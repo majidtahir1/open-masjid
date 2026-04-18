@@ -19,7 +19,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['email', 'role', 'tenant'],
+    defaultColumns: ['firstName', 'lastName', 'email', 'role', 'tenant'],
     description:
       'People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant\'s content.',
   },
@@ -91,6 +91,24 @@ export const Users: CollectionConfig = {
     },
   },
   fields: [
+    {
+      name: 'firstName',
+      type: 'text',
+      required: true,
+      label: 'First name',
+      admin: {
+        description: 'First name, used for greetings and displayed in the admin panel',
+      },
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+      required: true,
+      label: 'Last name',
+      admin: {
+        description: 'Last name',
+      },
+    },
     {
       name: 'role',
       type: 'select',

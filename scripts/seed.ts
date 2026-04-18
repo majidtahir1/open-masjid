@@ -70,13 +70,22 @@ async function seed() {
         email: platformEmail,
         password: 'platform-dev-password',
         role: 'platformOwner',
+        firstName: 'Platform',
+        lastName: 'Owner',
       },
       overrideAccess: true,
       req: seedReq,
     })
     console.log('✓ Created platform owner')
   } else {
-    console.log('✓ Platform owner exists')
+    await payload.update({
+      collection: 'users',
+      id: existingPlatform.id,
+      data: { firstName: 'Platform', lastName: 'Owner' },
+      overrideAccess: true,
+      req: seedReq,
+    })
+    console.log('✓ Platform owner exists (names backfilled)')
   }
 
   // 2. ICP tenant
@@ -143,13 +152,22 @@ async function seed() {
         password: 'admin-dev-password',
         role: 'admin',
         tenant: tenantId,
+        firstName: 'Masjid',
+        lastName: 'Admin',
       },
       overrideAccess: true,
       req: seedReq,
     })
     console.log('✓ Created admin user')
   } else {
-    console.log('✓ Admin user exists')
+    await payload.update({
+      collection: 'users',
+      id: existingAdmin.id,
+      data: { firstName: 'Masjid', lastName: 'Admin' },
+      overrideAccess: true,
+      req: seedReq,
+    })
+    console.log('✓ Admin user exists (names backfilled)')
   }
 
   // 4. Services — delete all, recreate

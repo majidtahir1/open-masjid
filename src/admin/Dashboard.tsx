@@ -58,10 +58,19 @@ type TenantRef = string | number | { id: string | number; name?: string } | null
 type UserLite = {
   id: string | number
   email?: string
-  name?: string
+  firstName?: string
+  lastName?: string
   role?: 'platformOwner' | 'admin' | 'staff'
   tenant?: TenantRef
 } | null
+
+/** Greeting name: prefer firstName, fall back to the local part of email. */
+function greetingName(u: NonNullable<UserLite>): string {
+  const fn = u.firstName?.trim()
+  if (fn) return fn
+  const email = u.email ?? ''
+  return email.includes('@') ? email.split('@')[0] : email || 'friend'
+}
 
 /** Extract the id out of a relationship that may be populated or a primitive. */
 function tenantIdOf(t: TenantRef): string | number | null {
@@ -270,7 +279,7 @@ async function TenantDashboard({
       ? '/admin/collections/prayer-times/create'
       : '/admin/collections/prayer-schedules/create'
 
-  const displayName = user.name?.trim() || user.email || 'friend'
+  const displayName = greetingName(user)
 
   return (
     <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
@@ -500,7 +509,7 @@ async function PlatformDashboard({
     }),
   ])
 
-  const displayName = user.name?.trim() || user.email || 'friend'
+  const displayName = greetingName(user)
 
   const stats: Array<{
     label: string
@@ -642,7 +651,7 @@ export default async function Dashboard() {
     return (
       <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-4">
         <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
-          Salam, {u.name?.trim() || u.email}
+          Salam, {greetingName(u)}
         </h1>
         <p className="text-base text-muted-foreground">No tenant assigned</p>
         <p className="italic text-muted-foreground text-base">
