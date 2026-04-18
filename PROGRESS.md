@@ -1,6 +1,6 @@
 # Build Progress — OpenMasjid Platform
 
-_Last updated: Wave 1 started — scaffolding foundation_
+_Last updated: Wave 4A complete — admin UX overhauled. Prayer schedules redesigned, custom dashboard, field polish._
 
 Kanban-style tracking for the autonomous build. Updated as agents complete work.
 
@@ -92,22 +92,42 @@ Kanban-style tracking for the autonomous build. Updated as agents complete work.
 
 ## 🏗 In Progress
 
-**Wave 1 — Foundation (3 parallel agents)**
-- 🔨 Agent A (Scaffolder): Next.js + Payload scaffold, deps, payload.config.ts, homepage, .env
-- 🗄 Agent B (Database): Docker Compose for PostgreSQL, start, verify
-- 🎨 Agent C (Design tokens): Prepare tokens CSS + Tailwind config + font setup (staged, applied after A finishes)
+_Nothing active. Ready for Wave 4B (Dockerfile, Caddyfile, deployment) when you're ready._
 
 ---
 
 ## ✅ Done
 
-_None yet._
+**Wave 1 — Foundation**
+- ✅ Next.js 15.5.15 + Payload 3.39.1 scaffold (build passing)
+- ✅ TypeScript strict, App Router, path aliases (@/*, @payload-config)
+- ✅ payload.config.ts with Postgres adapter + Lexical editor
+- ✅ .env with DATABASE_URI + generated PAYLOAD_SECRET
+- ✅ Minimal homepage + admin panel + REST + GraphQL endpoints registered
+- ✅ PostgreSQL 16.13 running in Docker (healthy, localhost:5432)
+- ✅ Design tokens staged: globals.css, tailwind.config.ts, fonts.ts, postcss.config.js, assets
+- ✅ Git repo initialized with initial commit
+
+**Wave 2 — Integration & Core Data**
+- ✅ Design tokens applied to scaffold; Tailwind utilities working (`bg-brand`, `type-display`, etc.)
+- ✅ All 9 Payload collections defined: Tenants, Users, Media, Events, HeroSlides, PrayerTimes, Announcements, Services, Pages
+- ✅ Tenant-scoped access helpers (`src/access/tenantScoped.ts`) + auto-set hook (`src/hooks/setTenantFromUser.ts`)
+- ✅ Edge-safe multi-tenant middleware with host parsing (16/16 tests pass)
+- ✅ Server-side tenant resolution (`src/lib/tenant-server.ts`)
+- ✅ Client-side tenant context (`src/lib/context.ts`: TenantProvider, useTenant, useRequiredTenant)
+- ✅ Runtime branding injection helper (`src/lib/tenantTheme.ts`)
+- ✅ /admin blocked on custom domains (security)
+- ✅ Build passing (34.4kB middleware, Edge-safe)
 
 ---
 
 ## 🚧 Blocked
 
-_None yet._
+_None currently blocking._
+
+**To address in hardening wave:**
+- 17 npm vulnerabilities (4 critical, 2 high, 11 moderate) in transitive deps
+- Payload 3.39.1 vs latest — future dep refresh
 
 ---
 
