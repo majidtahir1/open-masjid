@@ -10,14 +10,51 @@ import type { Config } from 'tailwindcss'
  * those tokens updates automatically without rebuilding CSS.
  */
 const config: Config = {
+  // Dark mode triggers: either Tailwind's default `.dark` class OR Payload's
+  // admin dark theme attribute. Both are wired up in globals.css so shadcn
+  // components invert correctly inside the admin shell.
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './src/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
+    './src/admin/**/*.{ts,tsx}',
+    './src/components/ui/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
       colors: {
-        // -------- Semantic tokens (tenant-overridable) --------
+        // -------- shadcn/ui semantic tokens --------
+        // Values come from CSS custom properties in globals.css (both light
+        // defaults under :root and dark overrides under .dark /
+        // [data-theme="dark"]). We reference them as plain `var(--token)`
+        // rather than `hsl(var(--token))` because our tokens are already
+        // stored as full color values, not HSL triplets.
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        card: {
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)',
+        },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
+        primary: {
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)',
+        },
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--destructive)',
+          foreground: 'var(--destructive-foreground)',
+        },
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+
+        // -------- ICP brand semantic tokens (tenant-overridable) --------
         brand: {
           DEFAULT: 'var(--brand)',
           hover: 'var(--brand-hover)',
@@ -25,12 +62,18 @@ const config: Config = {
           soft: 'var(--brand-soft)',
           ink: 'var(--brand-ink)',
         },
+        // `secondary` doubles as both ICP's secondary and shadcn's secondary —
+        // the underlying --secondary token maps to teal, which is the intended
+        // mapping for both systems.
         secondary: {
           DEFAULT: 'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
           soft: 'var(--secondary-soft)',
         },
+        // Same story for `accent` — maps to ICP gold.
         accent: {
           DEFAULT: 'var(--accent)',
+          foreground: 'var(--accent-foreground)',
           soft: 'var(--accent-soft)',
         },
 

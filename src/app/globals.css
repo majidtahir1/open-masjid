@@ -1,17 +1,15 @@
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-
 /* =========================================================================
    OpenMasjid — globals.css
    Base design token system for all tenants. Default values below are the
    ICP (Islamic Center of Prosper) brand — they act as fallbacks.
 
    Per-tenant overrides (--brand, --secondary, --accent, logo, font selections)
-   are injected at runtime by Next.js middleware via an inline \3c style> block
+   are injected at runtime by Next.js middleware via an inline <style> block
    in the root layout, based on the tenant resolved from the request host.
 
-   Source of truth: /tmp/design_extracted/icp-prosper-design-system/project/colors_and_type.css
-   (Google Fonts @import has been removed — fonts load via next/font in src/lib/fonts.ts.)
+   This file also hosts shadcn/ui's semantic tokens (--background, --foreground,
+   --primary, --card, --muted, --border, etc.) mapped onto the ICP palette so
+   shadcn components pick up brand colors automatically.
    ========================================================================= */
 
 @tailwind base;
@@ -21,17 +19,8 @@
 /* =========================================================================
    ICP Prosper — Colors & Type
    A modern, warm-but-grounded system inspired by the masjid-dome logo.
-   Primary = the teal pulled directly from the logo (#3C8285).
+   Primary = NAVY from flyer system; Teal (logo) = secondary; Gold = accent.
    ========================================================================= */
-
-/* -------------------- FONTS -------------------- */
-/* Display / Headlines: Fraunces — a modern warm serif with Islamic-adjacent
-   ornamentation that keeps things approachable, not corporate.
-   Body / UI: Inter — highly legible, neutral.
-   Arabic / Quranic text: Amiri — a classical Naskh cut designed for Quran.
-   Loaded via next/font/google in src/lib/fonts.ts; the loaded CSS variables
-   (--font-display-loaded, --font-body-loaded, --font-arabic-loaded) are
-   referenced below as the first family in each stack. */
 
 :root {
   /* -------------------- BRAND COLORS -------------------- */
@@ -95,7 +84,7 @@
   --icp-danger:    #B2493C;
   --icp-info:      var(--icp-teal-500);
 
-  /* -------------------- SEMANTIC TOKENS -------------------- */
+  /* -------------------- SEMANTIC TOKENS (public site) -------------------- */
   --bg:            #FFFFFF;
   --bg-alt:        var(--icp-gray-50);
   --bg-sand:       var(--icp-sand-50);
@@ -107,21 +96,50 @@
   --fg4:           var(--icp-gray-400);   /* tertiary / disabled */
   --fg-inverse:    #FFFFFF;
 
-  --border:        var(--icp-gray-200);
   --border-strong: var(--icp-gray-300);
   --border-teal:   var(--icp-teal-100);
   --border-navy:   var(--icp-navy-100);
 
-  /* Primary is NAVY; teal is secondary; gold is accent */
+  /* Primary is NAVY; teal is secondary; gold is accent (public site tokens) */
   --brand:         var(--icp-navy-700);
   --brand-hover:   var(--icp-navy-800);
   --brand-press:   var(--icp-navy-900);
   --brand-soft:    var(--icp-navy-50);
   --brand-ink:     var(--icp-navy-900);
-  --secondary:     var(--icp-teal-500);
   --secondary-soft:var(--icp-teal-50);
-  --accent:        var(--icp-gold-500);
   --accent-soft:   var(--icp-gold-100);
+
+  /* -------------------- shadcn/ui semantic tokens --------------------
+     These are consumed by the shadcn Tailwind color mappings in
+     tailwind.config.ts and by shadcn primitives (Card/Button/Badge/etc.).
+     Values are expressed as plain hex for direct consumption via
+     `bg-[var(--primary)]` or through the CSS-variable-aware theme config.
+
+     Mapping:
+       --primary   → ICP navy-700 (brand)
+       --secondary → ICP teal-500 (logo accent)
+       --accent    → ICP gold-300 (flyer warm)
+  --------------------------------------------------------------------- */
+  --background:              #FFFFFF;
+  --foreground:              var(--icp-gray-900);
+  --card:                    #FFFFFF;
+  --card-foreground:         var(--icp-gray-900);
+  --popover:                 #FFFFFF;
+  --popover-foreground:      var(--icp-gray-900);
+  --primary:                 var(--icp-navy-700);
+  --primary-foreground:      #FFFFFF;
+  --secondary:               var(--icp-teal-500);
+  --secondary-foreground:    #FFFFFF;
+  --muted:                   var(--icp-gray-100);
+  --muted-foreground:        var(--icp-gray-600);
+  --accent:                  var(--icp-gold-300);
+  --accent-foreground:       var(--icp-gray-900);
+  --destructive:             var(--icp-danger);
+  --destructive-foreground:  #FFFFFF;
+  --border:                  var(--icp-gray-200);
+  --input:                   var(--icp-gray-200);
+  --ring:                    var(--icp-teal-500);
+  --radius:                  0.625rem;
 
   /* -------------------- TYPE FAMILIES -------------------- */
   /* next/font loads these and exposes CSS variables with the -loaded suffix.
@@ -197,6 +215,33 @@
   --dur-fast: 120ms;
   --dur-base: 220ms;
   --dur-slow: 420ms;
+}
+
+/* -------------------- DARK MODE --------------------
+   Both `.dark` (shadcn default) and Payload's admin dark-theme hook
+   (`[data-theme="dark"]`) trigger the dark palette, so the admin dashboard
+   inverts correctly when a user toggles theme from the Payload menu. */
+.dark,
+[data-theme="dark"] {
+  --background:              var(--icp-navy-900);
+  --foreground:              #F7F8F8;
+  --card:                    var(--icp-navy-800);
+  --card-foreground:         #F7F8F8;
+  --popover:                 var(--icp-navy-800);
+  --popover-foreground:      #F7F8F8;
+  --primary:                 var(--icp-teal-500);
+  --primary-foreground:      var(--icp-navy-900);
+  --secondary:               var(--icp-navy-500);
+  --secondary-foreground:    #F7F8F8;
+  --muted:                   var(--icp-navy-800);
+  --muted-foreground:        var(--icp-gray-300);
+  --accent:                  var(--icp-gold-300);
+  --accent-foreground:       var(--icp-navy-900);
+  --destructive:             var(--icp-danger);
+  --destructive-foreground:  #FFFFFF;
+  --border:                  rgba(255, 255, 255, 0.10);
+  --input:                   rgba(255, 255, 255, 0.12);
+  --ring:                    var(--icp-teal-400);
 }
 
 /* -------------------- SEMANTIC TYPE CLASSES -------------------- */
@@ -325,86 +370,3 @@
 .prose p  { font: 400 var(--fs-base)/var(--lh-relaxed) var(--font-body); color: var(--fg2); }
 .prose a  { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
 .prose a:hover { color: var(--brand-hover); }
-
-@layer base {
-  .theme {
-    --font-heading:   var(--font-sans);
-    --font-sans:   var(--font-sans);
-  }
-  :root {
-    --background:   oklch(1 0 0);
-    --foreground:   oklch(0.145 0 0);
-    --card:   oklch(1 0 0);
-    --card-foreground:   oklch(0.145 0 0);
-    --popover:   oklch(1 0 0);
-    --popover-foreground:   oklch(0.145 0 0);
-    --primary:   oklch(0.205 0 0);
-    --primary-foreground:   oklch(0.985 0 0);
-    --secondary:   oklch(0.97 0 0);
-    --secondary-foreground:   oklch(0.205 0 0);
-    --muted:   oklch(0.97 0 0);
-    --muted-foreground:   oklch(0.556 0 0);
-    --accent:   oklch(0.97 0 0);
-    --accent-foreground:   oklch(0.205 0 0);
-    --destructive:   oklch(0.577 0.245 27.325);
-    --border:   oklch(0.922 0 0);
-    --input:   oklch(0.922 0 0);
-    --ring:   oklch(0.708 0 0);
-    --chart-1:   oklch(0.87 0 0);
-    --chart-2:   oklch(0.556 0 0);
-    --chart-3:   oklch(0.439 0 0);
-    --chart-4:   oklch(0.371 0 0);
-    --chart-5:   oklch(0.269 0 0);
-    --radius:   0.625rem;
-    --sidebar:   oklch(0.985 0 0);
-    --sidebar-foreground:   oklch(0.145 0 0);
-    --sidebar-primary:   oklch(0.205 0 0);
-    --sidebar-primary-foreground:   oklch(0.985 0 0);
-    --sidebar-accent:   oklch(0.97 0 0);
-    --sidebar-accent-foreground:   oklch(0.205 0 0);
-    --sidebar-border:   oklch(0.922 0 0);
-    --sidebar-ring:   oklch(0.708 0 0);
-  }
-  .dark {
-    --background:   oklch(0.145 0 0);
-    --foreground:   oklch(0.985 0 0);
-    --card:   oklch(0.205 0 0);
-    --card-foreground:   oklch(0.985 0 0);
-    --popover:   oklch(0.205 0 0);
-    --popover-foreground:   oklch(0.985 0 0);
-    --primary:   oklch(0.922 0 0);
-    --primary-foreground:   oklch(0.205 0 0);
-    --secondary:   oklch(0.269 0 0);
-    --secondary-foreground:   oklch(0.985 0 0);
-    --muted:   oklch(0.269 0 0);
-    --muted-foreground:   oklch(0.708 0 0);
-    --accent:   oklch(0.269 0 0);
-    --accent-foreground:   oklch(0.985 0 0);
-    --destructive:   oklch(0.704 0.191 22.216);
-    --border:   oklch(1 0 0 / 10%);
-    --input:   oklch(1 0 0 / 15%);
-    --ring:   oklch(0.556 0 0);
-    --chart-1:   oklch(0.87 0 0);
-    --chart-2:   oklch(0.556 0 0);
-    --chart-3:   oklch(0.439 0 0);
-    --chart-4:   oklch(0.371 0 0);
-    --chart-5:   oklch(0.269 0 0);
-    --sidebar:   oklch(0.205 0 0);
-    --sidebar-foreground:   oklch(0.985 0 0);
-    --sidebar-primary:   oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground:   oklch(0.985 0 0);
-    --sidebar-accent:   oklch(0.269 0 0);
-    --sidebar-accent-foreground:   oklch(0.985 0 0);
-    --sidebar-border:   oklch(1 0 0 / 10%);
-    --sidebar-ring:   oklch(0.556 0 0);
-  }
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
-}
