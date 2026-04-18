@@ -44,6 +44,11 @@ export default buildConfig({
         dashboard: {
           Component: '/src/admin/Dashboard#default',
         },
+        // The login screen is replaced via a Next.js file-system route at
+        // `src/app/(payload)/admin/login/page.tsx`. Payload 3.39 does not
+        // expose `views.login` as an override, so the route-level swap is
+        // the cleanest way to keep the built-in admin shell intact while
+        // fully owning the login UI.
       },
     },
   },
