@@ -273,13 +273,15 @@ async function TenantDashboard({
   const displayName = user.name?.trim() || user.email || 'friend'
 
   return (
-    <div className="p-8 md:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold text-foreground">Salam, {displayName}</h1>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
+          Salam, {displayName}
+        </h1>
+        <div className="flex flex-wrap items-center gap-2 text-base text-muted-foreground">
           <span>Managing</span>
-          <Badge variant="secondary" className="gap-1">
-            <Building className="size-3" aria-hidden />
+          <Badge variant="secondary" className="gap-1 text-base px-3 py-1.5">
+            <Building className="size-4" aria-hidden />
             {tenantName}
           </Badge>
         </div>
@@ -288,25 +290,29 @@ async function TenantDashboard({
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {/* Active prayer schedule */}
         <Card>
-          <CardHeader>
+          <CardHeader className="p-6 md:p-8">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="size-4 text-secondary" aria-hidden />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Clock className="size-5 text-secondary" aria-hidden />
                   Active Prayer Schedule
                 </CardTitle>
                 {schedule ? (
-                  <CardDescription>{schedule.name}</CardDescription>
+                  <CardDescription className="text-base text-muted-foreground">
+                    {schedule.name}
+                  </CardDescription>
                 ) : (
-                  <CardDescription>Nothing active yet</CardDescription>
+                  <CardDescription className="text-base text-muted-foreground">
+                    Nothing active yet
+                  </CardDescription>
                 )}
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
             {schedule ? (
               <div className="space-y-1">
-                <div className="grid grid-cols-[80px_1fr_1fr] gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground pb-2 border-b border-border">
+                <div className="grid grid-cols-[80px_1fr_1fr] gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground pb-2 border-b border-border">
                   <div>Prayer</div>
                   <div>Adhan</div>
                   <div>Iqamah</div>
@@ -314,7 +320,7 @@ async function TenantDashboard({
                 {schedule.rows.map((r, i) => (
                   <div
                     key={r.prayer}
-                    className={`grid grid-cols-[80px_1fr_1fr] gap-2 text-sm py-2 text-foreground ${
+                    className={`grid grid-cols-[80px_1fr_1fr] gap-2 text-base py-2.5 text-foreground ${
                       i < schedule.rows.length - 1 ? 'border-b border-border/60' : ''
                     }`}
                   >
@@ -325,13 +331,13 @@ async function TenantDashboard({
                 ))}
               </div>
             ) : (
-              <p className="italic text-muted-foreground text-sm">
+              <p className="italic text-muted-foreground text-base">
                 No schedule set yet. Create one to populate the public prayer times page.
               </p>
             )}
           </CardContent>
-          <CardFooter>
-            <Button variant="ghost" size="sm" asChild>
+          <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
+            <Button variant="ghost" size="sm" asChild className="text-base">
               <Link href={scheduleEditHref}>
                 Update schedule
                 <ChevronRight aria-hidden />
@@ -342,18 +348,18 @@ async function TenantDashboard({
 
         {/* Upcoming events */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarPlus className="size-4 text-secondary" aria-hidden />
+          <CardHeader className="p-6 md:p-8">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <CalendarPlus className="size-5 text-secondary" aria-hidden />
               Upcoming Events
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base text-muted-foreground">
               {eventsRes.docs.length > 0
                 ? `${eventsRes.docs.length} upcoming`
                 : 'Nothing scheduled'}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
             {eventsRes.docs.length > 0 ? (
               <ul className="space-y-0">
                 {(
@@ -374,10 +380,10 @@ async function TenantDashboard({
                       href={`/admin/collections/events/${e.id}`}
                       className="block group"
                     >
-                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                      <p className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                         {e.title || '(untitled)'}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-base text-muted-foreground mt-0.5">
                         {e.startDate ? formatWhen(e.startDate) : e.when || 'No date set'}
                       </p>
                     </Link>
@@ -385,13 +391,13 @@ async function TenantDashboard({
                 ))}
               </ul>
             ) : (
-              <p className="italic text-muted-foreground text-sm">
+              <p className="italic text-muted-foreground text-base">
                 No upcoming published events.
               </p>
             )}
           </CardContent>
-          <CardFooter>
-            <Button variant="ghost" size="sm" asChild>
+          <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
+            <Button variant="ghost" size="sm" asChild className="text-base">
               <Link href="/admin/collections/events/create">
                 Add event
                 <ChevronRight aria-hidden />
@@ -402,25 +408,27 @@ async function TenantDashboard({
 
         {/* Active announcements */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Megaphone className="size-4 text-secondary" aria-hidden />
+          <CardHeader className="p-6 md:p-8">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Megaphone className="size-5 text-secondary" aria-hidden />
               Active Announcements
             </CardTitle>
-            <CardDescription>Live across the public site</CardDescription>
+            <CardDescription className="text-base text-muted-foreground">
+              Live across the public site
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-foreground leading-none">
+          <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
+            <p className="text-6xl md:text-7xl font-bold text-foreground leading-none">
               {announcementsRes.totalDocs}
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-base text-muted-foreground mt-2">
               {announcementsRes.totalDocs === 1
                 ? 'announcement is live'
                 : 'announcements are live'}
             </p>
           </CardContent>
-          <CardFooter>
-            <Button variant="ghost" size="sm" asChild>
+          <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
+            <Button variant="ghost" size="sm" asChild className="text-base">
               <Link href="/admin/collections/announcements">
                 View announcements
                 <ChevronRight aria-hidden />
@@ -438,27 +446,27 @@ async function TenantDashboard({
           Quick actions
         </h2>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="text-base">
             <Link href="/admin/collections/events/create">
-              <CalendarPlus aria-hidden />
+              <CalendarPlus className="h-5 w-5" aria-hidden />
               New Event
             </Link>
           </Button>
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="text-base">
             <Link href="/admin/collections/announcements/create">
-              <Megaphone aria-hidden />
+              <Megaphone className="h-5 w-5" aria-hidden />
               New Announcement
             </Link>
           </Button>
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="text-base">
             <Link href={newScheduleHref}>
-              <Clock aria-hidden />
+              <Clock className="h-5 w-5" aria-hidden />
               New Prayer Schedule
             </Link>
           </Button>
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="text-base">
             <Link href="/admin/collections/hero-slides/create">
-              <ImageIcon aria-hidden />
+              <ImageIcon className="h-5 w-5" aria-hidden />
               New Hero Slide
             </Link>
           </Button>
@@ -537,11 +545,15 @@ async function PlatformDashboard({
   ]
 
   return (
-    <div className="p-8 md:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold text-foreground">Salam, {displayName}</h1>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Badge variant="accent">Platform Admin</Badge>
+        <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
+          Salam, {displayName}
+        </h1>
+        <div className="flex flex-wrap items-center gap-2 text-base text-muted-foreground">
+          <Badge variant="accent" className="text-base px-3 py-1.5">
+            Platform Admin
+          </Badge>
           <span>Viewing platform-wide stats</span>
         </div>
       </header>
@@ -551,18 +563,20 @@ async function PlatformDashboard({
           const Icon = s.icon
           return (
             <Card key={s.label}>
-              <CardHeader>
+              <CardHeader className="p-6 md:p-8">
                 <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  <Icon className="size-4 text-secondary" aria-hidden />
+                  <Icon className="size-5 text-secondary" aria-hidden />
                   {s.label}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-4xl font-bold text-foreground leading-none">{s.value}</p>
-                <p className="text-sm text-muted-foreground mt-2">{s.caption}</p>
+              <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
+                <p className="text-6xl md:text-7xl font-bold text-foreground leading-none">
+                  {s.value}
+                </p>
+                <p className="text-base text-muted-foreground mt-2">{s.caption}</p>
               </CardContent>
-              <CardFooter>
-                <Button variant="ghost" size="sm" asChild>
+              <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
+                <Button variant="ghost" size="sm" asChild className="text-base">
                   <Link href={s.href}>
                     {s.linkLabel}
                     <ChevronRight aria-hidden />
@@ -581,15 +595,15 @@ async function PlatformDashboard({
           Quick actions
         </h2>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="text-base">
             <Link href="/admin/collections/tenants/create">
-              <Building aria-hidden />
+              <Building className="h-5 w-5" aria-hidden />
               Add Tenant
             </Link>
           </Button>
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="text-base">
             <Link href="/admin/collections/users/create">
-              <Users aria-hidden />
+              <Users className="h-5 w-5" aria-hidden />
               Add User
             </Link>
           </Button>
@@ -626,12 +640,12 @@ export default async function Dashboard() {
   const tenantId = tenantIdOf(u.tenant)
   if (!tenantId) {
     return (
-      <div className="p-8 md:p-10 max-w-7xl mx-auto space-y-4">
-        <h1 className="text-3xl font-semibold text-foreground">
+      <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-4">
+        <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
           Salam, {u.name?.trim() || u.email}
         </h1>
-        <p className="text-sm text-muted-foreground">No tenant assigned</p>
-        <p className="italic text-muted-foreground text-sm">
+        <p className="text-base text-muted-foreground">No tenant assigned</p>
+        <p className="italic text-muted-foreground text-base">
           Your account is not linked to a masjid yet. Ask a platform admin to set your tenant.
         </p>
       </div>
