@@ -1,6 +1,11 @@
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
+import { Geist } from 'next/font/google'
 
+import '../globals.css'
+import { fraunces, inter, amiri } from '@/lib/fonts'
+import { cn } from '@/lib/utils'
 import Header from '@/components/Header'
 import PrayerStrip from '@/components/PrayerStrip'
 import Footer from '@/components/Footer'
@@ -14,6 +19,13 @@ import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
 import { getActiveSchedule } from '@/lib/prayer-schedule'
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
+
+export const metadata: Metadata = {
+  title: 'OpenMasjid Platform',
+  description: 'Multi-tenant masjid website platform',
+}
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const tenant = await getCurrentTenant()
@@ -37,14 +49,21 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   }
 
   return (
-    <TenantProvider tenant={tenant}>
-      {themeCss && (
-        <style dangerouslySetInnerHTML={{ __html: themeCss }} />
-      )}
-      <Header tenant={tenant as unknown as TenantLike} />
-      <PrayerStrip schedule={schedule as PrayerScheduleLike | null} />
-      <main className="min-h-[60vh]">{children}</main>
-      <Footer tenant={footerTenant} />
-    </TenantProvider>
+    <html
+      lang="en"
+      className={cn(fraunces.variable, inter.variable, amiri.variable, 'font-sans', geist.variable)}
+    >
+      <body className="font-body bg-bg text-fg2 antialiased">
+        <TenantProvider tenant={tenant}>
+          {themeCss && (
+            <style dangerouslySetInnerHTML={{ __html: themeCss }} />
+          )}
+          <Header tenant={tenant as unknown as TenantLike} />
+          <PrayerStrip schedule={schedule as PrayerScheduleLike | null} />
+          <main className="min-h-[60vh]">{children}</main>
+          <Footer tenant={footerTenant} />
+        </TenantProvider>
+      </body>
+    </html>
   )
 }
