@@ -28,9 +28,15 @@ const autoSlug: FieldHook = ({ value, data, operation }) => {
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  labels: {
+    singular: 'Page',
+    plural: 'Pages',
+  },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'tenant'],
+    defaultColumns: ['title', 'slug'],
+    description:
+      'Static content pages (About, Our Story, Bylaws, etc.). Each page becomes a URL under the tenant\'s site. Use the built-in pages (Home, Events, Prayer Times, Donate) for standard sections.',
   },
   access: {
     read: tenantScopedRead,
@@ -46,14 +52,22 @@ export const Pages: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      label: 'Page Title',
+      admin: {
+        description: 'Shown as the page heading and in the browser tab.',
+        placeholder: 'About Us',
+      },
     },
     {
       name: 'slug',
       type: 'text',
       index: true,
+      label: 'URL Slug',
       admin: {
-        description: 'Auto-generated from title. Used in the URL path, e.g. /about.',
+        description:
+          'Auto-generated from the title. Becomes the URL path, e.g. "about" renders at /about. Lowercase letters, numbers, and dashes only.',
         position: 'sidebar',
+        placeholder: 'about',
       },
       hooks: {
         beforeValidate: [autoSlug],
@@ -62,6 +76,11 @@ export const Pages: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      label: 'Content',
+      admin: {
+        description:
+          'The body of the page. Supports headings, lists, links, and inline images.',
+      },
     },
     {
       name: 'tenant',
@@ -69,8 +88,10 @@ export const Pages: CollectionConfig = {
       relationTo: 'tenants',
       required: true,
       index: true,
+      label: 'Tenant',
       admin: {
         position: 'sidebar',
+        description: 'Set automatically from your account. Only a Platform Owner can reassign.',
         condition: (_, __, { user }) => {
           const u = user as { role?: string } | null | undefined
           return u?.role === 'platformOwner'

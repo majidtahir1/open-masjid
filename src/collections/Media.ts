@@ -14,9 +14,15 @@ import { setTenantFromUser } from '../hooks/setTenantFromUser'
  */
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: {
+    singular: 'Media File',
+    plural: 'Media Library',
+  },
   admin: {
     useAsTitle: 'filename',
-    defaultColumns: ['filename', 'alt', 'tenant'],
+    defaultColumns: ['filename', 'alt', 'mimeType', 'tenant'],
+    description:
+      'Uploaded images and PDFs (event flyers, logos, hero photos). Files live in this tenant\'s library only — other masajid cannot see them.',
   },
   access: {
     read: tenantScopedRead,
@@ -50,9 +56,11 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       required: true,
+      label: 'Alt Text',
       admin: {
         description:
-          'Alternative text for accessibility. Describe the image content concisely.',
+          'Describe the image in one short sentence for screen readers and SEO. Required for every upload.',
+        placeholder: 'ICP event flyer for the Evidences of Islam class',
       },
     },
     {
@@ -61,9 +69,11 @@ export const Media: CollectionConfig = {
       relationTo: 'tenants',
       required: true,
       index: true,
+      label: 'Tenant',
       admin: {
         position: 'sidebar',
-        description: 'Automatically set from your account for non-platform users.',
+        description:
+          'Automatically set from your account for non-platform users. Only a Platform Owner can reassign media across tenants.',
       },
       access: {
         update: ({ req: { user } }) => {

@@ -11,7 +11,7 @@ import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
-import { PrayerTimes } from './collections/PrayerTimes'
+import { PrayerSchedules } from './collections/PrayerSchedules'
 import { Services } from './collections/Services'
 import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
@@ -22,6 +22,30 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: 'users',
+    meta: {
+      title: 'OpenMasjid Admin',
+      description: 'Content management for masajid',
+      titleSuffix: ' — OpenMasjid',
+      icons: [
+        {
+          // TODO: resolve per-tenant favicon once tenant resolution at admin time is wired up.
+          url: '/brand/logo-icp.jpg',
+          rel: 'icon',
+          type: 'image/jpeg',
+        },
+      ],
+    },
+    components: {
+      graphics: {
+        Logo: '/src/admin/Logo#default',
+        Icon: '/src/admin/Logo#default',
+      },
+      views: {
+        dashboard: {
+          Component: '/src/admin/Dashboard#default',
+        },
+      },
+    },
   },
   collections: [
     Users,
@@ -29,7 +53,7 @@ export default buildConfig({
     Media,
     Events,
     HeroSlides,
-    PrayerTimes,
+    PrayerSchedules,
     Announcements,
     Services,
     Pages,

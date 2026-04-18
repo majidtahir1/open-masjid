@@ -10,9 +10,15 @@ import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 export const Services: CollectionConfig = {
   slug: 'services',
+  labels: {
+    singular: 'Service',
+    plural: 'Services',
+  },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'icon', 'sortOrder', 'tenant'],
+    defaultColumns: ['title', 'icon', 'sortOrder'],
+    description:
+      'Ongoing services the masjid offers (counseling, new-Muslim support, funeral services, etc.). These appear as icon cards on the homepage Services grid.',
   },
   defaultSort: 'sortOrder',
   access: {
@@ -29,25 +35,38 @@ export const Services: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      label: 'Title',
+      admin: {
+        description: 'The service name, e.g. "New Muslims (Ansar)" or "Funeral Services".',
+        placeholder: 'New Muslims (Ansar)',
+      },
     },
     {
       name: 'description',
       type: 'textarea',
+      label: 'Description',
+      admin: {
+        description: 'A short sentence or two explaining what this service offers.',
+      },
     },
     {
       name: 'icon',
       type: 'text',
       required: true,
+      label: 'Icon Name',
       admin: {
-        description: 'Lucide icon name (kebab-case), e.g. "hand-heart".',
+        description:
+          'Name of a Lucide icon (kebab-case), e.g. "hand-heart", "book-open", "users". Browse lucide.dev for the full list.',
+        placeholder: 'hand-heart',
       },
     },
     {
       name: 'sortOrder',
       type: 'number',
       defaultValue: 0,
+      label: 'Sort Order',
       admin: {
-        description: 'Lower numbers appear first.',
+        description: 'Lower numbers appear first in the grid.',
         position: 'sidebar',
       },
     },
@@ -57,8 +76,10 @@ export const Services: CollectionConfig = {
       relationTo: 'tenants',
       required: true,
       index: true,
+      label: 'Tenant',
       admin: {
         position: 'sidebar',
+        description: 'Set automatically from your account. Only a Platform Owner can reassign.',
         condition: (_, __, { user }) => {
           const u = user as { role?: string } | null | undefined
           return u?.role === 'platformOwner'

@@ -10,12 +10,18 @@ import type { CollectionConfig, Where } from 'payload'
  */
 export const Users: CollectionConfig = {
   slug: 'users',
+  labels: {
+    singular: 'User',
+    plural: 'Users',
+  },
   auth: {
     depth: 0,
   },
   admin: {
     useAsTitle: 'email',
     defaultColumns: ['email', 'role', 'tenant'],
+    description:
+      'People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant\'s content.',
   },
   access: {
     // Who can create a new user?
@@ -90,11 +96,16 @@ export const Users: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'staff',
+      label: 'Role',
       options: [
-        { label: 'Platform owner', value: 'platformOwner' },
-        { label: 'Admin', value: 'admin' },
-        { label: 'Staff', value: 'staff' },
+        { label: 'Platform Owner (manages all tenants)', value: 'platformOwner' },
+        { label: 'Admin (full access within one tenant)', value: 'admin' },
+        { label: 'Staff (content only within one tenant)', value: 'staff' },
       ],
+      admin: {
+        description:
+          'Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.',
+      },
       access: {
         // Only platformOwner can change role to platformOwner; admins can set
         // admin/staff within their tenant. For simplicity we let admins update
@@ -117,6 +128,11 @@ export const Users: CollectionConfig = {
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
+      label: 'Tenant',
+      admin: {
+        description:
+          'Which masjid this user belongs to. Required for Admin and Staff; leave blank for Platform Owner (they access every tenant). Only a Platform Owner can change this field.',
+      },
       // Required for admin/staff; optional for platformOwner. We enforce this
       // via validate because Payload requires `required` to be a static bool.
       validate: (value: unknown, { data }: { data?: { role?: string } }) => {
