@@ -8,6 +8,9 @@ import React from 'react'
  * (tenant.branding.logo) so each masjid's staff sees their own brand.
  */
 const Logo: React.FC = () => {
+  // The wordmark uses `--theme-elevation-1000` so it stays readable in both
+  // light (dark text on white nav) and dark (light text on near-black nav)
+  // admin themes. The pill is always navy+gold — the mark is brand-critical.
   return (
     <div
       style={{
@@ -41,7 +44,7 @@ const Logo: React.FC = () => {
           fontFamily: 'Fraunces, Georgia, serif',
           fontSize: 18,
           fontWeight: 600,
-          color: '#0F1E4A',
+          color: 'var(--theme-elevation-1000, #0F1E4A)',
           letterSpacing: '0.01em',
         }}
       >

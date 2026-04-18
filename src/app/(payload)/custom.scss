@@ -1,54 +1,34 @@
 /* Payload admin panel — OpenMasjid / ICP skin.
  *
- * Payload 3 exposes its design tokens as CSS custom properties. We override
- * a small set to match the ICP navy/teal/gold palette without touching
- * component internals. Kept intentionally minimal.
+ * Intentionally minimal. Payload 3's default theme (light + dark) already
+ * has strong, accessible contrast. We only nudge a few brand accents
+ * (primary button colour, links) and otherwise let Payload's defaults win.
+ *
+ * Important: DO NOT override Payload's `--theme-elevation-*` scale. Those
+ * values are inverted between light and dark mode; overriding them with
+ * fixed brand colors (e.g. navy for elevation-1000) breaks text contrast
+ * in one of the two modes.
  */
 
 :root {
-  /* Brand */
+  /* Brand tokens — referenced by the rules below, not by Payload internals. */
   --icp-navy: #0f1e4a;
   --icp-navy-hover: #0a1638;
   --icp-teal: #28a0b4;
+  --icp-teal-hover: #1f8494;
   --icp-gold: #f0c88c;
-  --icp-cream: #f0efe8;
-
-  /* Payload theme overrides (light mode) */
-  --theme-elevation-1000: #0f1e4a;
-  --theme-success-500: #28a0b4;
-  --theme-success-600: #1f8494;
-
-  /* Accent used for primary buttons, active nav, links */
-  --color-base-0: #ffffff;
-  --color-success-500: #28a0b4;
-}
-
-/* Soft navy header strip to anchor the panel visually. */
-.template-default__wrap,
-.payload__wrap {
-  --theme-bg: #fafaf7;
 }
 
 /* Primary button — subtle brand nudge without fighting Payload's hierarchy. */
-.btn--style-primary {
+.btn--style-primary:not(:disabled) {
   background-color: var(--icp-navy);
   border-color: var(--icp-navy);
+  color: #ffffff;
 
   &:hover,
   &:focus {
     background-color: var(--icp-navy-hover);
     border-color: var(--icp-navy-hover);
+    color: #ffffff;
   }
-}
-
-/* Active nav link gets a teal indicator instead of default grey. */
-.nav__link--active,
-.nav-group__toggle--is-active {
-  color: var(--icp-navy);
-}
-
-/* Collection titles in the nav get a touch of brand weight. */
-.nav h1,
-.nav h2 {
-  color: var(--icp-navy);
 }

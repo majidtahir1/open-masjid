@@ -173,17 +173,34 @@ async function fetchActiveSchedule(
 /* Styles — inline to avoid fighting Payload's SCSS layer ordering.    */
 /* ------------------------------------------------------------------ */
 
+/*
+ * Colour strategy: we rely on Payload's own `--theme-elevation-*` scale
+ * so the dashboard inverts correctly between light and dark admin themes.
+ * Fallbacks assume light mode (white page) — that matches Payload's default.
+ *
+ *   elevation-0   → page bg (white / near-black)
+ *   elevation-50  → slight off-bg tint
+ *   elevation-100 → hairlines / borders
+ *   elevation-500 → muted text
+ *   elevation-800 → strong text
+ *   elevation-1000 → highest-contrast text
+ *
+ * We never hard-code navy as a background — navy on navy is unreadable.
+ * Accent colour (ICP teal) is reserved for links.
+ */
 const styles = {
   page: {
     padding: '2rem',
     maxWidth: 1200,
     margin: '0 auto',
     fontFamily: 'inherit',
+    color: 'var(--theme-elevation-1000, #111)',
   } as React.CSSProperties,
   greeting: {
     fontSize: '1.75rem',
     fontWeight: 600,
     margin: 0,
+    color: 'var(--theme-elevation-1000, #111)',
   } as React.CSSProperties,
   contextLine: {
     marginTop: '0.25rem',
@@ -197,10 +214,11 @@ const styles = {
     gap: '1.25rem',
   } as React.CSSProperties,
   card: {
-    background: 'var(--theme-elevation-50, #fafafa)',
-    border: '1px solid var(--theme-elevation-150, #e5e5e5)',
+    background: 'var(--theme-elevation-0, #ffffff)',
+    border: '1px solid var(--theme-elevation-100, #e5e5e5)',
     borderRadius: 8,
     padding: '1.25rem 1.5rem',
+    color: 'var(--theme-elevation-1000, #111)',
   } as React.CSSProperties,
   cardHeader: {
     display: 'flex',
@@ -210,17 +228,18 @@ const styles = {
     marginBottom: '0.75rem',
   } as React.CSSProperties,
   cardTitle: {
-    fontSize: '1rem',
+    fontSize: '0.8rem',
     fontWeight: 600,
     margin: 0,
     textTransform: 'uppercase',
-    letterSpacing: '0.04em',
+    letterSpacing: '0.06em',
     color: 'var(--theme-elevation-600, #444)',
   } as React.CSSProperties,
   cardLink: {
     fontSize: '0.85rem',
     textDecoration: 'none',
-    color: 'var(--theme-success-500, #0d7c4b)',
+    color: 'var(--icp-teal, #28a0b4)',
+    fontWeight: 500,
   } as React.CSSProperties,
   scheduleRow: {
     display: 'grid',
@@ -229,12 +248,17 @@ const styles = {
     padding: '0.4rem 0',
     borderBottom: '1px solid var(--theme-elevation-100, #eee)',
     fontSize: '0.95rem',
+    color: 'var(--theme-elevation-900, #222)',
   } as React.CSSProperties,
   eventRow: {
     padding: '0.6rem 0',
     borderBottom: '1px solid var(--theme-elevation-100, #eee)',
   } as React.CSSProperties,
-  eventTitle: { fontWeight: 500, margin: 0 } as React.CSSProperties,
+  eventTitle: {
+    fontWeight: 500,
+    margin: 0,
+    color: 'var(--theme-elevation-1000, #111)',
+  } as React.CSSProperties,
   eventWhen: {
     fontSize: '0.85rem',
     color: 'var(--theme-elevation-500, #666)',
@@ -244,7 +268,7 @@ const styles = {
     fontSize: '2.5rem',
     fontWeight: 700,
     margin: '0.25rem 0',
-    color: 'var(--theme-text, #111)',
+    color: 'var(--theme-elevation-1000, #111)',
   } as React.CSSProperties,
   quickRow: {
     display: 'flex',
@@ -256,11 +280,12 @@ const styles = {
     display: 'inline-block',
     padding: '0.7rem 1.2rem',
     borderRadius: 6,
-    background: 'var(--theme-elevation-800, #111)',
-    color: 'var(--theme-elevation-0, #fff)',
+    background: 'var(--icp-navy, #0f1e4a)',
+    color: '#ffffff',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: 500,
+    border: '1px solid var(--icp-navy, #0f1e4a)',
   } as React.CSSProperties,
   empty: {
     color: 'var(--theme-elevation-500, #888)',
