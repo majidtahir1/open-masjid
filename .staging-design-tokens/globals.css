@@ -1,0 +1,324 @@
+/* =========================================================================
+   OpenMasjid — globals.css
+   Base design token system for all tenants. Default values below are the
+   ICP (Islamic Center of Prosper) brand — they act as fallbacks.
+
+   Per-tenant overrides (--brand, --secondary, --accent, logo, font selections)
+   are injected at runtime by Next.js middleware via an inline <style> block
+   in the root layout, based on the tenant resolved from the request host.
+
+   Source of truth: /tmp/design_extracted/icp-prosper-design-system/project/colors_and_type.css
+   (Google Fonts @import has been removed — fonts load via next/font in src/lib/fonts.ts.)
+   ========================================================================= */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================================
+   ICP Prosper — Colors & Type
+   A modern, warm-but-grounded system inspired by the masjid-dome logo.
+   Primary = the teal pulled directly from the logo (#3C8285).
+   ========================================================================= */
+
+/* -------------------- FONTS -------------------- */
+/* Display / Headlines: Fraunces — a modern warm serif with Islamic-adjacent
+   ornamentation that keeps things approachable, not corporate.
+   Body / UI: Inter — highly legible, neutral.
+   Arabic / Quranic text: Amiri — a classical Naskh cut designed for Quran.
+   Loaded via next/font/google in src/lib/fonts.ts; the loaded CSS variables
+   (--font-display-loaded, --font-body-loaded, --font-arabic-loaded) are
+   referenced below as the first family in each stack. */
+
+:root {
+  /* -------------------- BRAND COLORS -------------------- */
+  /* NAVY — dominant brand color (from flyer system). Deep, confident. */
+  --icp-navy-50:   #EEF0FA;
+  --icp-navy-100:  #D1D6ED;
+  --icp-navy-200:  #9BA4D1;
+  --icp-navy-300:  #5E6AA8;
+  --icp-navy-500:  #1E2A6B;
+  --icp-navy-700:  #0F1E4A;   /* ← primary navy (flyer wordmark color) */
+  --icp-navy-800:  #0A1638;
+  --icp-navy-900:  #050B22;
+
+  /* TEAL — from logo dome + wordmark, now used as accent */
+  --icp-teal-50:   #E6F5F7;
+  --icp-teal-100:  #BEE4E9;
+  --icp-teal-200:  #8DCED6;
+  --icp-teal-300:  #5CB8C3;
+  --icp-teal-400:  #3CA4B2;
+  --icp-teal-500:  #28A0B4;   /* ← bright teal from flyer pattern */
+  --icp-teal-600:  #1E7E8E;
+  --icp-teal-700:  #175F6B;
+  --icp-teal-800:  #114751;
+  --icp-teal-900:  #0B2F36;
+
+  /* Neutral Gray — from dome silhouette */
+  --icp-gray-50:   #F7F8F8;
+  --icp-gray-100:  #EEF0F0;
+  --icp-gray-200:  #DDE1E1;
+  --icp-gray-300:  #C3C9C9;
+  --icp-gray-400:  #9CA4A4;
+  --icp-gray-500:  #747C7C;
+  --icp-gray-600:  #545B5B;
+  --icp-gray-700:  #3A3F3F;
+  --icp-gray-800:  #242828;
+  --icp-gray-900:  #141616;
+
+  /* GOLD — warm accent from flyer. Used for highlights, events, Ramadan. */
+  --icp-gold-50:   #FBF5E6;
+  --icp-gold-100:  #F6E6BF;
+  --icp-gold-300:  #F0C88C;   /* ← flyer gold */
+  --icp-gold-500:  #D9A84E;
+  --icp-gold-700:  #9A7428;
+  /* Legacy alias for sand */
+  --icp-sand-50:   var(--icp-gold-50);
+  --icp-sand-100:  var(--icp-gold-100);
+  --icp-sand-300:  var(--icp-gold-300);
+  --icp-sand-500:  var(--icp-gold-500);
+  --icp-sand-700:  var(--icp-gold-700);
+
+  /* Cream — the flyer background warm-off-white */
+  --icp-cream:     #F0EFE8;
+
+  /* Deep night — for Isha, Ramadan nights, hero backgrounds */
+  --icp-night-500: #0E2A2C;
+  --icp-night-700: #071719;
+
+  /* Semantic */
+  --icp-success:   #4C8B5B;
+  --icp-warning:   #B8954F;
+  --icp-danger:    #B2493C;
+  --icp-info:      var(--icp-teal-500);
+
+  /* -------------------- SEMANTIC TOKENS -------------------- */
+  --bg:            #FFFFFF;
+  --bg-alt:        var(--icp-gray-50);
+  --bg-sand:       var(--icp-sand-50);
+  --bg-ink:        var(--icp-navy-900);
+
+  --fg1:           var(--icp-gray-900);   /* headings / primary text */
+  --fg2:           var(--icp-gray-700);   /* body */
+  --fg3:           var(--icp-gray-500);   /* secondary / meta */
+  --fg4:           var(--icp-gray-400);   /* tertiary / disabled */
+  --fg-inverse:    #FFFFFF;
+
+  --border:        var(--icp-gray-200);
+  --border-strong: var(--icp-gray-300);
+  --border-teal:   var(--icp-teal-100);
+  --border-navy:   var(--icp-navy-100);
+
+  /* Primary is NAVY; teal is secondary; gold is accent */
+  --brand:         var(--icp-navy-700);
+  --brand-hover:   var(--icp-navy-800);
+  --brand-press:   var(--icp-navy-900);
+  --brand-soft:    var(--icp-navy-50);
+  --brand-ink:     var(--icp-navy-900);
+  --secondary:     var(--icp-teal-500);
+  --secondary-soft:var(--icp-teal-50);
+  --accent:        var(--icp-gold-500);
+  --accent-soft:   var(--icp-gold-100);
+
+  /* -------------------- TYPE FAMILIES -------------------- */
+  /* next/font loads these and exposes CSS variables with the -loaded suffix.
+     The base tokens below prepend the loaded variable so class consumers can
+     keep using var(--font-display) / var(--font-body) / var(--font-arabic). */
+  --font-display:  var(--font-display-loaded), 'Fraunces', 'Georgia', 'Times New Roman', serif;
+  --font-body:     var(--font-body-loaded), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-arabic:   var(--font-arabic-loaded), 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* -------------------- TYPE SCALE -------------------- */
+  /* Modular scale ~1.200 (minor third) on body, 1.333 on display */
+  --fs-xs:    0.75rem;    /* 12 */
+  --fs-sm:    0.875rem;   /* 14 */
+  --fs-base:  1rem;       /* 16 */
+  --fs-md:    1.125rem;   /* 18 */
+  --fs-lg:    1.375rem;   /* 22 */
+  --fs-xl:    1.75rem;    /* 28 */
+  --fs-2xl:   2.25rem;    /* 36 */
+  --fs-3xl:   3rem;       /* 48 */
+  --fs-4xl:   4rem;       /* 64 */
+  --fs-5xl:   5.5rem;     /* 88 */
+
+  --lh-tight:  1.1;
+  --lh-snug:   1.25;
+  --lh-normal: 1.5;
+  --lh-relaxed:1.7;
+
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;
+  --tracking-caps:   0.12em;
+
+  /* -------------------- SPACING -------------------- */
+  --sp-0: 0;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+  --sp-32: 128px;
+
+  /* -------------------- RADII -------------------- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 22px;
+  --r-2xl: 32px;
+  --r-pill: 999px;
+  /* Mihrab-inspired arched top radius for featured cards */
+  --r-arch: 50% 50% 14px 14px / 28% 28% 14px 14px;
+
+  /* -------------------- SHADOWS -------------------- */
+  /* Soft, natural shadows — no hard neon drop shadows */
+  --sh-xs: 0 1px 2px rgba(19, 46, 48, 0.05);
+  --sh-sm: 0 2px 6px rgba(19, 46, 48, 0.06), 0 1px 2px rgba(19, 46, 48, 0.04);
+  --sh-md: 0 6px 18px rgba(19, 46, 48, 0.08), 0 2px 4px rgba(19, 46, 48, 0.04);
+  --sh-lg: 0 14px 32px rgba(19, 46, 48, 0.10), 0 4px 8px rgba(19, 46, 48, 0.05);
+  --sh-xl: 0 24px 56px rgba(19, 46, 48, 0.14);
+  --sh-inset: inset 0 0 0 1px rgba(60, 130, 133, 0.15);
+
+  /* -------------------- MOTION -------------------- */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+}
+
+/* -------------------- SEMANTIC TYPE CLASSES -------------------- */
+.type-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.type-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-5xl);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+  font-variation-settings: "opsz" 120, "SOFT" 50;
+}
+
+.type-h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-4xl);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+  font-variation-settings: "opsz" 100, "SOFT" 40;
+}
+
+.type-h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+}
+
+.type-h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-snug);
+  color: var(--fg1);
+}
+
+.type-h4 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+  color: var(--fg1);
+}
+
+.type-h5 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  color: var(--fg1);
+}
+
+.type-body-lg {
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+  color: var(--fg2);
+}
+
+.type-body {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+  color: var(--fg2);
+}
+
+.type-body-sm {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--fg2);
+}
+
+.type-meta {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  color: var(--fg3);
+  letter-spacing: 0.01em;
+}
+
+.type-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--fs-xl);
+  line-height: var(--lh-relaxed);
+  color: var(--fg1);
+}
+
+.type-arabic {
+  font-family: var(--font-arabic);
+  font-size: var(--fs-2xl);
+  line-height: 1.9;
+  color: var(--fg1);
+  direction: rtl;
+  font-feature-settings: "calt" on, "liga" on;
+}
+
+.type-arabic-lg {
+  font-family: var(--font-arabic);
+  font-size: var(--fs-3xl);
+  line-height: 1.9;
+  color: var(--fg1);
+  direction: rtl;
+}
+
+/* Native element defaults (optional opt-in via .prose) */
+.prose h1 { font: 500 var(--fs-4xl)/var(--lh-tight) var(--font-display); letter-spacing: var(--tracking-tight); }
+.prose h2 { font: 500 var(--fs-3xl)/var(--lh-snug) var(--font-display); }
+.prose h3 { font: 500 var(--fs-2xl)/var(--lh-snug) var(--font-display); }
+.prose h4 { font: 600 var(--fs-xl)/var(--lh-snug) var(--font-body); }
+.prose p  { font: 400 var(--fs-base)/var(--lh-relaxed) var(--font-body); color: var(--fg2); }
+.prose a  { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+.prose a:hover { color: var(--brand-hover); }
