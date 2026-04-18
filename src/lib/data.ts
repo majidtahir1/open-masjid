@@ -96,58 +96,13 @@ export async function fetchServices(tenant: TenantRecord) {
   }
 }
 
-function dayBounds(date = new Date()) {
-  const start = new Date(date)
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(date)
-  end.setHours(23, 59, 59, 999)
-  return { start: start.toISOString(), end: end.toISOString() }
-}
-
-export async function fetchTodayPrayerTimes(tenant: TenantRecord) {
-  const payload = await payloadClient()
-  const { start, end } = dayBounds()
-  try {
-    const res = await payload.find({
-      collection: 'prayer-times',
-      where: {
-        tenant: { equals: tenant.id },
-        date: { greater_than_equal: start, less_than_equal: end },
-      },
-      limit: 1,
-      depth: 0,
-      overrideAccess: true,
-    })
-    return (res.docs[0] as unknown) ?? null
-  } catch {
-    return null
-  }
-}
-
-export async function fetchUpcomingPrayerTimes(
-  tenant: TenantRecord,
-  days = 30,
-) {
-  const payload = await payloadClient()
-  const start = new Date()
-  start.setHours(0, 0, 0, 0)
-  try {
-    const res = await payload.find({
-      collection: 'prayer-times',
-      where: {
-        tenant: { equals: tenant.id },
-        date: { greater_than_equal: start.toISOString() },
-      },
-      sort: 'date',
-      limit: days,
-      depth: 0,
-      overrideAccess: true,
-    })
-    return res.docs as unknown[]
-  } catch {
-    return []
-  }
-}
+/**
+ * Prayer schedule fetchers live in `./prayer-schedule.ts` — import
+ * `getActiveSchedule` / `getAllSchedules` from there instead. They are
+ * re-exported here for convenience so page code has a single data-access
+ * surface.
+ */
+export { getActiveSchedule, getAllSchedules } from './prayer-schedule'
 
 export async function fetchPageBySlug(tenant: TenantRecord, slug: string) {
   const payload = await payloadClient()

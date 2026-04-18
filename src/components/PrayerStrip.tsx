@@ -1,9 +1,9 @@
 import Link from 'next/link'
 
-import type { PrayerTimesLike } from './types'
+import type { PrayerScheduleLike, PrayerTimePair } from './types'
 
 export interface PrayerStripProps {
-  prayerTimes: PrayerTimesLike | null | undefined
+  schedule: PrayerScheduleLike | null | undefined
   /** Whether to show the "Full schedule →" link. Default true. */
   showFullScheduleLink?: boolean
 }
@@ -50,10 +50,10 @@ function parseTimeToMinutes(raw: string, key: PrayerKey): number | null {
   return hour * 60 + minute
 }
 
-function pickTime(pt: PrayerTimesLike, key: PrayerKey): string | null {
-  const iqamah = pt[`${key}Iqamah` as keyof PrayerTimesLike] as string | null | undefined
-  const adhan = pt[`${key}Adhan` as keyof PrayerTimesLike] as string | null | undefined
-  return iqamah || adhan || null
+function pickTime(schedule: PrayerScheduleLike, key: PrayerKey): string | null {
+  const pair = schedule[key] as PrayerTimePair | null | undefined
+  if (!pair) return null
+  return pair.iqamah?.trim() || pair.adhan?.trim() || null
 }
 
 /**
@@ -74,7 +74,7 @@ function findNextPrayer(rows: PrayerRow[], now: Date): number {
 }
 
 function formatJummahTimes(
-  raw: PrayerTimesLike['jummahTimes'] | undefined,
+  raw: PrayerScheduleLike['jummahTimes'] | undefined,
 ): string[] {
   if (!raw) return []
   return raw
@@ -82,22 +82,12 @@ function formatJummahTimes(
     .filter((t): t is string => typeof t === 'string' && t.length > 0)
 }
 
-function formatGregorian(dateStr: string | null | undefined): string | null {
-  if (!dateStr) return null
-  const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return null
-  return d.toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-  })
-}
-
 export default function PrayerStrip({
-  prayerTimes,
+  schedule,
   showFullScheduleLink = true,
 }: PrayerStripProps) {
   // No data — render a subtle placeholder strip.
-  if (!prayerTimes) {
+  if (!schedule) {
     return (
       <div className="bg-brand-ink text-white">
         <div className="mx-auto flex min-h-12 max-w-page items-center justify-between gap-6 px-6 py-[14px]">
@@ -120,28 +110,24 @@ export default function PrayerStrip({
   const rows: PrayerRow[] = PRAYER_ORDER.map(({ key, name }) => ({
     key,
     name,
-    time: pickTime(prayerTimes, key),
+    time: pickTime(schedule, key),
   }))
 
   const nextIdx = findNextPrayer(rows, new Date())
-  const jummahTimes = formatJummahTimes(prayerTimes.jummahTimes)
-  const gregorian = formatGregorian(prayerTimes.date)
+  const jummahTimes = formatJummahTimes(schedule.jummahTimes)
+  const scheduleLabel = schedule.name?.trim() || null
 
   return (
     <div className="bg-brand-ink text-white">
       <div className="mx-auto flex min-h-12 max-w-page flex-wrap items-center gap-6 px-6 py-[14px]">
-        {(gregorian || prayerTimes.hijriDate) && (
+        {scheduleLabel && (
           <div className="flex-shrink-0 border-r border-white/15 pr-5">
-            {gregorian && (
-              <div className="font-display text-[16px] font-semibold leading-snug text-white">
-                {gregorian}
-              </div>
-            )}
-            {prayerTimes.hijriDate && (
-              <div className="font-body text-[11px] uppercase tracking-caps text-teal-200">
-                {prayerTimes.hijriDate}
-              </div>
-            )}
+            <div className="font-body text-[10.5px] uppercase tracking-caps text-teal-200">
+              Schedule
+            </div>
+            <div className="font-display text-[15px] font-semibold leading-snug text-white">
+              {scheduleLabel}
+            </div>
           </div>
         )}
 

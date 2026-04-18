@@ -4,7 +4,7 @@
  * These are intentionally loose structural types — they describe the data the
  * components need to render, not the full Payload record shape. When
  * `payload generate:types` starts working, callers can pass the real Event /
- * HeroSlide / PrayerTimes / Service / Tenant records and TypeScript will be
+ * HeroSlide / PrayerSchedule / Service / Tenant records and TypeScript will be
  * happy because these interfaces are a subset.
  */
 
@@ -112,20 +112,22 @@ export interface EventLike {
   status?: 'draft' | 'published' | null
 }
 
-export interface PrayerTimesLike {
-  date?: string | null
-  hijriDate?: string | null
-  fajrAdhan?: string | null
-  fajrIqamah?: string | null
-  zuhrAdhan?: string | null
-  zuhrIqamah?: string | null
-  asrAdhan?: string | null
-  asrIqamah?: string | null
-  maghribAdhan?: string | null
-  maghribIqamah?: string | null
-  ishaAdhan?: string | null
-  ishaIqamah?: string | null
-  jummahTimes?: Array<{ time: string } | string> | null
+export interface PrayerTimePair {
+  adhan?: string | null
+  iqamah?: string | null
+}
+
+export interface PrayerScheduleLike {
+  id?: string | number
+  name?: string | null
+  isCurrent?: boolean | null
+  startDate?: string | null
+  fajr?: PrayerTimePair | null
+  zuhr?: PrayerTimePair | null
+  asr?: PrayerTimePair | null
+  maghrib?: PrayerTimePair | null
+  isha?: PrayerTimePair | null
+  jummahTimes?: Array<{ time?: string | null } | string> | null
   notes?: string | null
 }
 

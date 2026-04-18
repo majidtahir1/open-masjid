@@ -5,7 +5,7 @@ import Header from '@/components/Header'
 import PrayerStrip from '@/components/PrayerStrip'
 import Footer from '@/components/Footer'
 import type {
-  PrayerTimesLike,
+  PrayerScheduleLike,
   TenantContactInfo,
   TenantLike,
   TenantSocialLink,
@@ -13,7 +13,7 @@ import type {
 import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
-import { fetchTodayPrayerTimes } from '@/lib/data'
+import { getActiveSchedule } from '@/lib/prayer-schedule'
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const tenant = await getCurrentTenant()
@@ -23,9 +23,9 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     redirect('/marketing')
   }
 
-  const [themeCss, prayerTimes] = await Promise.all([
+  const [themeCss, schedule] = await Promise.all([
     Promise.resolve(tenantThemeCss(tenant)),
-    fetchTodayPrayerTimes(tenant),
+    getActiveSchedule(tenant.id),
   ])
 
   const footerTenant = {
@@ -42,7 +42,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
       )}
       <Header tenant={tenant as unknown as TenantLike} />
-      <PrayerStrip prayerTimes={prayerTimes as PrayerTimesLike | null} />
+      <PrayerStrip schedule={schedule as PrayerScheduleLike | null} />
       <main className="min-h-[60vh]">{children}</main>
       <Footer tenant={footerTenant} />
     </TenantProvider>

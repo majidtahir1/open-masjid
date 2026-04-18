@@ -302,37 +302,55 @@ async function seed() {
   }
   console.log(`✓ Created ${events.length} events`)
 
-  // 7. Prayer times — 7 days starting today
-  await deleteAll(payload, 'prayer-times', tenantId)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  for (let d = 0; d < 7; d++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() + d)
+  // 7. Prayer schedules — baseline + Summer + Ramadan
+  await deleteAll(payload, 'prayer-schedules', tenantId)
+  const schedules = [
+    {
+      name: 'Baseline',
+      isCurrent: true,
+      startDate: undefined as string | undefined,
+      fajr: { adhan: '5:30 AM', iqamah: '5:45 AM' },
+      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
+      asr: { adhan: '5:00 PM', iqamah: '5:15 PM' },
+      maghrib: { adhan: 'at sunset', iqamah: 'sunset + 5 min' },
+      isha: { adhan: '9:15 PM', iqamah: '9:30 PM' },
+      jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
+      notes: undefined as string | undefined,
+    },
+    {
+      name: 'Summer 2026',
+      isCurrent: false,
+      startDate: new Date('2026-06-01T00:00:00Z').toISOString(),
+      fajr: { adhan: '4:45 AM', iqamah: '5:00 AM' },
+      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
+      asr: { adhan: '6:00 PM', iqamah: '6:15 PM' },
+      maghrib: { adhan: 'at sunset', iqamah: 'sunset + 5 min' },
+      isha: { adhan: '10:00 PM', iqamah: '10:15 PM' },
+      jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
+      notes: 'Summer hours — later Isha.',
+    },
+    {
+      name: 'Ramadan 2026',
+      isCurrent: false,
+      startDate: new Date('2026-02-18T00:00:00Z').toISOString(),
+      fajr: { adhan: '5:15 AM', iqamah: '5:30 AM' },
+      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
+      asr: { adhan: '5:15 PM', iqamah: '5:30 PM' },
+      maghrib: { adhan: 'at sunset', iqamah: 'at iftar' },
+      isha: { adhan: '8:45 PM', iqamah: '9:00 PM' },
+      jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
+      notes: 'Taraweeh after Isha — 20 rakahs.',
+    },
+  ]
+  for (const s of schedules) {
     await payload.create({
-      collection: 'prayer-times',
-      data: {
-        date: date.toISOString(),
-        fajrAdhan: '5:30 AM',
-        fajrIqamah: '5:45 AM',
-        zuhrAdhan: '1:30 PM',
-        zuhrIqamah: '1:45 PM',
-        asrAdhan: '5:00 PM',
-        asrIqamah: '5:15 PM',
-        maghribAdhan: 'at sunset',
-        maghribIqamah: 'sunset + 5 min',
-        ishaAdhan: '9:15 PM',
-        ishaIqamah: '9:30 PM',
-        jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
-        notes: d === 0 ? 'Taraweeh 9:45pm' : undefined,
-        source: 'manual' as const,
-        tenant: tenantId,
-      },
+      collection: 'prayer-schedules',
+      data: { ...s, tenant: tenantId },
       overrideAccess: true,
       req: seedReq,
     })
   }
-  console.log('✓ Created 7 days of prayer times')
+  console.log(`✓ Created ${schedules.length} prayer schedules`)
 
   console.log('✓ Seed complete')
   process.exit(0)
