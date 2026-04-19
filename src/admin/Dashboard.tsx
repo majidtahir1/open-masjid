@@ -126,22 +126,7 @@ async function fetchActiveSchedule(
       depth: 0,
       overrideAccess: true,
     })
-    let doc = dated.docs[0] as Record<string, unknown> | undefined
-
-    // 2. Fall back to baseline (isCurrent: true) if no dated schedule matched.
-    if (!doc) {
-      const baseline = await payload.find({
-        collection: 'prayer-schedules' as never,
-        where: {
-          tenant: { equals: tenantId },
-          isCurrent: { equals: true },
-        },
-        limit: 1,
-        depth: 0,
-        overrideAccess: true,
-      })
-      doc = baseline.docs[0] as Record<string, unknown> | undefined
-    }
+    const doc = dated.docs[0] as Record<string, unknown> | undefined
 
     if (doc) {
       const pick = (g: unknown): { adhan: string; iqamah: string } => {

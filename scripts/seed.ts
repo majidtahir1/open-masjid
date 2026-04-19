@@ -325,8 +325,7 @@ async function seed() {
   const schedules = [
     {
       name: 'Baseline',
-      isCurrent: true,
-      startDate: undefined as string | undefined,
+      startDate: new Date('2026-01-01T00:00:00Z').toISOString(),
       fajr: { adhan: '5:30 AM', iqamah: '5:45 AM' },
       zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
       asr: { adhan: '5:00 PM', iqamah: '5:15 PM' },
@@ -337,7 +336,6 @@ async function seed() {
     },
     {
       name: 'Summer 2026',
-      isCurrent: false,
       startDate: new Date('2026-06-01T00:00:00Z').toISOString(),
       fajr: { adhan: '4:45 AM', iqamah: '5:00 AM' },
       zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
@@ -349,7 +347,6 @@ async function seed() {
     },
     {
       name: 'Ramadan 2026',
-      isCurrent: false,
       startDate: new Date('2026-02-18T00:00:00Z').toISOString(),
       fajr: { adhan: '5:15 AM', iqamah: '5:30 AM' },
       zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },

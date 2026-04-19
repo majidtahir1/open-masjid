@@ -120,7 +120,6 @@ export interface PrayerTimePair {
 export interface PrayerScheduleLike {
   id?: string | number
   name?: string | null
-  isCurrent?: boolean | null
   startDate?: string | null
   fajr?: PrayerTimePair | null
   zuhr?: PrayerTimePair | null

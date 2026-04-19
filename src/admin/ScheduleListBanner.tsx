@@ -2,9 +2,14 @@
  * ScheduleListBanner
  *
  * Rendered above the PrayerSchedules list view via
- * `admin.components.beforeListTable`. Shows a prominent green callout naming
- * the currently-active schedule so staff immediately know which record is
- * driving the public site.
+ * `admin.components.beforeListTable`. Renders one of:
+ *
+ *   - Green callout naming the currently-active schedule (the one whose
+ *     startDate is the most recent date <= today), so staff immediately know
+ *     which record is driving the public site.
+ *   - Amber warning when no schedule has a past startDate yet — the public
+ *     site is showing "Prayer times coming soon" and staff likely need to
+ *     either backdate an existing schedule or create a new one.
  *
  * This is a React Server Component: the active schedule is resolved on the
  * server at render time, so the banner is present in the initial HTML and
@@ -34,7 +39,29 @@ export default async function ScheduleListBanner() {
     if (!tenantId) return null
 
     const schedule = await getActiveSchedule(tenantId)
-    if (!schedule?.name) return null
+
+    if (!schedule?.name) {
+      return (
+        <div
+          role="status"
+          style={{
+            margin: '0 0 20px 0',
+            padding: '16px 20px',
+            borderRadius: 10,
+            background: '#fef3c7',
+            borderLeft: '5px solid #d97706',
+            color: '#78350f',
+            fontSize: '1rem',
+            fontWeight: 600,
+          }}
+        >
+          <span aria-hidden="true">⚠ </span>
+          No active prayer schedule for today. Create one with a past start
+          date to activate, or set an existing schedule&rsquo;s start date to a
+          date on or before today.
+        </div>
+      )
+    }
 
     return (
       <div

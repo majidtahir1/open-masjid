@@ -52,9 +52,9 @@ export default async function PrayerTimesPage() {
   ])
 
   const activeId = active?.id
-  const baseline = all.find((s) => s.isCurrent || !s.startDate) ?? null
+  const baseline = all.find((s) => !s.startDate) ?? null
   const dated = all
-    .filter((s) => s.startDate && !s.isCurrent)
+    .filter((s) => !!s.startDate)
     .slice()
     // Ensure startDate desc (newest at top)
     .sort(
