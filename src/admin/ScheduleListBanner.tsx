@@ -34,9 +34,29 @@ export default async function ScheduleListBanner() {
         ? (tenantRef as { id: string | number }).id
         : (tenantRef as string | number | undefined)
 
-    // Platform owners without a tenant can't have a single "active" schedule
-    // surfaced here — just skip the banner in that case.
-    if (!tenantId) return null
+    // Platform owners (no tenant) see schedules across every tenant, so there
+    // isn't a single "active schedule" to name here. Show a generic banner
+    // pointing at the per-row "ACTIVE NOW" highlight instead.
+    if (!tenantId) {
+      return (
+        <div
+          role="status"
+          style={{
+            margin: '0 0 20px 0',
+            padding: '16px 20px',
+            borderRadius: 10,
+            background: '#e0e7ff',
+            borderLeft: '5px solid #4f46e5',
+            color: '#312e81',
+            fontSize: '1rem',
+            fontWeight: 600,
+          }}
+        >
+          Platform-wide view — the active schedule for each tenant is
+          highlighted below.
+        </div>
+      )
+    }
 
     const schedule = await getActiveSchedule(tenantId)
 

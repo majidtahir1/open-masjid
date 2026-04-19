@@ -2,37 +2,62 @@
  * ScheduleNameCell
  *
  * Custom Payload 3 Cell component rendered in the `name` column of the
- * PrayerSchedules list view. For the row whose id matches the current active
- * schedule (resolved server-side via /api/active-schedule), we render a loud
- * green "ACTIVE NOW" pill next to the name and tint the cell background so
- * the row reads as highlighted. All other rows render the plain name.
+ * PrayerSchedules list view. For the row whose id matches the active schedule
+ * for the row's tenant (resolved server-side via /api/active-schedules), we
+ * render a loud green "ACTIVE NOW" pill next to the name and tint the cell
+ * background so the row reads as highlighted. All other rows render the plain
+ * name.
+ *
+ * In either state, the name is wrapped in a Next.js Link to the schedule's
+ * edit page so the column keeps its click-to-edit behavior that Payload's
+ * default Name cell provides.
  *
  * Payload 3's Cell API doesn't let us style the whole `<tr>`, so making the
  * Name cell visually prominent is the simplest way to convey "this row is
  * the one driving the public site."
  *
- * All rows share a single module-level fetch of /api/active-schedule so we
+ * All rows share a single module-level fetch of /api/active-schedules so we
  * don't hit the endpoint once per row.
  */
 
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-type ActiveInfo = { activeId: string | number | null; activeName?: string | null }
+type ActiveMap = Record<string, string | number | null>
 
-let cachedPromise: Promise<ActiveInfo> | null = null
-function getActive(): Promise<ActiveInfo> {
+let cachedPromise: Promise<ActiveMap> | null = null
+function getActiveMap(): Promise<ActiveMap> {
   if (!cachedPromise) {
-    cachedPromise = fetch('/api/active-schedule', { credentials: 'include' })
-      .then((r) => (r.ok ? r.json() : { activeId: null }))
-      .catch(() => ({ activeId: null }))
+    cachedPromise = fetch('/api/active-schedules', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : {}))
+      .catch(() => ({}))
   }
   return cachedPromise
 }
 
+type TenantRef =
+  | string
+  | number
+  | { id?: string | number }
+  | null
+  | undefined
+
 type RowData = {
   id?: string | number
+  tenant?: TenantRef
+}
+
+function extractTenantId(t: TenantRef): string | number | undefined {
+  if (t == null) return undefined
+  if (typeof t === 'object') return t.id
+  return t
+}
+
+const linkStyle: React.CSSProperties = {
+  textDecoration: 'underline',
+  color: 'inherit',
 }
 
 export default function ScheduleNameCell({
@@ -42,14 +67,14 @@ export default function ScheduleNameCell({
   rowData?: RowData
   cellData?: unknown
 }) {
-  const [activeId, setActiveId] = useState<string | number | null>(null)
+  const [activeMap, setActiveMap] = useState<ActiveMap>({})
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    getActive().then((d) => {
+    getActiveMap().then((m) => {
       if (cancelled) return
-      setActiveId(d?.activeId ?? null)
+      setActiveMap(m ?? {})
       setLoaded(true)
     })
     return () => {
@@ -58,16 +83,29 @@ export default function ScheduleNameCell({
   }, [])
 
   const name = typeof cellData === 'string' ? cellData : ''
+  const id = rowData?.id
+  const editHref =
+    id != null ? `/admin/collections/prayer-schedules/${id}` : undefined
+
+  const nameLink = editHref ? (
+    <Link href={editHref} style={linkStyle}>
+      {name}
+    </Link>
+  ) : (
+    <span>{name}</span>
+  )
 
   if (!rowData || !loaded) {
-    return <span>{name}</span>
+    return nameLink
   }
 
-  const id = rowData.id
-  const isActive = id != null && activeId != null && String(id) === String(activeId)
+  const tenantId = extractTenantId(rowData.tenant)
+  const activeId = tenantId != null ? activeMap[String(tenantId)] : null
+  const isActive =
+    id != null && activeId != null && String(id) === String(activeId)
 
   if (!isActive) {
-    return <span>{name}</span>
+    return nameLink
   }
 
   return (
@@ -112,7 +150,13 @@ export default function ScheduleNameCell({
         />
         Active now
       </span>
-      <span>{name}</span>
+      {editHref ? (
+        <Link href={editHref} style={linkStyle}>
+          {name}
+        </Link>
+      ) : (
+        <span>{name}</span>
+      )}
     </span>
   )
 }
