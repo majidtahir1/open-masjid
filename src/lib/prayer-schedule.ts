@@ -10,6 +10,7 @@
  * All lookups use `overrideAccess: true` since the public site is read-only.
  */
 
+import { unstable_noStore as noStore } from 'next/cache'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -41,6 +42,7 @@ export async function getActiveSchedule(
   tenantId: string | number,
   date: Date = new Date(),
 ): Promise<PrayerScheduleRecord | null> {
+  noStore()
   const payload = await payloadClient()
   const iso = date.toISOString()
 
@@ -91,6 +93,7 @@ export async function getActiveSchedule(
 export async function getAllSchedules(
   tenant: TenantRecord,
 ): Promise<PrayerScheduleRecord[]> {
+  noStore()
   const payload = await payloadClient()
   try {
     const res = await payload.find({

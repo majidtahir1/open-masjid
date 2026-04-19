@@ -8,6 +8,7 @@
  * `components/types.ts`.
  */
 
+import { unstable_noStore as noStore } from 'next/cache'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -18,6 +19,7 @@ async function payloadClient() {
 }
 
 export async function fetchHeroSlides(tenant: TenantRecord) {
+  noStore()
   const payload = await payloadClient()
   try {
     const res = await payload.find({
@@ -41,6 +43,7 @@ export async function fetchEvents(
   tenant: TenantRecord,
   opts: { limit?: number } = {},
 ) {
+  noStore()
   const payload = await payloadClient()
   try {
     const res = await payload.find({
@@ -61,6 +64,7 @@ export async function fetchEvents(
 }
 
 export async function fetchEventBySlug(tenant: TenantRecord, slug: string) {
+  noStore()
   const payload = await payloadClient()
   try {
     const res = await payload.find({
@@ -80,6 +84,7 @@ export async function fetchEventBySlug(tenant: TenantRecord, slug: string) {
 }
 
 export async function fetchServices(tenant: TenantRecord) {
+  noStore()
   const payload = await payloadClient()
   try {
     const res = await payload.find({
@@ -105,6 +110,7 @@ export async function fetchServices(tenant: TenantRecord) {
 export { getActiveSchedule, getAllSchedules } from './prayer-schedule'
 
 export async function fetchPageBySlug(tenant: TenantRecord, slug: string) {
+  noStore()
   const payload = await payloadClient()
   try {
     const res = await payload.find({
