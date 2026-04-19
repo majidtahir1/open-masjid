@@ -85,9 +85,12 @@ export const PrayerSchedules: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'startDate', 'isCurrent', 'updatedAt'],
+    defaultColumns: ['name', 'status', 'startDate', 'isCurrent', 'updatedAt'],
     description:
       'Prayer time schedules. The ACTIVE schedule right now is the one with the most recent start date that has already passed. If no dated schedule applies (e.g. on first launch), the \u201cfallback\u201d schedule is used. To see which schedule is active today, check the \u201cActive now\u201d indicator on the list or the banner at the top of each schedule.',
+    components: {
+      beforeList: ['/src/admin/ScheduleListBanner#default'],
+    },
   },
   defaultSort: '-startDate',
   access: {
@@ -106,6 +109,16 @@ export const PrayerSchedules: CollectionConfig = {
       admin: {
         components: {
           Field: '/src/admin/ActiveScheduleBanner#default',
+        },
+      },
+    },
+    {
+      name: 'status',
+      type: 'ui',
+      label: 'Status',
+      admin: {
+        components: {
+          Cell: '/src/admin/ScheduleStatusCell#default',
         },
       },
     },

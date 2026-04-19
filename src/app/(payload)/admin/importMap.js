@@ -28,7 +28,9 @@ import { default as default_5065215e438fef22269547c6432587f3 } from '../../../..
 import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../../src/fields/CheckboxField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
+import { default as default_98ca886fe655d64b0922dbf5736fc771 } from '../../../../src/admin/ScheduleStatusCell'
 import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
+import { default as default_1b061eb5b281695d53709027f168847b } from '../../../../src/admin/ScheduleListBanner'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 
@@ -63,7 +65,9 @@ export const importMap = {
   "/src/fields/CheckboxField#default": default_020349c8fbd548aa796ba56590815903,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/ActiveScheduleBanner#default": default_07d961590be6dea90e3f89bf0ec85650,
+  "/src/admin/ScheduleStatusCell#default": default_98ca886fe655d64b0922dbf5736fc771,
   "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
+  "/src/admin/ScheduleListBanner#default": default_1b061eb5b281695d53709027f168847b,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }
