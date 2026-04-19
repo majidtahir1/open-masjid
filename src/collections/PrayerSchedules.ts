@@ -105,7 +105,7 @@ export const PrayerSchedules: CollectionConfig = {
       type: 'ui',
       admin: {
         components: {
-          Field: '/admin/ActiveScheduleBanner#default',
+          Field: '/src/admin/ActiveScheduleBanner#default',
         },
       },
     },
