@@ -5,54 +5,58 @@
  * `admin.components.beforeListTable`. Shows a prominent green callout naming
  * the currently-active schedule so staff immediately know which record is
  * driving the public site.
+ *
+ * This is a React Server Component: the active schedule is resolved on the
+ * server at render time, so the banner is present in the initial HTML and
+ * does not depend on any client-side fetch / hydration path.
  */
 
-'use client'
+import { getPayload } from 'payload'
+import { headers as nextHeaders } from 'next/headers'
 
-import { useEffect, useState } from 'react'
+import config from '@payload-config'
+import { getActiveSchedule } from '@/lib/prayer-schedule'
 
-type ActiveInfo = {
-  activeId: string | number | null
-  activeName: string | null
-}
+export default async function ScheduleListBanner() {
+  try {
+    const payload = await getPayload({ config })
+    const { user } = await payload.auth({ headers: await nextHeaders() })
+    if (!user) return null
 
-export default function ScheduleListBanner() {
-  const [info, setInfo] = useState<ActiveInfo | null>(null)
+    const tenantRef = (user as { tenant?: unknown }).tenant
+    const tenantId =
+      typeof tenantRef === 'object' && tenantRef !== null && 'id' in tenantRef
+        ? (tenantRef as { id: string | number }).id
+        : (tenantRef as string | number | undefined)
 
-  useEffect(() => {
-    let cancelled = false
-    fetch('/api/active-schedule', { credentials: 'include' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data && 'activeId' in data) setInfo(data)
-      })
-      .catch(() => {
-        // Banner is an enhancement — fail quietly.
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    // Platform owners without a tenant can't have a single "active" schedule
+    // surfaced here — just skip the banner in that case.
+    if (!tenantId) return null
 
-  if (!info?.activeName) return null
+    const schedule = await getActiveSchedule(tenantId)
+    if (!schedule?.name) return null
 
-  return (
-    <div
-      role="status"
-      style={{
-        margin: '0 0 16px 0',
-        padding: '14px 18px',
-        borderRadius: 10,
-        background: '#dcfce7',
-        borderLeft: '4px solid #16a34a',
-        color: '#14532d',
-        fontWeight: 600,
-        fontSize: '0.95rem',
-      }}
-    >
-      <span aria-hidden="true">✓ </span>
-      Currently active schedule: <strong>{info.activeName}</strong> — this is
-      what the public site displays right now.
-    </div>
-  )
+    return (
+      <div
+        role="status"
+        style={{
+          margin: '0 0 20px 0',
+          padding: '16px 20px',
+          borderRadius: 10,
+          background: '#dcfce7',
+          borderLeft: '5px solid #16a34a',
+          color: '#14532d',
+          fontSize: '1rem',
+          fontWeight: 600,
+        }}
+      >
+        <span aria-hidden="true">✓ </span>
+        Currently active schedule: <strong>{schedule.name}</strong> — this is
+        what the public site displays right now.
+      </div>
+    )
+  } catch {
+    // Banner is an enhancement — never break the list view if it fails.
+    return null
+  }
 }
