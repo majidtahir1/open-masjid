@@ -28,7 +28,7 @@ export default function CheckboxField({ field, path }: { field: FieldProp; path:
           checked={!!value}
           onCheckedChange={(checked) => setValue(checked === true)}
         />
-        <Label htmlFor={path} className="text-sm font-medium cursor-pointer">
+        <Label htmlFor={path} className="text-base font-medium cursor-pointer">
           {label}
           {field.required && <span className="text-destructive ml-1">*</span>}
         </Label>

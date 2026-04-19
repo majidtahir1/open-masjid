@@ -106,6 +106,9 @@ export const PrayerSchedules: CollectionConfig = {
       required: true,
       admin: {
         description: 'e.g. "Summer 2026", "Ramadan 2026", "Winter".',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {
@@ -116,6 +119,9 @@ export const PrayerSchedules: CollectionConfig = {
       admin: {
         description:
           'Leave startDate blank and check "Current" to mark this as the baseline schedule shown when no dated schedule applies. Only one schedule per masjid may be Current.',
+        components: {
+          Field: '/src/fields/CheckboxField#default',
+        },
       },
       validate: validateSingleCurrent,
     },
@@ -127,6 +133,9 @@ export const PrayerSchedules: CollectionConfig = {
         date: { pickerAppearance: 'dayOnly' },
         description:
           'The date this schedule activates. It stays active until a later schedule\u2019s start date kicks in. Leave blank for the baseline (Current) schedule.',
+        components: {
+          Field: '/src/fields/DateField#default',
+        },
       },
     },
     {
@@ -150,13 +159,23 @@ export const PrayerSchedules: CollectionConfig = {
                       name: 'adhan',
                       type: 'text',
                       label: 'Fajr Adhan',
-                      admin: { placeholder: 'e.g. 5:30 AM' },
+                      admin: {
+                        placeholder: 'e.g. 5:30 AM',
+                        components: {
+                          Field: '/src/fields/TextField#default',
+                        },
+                      },
                     },
                     {
                       name: 'iqamah',
                       type: 'text',
                       label: 'Fajr Iqamah',
-                      admin: { placeholder: 'e.g. 5:45 AM' },
+                      admin: {
+                        placeholder: 'e.g. 5:45 AM',
+                        components: {
+                          Field: '/src/fields/TextField#default',
+                        },
+                      },
                     },
                   ],
                 },
@@ -184,13 +203,23 @@ export const PrayerSchedules: CollectionConfig = {
                   name: 'adhan',
                   type: 'text',
                   label: 'Zuhr Adhan',
-                  admin: { placeholder: 'e.g. 1:30 PM' },
+                  admin: {
+                    placeholder: 'e.g. 1:30 PM',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
                 {
                   name: 'iqamah',
                   type: 'text',
                   label: 'Zuhr Iqamah',
-                  admin: { placeholder: 'e.g. 1:45 PM' },
+                  admin: {
+                    placeholder: 'e.g. 1:45 PM',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
               ],
             },
@@ -216,13 +245,23 @@ export const PrayerSchedules: CollectionConfig = {
                   name: 'adhan',
                   type: 'text',
                   label: 'Asr Adhan',
-                  admin: { placeholder: 'e.g. 5:00 PM' },
+                  admin: {
+                    placeholder: 'e.g. 5:00 PM',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
                 {
                   name: 'iqamah',
                   type: 'text',
                   label: 'Asr Iqamah',
-                  admin: { placeholder: 'e.g. 5:15 PM' },
+                  admin: {
+                    placeholder: 'e.g. 5:15 PM',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
               ],
             },
@@ -248,13 +287,23 @@ export const PrayerSchedules: CollectionConfig = {
                   name: 'adhan',
                   type: 'text',
                   label: 'Maghrib Adhan',
-                  admin: { placeholder: 'e.g. at sunset' },
+                  admin: {
+                    placeholder: 'e.g. at sunset',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
                 {
                   name: 'iqamah',
                   type: 'text',
                   label: 'Maghrib Iqamah',
-                  admin: { placeholder: 'e.g. sunset + 5 min' },
+                  admin: {
+                    placeholder: 'e.g. sunset + 5 min',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
               ],
             },
@@ -280,13 +329,23 @@ export const PrayerSchedules: CollectionConfig = {
                   name: 'adhan',
                   type: 'text',
                   label: 'Isha Adhan',
-                  admin: { placeholder: 'e.g. 9:15 PM' },
+                  admin: {
+                    placeholder: 'e.g. 9:15 PM',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
                 {
                   name: 'iqamah',
                   type: 'text',
                   label: 'Isha Iqamah',
-                  admin: { placeholder: 'e.g. 9:30 PM' },
+                  admin: {
+                    placeholder: 'e.g. 9:30 PM',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
               ],
             },
@@ -301,13 +360,27 @@ export const PrayerSchedules: CollectionConfig = {
       admin: {
         description: 'e.g. "12:45 PM", "1:30 PM", "2:15 PM".',
       },
-      fields: [{ name: 'time', type: 'text', required: true }],
+      fields: [
+        {
+          name: 'time',
+          type: 'text',
+          required: true,
+          admin: {
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
+          },
+        },
+      ],
     },
     {
       name: 'notes',
       type: 'text',
       admin: {
         description: 'Optional, e.g. "Taraweeh after Isha".',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {

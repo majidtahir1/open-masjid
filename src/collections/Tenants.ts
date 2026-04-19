@@ -69,6 +69,9 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Public-facing name shown in the site header, footer, and emails, e.g. "Islamic Center of Prosper".',
                 placeholder: 'Islamic Center of Prosper',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
             {
@@ -82,6 +85,9 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Short identifier used for the platform subdomain (e.g. "icp" becomes icp.openmasjid.app). Lowercase letters, numbers, and dashes only. Avoid changing after launch.',
                 placeholder: 'icp',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
             {
@@ -97,6 +103,9 @@ export const Tenants: CollectionConfig = {
               admin: {
                 description:
                   'Choose "Masjid" for a single-community site, or "Umbrella Organization" for a parent org that groups multiple masajid.',
+                components: {
+                  Field: '/src/fields/SelectField#default',
+                },
               },
             },
           ],
@@ -128,6 +137,9 @@ export const Tenants: CollectionConfig = {
                     description:
                       'Hostname only — no https:// and no trailing slash. Example: icprosper.org',
                     placeholder: 'icprosper.org',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
               ],
@@ -166,6 +178,9 @@ export const Tenants: CollectionConfig = {
                     description:
                       'Main brand color — used for buttons, links, and headings. Hex value, e.g. #0F1E4A (navy).',
                     placeholder: '#0F1E4A',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
                 {
@@ -176,6 +191,9 @@ export const Tenants: CollectionConfig = {
                     description:
                       'Supporting accent — used in highlights and secondary UI. Hex value, e.g. #28A0B4 (teal).',
                     placeholder: '#28A0B4',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
                 {
@@ -186,6 +204,9 @@ export const Tenants: CollectionConfig = {
                     description:
                       'Warm accent — used sparingly on badges and devotional elements. Hex value, e.g. #F0C88C (gold).',
                     placeholder: '#F0C88C',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
                 {
@@ -201,6 +222,9 @@ export const Tenants: CollectionConfig = {
                   admin: {
                     description:
                       'Headline font. Body text and Arabic fonts are fixed platform-wide for consistency.',
+                    components: {
+                      Field: '/src/fields/SelectField#default',
+                    },
                   },
                 },
               ],
@@ -223,13 +247,23 @@ export const Tenants: CollectionConfig = {
                   name: 'phone',
                   type: 'text',
                   label: 'Phone',
-                  admin: { placeholder: '(555) 555-5555' },
+                  admin: {
+                    placeholder: '(555) 555-5555',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
                 {
                   name: 'email',
                   type: 'text',
                   label: 'Email',
-                  admin: { placeholder: 'info@icprosper.org' },
+                  admin: {
+                    placeholder: 'info@icprosper.org',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
                 },
                 {
                   name: 'address',
@@ -237,6 +271,9 @@ export const Tenants: CollectionConfig = {
                   label: 'Address',
                   admin: {
                     description: 'Street address, one line per part (street, city/state/zip).',
+                    components: {
+                      Field: '/src/fields/TextareaField#default',
+                    },
                   },
                 },
               ],
@@ -266,6 +303,11 @@ export const Tenants: CollectionConfig = {
                     { label: 'Twitter / X', value: 'twitter' },
                     { label: 'LinkedIn', value: 'linkedin' },
                   ],
+                  admin: {
+                    components: {
+                      Field: '/src/fields/SelectField#default',
+                    },
+                  },
                 },
                 {
                   name: 'url',
@@ -275,6 +317,9 @@ export const Tenants: CollectionConfig = {
                   admin: {
                     description: 'Full URL including https://',
                     placeholder: 'https://instagram.com/your-handle',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
               ],
@@ -287,6 +332,9 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Optional short phrase shown beneath the logo in the footer, e.g. "Serving Prosper since 2010".',
                 placeholder: 'A community rooted in service.',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
           ],
@@ -316,6 +364,9 @@ export const Tenants: CollectionConfig = {
                   admin: {
                     description:
                       'External link is recommended for MVP. Stripe mode will be enabled in a future release.',
+                    components: {
+                      Field: '/src/fields/SelectField#default',
+                    },
                   },
                 },
                 {
@@ -327,6 +378,9 @@ export const Tenants: CollectionConfig = {
                       'Shown only when Donation Mode is "External link". Full URL to your existing donation page.',
                     placeholder: 'https://launchgood.com/...',
                     condition: (_, siblingData) => siblingData?.mode === 'external',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
                 {
@@ -338,6 +392,9 @@ export const Tenants: CollectionConfig = {
                       'Shown only when Donation Mode is "Stripe on-site". Connected Stripe account ID (acct_...).',
                     placeholder: 'acct_1AbCdEfGhIjKlMnO',
                     condition: (_, siblingData) => siblingData?.mode === 'stripe',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
                   },
                 },
               ],

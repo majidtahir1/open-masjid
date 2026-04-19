@@ -39,6 +39,9 @@ export const Services: CollectionConfig = {
       admin: {
         description: 'The service name, e.g. "New Muslims (Ansar)" or "Funeral Services".',
         placeholder: 'New Muslims (Ansar)',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {
@@ -47,6 +50,9 @@ export const Services: CollectionConfig = {
       label: 'Description',
       admin: {
         description: 'A short sentence or two explaining what this service offers.',
+        components: {
+          Field: '/src/fields/TextareaField#default',
+        },
       },
     },
     {
@@ -58,6 +64,9 @@ export const Services: CollectionConfig = {
         description:
           'Name of a Lucide icon (kebab-case), e.g. "hand-heart", "book-open", "users". Browse lucide.dev for the full list.',
         placeholder: 'hand-heart',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {
@@ -68,6 +77,9 @@ export const Services: CollectionConfig = {
       admin: {
         description: 'Lower numbers appear first in the grid.',
         position: 'sidebar',
+        components: {
+          Field: '/src/fields/NumberField#default',
+        },
       },
     },
     {

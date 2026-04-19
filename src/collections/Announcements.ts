@@ -37,6 +37,9 @@ export const Announcements: CollectionConfig = {
       label: 'Title',
       admin: {
         description: 'A short headline, e.g. "Jumu\'ah moved to 1:30 PM this week".',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {
@@ -60,6 +63,9 @@ export const Announcements: CollectionConfig = {
         description:
           'High priority renders with stronger visual emphasis (e.g. bolder banner). Use sparingly.',
         position: 'sidebar',
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
       },
     },
     {
@@ -71,6 +77,9 @@ export const Announcements: CollectionConfig = {
         description:
           'Manual on/off switch. Turn off to hide immediately. Prefer this for "show, then hide on my schedule"; use Expires At for automatic hiding.',
         position: 'sidebar',
+        components: {
+          Field: '/src/fields/CheckboxField#default',
+        },
       },
     },
     {

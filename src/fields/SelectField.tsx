@@ -46,7 +46,7 @@ export default function SelectField({ field, path }: { field: FieldProp; path: s
 
   return (
     <div className="space-y-2 mb-4">
-      <Label htmlFor={path} className="text-sm font-medium">
+      <Label htmlFor={path} className="text-base font-medium">
         {label}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>

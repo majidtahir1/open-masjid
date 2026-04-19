@@ -46,6 +46,9 @@ export const HeroSlides: CollectionConfig = {
             description:
               'Small label above the headline, e.g. "Islamic Center of Prosper". Optional — omit to save vertical space.',
             placeholder: 'Islamic Center of Prosper',
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
           },
         },
         {
@@ -56,6 +59,9 @@ export const HeroSlides: CollectionConfig = {
           admin: {
             description: 'The main line visitors see. Short and action-oriented.',
             placeholder: 'A community rooted in service',
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
           },
         },
         {
@@ -64,6 +70,9 @@ export const HeroSlides: CollectionConfig = {
           label: 'Body Copy',
           admin: {
             description: 'One or two sentences supporting the headline.',
+            components: {
+              Field: '/src/fields/TextareaField#default',
+            },
           },
         },
         {
@@ -73,6 +82,9 @@ export const HeroSlides: CollectionConfig = {
           admin: {
             description:
               'Optional small line below the CTAs, e.g. "Monthly recurring available".',
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
           },
         },
       ],
@@ -92,6 +104,9 @@ export const HeroSlides: CollectionConfig = {
       admin: {
         description:
           'Controls the background color and typography contrast for this slide. Rotate themes across slides so adjacent slides look distinct.',
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
       },
     },
     {
@@ -109,7 +124,12 @@ export const HeroSlides: CollectionConfig = {
           type: 'text',
           required: true,
           label: 'Button Label',
-          admin: { placeholder: 'Donate' },
+          admin: {
+            placeholder: 'Donate',
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
+          },
         },
         {
           name: 'linkType',
@@ -124,6 +144,9 @@ export const HeroSlides: CollectionConfig = {
           admin: {
             description:
               'Use "Internal page" for site pages (faster, handles branding). Use "External URL" for LaunchGood, forms, etc.',
+            components: {
+              Field: '/src/fields/SelectField#default',
+            },
           },
         },
         {
@@ -140,6 +163,9 @@ export const HeroSlides: CollectionConfig = {
           admin: {
             description: 'Shown only when Link Type is "Internal page".',
             condition: (_, siblingData) => siblingData?.linkType === 'page',
+            components: {
+              Field: '/src/fields/SelectField#default',
+            },
           },
         },
         {
@@ -151,6 +177,9 @@ export const HeroSlides: CollectionConfig = {
               'Shown only when Link Type is "External URL". Include https://',
             placeholder: 'https://launchgood.com/...',
             condition: (_, siblingData) => siblingData?.linkType === 'url',
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
           },
         },
         {
@@ -161,6 +190,9 @@ export const HeroSlides: CollectionConfig = {
             description:
               'Optional. Name of a Lucide icon (kebab-case), e.g. "hand-heart". See lucide.dev for the full list.',
             placeholder: 'hand-heart',
+            components: {
+              Field: '/src/fields/TextField#default',
+            },
           },
         },
         {
@@ -171,6 +203,9 @@ export const HeroSlides: CollectionConfig = {
           admin: {
             description:
               'On = filled/branded button. Off = outlined secondary button. Mark one CTA per slide as primary.',
+            components: {
+              Field: '/src/fields/CheckboxField#default',
+            },
           },
         },
       ],
@@ -183,6 +218,9 @@ export const HeroSlides: CollectionConfig = {
       admin: {
         description: 'Lower numbers appear first in the slider.',
         position: 'sidebar',
+        components: {
+          Field: '/src/fields/NumberField#default',
+        },
       },
     },
     {
@@ -193,6 +231,9 @@ export const HeroSlides: CollectionConfig = {
       admin: {
         description: 'Uncheck to hide this slide without deleting it.',
         position: 'sidebar',
+        components: {
+          Field: '/src/fields/CheckboxField#default',
+        },
       },
     },
     {

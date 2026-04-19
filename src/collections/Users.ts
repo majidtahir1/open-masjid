@@ -98,6 +98,9 @@ export const Users: CollectionConfig = {
       label: 'First name',
       admin: {
         description: 'First name, used for greetings and displayed in the admin panel',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {
@@ -107,6 +110,9 @@ export const Users: CollectionConfig = {
       label: 'Last name',
       admin: {
         description: 'Last name',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {
@@ -123,6 +129,9 @@ export const Users: CollectionConfig = {
       admin: {
         description:
           'Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.',
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
       },
       access: {
         // Only platformOwner can change role to platformOwner; admins can set

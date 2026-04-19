@@ -158,3 +158,37 @@
     box-shadow: 0 0 0 2px rgba(40, 160, 180, 0.25);
   }
 }
+
+/* -------------------------------------------------------------------------
+ * Admin font size bump — Payload's default body text is ~13-14px which is
+ * cramped for volunteer admins. Nudging the base up one tier makes labels,
+ * helper text, tabs, and breadcrumbs feel more legible without breaking
+ * layout math (Payload uses rem everywhere).
+ * ----------------------------------------------------------------------- */
+
+html,
+body {
+  font-size: 15px;
+}
+
+.field-type .field-label,
+.field-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.field-description {
+  font-size: 0.875rem;
+}
+
+.tabs-field__tab-button,
+.doc-tabs__tab,
+.tab-button {
+  font-size: 0.9375rem;
+}
+
+.step-nav,
+.step-nav a,
+.step-nav__last {
+  font-size: 0.9375rem;
+}

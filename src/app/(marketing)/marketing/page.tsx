@@ -15,8 +15,8 @@ export default function MarketingPage() {
           The platform for <em className="text-brand">masajid</em>.
         </h1>
         <p className="mb-10 max-w-[52ch] text-[18px] leading-relaxed text-fg2">
-          Self-hosted. Open-source. Built to help masjid volunteers run a modern
-          website without needing a developer on call.
+          The most modern masjid digital management system that just works.  Built to help masjid volunteers run a modern
+          masjid's digital presence without needing a developer on call.
         </p>
         <p className="font-body text-fs-sm font-semibold uppercase tracking-caps text-fg3">
           Coming soon

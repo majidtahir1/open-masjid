@@ -56,6 +56,9 @@ export const Pages: CollectionConfig = {
       admin: {
         description: 'Shown as the page heading and in the browser tab.',
         placeholder: 'About Us',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
       },
     },
     {

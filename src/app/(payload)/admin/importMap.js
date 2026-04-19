@@ -1,10 +1,6 @@
-import { default as CustomTextField } from '../../../../src/fields/TextField'
-import { default as CustomEmailField } from '../../../../src/fields/EmailField'
-import { default as CustomNumberField } from '../../../../src/fields/NumberField'
-import { default as CustomTextareaField } from '../../../../src/fields/TextareaField'
-import { default as CustomSelectField } from '../../../../src/fields/SelectField'
-import { default as CustomCheckboxField } from '../../../../src/fields/CheckboxField'
-import { default as CustomDateField } from '../../../../src/fields/DateField'
+import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
+import { default as default_ff3268629584f3c8482e80b479334e91 } from '../../../../src/fields/SelectField'
+import { default as default_0ffd719fe552e7f96260b5b4f16226bb } from '../../../../src/fields/TextareaField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -28,17 +24,17 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_5065215e438fef22269547c6432587f3 } from '../../../../src/fields/EmailField'
+import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../../src/fields/CheckboxField'
+import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
+import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 
 export const importMap = {
-  "/src/fields/TextField#default": CustomTextField,
-  "/src/fields/EmailField#default": CustomEmailField,
-  "/src/fields/NumberField#default": CustomNumberField,
-  "/src/fields/TextareaField#default": CustomTextareaField,
-  "/src/fields/SelectField#default": CustomSelectField,
-  "/src/fields/CheckboxField#default": CustomCheckboxField,
-  "/src/fields/DateField#default": CustomDateField,
+  "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
+  "/src/fields/SelectField#default": default_ff3268629584f3c8482e80b479334e91,
+  "/src/fields/TextareaField#default": default_0ffd719fe552e7f96260b5b4f16226bb,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -62,6 +58,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/src/fields/EmailField#default": default_5065215e438fef22269547c6432587f3,
+  "/src/fields/CheckboxField#default": default_020349c8fbd548aa796ba56590815903,
+  "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
+  "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }
