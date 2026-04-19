@@ -19,19 +19,30 @@ function labelText(label: FieldProp['label'], fallback: string): string {
   return label.en ?? Object.values(label)[0] ?? fallback
 }
 
-export default function NumberField({ field, path }: { field: FieldProp; path: string }) {
-  const { value, setValue, showError, errorMessage } = useField<number | null>({ path })
-  const label = labelText(field.label, field.name ?? path)
+export default function NumberField({
+  field,
+  path: pathFromProps,
+}: {
+  field: FieldProp
+  path: string
+}) {
+  const { value, setValue, showError, errorMessage, path } = useField<number | null>({
+    potentiallyStalePath: pathFromProps,
+  })
+  const resolvedPath = path || pathFromProps
+  const label = labelText(field.label, field.name ?? resolvedPath)
+  const displayValue =
+    value === null || value === undefined ? '' : String(value)
   return (
     <div className="space-y-2 mb-4">
-      <Label htmlFor={path} className="text-base font-medium">
+      <Label htmlFor={resolvedPath} className="text-base font-medium">
         {label}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       <Input
-        id={path}
+        id={resolvedPath}
         type="number"
-        value={value ?? ''}
+        value={displayValue}
         min={field.min}
         max={field.max}
         placeholder={field.admin?.placeholder}

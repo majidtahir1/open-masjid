@@ -36,19 +36,30 @@ function toInputValue(v: string | Date | null | undefined): string {
   return d.toISOString().slice(0, 10)
 }
 
-export default function DateField({ field, path }: { field: FieldProp; path: string }) {
-  const { value, setValue, showError, errorMessage } = useField<string | Date>({ path })
-  const label = labelText(field.label, field.name ?? path)
+export default function DateField({
+  field,
+  path: pathFromProps,
+}: {
+  field: FieldProp
+  path: string
+}) {
+  const { value, setValue, showError, errorMessage, path } = useField<
+    string | Date
+  >({
+    potentiallyStalePath: pathFromProps,
+  })
+  const resolvedPath = path || pathFromProps
+  const label = labelText(field.label, field.name ?? resolvedPath)
   return (
     <div className="space-y-2 mb-4">
-      <Label htmlFor={path} className="text-base font-medium">
+      <Label htmlFor={resolvedPath} className="text-base font-medium">
         {label}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       <Input
-        id={path}
+        id={resolvedPath}
         type="date"
-        value={toInputValue(value)}
+        value={toInputValue(value as string | Date | null | undefined)}
         onChange={(e) => {
           const v = e.target.value
           // Store as ISO string so Payload's date validation is happy.

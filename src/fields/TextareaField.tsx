@@ -17,18 +17,27 @@ function labelText(label: FieldProp['label'], fallback: string): string {
   return label.en ?? Object.values(label)[0] ?? fallback
 }
 
-export default function TextareaField({ field, path }: { field: FieldProp; path: string }) {
-  const { value, setValue, showError, errorMessage } = useField<string>({ path })
-  const label = labelText(field.label, field.name ?? path)
+export default function TextareaField({
+  field,
+  path: pathFromProps,
+}: {
+  field: FieldProp
+  path: string
+}) {
+  const { value, setValue, showError, errorMessage, path } = useField<string>({
+    potentiallyStalePath: pathFromProps,
+  })
+  const resolvedPath = path || pathFromProps
+  const label = labelText(field.label, field.name ?? resolvedPath)
   return (
     <div className="space-y-2 mb-4">
-      <Label htmlFor={path} className="text-base font-medium">
+      <Label htmlFor={resolvedPath} className="text-base font-medium">
         {label}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       <Textarea
-        id={path}
-        value={value ?? ''}
+        id={resolvedPath}
+        value={(value as string) ?? ''}
         rows={field.admin?.rows ?? 4}
         placeholder={field.admin?.placeholder}
         onChange={(e) => setValue(e.target.value)}

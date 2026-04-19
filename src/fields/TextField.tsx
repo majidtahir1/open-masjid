@@ -5,6 +5,12 @@
  * built-in text field contract: receives `field` (the field config) and
  * `path` (string, provided by Payload's form renderer). Integrates with
  * form state via the `useField` hook from `@payloadcms/ui`.
+ *
+ * Note: we pass `pathFromProps` via `potentiallyStalePath` (not `path`) to
+ * match how Payload's own built-in fields invoke `useField`. Passing `path`
+ * directly can cause React 19 to throw "Context can only be read while React
+ * is rendering" because the field-state selector callback inside useField
+ * re-registers every render when the path reference is unstable.
  */
 
 import { useField } from '@payloadcms/ui'
@@ -12,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 type FieldProp = {
+  name?: string
   label?: string | Record<string, string> | false
   required?: boolean
   admin?: {
@@ -28,19 +35,28 @@ function labelText(label: FieldProp['label'], fallback: string): string {
   return label.en ?? Object.values(label)[0] ?? fallback
 }
 
-export default function TextField({ field, path }: { field: FieldProp & { name?: string }; path: string }) {
-  const { value, setValue, showError, errorMessage } = useField<string>({ path })
-  const label = labelText(field.label, field.name ?? path)
+export default function TextField({
+  field,
+  path: pathFromProps,
+}: {
+  field: FieldProp
+  path: string
+}) {
+  const { value, setValue, showError, errorMessage, path } = useField<string>({
+    potentiallyStalePath: pathFromProps,
+  })
+  const resolvedPath = path || pathFromProps
+  const label = labelText(field.label, field.name ?? resolvedPath)
   return (
     <div className="space-y-2 mb-4">
-      <Label htmlFor={path} className="text-base font-medium">
+      <Label htmlFor={resolvedPath} className="text-base font-medium">
         {label}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       <Input
-        id={path}
+        id={resolvedPath}
         type="text"
-        value={value ?? ''}
+        value={(value as string) ?? ''}
         placeholder={field.admin?.placeholder}
         onChange={(e) => setValue(e.target.value)}
         className={showError ? 'border-destructive' : ''}

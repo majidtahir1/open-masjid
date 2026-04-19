@@ -4,6 +4,12 @@
  * Custom Payload select field using shadcn Select. Supports `hasMany: false`
  * only — for hasMany selects, leave the default Payload field in place (adding
  * multi-select would mean rebuilding chip/tag UI, which isn't worth it yet).
+ *
+ * Important: Radix `<Select>` does NOT accept an empty string for `value` —
+ * passing `""` triggers a console error. We render the trigger in "unset"
+ * mode (no `value` prop) when the field has no value, and only go controlled
+ * once the user picks something. Radix's `<SelectItem value="">` is also
+ * forbidden, so we filter any empty option out.
  */
 
 import { useField } from '@payloadcms/ui'
@@ -35,27 +41,41 @@ function labelText(label: FieldProp['label'], fallback: string): string {
 }
 
 function normalizeOptions(options: Option[] = []): OptionObject[] {
-  return options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o))
+  return options
+    .map((o) => (typeof o === 'string' ? { label: o, value: o } : o))
+    .filter((o) => o.value !== '')
 }
 
-export default function SelectField({ field, path }: { field: FieldProp; path: string }) {
-  const { value, setValue, showError, errorMessage } = useField<string>({ path })
-  const label = labelText(field.label, field.name ?? path)
+export default function SelectField({
+  field,
+  path: pathFromProps,
+}: {
+  field: FieldProp
+  path: string
+}) {
+  const { value, setValue, showError, errorMessage, path } = useField<string>({
+    potentiallyStalePath: pathFromProps,
+  })
+  const resolvedPath = path || pathFromProps
+  const label = labelText(field.label, field.name ?? resolvedPath)
   const options = normalizeOptions(field.options)
   const placeholder = field.admin?.placeholder ?? 'Select...'
+  const hasValue = typeof value === 'string' && value.length > 0
 
   return (
     <div className="space-y-2 mb-4">
-      <Label htmlFor={path} className="text-base font-medium">
+      <Label htmlFor={resolvedPath} className="text-base font-medium">
         {label}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       <Select
-        value={value ?? ''}
+        // Pass `undefined` (not "") when the field has no value so Radix stays
+        // in uncontrolled-ish mode and renders the placeholder.
+        value={hasValue ? (value as string) : undefined}
         onValueChange={(v) => setValue(v)}
       >
         <SelectTrigger
-          id={path}
+          id={resolvedPath}
           className={showError ? 'border-destructive' : ''}
         >
           <SelectValue placeholder={placeholder} />
