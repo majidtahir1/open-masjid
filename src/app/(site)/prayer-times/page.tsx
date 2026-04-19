@@ -6,6 +6,9 @@ export const metadata = {
   title: 'Prayer Times',
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const PRAYERS: Array<{ key: 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha'; name: string }> = [
   { key: 'fajr', name: 'Fajr' },
   { key: 'zuhr', name: 'Zuhr' },
@@ -72,9 +75,10 @@ export default async function PrayerTimesPage() {
             Prayer times
           </h1>
           <p className="m-0 text-[17px] leading-relaxed text-fg2">
-            Adhan and iqamah times for the five daily prayers and Jummah. The
-            schedule shown below is in effect today. Upcoming schedule changes
-            are listed at the bottom of the page.
+            Iqamah (prayer start) times for the five daily prayers and Jummah,
+            with the corresponding adhan (call to prayer) shown alongside. The
+            schedule below is in effect today. Upcoming schedule changes are
+            listed at the bottom of the page.
           </p>
         </header>
 
@@ -114,11 +118,11 @@ export default async function PrayerTimesPage() {
                     <th className="px-6 py-3 font-body text-fs-xs font-semibold uppercase tracking-caps text-fg3">
                       Prayer
                     </th>
-                    <th className="px-6 py-3 font-body text-fs-xs font-semibold uppercase tracking-caps text-fg3">
-                      Adhan
-                    </th>
-                    <th className="px-6 py-3 font-body text-fs-xs font-semibold uppercase tracking-caps text-fg3">
+                    <th className="px-6 py-3 font-body text-fs-xs font-semibold uppercase tracking-caps text-brand">
                       Iqamah
+                    </th>
+                    <th className="px-6 py-3 font-body text-[10.5px] font-medium uppercase tracking-caps text-fg3">
+                      Adhan
                     </th>
                   </tr>
                 </thead>
@@ -127,14 +131,14 @@ export default async function PrayerTimesPage() {
                     const p = pair(active[key])
                     return (
                       <tr key={key} className="border-b border-border last:border-b-0">
-                        <td className="whitespace-nowrap px-6 py-3 font-body text-fs-sm font-semibold text-fg1">
+                        <td className="whitespace-nowrap px-6 py-4 font-body text-fs-base font-semibold text-fg1">
                           {name}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-3 font-mono text-fs-sm text-fg1">
-                          {p.adhan}
-                        </td>
-                        <td className="whitespace-nowrap px-6 py-3 font-mono text-fs-sm text-fg1">
+                        <td className="whitespace-nowrap px-6 py-4 font-mono text-[20px] font-semibold text-fg1">
                           {p.iqamah}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 font-mono text-fs-sm text-fg3">
+                          {p.adhan}
                         </td>
                       </tr>
                     )
@@ -205,8 +209,11 @@ export default async function PrayerTimesPage() {
                             <span className="text-[10.5px] uppercase tracking-caps text-fg3">
                               {name}
                             </span>
-                            <span className="font-mono text-fs-sm text-fg1">
-                              {p.adhan} / {p.iqamah}
+                            <span className="font-mono text-fs-base font-semibold text-fg1">
+                              {p.iqamah}
+                            </span>
+                            <span className="font-mono text-[11px] text-fg3">
+                              Adhan {p.adhan}
                             </span>
                           </div>
                         )
@@ -248,8 +255,11 @@ export default async function PrayerTimesPage() {
                           <span className="text-[10.5px] uppercase tracking-caps text-fg3">
                             {name}
                           </span>
-                          <span className="font-mono text-fs-sm text-fg1">
-                            {p.adhan} / {p.iqamah}
+                          <span className="font-mono text-fs-base font-semibold text-fg1">
+                            {p.iqamah}
+                          </span>
+                          <span className="font-mono text-[11px] text-fg3">
+                            Adhan {p.adhan}
                           </span>
                         </div>
                       )

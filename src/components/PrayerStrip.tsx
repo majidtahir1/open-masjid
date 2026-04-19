@@ -13,7 +13,11 @@ type PrayerKey = 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha'
 interface PrayerRow {
   key: PrayerKey
   name: string
-  /** The iqamah time when available, else adhan — whichever is non-empty. */
+  /**
+   * The masjid's iqamah (prayer start) time — what we display on the strip.
+   * Falls back to adhan only if iqamah is not configured for a prayer
+   * (e.g. a Maghrib entry marked "at sunset" lives in adhan).
+   */
   time: string | null
 }
 
@@ -53,6 +57,8 @@ function parseTimeToMinutes(raw: string, key: PrayerKey): number | null {
 function pickTime(schedule: PrayerScheduleLike, key: PrayerKey): string | null {
   const pair = schedule[key] as PrayerTimePair | null | undefined
   if (!pair) return null
+  // Public site shows iqamah (masjid-determined prayer start). Fall back to
+  // adhan only when iqamah is blank — e.g. "at sunset" style Maghrib entries.
   return pair.iqamah?.trim() || pair.adhan?.trim() || null
 }
 

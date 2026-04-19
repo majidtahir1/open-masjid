@@ -17,6 +17,9 @@ import {
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function HomePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null

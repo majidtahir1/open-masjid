@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   description: 'Multi-tenant masjid website platform',
 }
 
+// CMS-backed pages must bypass Next's default static cache so admin edits appear immediately.
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const tenant = await getCurrentTenant()
 

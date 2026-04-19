@@ -8,6 +8,9 @@ export const metadata = {
   title: 'Donate',
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const HADITH =
   'The believer\u2019s shade on the Day of Resurrection will be their charity.'
 const CITATION = '\u2014 Prophet Muhammad (peace be upon him)'

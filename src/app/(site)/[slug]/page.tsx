@@ -6,6 +6,9 @@ import { fetchPageBySlug } from '@/lib/data'
 
 const RESERVED = new Set(['events', 'about', 'donate', 'prayer-times', 'marketing'])
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }

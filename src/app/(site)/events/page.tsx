@@ -7,6 +7,9 @@ export const metadata = {
   title: 'Events',
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function EventsPage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
