@@ -121,22 +121,10 @@ export default function PrayerStrip({
 
   const nextIdx = findNextPrayer(rows, new Date())
   const jummahTimes = formatJummahTimes(schedule.jummahTimes)
-  const scheduleLabel = schedule.name?.trim() || null
 
   return (
     <div className="bg-brand-ink text-white">
       <div className="mx-auto flex min-h-12 max-w-page flex-wrap items-center gap-6 px-6 py-[14px]">
-        {scheduleLabel && (
-          <div className="flex-shrink-0 border-r border-white/15 pr-5">
-            <div className="font-body text-[10.5px] uppercase tracking-caps text-teal-200">
-              Schedule
-            </div>
-            <div className="font-display text-[15px] font-semibold leading-snug text-white">
-              {scheduleLabel}
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-1 flex-wrap gap-7">
           {rows.map((row, i) => {
             const isNext = i === nextIdx
