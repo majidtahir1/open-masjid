@@ -30,6 +30,7 @@ import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../..
 import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
+import { default as default_activescheduleBanner } from '../../../../src/admin/ActiveScheduleBanner'
 
 export const importMap = {
   "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
@@ -63,5 +64,6 @@ export const importMap = {
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
-  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
+  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
+  "/admin/ActiveScheduleBanner#default": default_activescheduleBanner
 }

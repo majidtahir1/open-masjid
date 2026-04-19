@@ -85,9 +85,9 @@ export const PrayerSchedules: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'isCurrent', 'startDate', 'tenant'],
+    defaultColumns: ['name', 'startDate', 'isCurrent', 'updatedAt'],
     description:
-      'Create a handful of schedules per year (e.g. Summer, Winter, Ramadan). The active schedule is determined by today\u2019s date: the most recent schedule whose start date has passed, falling back to the one marked \u201cCurrent\u201d.',
+      'Prayer time schedules. The ACTIVE schedule right now is the one with the most recent start date that has already passed. If no dated schedule applies (e.g. on first launch), the \u201cfallback\u201d schedule is used. To see which schedule is active today, check the \u201cActive now\u201d indicator on the list or the banner at the top of each schedule.',
   },
   defaultSort: '-startDate',
   access: {
@@ -100,6 +100,15 @@ export const PrayerSchedules: CollectionConfig = {
     beforeChange: [setTenantFromUser],
   },
   fields: [
+    {
+      name: 'activeBanner',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/admin/ActiveScheduleBanner#default',
+        },
+      },
+    },
     {
       name: 'name',
       type: 'text',
@@ -115,10 +124,10 @@ export const PrayerSchedules: CollectionConfig = {
       name: 'isCurrent',
       type: 'checkbox',
       defaultValue: false,
-      label: 'Current (baseline) schedule',
+      label: 'Use as fallback (baseline) schedule',
       admin: {
         description:
-          'Leave startDate blank and check "Current" to mark this as the baseline schedule shown when no dated schedule applies. Only one schedule per masjid may be Current.',
+          'When checked, this schedule is used ONLY if no dated schedule\u2019s start date has been reached. It\u2019s the default when nothing else applies. The actively-displayed schedule at any moment is the one with the most recent past start date \u2014 not necessarily this one.',
         components: {
           Field: '/src/fields/CheckboxField#default',
         },
