@@ -118,3 +118,43 @@
     color: #ffffff;
   }
 }
+
+/* -------------------------------------------------------------------------
+ * Teal accent: active tab underline in Payload's tabs field (e.g.
+ * "Content / Timing & Location / Display" on the Events collection).
+ *
+ * Payload's DOM has shifted between versions; the selectors below cover the
+ * commonly-seen class names so one of them should match. If a future Payload
+ * release renames these, update here.
+ * ----------------------------------------------------------------------- */
+
+.tabs-field__tab-button--active,
+.tabs-field__tab--active,
+.doc-tabs__tab--active,
+.tab-button--active,
+.tabs-field__tab-button[aria-selected='true'] {
+  border-bottom-color: var(--icp-teal-500) !important;
+  color: var(--icp-teal-500);
+
+  &::after {
+    background-color: var(--icp-teal-500) !important;
+    border-color: var(--icp-teal-500) !important;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Teal focus ring for Payload's native form fields. shadcn field components
+ * (src/fields/*.tsx) already inherit teal via `--ring` above — this block
+ * handles the inputs Payload renders itself.
+ * ----------------------------------------------------------------------- */
+
+.field-type {
+  input:focus,
+  textarea:focus,
+  select:focus,
+  .rs__control--is-focused {
+    outline-color: var(--icp-teal-500);
+    border-color: var(--icp-teal-500);
+    box-shadow: 0 0 0 2px rgba(40, 160, 180, 0.25);
+  }
+}
