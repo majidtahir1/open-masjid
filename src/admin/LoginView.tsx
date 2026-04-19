@@ -9,12 +9,11 @@
  * auth cookie and returns `{ user, token, exp }`; we then navigate to /admin.
  * On failure the API returns 401 with `{ errors: [{ message }] }`.
  *
- * We pull Tailwind + ICP tokens in via the globals.css import (same trick
- * Dashboard.tsx uses) so the admin shell — which doesn't load our app's CSS
- * by default — picks up the shadcn utility classes.
+ * Tailwind + ICP tokens reach this view via src/app/(payload)/custom.scss,
+ * which Payload's admin layout imports for the whole admin shell — so we do
+ * NOT import globals.css here (that would pull Tailwind's `base` preflight
+ * and break Payload's own chrome).
  */
-
-import '@/app/globals.css'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'

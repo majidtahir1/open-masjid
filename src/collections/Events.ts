@@ -67,6 +67,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description: 'The event name as it appears in cards and detail pages.',
                 placeholder: 'Evidences of Islam',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
             {
@@ -77,6 +80,9 @@ export const Events: CollectionConfig = {
                 description:
                   'One or two sentences shown on event cards and in the hero. Keep it under ~160 characters.',
                 placeholder: 'A weekly class exploring proofs of the faith.',
+                components: {
+                  Field: '/src/fields/TextareaField#default',
+                },
               },
             },
             {
@@ -103,6 +109,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description:
                   'A single primary category. Used for filtering on the Events page and for the colored tag on cards.',
+                components: {
+                  Field: '/src/fields/SelectField#default',
+                },
               },
             },
             {
@@ -136,6 +145,9 @@ export const Events: CollectionConfig = {
                 description:
                   'Free-text cadence for recurring events, e.g. "Mondays after Isha" or "Every Saturday, 10 AM".',
                 placeholder: 'Mondays after Isha',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
             {
@@ -164,6 +176,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description: 'Where inside/around the masjid the event takes place.',
                 placeholder: 'Main prayer hall',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
             {
@@ -173,6 +188,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description:
                   'Optional — only needed when the event is at a different address than the masjid.',
+                components: {
+                  Field: '/src/fields/TextField#default',
+                },
               },
             },
             {
@@ -182,6 +200,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description: 'Optional — shown on the event detail page for attendee questions.',
                 placeholder: 'events@icprosper.org',
+                components: {
+                  Field: '/src/fields/EmailField#default',
+                },
               },
             },
           ],
@@ -204,6 +225,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description:
                   'Choose how this event renders on the Events page. "Image" uses your uploaded flyer; "Template" auto-generates a branded flyer from the title; "Text only" is a compact card.',
+                components: {
+                  Field: '/src/fields/SelectField#default',
+                },
               },
             },
             {
@@ -230,6 +254,9 @@ export const Events: CollectionConfig = {
                 description:
                   'Shown only when Display Mode is "Template". Pick the color scheme for the auto-generated flyer.',
                 condition: (_, siblingData) => siblingData?.displayMode === 'template',
+                components: {
+                  Field: '/src/fields/SelectField#default',
+                },
               },
             },
             {
@@ -240,6 +267,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description:
                   'Tick to include this event in the homepage hero slider. Featured events rotate alongside hero slides.',
+                components: {
+                  Field: '/src/fields/CheckboxField#default',
+                },
               },
             },
             {
@@ -256,6 +286,9 @@ export const Events: CollectionConfig = {
                 description:
                   'Shown only when "Featured on Homepage" is on. Picks the theme for this event\'s slide in the hero.',
                 condition: (_, siblingData) => siblingData?.featured === true,
+                components: {
+                  Field: '/src/fields/SelectField#default',
+                },
               },
             },
             {
@@ -271,6 +304,9 @@ export const Events: CollectionConfig = {
               admin: {
                 description: 'Only Published events appear on the public site.',
                 position: 'sidebar',
+                components: {
+                  Field: '/src/fields/SelectField#default',
+                },
               },
             },
           ],

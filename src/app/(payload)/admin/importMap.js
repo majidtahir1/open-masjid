@@ -1,3 +1,10 @@
+import { default as CustomTextField } from '../../../../src/fields/TextField'
+import { default as CustomEmailField } from '../../../../src/fields/EmailField'
+import { default as CustomNumberField } from '../../../../src/fields/NumberField'
+import { default as CustomTextareaField } from '../../../../src/fields/TextareaField'
+import { default as CustomSelectField } from '../../../../src/fields/SelectField'
+import { default as CustomCheckboxField } from '../../../../src/fields/CheckboxField'
+import { default as CustomDateField } from '../../../../src/fields/DateField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -25,6 +32,13 @@ import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../..
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 
 export const importMap = {
+  "/src/fields/TextField#default": CustomTextField,
+  "/src/fields/EmailField#default": CustomEmailField,
+  "/src/fields/NumberField#default": CustomNumberField,
+  "/src/fields/TextareaField#default": CustomTextareaField,
+  "/src/fields/SelectField#default": CustomSelectField,
+  "/src/fields/CheckboxField#default": CustomCheckboxField,
+  "/src/fields/DateField#default": CustomDateField,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,

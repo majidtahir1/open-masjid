@@ -18,15 +18,12 @@
  * - Prayer schedule lookup tries the new `prayer-schedules` collection first
  *   and falls back to the legacy `prayer-times` shape so the dashboard keeps
  *   working mid-migration.
- * - UI is built with shadcn/ui primitives + Tailwind. We `import '../app/globals.css'`
- *   at the top so Tailwind utilities are available here even though Payload's
- *   admin layout doesn't load them itself.
+ * - UI is built with shadcn/ui primitives + Tailwind. Tailwind's components +
+ *   utilities layers are loaded by `src/app/(payload)/custom.scss`, which
+ *   Payload's admin layout imports — so we do NOT import globals.css here
+ *   (doing so would pull Tailwind's `base` preflight, which resets styles
+ *   Payload's own chrome depends on).
  */
-
-// Load Tailwind + ICP design tokens into the admin shell. Payload's own layout
-// (src/app/(payload)/layout.tsx) is generated and must not be modified, so we
-// pull globals.css in here instead — Next/webpack deduplicates the import.
-import '@/app/globals.css'
 
 import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'

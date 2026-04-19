@@ -1,25 +1,111 @@
-/* Payload admin panel — OpenMasjid / ICP skin.
+/* =========================================================================
+ * Payload admin panel — OpenMasjid / ICP skin.
  *
- * Intentionally minimal. Payload 3's default theme (light + dark) already
- * has strong, accessible contrast. We only nudge a few brand accents
- * (primary button colour, links) and otherwise let Payload's defaults win.
+ * Follows Payload's official Tailwind + shadcn integration recipe:
+ *   - Loads Tailwind's `components` and `utilities` layers only.
+ *   - Deliberately OMITS `@tailwind base` — Tailwind's preflight resets
+ *     would fight Payload's admin chrome (sidebar, topbar, form layout).
+ *   - Defines shadcn semantic tokens scoped to this stylesheet so shadcn-based
+ *     custom field components (see src/fields/) pick up ICP colors inside the
+ *     admin shell. Dark mode is keyed on `[data-theme='dark']` which is the
+ *     attribute Payload sets when a user toggles theme from the account menu.
  *
- * Important: DO NOT override Payload's `--theme-elevation-*` scale. Those
- * values are inverted between light and dark mode; overriding them with
- * fixed brand colors (e.g. navy for elevation-1000) breaks text contrast
- * in one of the two modes.
- */
+ * Important: Do NOT override Payload's `--theme-elevation-*` scale — those are
+ * inverted between light and dark mode; overriding them with fixed brand
+ * colors (e.g. navy for elevation-1000) breaks text contrast in one mode.
+ * ========================================================================= */
+
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------
+ * shadcn/ui semantic tokens (admin scope).
+ *
+ * Values mirror the public site's globals.css so admin chrome, custom field
+ * components, and the public site stay visually consistent. Tokens are stored
+ * as plain color values (hex / CSS colors) — the Tailwind config in
+ * tailwind.config.ts references them as `var(--token)` directly (not
+ * `hsl(var(--token))`).
+ * ----------------------------------------------------------------------- */
 
 :root {
-  /* Brand tokens — referenced by the rules below, not by Payload internals. */
-  --icp-navy: #0f1e4a;
-  --icp-navy-hover: #0a1638;
-  --icp-teal: #28a0b4;
-  --icp-teal-hover: #1f8494;
-  --icp-gold: #f0c88c;
+  /* Brand palette — referenced by the shadcn tokens below. */
+  --icp-navy-50:   #EEF0FA;
+  --icp-navy-100:  #D1D6ED;
+  --icp-navy-500:  #1E2A6B;
+  --icp-navy-700:  #0F1E4A;
+  --icp-navy-800:  #0A1638;
+  --icp-navy-900:  #050B22;
+  --icp-teal-400:  #3CA4B2;
+  --icp-teal-500:  #28A0B4;
+  --icp-gold-300:  #F0C88C;
+  --icp-gray-100:  #EEF0F0;
+  --icp-gray-200:  #DDE1E1;
+  --icp-gray-300:  #C3C9C9;
+  --icp-gray-600:  #545B5B;
+  --icp-gray-900:  #141616;
+  --icp-danger:    #B2493C;
+
+  /* Legacy brand tokens retained for the .btn--style-primary override below. */
+  --icp-navy:       #0F1E4A;
+  --icp-navy-hover: #0A1638;
+  --icp-teal:       #28A0B4;
+  --icp-teal-hover: #1F8494;
+  --icp-gold:       #F0C88C;
+
+  /* shadcn/ui semantic tokens (light). */
+  --background:             #FFFFFF;
+  --foreground:             var(--icp-gray-900);
+  --card:                   #FFFFFF;
+  --card-foreground:        var(--icp-gray-900);
+  --popover:                #FFFFFF;
+  --popover-foreground:     var(--icp-gray-900);
+  --primary:                var(--icp-navy-700);
+  --primary-foreground:     #FFFFFF;
+  --secondary:              var(--icp-teal-500);
+  --secondary-foreground:   #FFFFFF;
+  --muted:                  var(--icp-gray-100);
+  --muted-foreground:       var(--icp-gray-600);
+  --accent:                 var(--icp-gold-300);
+  --accent-foreground:      var(--icp-gray-900);
+  --destructive:            var(--icp-danger);
+  --destructive-foreground: #FFFFFF;
+  --border:                 var(--icp-gray-200);
+  --input:                  var(--icp-gray-200);
+  --ring:                   var(--icp-teal-500);
+  --radius:                 0.625rem;
 }
 
-/* Primary button — subtle brand nudge without fighting Payload's hierarchy. */
+/* Dark mode — keyed on Payload's admin theme attribute. Do not add `.dark`
+ * here; the public site handles its own `.dark` scope in globals.css. */
+[data-theme='dark'] {
+  --background:             var(--icp-navy-900);
+  --foreground:             #F7F8F8;
+  --card:                   var(--icp-navy-800);
+  --card-foreground:        #F7F8F8;
+  --popover:                var(--icp-navy-800);
+  --popover-foreground:     #F7F8F8;
+  --primary:                var(--icp-teal-500);
+  --primary-foreground:     var(--icp-navy-900);
+  --secondary:              var(--icp-navy-500);
+  --secondary-foreground:   #F7F8F8;
+  --muted:                  var(--icp-navy-800);
+  --muted-foreground:       var(--icp-gray-300);
+  --accent:                 var(--icp-gold-300);
+  --accent-foreground:      var(--icp-navy-900);
+  --destructive:            var(--icp-danger);
+  --destructive-foreground: #FFFFFF;
+  --border:                 rgba(255, 255, 255, 0.10);
+  --input:                  rgba(255, 255, 255, 0.12);
+  --ring:                   var(--icp-teal-400);
+}
+
+/* -------------------------------------------------------------------------
+ * ICP brand overrides for Payload's own chrome. Kept minimal — only nudging
+ * the primary button so it picks up navy, everything else defers to
+ * Payload's default theme for proper contrast in both light and dark modes.
+ * ----------------------------------------------------------------------- */
+
 .btn--style-primary:not(:disabled) {
   background-color: var(--icp-navy);
   border-color: var(--icp-navy);
