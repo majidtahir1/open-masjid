@@ -37,6 +37,7 @@ export const Events: CollectionConfig = {
     plural: 'Events',
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'tag', 'status', 'startDate', 'featured'],
     description:

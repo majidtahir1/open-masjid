@@ -18,6 +18,7 @@ export const Media: CollectionConfig = {
     plural: 'Media Library',
   },
   admin: {
+    group: 'Library',
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'alt', 'mimeType', 'tenant'],
     description:

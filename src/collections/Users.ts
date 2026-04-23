@@ -18,6 +18,7 @@ export const Users: CollectionConfig = {
     depth: 0,
   },
   admin: {
+    group: 'People',
     useAsTitle: 'email',
     defaultColumns: ['firstName', 'lastName', 'email', 'role', 'tenant'],
     description:

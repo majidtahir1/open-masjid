@@ -17,6 +17,7 @@ export const Tenants: CollectionConfig = {
     plural: 'Tenants',
   },
   admin: {
+    group: 'Site',
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'siteType'],
     description:

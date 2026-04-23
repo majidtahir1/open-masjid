@@ -15,6 +15,7 @@ export const PrayerSchedules: CollectionConfig = {
     plural: 'Prayer schedules',
   },
   admin: {
+    group: 'Prayer',
     useAsTitle: 'name',
     defaultColumns: ['name', 'startDate', 'updatedAt'],
     description:

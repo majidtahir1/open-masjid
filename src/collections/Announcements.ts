@@ -15,6 +15,7 @@ export const Announcements: CollectionConfig = {
     plural: 'Announcements',
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'priority', 'active', 'expiresAt'],
     description:

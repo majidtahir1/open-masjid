@@ -15,6 +15,7 @@ export const HeroSlides: CollectionConfig = {
     plural: 'Hero Slides',
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'accent', 'active', 'sortOrder'],
     description:

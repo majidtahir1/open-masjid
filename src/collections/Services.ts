@@ -15,6 +15,7 @@ export const Services: CollectionConfig = {
     plural: 'Services',
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'icon', 'sortOrder'],
     description:
