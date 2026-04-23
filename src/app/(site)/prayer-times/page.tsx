@@ -1,6 +1,6 @@
 import type { PrayerScheduleLike, PrayerTimePair } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
-import { getActiveSchedule } from '@/lib/prayer-schedule'
+import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
 
 export const metadata = {
   title: 'Prayer Times',
@@ -35,8 +35,26 @@ export default async function PrayerTimesPage() {
   if (!tenant) return null
 
   const active = await getActiveSchedule(tenant.id)
+  const today = findDayRow(active)
 
-  const activeJummah = active ? jummahList(active) : []
+  // Flatten today's day row into the same shape the render helpers expect.
+  const flat: PrayerScheduleLike | null =
+    active && today
+      ? {
+          id: active.id,
+          name: active.name,
+          startDate: active.startDate,
+          fajr: today.fajr,
+          zuhr: today.zuhr,
+          asr: today.asr,
+          maghrib: today.maghrib,
+          isha: today.isha,
+          jummahTimes: active.jummahTimes,
+          notes: active.notes,
+        }
+      : null
+
+  const activeJummah = flat ? jummahList(flat) : []
 
   return (
     <section className="py-20">
@@ -54,15 +72,15 @@ export default async function PrayerTimesPage() {
           </p>
         </header>
 
-        {!active ? (
+        {!flat ? (
           <div className="rounded-[var(--r-md)] border border-border bg-white p-8 text-center text-fs-base text-fg3">
             Prayer times will be updated soon.
           </div>
         ) : (
           <div className="mb-10 rounded-[var(--r-md)] border border-border bg-white shadow-sh-xs">
-            {active.notes && (
+            {flat.notes && (
               <div className="border-b border-border px-6 py-4 font-body text-fs-sm text-fg1">
-                {active.notes}
+                {flat.notes}
               </div>
             )}
 
@@ -83,7 +101,7 @@ export default async function PrayerTimesPage() {
                 </thead>
                 <tbody>
                   {PRAYERS.map(({ key, name }) => {
-                    const p = pair(active[key])
+                    const p = pair(flat[key])
                     return (
                       <tr key={key} className="border-b border-border last:border-b-0">
                         <td className="whitespace-nowrap px-6 py-4 font-body text-fs-base font-semibold text-fg1">

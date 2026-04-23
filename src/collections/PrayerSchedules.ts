@@ -6,7 +6,76 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { autoRegeneratePrayerDays } from '../hooks/autoRegeneratePrayerDays'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { trimDaysToRange } from '../hooks/trimDaysToRange'
+
+const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'] as const
+
+const iqamahRuleFields = (prayer: (typeof PRAYERS)[number]) => ({
+  type: 'collapsible' as const,
+  label: prayer.charAt(0).toUpperCase() + prayer.slice(1),
+  admin: { initCollapsed: false },
+  fields: [
+    {
+      name: prayer,
+      type: 'group' as const,
+      label: false as const,
+      admin: { hideGutter: true },
+      fields: [
+        {
+          type: 'row' as const,
+          fields: [
+            {
+              name: 'mode',
+              type: 'select' as const,
+              required: true,
+              defaultValue: prayer === 'maghrib' ? 'offset' : 'absolute',
+              label: 'Mode',
+              options: [
+                { label: 'Absolute', value: 'absolute' },
+                { label: 'Offset from adhan', value: 'offset' },
+              ],
+              admin: { width: '40%' },
+            },
+            {
+              name: 'absoluteValue',
+              type: 'text' as const,
+              label: 'Time',
+              admin: {
+                placeholder: '5:45 AM',
+                width: '60%',
+                condition: (_: unknown, sibling: unknown) =>
+                  (sibling as { mode?: string })?.mode === 'absolute',
+              },
+            },
+            {
+              name: 'offsetMinutes',
+              type: 'number' as const,
+              label: 'Minutes after adhan',
+              defaultValue: prayer === 'maghrib' ? 5 : 15,
+              admin: {
+                width: '60%',
+                condition: (_: unknown, sibling: unknown) =>
+                  (sibling as { mode?: string })?.mode === 'offset',
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+})
+
+const dayPrayerGroup = (prayer: (typeof PRAYERS)[number]) => ({
+  name: prayer,
+  type: 'group' as const,
+  label: prayer.charAt(0).toUpperCase() + prayer.slice(1),
+  fields: [
+    { name: 'adhan', type: 'text' as const, admin: { placeholder: '5:30 AM' } },
+    { name: 'iqamah', type: 'text' as const, admin: { placeholder: '5:45 AM' } },
+  ],
+})
 
 export const PrayerSchedules: CollectionConfig = {
   slug: 'prayer-schedules',
@@ -18,11 +87,14 @@ export const PrayerSchedules: CollectionConfig = {
     group: 'Prayer',
     hideAPIURL: true,
     useAsTitle: 'name',
-    defaultColumns: ['name', 'startDate', 'updatedAt'],
+    defaultColumns: ['name', 'startDate', 'endDate', 'updatedAt'],
     description:
-      'Prayer schedules. The active schedule right now is the one with the most recent start date that has already passed. When you create a new seasonal schedule (e.g. "Summer 2026"), set its start date; it takes effect on that day. Before the first schedule\u2019s start date arrives, the public site shows "Prayer times coming soon".',
+      'Prayer schedules cover a date range. Set the range + iqamah rules, then click "Generate times" to compute adhan times per day from the tenant’s location. Before any schedule’s start date has been reached, the public site shows "Prayer times coming soon".',
     components: {
-      beforeListTable: ['/src/admin/ScheduleListBanner#default'],
+      beforeListTable: [
+        '/src/admin/ScheduleListBanner#default',
+        '/src/admin/ScheduleTimeline#default',
+      ],
     },
   },
   defaultSort: '-startDate',
@@ -33,7 +105,7 @@ export const PrayerSchedules: CollectionConfig = {
     delete: tenantScopedDelete,
   },
   hooks: {
-    beforeChange: [setTenantFromUser],
+    beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays],
   },
   fields: [
     {
@@ -58,239 +130,72 @@ export const PrayerSchedules: CollectionConfig = {
       },
     },
     {
-      name: 'startDate',
-      type: 'date',
-      index: true,
+      type: 'row',
+      fields: [
+        {
+          name: 'startDate',
+          type: 'date',
+          required: true,
+          index: true,
+          admin: {
+            date: { pickerAppearance: 'dayOnly' },
+            description: 'First day this schedule covers.',
+            components: {
+              Field: '/src/fields/DateField#default',
+              Cell: '/src/admin/DateOnlyCell#default',
+            },
+          },
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          required: true,
+          index: true,
+          admin: {
+            date: { pickerAppearance: 'dayOnly' },
+            description:
+              'Last day this schedule covers. "Generate times" builds one day-row per date in this range.',
+            components: {
+              Field: '/src/fields/DateField#default',
+              Cell: '/src/admin/DateOnlyCell#default',
+            },
+          },
+          validate: (value: unknown, { data }: { data?: { startDate?: string } }) => {
+            if (!value || !data?.startDate) return true
+            if (new Date(value as string) < new Date(data.startDate)) {
+              return 'End date must be on or after Start date.'
+            }
+            return true
+          },
+        },
+      ],
+    },
+    {
+      name: 'adhanPreview',
+      type: 'ui',
       admin: {
-        date: { pickerAppearance: 'dayOnly' },
-        description:
-          'The date this schedule activates. It stays active until a later schedule\u2019s start date kicks in. If no schedule\u2019s start date has been reached yet, the public site shows "Prayer times coming soon".',
         components: {
-          Field: '/src/fields/DateField#default',
+          Field: '/src/admin/AdhanRangePreview#default',
         },
       },
     },
     {
-      type: 'collapsible',
-      label: 'Fajr',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          type: 'row',
-          fields: [
-            {
-              name: 'fajr',
-              type: 'group',
-              label: false,
-              admin: { hideGutter: true },
-              fields: [
-                {
-                  type: 'row',
-                  fields: [
-                    {
-                      name: 'adhan',
-                      type: 'text',
-                      label: 'Fajr Adhan',
-                      admin: {
-                        placeholder: 'e.g. 5:30 AM',
-                        components: {
-                          Field: '/src/fields/TextField#default',
-                        },
-                      },
-                    },
-                    {
-                      name: 'iqamah',
-                      type: 'text',
-                      label: 'Fajr Iqamah',
-                      admin: {
-                        placeholder: 'e.g. 5:45 AM',
-                        components: {
-                          Field: '/src/fields/TextField#default',
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'collapsible',
-      label: 'Zuhr',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          name: 'zuhr',
-          type: 'group',
-          label: false,
-          admin: { hideGutter: true },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'adhan',
-                  type: 'text',
-                  label: 'Zuhr Adhan',
-                  admin: {
-                    placeholder: 'e.g. 1:30 PM',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-                {
-                  name: 'iqamah',
-                  type: 'text',
-                  label: 'Zuhr Iqamah',
-                  admin: {
-                    placeholder: 'e.g. 1:45 PM',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'collapsible',
-      label: 'Asr',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          name: 'asr',
-          type: 'group',
-          label: false,
-          admin: { hideGutter: true },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'adhan',
-                  type: 'text',
-                  label: 'Asr Adhan',
-                  admin: {
-                    placeholder: 'e.g. 5:00 PM',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-                {
-                  name: 'iqamah',
-                  type: 'text',
-                  label: 'Asr Iqamah',
-                  admin: {
-                    placeholder: 'e.g. 5:15 PM',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'collapsible',
-      label: 'Maghrib',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          name: 'maghrib',
-          type: 'group',
-          label: false,
-          admin: { hideGutter: true },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'adhan',
-                  type: 'text',
-                  label: 'Maghrib Adhan',
-                  admin: {
-                    placeholder: 'e.g. at sunset',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-                {
-                  name: 'iqamah',
-                  type: 'text',
-                  label: 'Maghrib Iqamah',
-                  admin: {
-                    placeholder: 'e.g. sunset + 5 min',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'collapsible',
-      label: 'Isha',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          name: 'isha',
-          type: 'group',
-          label: false,
-          admin: { hideGutter: true },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'adhan',
-                  type: 'text',
-                  label: 'Isha Adhan',
-                  admin: {
-                    placeholder: 'e.g. 9:15 PM',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-                {
-                  name: 'iqamah',
-                  type: 'text',
-                  label: 'Isha Iqamah',
-                  admin: {
-                    placeholder: 'e.g. 9:30 PM',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
+      name: 'iqamahRules',
+      type: 'group',
+      label: 'Iqamah Rules',
+      admin: {
+        description:
+          'Bulk iqamah for every day in the range. Each prayer is either an absolute time or an offset from the computed adhan. Maghrib is usually an offset (e.g. "+5 min after sunset"); others are usually absolute. Click "Apply iqamah to range" after changing these to rewrite all days.',
+      },
+      fields: PRAYERS.map(iqamahRuleFields),
     },
     {
       name: 'jummahTimes',
       type: 'array',
       labels: { singular: 'Jummah time', plural: 'Jummah times' },
       admin: {
-        description: 'e.g. "12:45 PM", "1:30 PM", "2:15 PM".',
+        description:
+          'Absolute times for Friday Jummah (e.g. 12:45 PM, 1:30 PM, 2:15 PM). Replaces Zuhr iqamah on Fridays on the public site.',
       },
       fields: [
         {
@@ -298,11 +203,54 @@ export const PrayerSchedules: CollectionConfig = {
           type: 'text',
           required: true,
           admin: {
+            placeholder: '12:45 PM',
             components: {
               Field: '/src/fields/TextField#default',
             },
           },
         },
+      ],
+    },
+    {
+      name: 'generateActions',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/src/admin/GenerateTimesButton#default',
+        },
+      },
+    },
+    {
+      name: 'days',
+      type: 'array',
+      label: 'Generated Days',
+      labels: { singular: 'Day', plural: 'Days' },
+      admin: {
+        description:
+          'One row per date in the range. Auto-filled on save when the range or iqamah rules change. Edit an individual row for per-day overrides; changing the range or rules will overwrite those edits on the next save.',
+        initCollapsed: true,
+        components: {
+          RowLabel: '/src/admin/DayRowLabel#default',
+        },
+      },
+      fields: [
+        {
+          name: 'date',
+          type: 'date',
+          required: true,
+          admin: { date: { pickerAppearance: 'dayOnly' } },
+        },
+        {
+          name: 'sunrise',
+          type: 'text',
+          label: 'Sunrise (Fajr ends)',
+          admin: {
+            description:
+              'Fajr must be prayed before sunrise. Informational — not shown on the public site by default.',
+            placeholder: '6:45 AM',
+          },
+        },
+        ...PRAYERS.map(dayPrayerGroup),
       ],
     },
     {

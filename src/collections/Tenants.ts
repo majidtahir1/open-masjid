@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { platformOwnerOnly } from '../access/tenantScoped'
+import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
 
 /**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
@@ -22,6 +23,9 @@ export const Tenants: CollectionConfig = {
     defaultColumns: ['name', 'slug', 'siteType'],
     description:
       'A tenant is a masjid (or umbrella org) served by the platform. Each tenant has its own domain, branding, and content.',
+  },
+  hooks: {
+    beforeChange: [geocodeTenantAddress],
   },
   access: {
     // Only platform owners can create or delete tenants.
@@ -237,6 +241,88 @@ export const Tenants: CollectionConfig = {
                       Field: '/src/fields/SelectField#default',
                     },
                   },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Prayer Calculation',
+          description:
+            'Required for auto-calculating adhan times. The masjid location + calculation method drive per-day adhan times.',
+          fields: [
+            {
+              name: 'location',
+              type: 'group',
+              label: 'Location',
+              admin: {
+                description:
+                  'Masjid coordinates and timezone. Lat/lng are auto-filled from the address on save. Override manually if the geocoder picks the wrong point.',
+              },
+              fields: [
+                {
+                  name: 'lat',
+                  type: 'number',
+                  label: 'Latitude',
+                  admin: {
+                    description: 'Decimal degrees (e.g. 33.2257 for Prosper, TX).',
+                    placeholder: '33.2257',
+                  },
+                },
+                {
+                  name: 'lng',
+                  type: 'number',
+                  label: 'Longitude',
+                  admin: {
+                    description: 'Decimal degrees (e.g. -96.7969 for Prosper, TX).',
+                    placeholder: '-96.7969',
+                  },
+                },
+                {
+                  name: 'timezone',
+                  type: 'text',
+                  label: 'Timezone',
+                  admin: {
+                    description:
+                      'IANA timezone for the masjid (e.g. America/Chicago, America/New_York). See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.',
+                    placeholder: 'America/Chicago',
+                  },
+                },
+              ],
+            },
+            {
+              name: 'prayerCalc',
+              type: 'group',
+              label: 'Calculation Method',
+              admin: {
+                description:
+                  'Select the calculation convention your community follows. ISNA is the default in North America.',
+              },
+              fields: [
+                {
+                  name: 'method',
+                  type: 'select',
+                  defaultValue: 'ISNA',
+                  label: 'Method',
+                  options: [
+                    { label: 'ISNA (North America)', value: 'ISNA' },
+                    { label: 'Muslim World League', value: 'MWL' },
+                    { label: 'Egyptian General Authority', value: 'Egyptian' },
+                    { label: 'Umm al-Qura (Makkah)', value: 'UmmAlQura' },
+                    { label: 'University of Islamic Sciences, Karachi', value: 'Karachi' },
+                    { label: 'Institute of Geophysics, Tehran', value: 'Tehran' },
+                    { label: 'Shia Ithna-Ashari, Jafari', value: 'Jafari' },
+                  ],
+                },
+                {
+                  name: 'asrMadhab',
+                  type: 'select',
+                  defaultValue: 'Standard',
+                  label: 'Asr Madhab',
+                  options: [
+                    { label: 'Standard (Shafi/Maliki/Hanbali)', value: 'Standard' },
+                    { label: 'Hanafi', value: 'Hanafi' },
+                  ],
                 },
               ],
             },

@@ -18,7 +18,7 @@ import type {
 import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
-import { getActiveSchedule } from '@/lib/prayer-schedule'
+import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
 import { resolveTenantFavicon } from '@/lib/tenantFavicon'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
@@ -52,6 +52,24 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     getActiveSchedule(tenant.id),
   ])
 
+  // Synthesize a flat PrayerScheduleLike for PrayerStrip from today's day row.
+  const today = findDayRow(schedule)
+  const stripSchedule: PrayerScheduleLike | null =
+    schedule && today
+      ? {
+          id: schedule.id,
+          name: schedule.name,
+          startDate: schedule.startDate,
+          fajr: today.fajr,
+          zuhr: today.zuhr,
+          asr: today.asr,
+          maghrib: today.maghrib,
+          isha: today.isha,
+          jummahTimes: schedule.jummahTimes,
+          notes: schedule.notes,
+        }
+      : null
+
   const footerTenant = {
     name: tenant.name ?? 'Masjid',
     contactInfo: tenant.contactInfo as TenantContactInfo | null | undefined,
@@ -71,7 +89,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <style dangerouslySetInnerHTML={{ __html: themeCss }} />
           )}
           <Header tenant={tenant as unknown as TenantLike} />
-          <PrayerStrip schedule={schedule as PrayerScheduleLike | null} />
+          <PrayerStrip schedule={stripSchedule} />
           <main className="min-h-[60vh]">{children}</main>
           <Footer tenant={footerTenant} />
         </TenantProvider>

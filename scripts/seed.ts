@@ -1,5 +1,6 @@
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
+import { generateDays } from '../src/lib/generateDays'
 
 const richText = (text: string) => ({
   root: {
@@ -118,6 +119,15 @@ async function seed() {
       externalUrl: 'https://icpcmasjid.org/donate',
     },
     footerTagline: 'A community built on knowledge, tarbiya, and prayer',
+    location: {
+      lat: 33.2257,
+      lng: -96.7969,
+      timezone: 'America/Chicago',
+    },
+    prayerCalc: {
+      method: 'ISNA' as const,
+      asrMadhab: 'Standard' as const,
+    },
   }
   if (!icp) {
     icp = (await payload.create({
@@ -320,50 +330,78 @@ async function seed() {
   }
   console.log(`✓ Created ${events.length} events`)
 
-  // 7. Prayer schedules — baseline + Summer + Ramadan
+  // 7. Prayer schedules — seed with ranges + iqamah rules, then compute days[]
+  //    in-process using the same generateDays() the admin "Generate times"
+  //    button calls via the HTTP endpoint.
   await deleteAll(payload, 'prayer-schedules', tenantId)
+
+  const icpLocation = { lat: 33.2257, lng: -96.7969, timezone: 'America/Chicago' }
+  const icpCalc = { method: 'ISNA' as const, madhab: 'Standard' as const }
+
   const schedules = [
     {
-      name: 'Baseline',
+      name: 'Baseline 2026',
       startDate: new Date('2026-01-01T00:00:00Z').toISOString(),
-      fajr: { adhan: '5:30 AM', iqamah: '5:45 AM' },
-      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
-      asr: { adhan: '5:00 PM', iqamah: '5:15 PM' },
-      maghrib: { adhan: 'at sunset', iqamah: 'sunset + 5 min' },
-      isha: { adhan: '9:15 PM', iqamah: '9:30 PM' },
+      endDate: new Date('2026-05-31T00:00:00Z').toISOString(),
+      iqamahRules: {
+        fajr: { mode: 'absolute', absoluteValue: '5:45 AM' },
+        zuhr: { mode: 'absolute', absoluteValue: '1:45 PM' },
+        asr: { mode: 'absolute', absoluteValue: '5:15 PM' },
+        maghrib: { mode: 'offset', offsetMinutes: 5 },
+        isha: { mode: 'absolute', absoluteValue: '9:30 PM' },
+      },
       jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
       notes: undefined as string | undefined,
     },
     {
       name: 'Summer 2026',
       startDate: new Date('2026-06-01T00:00:00Z').toISOString(),
-      fajr: { adhan: '4:45 AM', iqamah: '5:00 AM' },
-      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
-      asr: { adhan: '6:00 PM', iqamah: '6:15 PM' },
-      maghrib: { adhan: 'at sunset', iqamah: 'sunset + 5 min' },
-      isha: { adhan: '10:00 PM', iqamah: '10:15 PM' },
+      endDate: new Date('2026-08-31T00:00:00Z').toISOString(),
+      iqamahRules: {
+        fajr: { mode: 'absolute', absoluteValue: '5:00 AM' },
+        zuhr: { mode: 'absolute', absoluteValue: '1:45 PM' },
+        asr: { mode: 'absolute', absoluteValue: '6:15 PM' },
+        maghrib: { mode: 'offset', offsetMinutes: 5 },
+        isha: { mode: 'absolute', absoluteValue: '10:15 PM' },
+      },
       jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
       notes: 'Summer hours — later Isha.',
     },
     {
       name: 'Ramadan 2026',
       startDate: new Date('2026-02-18T00:00:00Z').toISOString(),
-      fajr: { adhan: '5:15 AM', iqamah: '5:30 AM' },
-      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
-      asr: { adhan: '5:15 PM', iqamah: '5:30 PM' },
-      maghrib: { adhan: 'at sunset', iqamah: 'at iftar' },
-      isha: { adhan: '8:45 PM', iqamah: '9:00 PM' },
+      endDate: new Date('2026-03-19T00:00:00Z').toISOString(),
+      iqamahRules: {
+        fajr: { mode: 'absolute', absoluteValue: '5:30 AM' },
+        zuhr: { mode: 'absolute', absoluteValue: '1:45 PM' },
+        asr: { mode: 'absolute', absoluteValue: '5:30 PM' },
+        maghrib: { mode: 'offset', offsetMinutes: 0 },
+        isha: { mode: 'absolute', absoluteValue: '9:00 PM' },
+      },
       jummahTimes: [{ time: '12:45 PM' }, { time: '1:30 PM' }, { time: '2:15 PM' }],
       notes: 'Taraweeh after Isha — 20 rakahs.',
     },
   ]
+
   for (const s of schedules) {
+    const days = generateDays({
+      startDate: s.startDate,
+      endDate: s.endDate,
+      lat: icpLocation.lat,
+      lng: icpLocation.lng,
+      timezone: icpLocation.timezone,
+      method: icpCalc.method,
+      madhab: icpCalc.madhab,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rules: s.iqamahRules as any,
+    })
     await payload.create({
       collection: 'prayer-schedules',
-      data: { ...s, tenant: tenantId },
+      data: { ...s, days, tenant: tenantId },
       overrideAccess: true,
       req: seedReq,
     })
+    console.log(`  ↳ ${s.name}: ${days.length} days generated`)
   }
   console.log(`✓ Created ${schedules.length} prayer schedules`)
 

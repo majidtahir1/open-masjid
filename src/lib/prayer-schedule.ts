@@ -1,14 +1,13 @@
 /**
  * Prayer schedule resolver.
  *
- * The "active" schedule at any moment is determined purely by date:
- *   - Find all schedules for the tenant with `startDate <= date`, sorted desc.
- *   - Return the one with the most recent startDate.
- *   - If none exist (i.e. no schedule has a past start date), return null.
- *     The public site is expected to render a "Prayer times coming soon"
- *     placeholder in that case.
+ * The "active" schedule right now covers the current date:
+ *   - Find all schedules for the tenant where `startDate <= date <= endDate`.
+ *   - If multiple match, pick the one with the most recent startDate.
+ *   - If none match, return null. The public site renders "Prayer times coming soon".
  *
- * All lookups use `overrideAccess: true` since the public site is read-only.
+ * Per-day adhan + iqamah live in `days[]` inside each schedule. Use
+ * `findDayRow(schedule, date)` to get today's row.
  */
 
 import { unstable_noStore as noStore } from 'next/cache'
@@ -21,24 +20,25 @@ async function payloadClient() {
   return getPayload({ config })
 }
 
-export interface PrayerScheduleRecord {
-  id: string | number
-  name?: string | null
-  startDate?: string | null
+export interface PrayerDayRow {
+  date?: string | null
   fajr?: { adhan?: string | null; iqamah?: string | null } | null
   zuhr?: { adhan?: string | null; iqamah?: string | null } | null
   asr?: { adhan?: string | null; iqamah?: string | null } | null
   maghrib?: { adhan?: string | null; iqamah?: string | null } | null
   isha?: { adhan?: string | null; iqamah?: string | null } | null
-  jummahTimes?: Array<{ time?: string | null } | string> | null
-  notes?: string | null
 }
 
-/**
- * Return the schedule that should be shown as the active schedule for
- * `tenantId` on `date` — i.e. the one whose `startDate` is the most recent
- * date that is still `<= date`. If no schedule has yet started, return null.
- */
+export interface PrayerScheduleRecord {
+  id: string | number
+  name?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  jummahTimes?: Array<{ time?: string | null } | string> | null
+  notes?: string | null
+  days?: PrayerDayRow[] | null
+}
+
 export async function getActiveSchedule(
   tenantId: string | number,
   date: Date = new Date(),
@@ -46,33 +46,49 @@ export async function getActiveSchedule(
   noStore()
   const payload = await payloadClient()
   const iso = date.toISOString()
+  // endDate is inclusive: a schedule with endDate = Apr 30 00:00 UTC should
+  // still be active at any moment on Apr 30 UTC. Compare against the UTC
+  // midnight of the query date so the match is inclusive through that day.
+  const dayFloorISO = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  ).toISOString()
 
   try {
-    const dated = await payload.find({
+    const res = await payload.find({
       collection: 'prayer-schedules',
       where: {
         tenant: { equals: tenantId },
         startDate: { less_than_equal: iso },
+        endDate: { greater_than_equal: dayFloorISO },
       },
       sort: '-startDate',
       limit: 1,
       depth: 0,
       overrideAccess: true,
     })
-    if (dated.docs[0]) return dated.docs[0] as PrayerScheduleRecord
+    return (res.docs[0] as PrayerScheduleRecord) ?? null
   } catch {
     return null
   }
-
-  return null
 }
 
 /**
- * Return all schedules for a tenant, sorted by startDate descending
- * (newest first). Schedules without a startDate (legacy / dateless) are
- * placed at the end.
- *
- * Used by the Prayer Times page to show a "Schedule changes" timeline.
+ * Find the `days[]` row whose date matches the given date (compared by YYYY-MM-DD).
+ * Returns null if the schedule has no row for that date.
+ */
+export function findDayRow(
+  schedule: PrayerScheduleRecord | null,
+  date: Date = new Date(),
+): PrayerDayRow | null {
+  if (!schedule?.days?.length) return null
+  const target = date.toISOString().slice(0, 10)
+  return (
+    schedule.days.find((d) => (d.date ? d.date.slice(0, 10) === target : false)) ?? null
+  )
+}
+
+/**
+ * Return all schedules for a tenant, sorted by startDate descending (newest first).
  */
 export async function getAllSchedules(
   tenant: TenantRecord,
