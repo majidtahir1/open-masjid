@@ -25,14 +25,31 @@ type SavedDoc = {
 function fmtDate(iso?: string | null): string | null {
   if (!iso) return null
   try {
+    // Dates are stored as UTC midnight (date-only picker). Format in UTC so a
+    // "2026-04-22T00:00:00Z" value doesn't drift to Apr 21 for US viewers.
     return new Date(iso).toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'UTC',
     })
   } catch {
     return iso.slice(0, 10)
   }
+}
+
+/**
+ * Inclusive day count between two ISO date strings (start and end).
+ * Both days count. Returns null if inputs are missing/invalid.
+ */
+function rangeDays(startISO?: string | null, endISO?: string | null): number | null {
+  if (!startISO || !endISO) return null
+  const start = new Date(startISO)
+  const end = new Date(endISO)
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
+  const ms = end.getTime() - start.getTime()
+  if (ms < 0) return null
+  return Math.floor(ms / (24 * 60 * 60 * 1000)) + 1
 }
 
 function detectStatus(
@@ -68,7 +85,8 @@ export default function ActiveScheduleBanner() {
   if (!id) return null
 
   const doc = (savedDocumentData as SavedDoc | undefined) ?? {}
-  const dayCount = Array.isArray(doc.days) ? doc.days.length : 0
+  const savedDayCount = Array.isArray(doc.days) ? doc.days.length : 0
+  const expectedDays = rangeDays(doc.startDate, doc.endDate)
   const status = detectStatus(doc.startDate, doc.endDate)
   const thisIsActive =
     info?.activeId != null && String(info.activeId) === String(id)
@@ -77,6 +95,16 @@ export default function ActiveScheduleBanner() {
     doc.startDate && doc.endDate
       ? `${fmtDate(doc.startDate)} → ${fmtDate(doc.endDate)}`
       : null
+
+  // "N days" reflects the range the admin set. If savedDayCount differs from
+  // expectedDays, the stored days[] is stale — flag so the admin re-runs Generate.
+  const dayCount = expectedDays ?? savedDayCount
+  const staleWarning =
+    expectedDays != null && savedDayCount > 0 && savedDayCount !== expectedDays
+      ? ` (${savedDayCount} stale day${savedDayCount === 1 ? '' : 's'} saved — re-run Generate)`
+      : savedDayCount === 0 && expectedDays != null && expectedDays > 0
+        ? ' (not yet generated — click "Generate times")'
+        : ''
 
   let tone: 'green' | 'amber' | 'gray' = 'gray'
   let title = ''
@@ -89,7 +117,8 @@ export default function ActiveScheduleBanner() {
       <>
         This schedule is currently shown on your public site.
         {rangeText ? ` Range: ${rangeText}.` : ''}{' '}
-        <strong>{dayCount}</strong> day{dayCount === 1 ? '' : 's'} configured.
+        <strong>{dayCount}</strong> day{dayCount === 1 ? '' : 's'} configured
+        {staleWarning}.
       </>
     )
   } else if (status === 'future') {
@@ -99,7 +128,8 @@ export default function ActiveScheduleBanner() {
       <>
         Starts {fmtDate(doc.startDate)}.
         {rangeText ? ` Range: ${rangeText}.` : ''}{' '}
-        <strong>{dayCount}</strong> day{dayCount === 1 ? '' : 's'} configured.
+        <strong>{dayCount}</strong> day{dayCount === 1 ? '' : 's'} configured
+        {staleWarning}.
       </>
     )
   } else if (status === 'expired') {
