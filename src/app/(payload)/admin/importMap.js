@@ -1,5 +1,6 @@
 import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
 import { default as default_ff3268629584f3c8482e80b479334e91 } from '../../../../src/fields/SelectField'
+import { default as default_6be9fe46a5d0b8701eabd18cf8509bb0 } from '../../../../src/admin/InviteUserPanel'
 import { default as default_0ffd719fe552e7f96260b5b4f16226bb } from '../../../../src/fields/TextareaField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -42,13 +43,12 @@ import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../..
 import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
 import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
 import { default as default_79a85695b376b830c5fc9180be7fd47b } from '../../../../src/admin/SiteSettingsLink'
-import { default as default_d90d8f83ffff42659b8221589b2d79aa } from '../../../../src/admin/InviteLink'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
-import { default as default_8e9e1ac222dd40038224b448e48625a9 } from '../../../../src/admin/InvitePage'
 
 export const importMap = {
   "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
   "/src/fields/SelectField#default": default_ff3268629584f3c8482e80b479334e91,
+  "/src/admin/InviteUserPanel#default": default_6be9fe46a5d0b8701eabd18cf8509bb0,
   "/src/fields/TextareaField#default": default_0ffd719fe552e7f96260b5b4f16226bb,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -91,7 +91,5 @@ export const importMap = {
   "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/SiteSettingsLink#default": default_79a85695b376b830c5fc9180be7fd47b,
-  "/src/admin/InviteLink#default": default_d90d8f83ffff42659b8221589b2d79aa,
-  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
-  "/src/admin/InvitePage#default": default_8e9e1ac222dd40038224b448e48625a9
+  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }

@@ -62,6 +62,9 @@ export const Users: CollectionConfig = {
     defaultColumns: ['firstName', 'lastName', 'email', 'role', 'tenant'],
     description:
       'People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant\'s content.',
+    components: {
+      beforeListTable: ['/src/admin/InviteUserPanel#default'],
+    },
   },
   access: {
     // Who can create a new user?
