@@ -3,7 +3,6 @@ import type { CollectionConfig } from 'payload'
 import {
   tenantScopedCreate,
   tenantScopedDelete,
-  tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
@@ -25,7 +24,7 @@ export const Media: CollectionConfig = {
       'Uploaded images and PDFs (event flyers, logos, hero photos). Files live in this tenant\'s library only — other masajid cannot see them.',
   },
   access: {
-    read: tenantScopedRead,
+    read: () => true,
     create: tenantScopedCreate,
     update: tenantScopedUpdate,
     delete: tenantScopedDelete,

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Islamic Center of Prosper">
+  <g fill="#0F1E4A">
+    <rect x="22" y="22" width="76" height="76"></rect>
+    <rect x="22" y="22" width="76" height="76" transform="rotate(45 60 60)"></rect>
+  </g>
+  <g fill="#FBF7EF">
+    <rect x="32" y="32" width="56" height="56"></rect>
+    <rect x="32" y="32" width="56" height="56" transform="rotate(45 60 60)"></rect>
+  </g>
+  <g transform="translate(60 60)">
+    <circle r="18" fill="#28A0B4"></circle>
+    <circle cx="6" r="16" fill="#FBF7EF"></circle>
+  </g>
+</svg>

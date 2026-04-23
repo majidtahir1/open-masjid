@@ -14,7 +14,7 @@ export interface HeaderProps {
   currentPath?: string
 }
 
-const DEFAULT_LOGO = '/brand/logo-icp.jpg'
+const DEFAULT_LOGO = '/brand/logo-icp-horizontal.svg'
 
 const NAV_LINKS: Array<{ href: string; label: string }> = [
   { href: '/', label: 'Home' },
@@ -68,19 +68,19 @@ export default function Header({ tenant, currentPath }: HeaderProps) {
           : 'bg-white/95',
       ].join(' ')}
     >
-      <div className="mx-auto flex h-20 max-w-page items-center justify-between gap-6 px-6">
+      <div className="mx-auto flex h-36 max-w-page items-center justify-between gap-6 px-6">
         <Link
           href="/"
-          className="inline-flex h-12 items-center"
+          className="inline-flex h-28 items-center"
           aria-label={`${tenantName} — Home`}
         >
           <Image
             src={logoSrc}
             alt={tenantName}
-            width={150}
-            height={48}
+            width={416}
+            height={112}
             priority
-            className="h-12 w-[150px] object-cover"
+            className="h-28 w-[416px] object-contain"
             unoptimized={logoSrc.startsWith('/')}
           />
         </Link>

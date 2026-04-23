@@ -21,14 +21,7 @@ export default function EventsList({ events, limit }: EventsListProps) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
       {items.map((event, i) => (
-        <div
-          key={event.id ?? event.slug ?? i}
-          className={[
-            // Staggered offset on the second column for visual rhythm.
-            'h-full',
-            i % 2 === 1 ? 'md:mt-12' : '',
-          ].join(' ')}
-        >
+        <div key={event.id ?? event.slug ?? i} className="h-full">
           <EventCard event={event} />
         </div>
       ))}

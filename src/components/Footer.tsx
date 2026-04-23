@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactElement, SVGProps } from 'react'
 
@@ -124,8 +125,18 @@ export default function Footer({ tenant }: FooterProps) {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           {/* Tagline + identity */}
           <div>
-            <div className="mb-4 font-display text-[22px] font-semibold leading-snug text-white">
-              {tenant.name}
+            <div className="mb-4 flex items-center gap-3">
+              <Image
+                src="/brand/logo-icp-gold.svg"
+                alt=""
+                width={72}
+                height={72}
+                className="h-[72px] w-[72px] shrink-0"
+                unoptimized
+              />
+              <div className="font-display text-[22px] font-semibold leading-snug text-white">
+                {tenant.name}
+              </div>
             </div>
             <p className="m-0 max-w-[32ch] text-fs-sm leading-relaxed text-white/75">
               {tagline}

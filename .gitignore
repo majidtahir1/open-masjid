@@ -15,6 +15,7 @@ next-env.d.ts
 
 # Payload
 payload-types.ts
+public/media/
 
 # Env files
 .env

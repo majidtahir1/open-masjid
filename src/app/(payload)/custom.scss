@@ -192,3 +192,114 @@ body {
 .step-nav__last {
   font-size: 0.9375rem;
 }
+
+/* -------------------------------------------------------------------------
+ * Side nav — larger, spaced out, colored hover states, and per-collection
+ * icons rendered via ::before pseudo-elements keyed on the href.
+ *
+ * Payload's DOM has shifted slightly across 3.x releases, so selectors are
+ * written defensively to cover both `.nav__link` and the newer `.nav a`.
+ * ----------------------------------------------------------------------- */
+
+aside.template-default__nav,
+.nav {
+  --nav-icon-size: 1.1rem;
+}
+
+.nav-group__toggle,
+.nav-group button[class*='toggle'] {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--icp-gray-600);
+  padding: 0.5rem 0.75rem;
+
+  [data-theme='dark'] & {
+    color: var(--icp-gray-300);
+  }
+}
+
+.nav__link,
+.nav a[href*='/collections/'],
+.nav a[href*='/globals/'] {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--icp-navy-700);
+  padding: 0.625rem 0.875rem;
+  margin: 0.125rem 0.25rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid transparent;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  line-height: 1.3;
+
+  &:hover {
+    background-color: rgba(40, 160, 180, 0.08);
+    color: var(--icp-teal-500);
+    border-left-color: var(--icp-teal-500);
+  }
+
+  &.active,
+  &[aria-current='page'] {
+    background-color: rgba(15, 30, 74, 0.08);
+    color: var(--icp-navy-700);
+    border-left-color: var(--icp-navy-700);
+    font-weight: 600;
+  }
+
+  &::before {
+    content: '';
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    opacity: 0.85;
+  }
+
+  [data-theme='dark'] & {
+    color: #F7F8F8;
+
+    &:hover {
+      background-color: rgba(60, 164, 178, 0.14);
+      color: var(--icp-teal-400);
+      border-left-color: var(--icp-teal-400);
+    }
+
+    &.active,
+    &[aria-current='page'] {
+      background-color: rgba(60, 164, 178, 0.18);
+      color: var(--icp-teal-400);
+      border-left-color: var(--icp-teal-400);
+    }
+  }
+}
+
+/* Per-collection icons (lucide outline style, inlined as mask SVGs). */
+$icons: (
+  'users': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  'tenants': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  'media': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+  'events': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  'hero-slides': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 12h20"/></svg>',
+  'prayer-schedules': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  'announcements': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>',
+  'services': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  'pages': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+);
+
+@each $slug, $svg in $icons {
+  .nav a[href*='/collections/#{$slug}']::before,
+  .nav__link[href*='/collections/#{$slug}']::before {
+    mask-image: url("data:image/svg+xml;utf8,#{$svg}");
+    -webkit-mask-image: url("data:image/svg+xml;utf8,#{$svg}");
+  }
+}
