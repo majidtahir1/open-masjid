@@ -22,10 +22,6 @@ export const Tenants: CollectionConfig = {
     defaultColumns: ['name', 'slug', 'siteType'],
     description:
       'A tenant is a masjid (or umbrella org) served by the platform. Each tenant has its own domain, branding, and content.',
-    hidden: ({ user }) => {
-      const u = user as { role?: string } | null | undefined
-      return !u || u.role !== 'platformOwner'
-    },
   },
   access: {
     // Only platform owners can create or delete tenants.
