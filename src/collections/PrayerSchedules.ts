@@ -91,7 +91,10 @@ export const PrayerSchedules: CollectionConfig = {
     description:
       'Prayer schedules cover a date range. Set the range + iqamah rules, then click "Generate times" to compute adhan times per day from the tenant’s location. Before any schedule’s start date has been reached, the public site shows "Prayer times coming soon".',
     components: {
-      beforeListTable: ['/src/admin/ScheduleListBanner#default'],
+      beforeListTable: [
+        '/src/admin/ScheduleListBanner#default',
+        '/src/admin/ScheduleTimeline#default',
+      ],
     },
   },
   defaultSort: '-startDate',
