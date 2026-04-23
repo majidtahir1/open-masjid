@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { trimDaysToRange } from '../hooks/trimDaysToRange'
 
 const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'] as const
 
@@ -86,7 +87,7 @@ export const PrayerSchedules: CollectionConfig = {
     delete: tenantScopedDelete,
   },
   hooks: {
-    beforeChange: [setTenantFromUser],
+    beforeChange: [setTenantFromUser, trimDaysToRange],
   },
   fields: [
     {
