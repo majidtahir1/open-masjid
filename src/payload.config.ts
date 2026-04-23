@@ -2,6 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { resendAdapter } from '@payloadcms/email-resend'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -20,6 +21,30 @@ import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/**
+ * Email adapter config.
+ *
+ * When RESEND_API_KEY is set, outgoing mail (forgot-password, invites, etc.)
+ * is sent via Resend. Without it, Payload falls back to logging email content
+ * to the console — fine for local dev, unsuitable for any deployed env.
+ *
+ * Sender identity comes from `EMAIL_FROM_ADDRESS` (required when Resend is on)
+ * and optional `EMAIL_FROM_NAME` (defaults to "OpenMasjid"). In production the
+ * from-address domain must be verified in your Resend dashboard; in dev you
+ * can use `onboarding@resend.dev`.
+ */
+function email() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return undefined
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS ?? 'onboarding@resend.dev'
+  const fromName = process.env.EMAIL_FROM_NAME ?? 'OpenMasjid'
+  return resendAdapter({
+    defaultFromAddress: fromAddress,
+    defaultFromName: fromName,
+    apiKey,
+  })
+}
 
 export default buildConfig({
   admin: {
@@ -76,5 +101,6 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || '',
     },
   }),
+  email: email(),
   sharp,
 })
