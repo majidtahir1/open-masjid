@@ -19,12 +19,20 @@ import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
 import { getActiveSchedule } from '@/lib/prayer-schedule'
+import { resolveTenantFavicon } from '@/lib/tenantFavicon'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
-export const metadata: Metadata = {
-  title: 'OpenMasjid Platform',
-  description: 'Multi-tenant masjid website platform',
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getCurrentTenant()
+  const favicon = resolveTenantFavicon(tenant)
+  return {
+    title: tenant?.name ?? 'OpenMasjid',
+    description: tenant?.name
+      ? `${tenant.name} — prayer times, events, and community`
+      : 'Multi-tenant masjid website platform',
+    icons: [{ rel: 'icon', url: favicon.href, type: favicon.type }],
+  }
 }
 
 // CMS-backed pages must bypass Next's default static cache so admin edits appear immediately.
