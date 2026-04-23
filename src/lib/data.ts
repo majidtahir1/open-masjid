@@ -59,16 +59,30 @@ export async function fetchHeroSlides(tenant: TenantRecord, opts: ReadOpts = {})
 
 export async function fetchEvents(
   tenant: TenantRecord,
-  opts: ReadOpts & { limit?: number } = {},
+  opts: ReadOpts & { limit?: number; upcomingOnly?: boolean } = {},
 ) {
   noStore()
   const payload = await payloadClient()
   const draft = opts.draft ?? false
+  const upcomingOnly = opts.upcomingOnly ?? false
+
+  const baseWhere: Where = { tenant: { equals: tenant.id } }
+  if (upcomingOnly) {
+    // Event is "upcoming" if its startDate is today-or-later, OR the event
+    // has no startDate (always-on recurring classes).
+    baseWhere.or = [
+      { startDate: { greater_than_equal: new Date().toISOString() } },
+      { startDate: { exists: false } },
+    ]
+  }
+
   try {
     const res = await payload.find({
       collection: 'events',
-      where: gate({ tenant: { equals: tenant.id } }, draft),
-      sort: '-startDate',
+      where: gate(baseWhere, draft),
+      // Ascending so the soonest future event comes first; Postgres places
+      // nulls (always-on recurring events) at the end of an ASC sort.
+      sort: upcomingOnly ? 'startDate' : '-startDate',
       limit: opts.limit ?? 50,
       depth: 1,
       overrideAccess: true,

@@ -29,7 +29,7 @@ export default async function HomePage() {
   const [slides, featuredEvents, events, services] = await Promise.all([
     fetchHeroSlides(tenant),
     fetchFeaturedEvents(tenant),
-    fetchEvents(tenant, { limit: 4 }),
+    fetchEvents(tenant, { limit: 4, upcomingOnly: true }),
     fetchServices(tenant),
   ])
 
