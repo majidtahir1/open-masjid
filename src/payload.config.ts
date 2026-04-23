@@ -33,7 +33,10 @@ export default buildConfig({
         '/src/admin/SiteSettingsLink#default',
       ],
       afterNavLinks: ['/src/admin/ViewPublicSiteLink#default'],
-      header: ['/src/admin/Favicon#default'],
+      header: [
+        '/src/admin/Favicon#default',
+        '/src/admin/HideTenantsNav#default',
+      ],
       graphics: {
         Logo: '/src/admin/Logo#default',
       },
