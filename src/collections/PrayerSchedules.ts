@@ -101,15 +101,6 @@ export const PrayerSchedules: CollectionConfig = {
       },
     },
     {
-      name: 'generateActions',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: '/src/admin/GenerateTimesButton#default',
-        },
-      },
-    },
-    {
       name: 'name',
       type: 'text',
       required: true,
@@ -191,6 +182,15 @@ export const PrayerSchedules: CollectionConfig = {
           },
         },
       ],
+    },
+    {
+      name: 'generateActions',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/src/admin/GenerateTimesButton#default',
+        },
+      },
     },
     {
       name: 'days',
