@@ -18,6 +18,7 @@ import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
 import { applyIqamahRulesEndpoint } from './endpoints/applyIqamahRules'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
+import { inviteUserEndpoint } from './endpoints/inviteUser'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -58,6 +59,7 @@ export default buildConfig({
       beforeNavLinks: [
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
+        '/src/admin/InviteLink#default',
       ],
       afterNavLinks: ['/src/admin/ViewPublicSiteLink#default'],
       header: [
@@ -70,6 +72,10 @@ export default buildConfig({
       views: {
         dashboard: {
           Component: '/src/admin/Dashboard#default',
+        },
+        invite: {
+          Component: '/src/admin/InvitePage#default',
+          path: '/invite',
         },
         // The login screen is replaced via a Next.js file-system route at
         // `src/app/(payload)/admin/login/page.tsx`. Payload 3.39 does not
@@ -90,7 +96,7 @@ export default buildConfig({
     Services,
     Pages,
   ],
-  endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint],
+  endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint, inviteUserEndpoint],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

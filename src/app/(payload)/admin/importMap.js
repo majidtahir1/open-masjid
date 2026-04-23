@@ -42,7 +42,9 @@ import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../..
 import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
 import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
 import { default as default_79a85695b376b830c5fc9180be7fd47b } from '../../../../src/admin/SiteSettingsLink'
+import { default as default_d90d8f83ffff42659b8221589b2d79aa } from '../../../../src/admin/InviteLink'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
+import { default as default_8e9e1ac222dd40038224b448e48625a9 } from '../../../../src/admin/InvitePage'
 
 export const importMap = {
   "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
@@ -89,5 +91,7 @@ export const importMap = {
   "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/SiteSettingsLink#default": default_79a85695b376b830c5fc9180be7fd47b,
-  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
+  "/src/admin/InviteLink#default": default_d90d8f83ffff42659b8221589b2d79aa,
+  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
+  "/src/admin/InvitePage#default": default_8e9e1ac222dd40038224b448e48625a9
 }
