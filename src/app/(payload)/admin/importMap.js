@@ -31,6 +31,7 @@ import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../..
 import { default as default_8dc5433bae6533c545f57c14ecdbdd63 } from '../../../../src/admin/GenerateTimesButton'
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
 import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
+import { default as default_da203cd1cc80e1efe81794b8f9711c65 } from '../../../../src/admin/DayRowLabel'
 import { default as default_1b061eb5b281695d53709027f168847b } from '../../../../src/admin/ScheduleListBanner'
 import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
 import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
@@ -74,6 +75,7 @@ export const importMap = {
   "/src/admin/GenerateTimesButton#default": default_8dc5433bae6533c545f57c14ecdbdd63,
   "/src/admin/ScheduleNameCell#default": default_dd3aaf7dfdea38a3f5207a0e64556a07,
   "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
+  "/src/admin/DayRowLabel#default": default_da203cd1cc80e1efe81794b8f9711c65,
   "/src/admin/ScheduleListBanner#default": default_1b061eb5b281695d53709027f168847b,
   "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
   "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,

@@ -6,6 +6,7 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { autoRegeneratePrayerDays } from '../hooks/autoRegeneratePrayerDays'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { trimDaysToRange } from '../hooks/trimDaysToRange'
 
@@ -87,7 +88,7 @@ export const PrayerSchedules: CollectionConfig = {
     delete: tenantScopedDelete,
   },
   hooks: {
-    beforeChange: [setTenantFromUser, trimDaysToRange],
+    beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays],
   },
   fields: [
     {
@@ -198,8 +199,11 @@ export const PrayerSchedules: CollectionConfig = {
       labels: { singular: 'Day', plural: 'Days' },
       admin: {
         description:
-          'One row per date in the range. Populated by the "Generate times" button. Each row can be edited individually; re-running bulk actions overwrites.',
+          'One row per date in the range. Auto-filled on save when the range or iqamah rules change. Edit an individual row for per-day overrides; changing the range or rules will overwrite those edits on the next save.',
         initCollapsed: true,
+        components: {
+          RowLabel: '/src/admin/DayRowLabel#default',
+        },
       },
       fields: [
         {

@@ -3,31 +3,49 @@
 import { useDocumentInfo } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
-function confirmOverwrite(count?: number): boolean {
-  const msg = count
-    ? `This will overwrite ${count} days. Continue?`
-    : 'This will overwrite existing day rows. Continue?'
-  return typeof window !== 'undefined' && window.confirm(msg)
-}
-
+/**
+ * Manual regenerate button for PrayerSchedule.
+ *
+ * In normal use, the schedule auto-regenerates on save whenever the range or
+ * iqamah rules change (see `autoRegeneratePrayerDays` hook). This button
+ * exists as an escape hatch for edge cases where a *related* change happens
+ * without touching the schedule itself — e.g. the tenant's lat/lng or calc
+ * method was corrected, or the admin just wants to force a fresh adhan
+ * recompute without editing the schedule.
+ *
+ * Clicks the `generate-prayer-times` endpoint, which rebuilds days[] from
+ * scratch using tenant location + rules.
+ */
 export default function GenerateTimesButton() {
   const { id, savedDocumentData } = useDocumentInfo()
-  const [busy, setBusy] = useState<null | 'generate' | 'apply'>(null)
-  const [message, setMessage] = useState<string>('')
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
 
-  const existingDayCount = Array.isArray(
+  const daySpan = Array.isArray(
     (savedDocumentData as { days?: unknown[] } | undefined)?.days,
   )
     ? (savedDocumentData as { days: unknown[] }).days.length
     : 0
 
-  async function callEndpoint(path: string) {
+  async function onRegenerate() {
     if (!id) {
       setMessage('Save the schedule first — generation needs a saved id.')
       return
     }
+    if (
+      daySpan > 0 &&
+      typeof window !== 'undefined' &&
+      !window.confirm(
+        `This will overwrite ${daySpan} day${daySpan === 1 ? '' : 's'} (adhan + iqamah). Any manual per-day edits will be lost. Continue?`,
+      )
+    ) {
+      return
+    }
+
+    setBusy(true)
+    setMessage('')
     try {
-      const res = await fetch(`/api/${path}`, {
+      const res = await fetch('/api/generate-prayer-times', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scheduleId: id }),
@@ -40,79 +58,45 @@ export default function GenerateTimesButton() {
       }
       if (!res.ok || !json.ok) {
         setMessage(json.error ?? `Request failed (${res.status})`)
-        return
+      } else {
+        setMessage(
+          `Regenerated ${json.dayCount ?? 0} day(s). Refresh the page to see the new times.`,
+        )
       }
-      setMessage(`Done — ${json.dayCount ?? 0} day(s) updated. Refresh to see.`)
     } catch (err) {
       setMessage((err as Error).message)
+    } finally {
+      setBusy(false)
     }
   }
 
-  async function onGenerate() {
-    if (existingDayCount > 0 && !confirmOverwrite(existingDayCount)) return
-    setBusy('generate')
-    setMessage('')
-    await callEndpoint('generate-prayer-times')
-    setBusy(null)
-  }
-
-  async function onApplyIqamah() {
-    if (existingDayCount > 0 && !confirmOverwrite(existingDayCount)) return
-    setBusy('apply')
-    setMessage('')
-    await callEndpoint('apply-iqamah-rules')
-    setBusy(null)
-  }
-
-  const baseButtonStyle: React.CSSProperties = {
+  const buttonStyle: React.CSSProperties = {
     padding: '8px 16px',
     borderRadius: 4,
     fontSize: 14,
     fontWeight: 500,
     cursor: busy ? 'not-allowed' : 'pointer',
     opacity: busy ? 0.6 : 1,
-    transition: 'background 120ms, border-color 120ms',
-    lineHeight: 1.2,
-  }
-  const primaryStyle: React.CSSProperties = {
-    ...baseButtonStyle,
-    background: 'var(--theme-elevation-800, #0F1E4A)',
-    color: 'var(--theme-elevation-0, #fff)',
-    border: '1px solid var(--theme-elevation-800, #0F1E4A)',
-  }
-  const secondaryStyle: React.CSSProperties = {
-    ...baseButtonStyle,
     background: 'transparent',
     color: 'var(--theme-elevation-800, #0F1E4A)',
     border: '1px solid var(--theme-elevation-400, #94a3b8)',
+    lineHeight: 1.2,
   }
 
   return (
     <div className="field-type ui-field" style={{ marginBottom: '1rem' }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button
-          type="button"
-          style={primaryStyle}
-          onClick={onGenerate}
-          disabled={busy !== null}
-        >
-          {busy === 'generate' ? 'Generating…' : 'Generate times'}
-        </button>
-        <button
-          type="button"
-          style={secondaryStyle}
-          onClick={onApplyIqamah}
-          disabled={busy !== null}
-        >
-          {busy === 'apply' ? 'Applying…' : 'Apply iqamah to range'}
+        <button type="button" style={buttonStyle} onClick={onRegenerate} disabled={busy}>
+          {busy ? 'Regenerating…' : 'Force regenerate now'}
         </button>
         {message ? (
           <span style={{ fontSize: 13, color: 'var(--theme-text)' }}>{message}</span>
         ) : null}
       </div>
       <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--theme-text-light)' }}>
-        Generate fills every day in the range with adhan from tenant coordinates and iqamah from the rules below.
-        Apply only rewrites iqamah from rules — preserves existing adhan.
+        Days auto-regenerate on save whenever the range or iqamah rules change —
+        you usually don't need this button. Use it only to force a fresh recompute
+        (e.g. after changing the tenant's location or calculation method).
       </p>
     </div>
   )
