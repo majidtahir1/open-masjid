@@ -26,17 +26,10 @@ export default buildConfig({
       title: 'OpenMasjid Admin',
       description: 'Content management for masajid',
       titleSuffix: ' — OpenMasjid',
-      icons: [
-        {
-          // TODO: resolve per-tenant favicon once tenant resolution at admin time is wired up.
-          url: '/brand/logo-icp.jpg',
-          rel: 'icon',
-          type: 'image/jpeg',
-        },
-      ],
     },
     components: {
       beforeNavLinks: ['/src/admin/DashboardLink#default'],
+      header: ['/src/admin/Favicon#default'],
       graphics: {
         Logo: '/src/admin/Logo#default',
       },
