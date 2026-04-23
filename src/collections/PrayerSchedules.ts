@@ -13,47 +13,54 @@ import { trimDaysToRange } from '../hooks/trimDaysToRange'
 const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'] as const
 
 const iqamahRuleFields = (prayer: (typeof PRAYERS)[number]) => ({
-  name: prayer,
-  type: 'group' as const,
+  type: 'collapsible' as const,
   label: prayer.charAt(0).toUpperCase() + prayer.slice(1),
-  admin: { hideGutter: true },
+  admin: { initCollapsed: false },
   fields: [
     {
-      type: 'row' as const,
+      name: prayer,
+      type: 'group' as const,
+      label: false as const,
+      admin: { hideGutter: true },
       fields: [
         {
-          name: 'mode',
-          type: 'select' as const,
-          required: true,
-          defaultValue: prayer === 'maghrib' ? 'offset' : 'absolute',
-          label: 'Mode',
-          options: [
-            { label: 'Absolute', value: 'absolute' },
-            { label: 'Offset from adhan', value: 'offset' },
+          type: 'row' as const,
+          fields: [
+            {
+              name: 'mode',
+              type: 'select' as const,
+              required: true,
+              defaultValue: prayer === 'maghrib' ? 'offset' : 'absolute',
+              label: 'Mode',
+              options: [
+                { label: 'Absolute', value: 'absolute' },
+                { label: 'Offset from adhan', value: 'offset' },
+              ],
+              admin: { width: '40%' },
+            },
+            {
+              name: 'absoluteValue',
+              type: 'text' as const,
+              label: 'Time',
+              admin: {
+                placeholder: '5:45 AM',
+                width: '60%',
+                condition: (_: unknown, sibling: unknown) =>
+                  (sibling as { mode?: string })?.mode === 'absolute',
+              },
+            },
+            {
+              name: 'offsetMinutes',
+              type: 'number' as const,
+              label: 'Minutes after adhan',
+              defaultValue: prayer === 'maghrib' ? 5 : 15,
+              admin: {
+                width: '60%',
+                condition: (_: unknown, sibling: unknown) =>
+                  (sibling as { mode?: string })?.mode === 'offset',
+              },
+            },
           ],
-          admin: { width: '40%' },
-        },
-        {
-          name: 'absoluteValue',
-          type: 'text' as const,
-          label: 'Time',
-          admin: {
-            placeholder: '5:45 AM',
-            width: '60%',
-            condition: (_: unknown, sibling: unknown) =>
-              (sibling as { mode?: string })?.mode === 'absolute',
-          },
-        },
-        {
-          name: 'offsetMinutes',
-          type: 'number' as const,
-          label: 'Minutes after adhan',
-          defaultValue: prayer === 'maghrib' ? 5 : 15,
-          admin: {
-            width: '60%',
-            condition: (_: unknown, sibling: unknown) =>
-              (sibling as { mode?: string })?.mode === 'offset',
-          },
         },
       ],
     },
