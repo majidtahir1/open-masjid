@@ -39,10 +39,23 @@ async function resolveFavicon(): Promise<{ href: string; type: string }> {
 
     const branding = tenant.branding as { favicon?: unknown } | undefined
     const favicon = branding?.favicon as
-      | { url?: string | null; mimeType?: string | null }
+      | {
+          url?: string | null
+          mimeType?: string | null
+          sizes?: { favicon?: { url?: string | null } | null } | null
+        }
       | undefined
 
     if (!favicon?.url) return { href: FALLBACK_HREF, type: FALLBACK_MIME }
+
+    // SVG: serve original — vector scales perfectly and browsers render it natively.
+    if (favicon.mimeType === 'image/svg+xml') {
+      return { href: favicon.url, type: 'image/svg+xml' }
+    }
+
+    // Raster: prefer the 64×64 PNG derivative when available, else original.
+    const resized = favicon.sizes?.favicon?.url
+    if (resized) return { href: resized, type: 'image/png' }
     return { href: favicon.url, type: favicon.mimeType ?? FALLBACK_MIME }
   } catch {
     return { href: FALLBACK_HREF, type: FALLBACK_MIME }

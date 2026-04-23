@@ -50,6 +50,13 @@ export const Media: CollectionConfig = {
         height: undefined,
         position: 'centre',
       },
+      {
+        name: 'favicon',
+        width: 64,
+        height: 64,
+        position: 'centre',
+        formatOptions: { format: 'png' },
+      },
     ],
   },
   fields: [
