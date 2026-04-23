@@ -64,6 +64,11 @@ export async function buildPreviewUrl(
   req: PayloadRequest,
   path: string,
 ): Promise<string | null> {
+  // Preview only makes sense after the doc is saved — Payload's internal
+  // preview endpoint needs a real id to resolve. Returning null here tells
+  // Payload to hide the button / disable the live-preview iframe.
+  if (!doc?.id) return null
+
   const slug = doc.slug as string | null | undefined
   if (!slug) return null
 
@@ -82,6 +87,7 @@ export async function buildHomePreviewUrl(
   doc: Record<string, unknown>,
   req: PayloadRequest,
 ): Promise<string | null> {
+  if (!doc?.id) return null
   const base = await tenantBaseUrl(doc.tenant as TenantRef, req.payload)
   if (!base) return null
   return `${base}/?draft=1`
