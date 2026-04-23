@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { platformOwnerOnly } from '../access/tenantScoped'
+import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
 
 /**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
@@ -22,6 +23,9 @@ export const Tenants: CollectionConfig = {
     defaultColumns: ['name', 'slug', 'siteType'],
     description:
       'A tenant is a masjid (or umbrella org) served by the platform. Each tenant has its own domain, branding, and content.',
+  },
+  hooks: {
+    beforeChange: [geocodeTenantAddress],
   },
   access: {
     // Only platform owners can create or delete tenants.
