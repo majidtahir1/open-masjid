@@ -16,6 +16,7 @@ export const Services: CollectionConfig = {
   },
   admin: {
     group: 'Content',
+    hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'icon', 'sortOrder'],
     description:

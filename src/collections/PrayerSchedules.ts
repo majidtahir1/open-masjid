@@ -16,6 +16,7 @@ export const PrayerSchedules: CollectionConfig = {
   },
   admin: {
     group: 'Prayer',
+    hideAPIURL: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'startDate', 'updatedAt'],
     description:

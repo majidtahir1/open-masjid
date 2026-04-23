@@ -16,6 +16,7 @@ export const Announcements: CollectionConfig = {
   },
   admin: {
     group: 'Content',
+    hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'priority', 'active', 'expiresAt'],
     description:

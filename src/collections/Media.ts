@@ -19,6 +19,7 @@ export const Media: CollectionConfig = {
   },
   admin: {
     group: 'Library',
+    hideAPIURL: true,
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'alt', 'mimeType', 'tenant'],
     description:

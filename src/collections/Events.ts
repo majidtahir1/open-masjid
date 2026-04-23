@@ -38,6 +38,7 @@ export const Events: CollectionConfig = {
   },
   admin: {
     group: 'Content',
+    hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'tag', 'status', 'startDate', 'featured'],
     description:

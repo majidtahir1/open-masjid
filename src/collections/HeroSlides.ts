@@ -16,6 +16,7 @@ export const HeroSlides: CollectionConfig = {
   },
   admin: {
     group: 'Content',
+    hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'accent', 'active', 'sortOrder'],
     description:

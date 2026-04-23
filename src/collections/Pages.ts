@@ -34,6 +34,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     group: 'Content',
+    hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug'],
     description:
