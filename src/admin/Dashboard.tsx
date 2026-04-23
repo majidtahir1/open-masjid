@@ -113,13 +113,15 @@ async function fetchActiveSchedule(
 ): Promise<ActiveScheduleView | null> {
   const todayIso = new Date().toISOString()
 
-  // 1. New collection: most recent schedule with startDate <= today.
+  // 1. New collection: schedule covering today (startDate <= today <= endDate),
+  //    then look up today's entry in days[].
   try {
     const dated = await payload.find({
       collection: 'prayer-schedules' as never,
       where: {
         tenant: { equals: tenantId },
         startDate: { less_than_equal: todayIso },
+        endDate: { greater_than_equal: todayIso },
       },
       sort: '-startDate',
       limit: 1,
@@ -129,25 +131,34 @@ async function fetchActiveSchedule(
     const doc = dated.docs[0] as Record<string, unknown> | undefined
 
     if (doc) {
-      const pick = (g: unknown): { adhan: string; iqamah: string } => {
-        const group = (g ?? {}) as { adhan?: string | null; iqamah?: string | null }
-        return { adhan: group.adhan ?? '—', iqamah: group.iqamah ?? '—' }
+      type DayPair = { adhan?: string | null; iqamah?: string | null }
+      type DayRow = {
+        date?: string | null
+        fajr?: DayPair | null
+        zuhr?: DayPair | null
+        asr?: DayPair | null
+        maghrib?: DayPair | null
+        isha?: DayPair | null
       }
-      const fajr = pick(doc.fajr)
-      const zuhr = pick(doc.zuhr)
-      const asr = pick(doc.asr)
-      const maghrib = pick(doc.maghrib)
-      const isha = pick(doc.isha)
+      const days = (doc.days as DayRow[] | null | undefined) ?? []
+      const target = todayIso.slice(0, 10)
+      const today = days.find((d) => (d.date ? d.date.slice(0, 10) === target : false))
+
+      const pick = (g: DayPair | null | undefined) => ({
+        adhan: g?.adhan ?? '—',
+        iqamah: g?.iqamah ?? '—',
+      })
+
       return {
         id: doc.id as string | number,
         name: (doc.name as string) || 'Active schedule',
         collectionSlug: 'prayer-schedules',
         rows: [
-          { prayer: 'Fajr', ...fajr },
-          { prayer: 'Zuhr', ...zuhr },
-          { prayer: 'Asr', ...asr },
-          { prayer: 'Maghrib', ...maghrib },
-          { prayer: 'Isha', ...isha },
+          { prayer: 'Fajr', ...pick(today?.fajr) },
+          { prayer: 'Zuhr', ...pick(today?.zuhr) },
+          { prayer: 'Asr', ...pick(today?.asr) },
+          { prayer: 'Maghrib', ...pick(today?.maghrib) },
+          { prayer: 'Isha', ...pick(today?.isha) },
         ],
       }
     }
