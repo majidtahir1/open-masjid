@@ -36,9 +36,9 @@ export default buildConfig({
       ],
     },
     components: {
+      beforeNavLinks: ['/src/admin/DashboardLink#default'],
       graphics: {
         Logo: '/src/admin/Logo#default',
-        Icon: '/src/admin/Logo#default',
       },
       views: {
         dashboard: {

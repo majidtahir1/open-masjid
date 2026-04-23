@@ -124,35 +124,37 @@ export default function PrayerStrip({
 
   return (
     <div className="bg-brand-ink text-white">
-      <div className="mx-auto flex min-h-12 max-w-page flex-wrap items-center gap-6 px-6 py-[14px]">
-        <div className="flex flex-1 flex-wrap gap-7">
-          {rows.map((row, i) => {
-            const isNext = i === nextIdx
-            return (
-              <div key={row.key} className="flex flex-col gap-[2px]">
-                <span
-                  className={[
-                    'text-[10.5px] uppercase tracking-caps',
-                    isNext ? 'text-gold-300' : 'text-white/60',
-                  ].join(' ')}
-                >
-                  {isNext ? `${row.name} •` : row.name}
-                </span>
-                <span
-                  className={[
-                    'font-mono text-[15px] font-semibold',
-                    isNext ? 'text-gold-300' : 'text-white',
-                  ].join(' ')}
-                >
-                  {row.time ?? '—'}
-                </span>
-              </div>
-            )
-          })}
+      <div className="mx-auto flex min-h-12 max-w-page flex-col gap-3 px-4 py-3 md:flex-row md:flex-wrap md:items-center md:gap-6 md:px-6 md:py-[14px]">
+        <div className="flex flex-col gap-3 md:flex-1 md:flex-row md:flex-wrap md:gap-7">
+          <div className="grid grid-cols-5 gap-2 md:flex md:flex-wrap md:gap-7">
+            {rows.map((row, i) => {
+              const isNext = i === nextIdx
+              return (
+                <div key={row.key} className="flex min-w-0 flex-col gap-[2px]">
+                  <span
+                    className={[
+                      'text-[10px] uppercase tracking-caps md:text-[10.5px]',
+                      isNext ? 'text-gold-300' : 'text-white/60',
+                    ].join(' ')}
+                  >
+                    {isNext ? `${row.name} •` : row.name}
+                  </span>
+                  <span
+                    className={[
+                      'font-mono text-[13px] font-semibold leading-tight md:text-[15px]',
+                      isNext ? 'text-gold-300' : 'text-white',
+                    ].join(' ')}
+                  >
+                    {row.time ?? '—'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
 
           {jummahTimes.length > 0 && (
-            <div className="flex flex-col gap-[2px] border-l border-white/15 pl-[18px]">
-              <span className="text-[10.5px] uppercase tracking-caps text-white/60">
+            <div className="flex flex-col gap-[2px] md:border-l md:border-white/15 md:pl-[18px]">
+              <span className="text-[10px] uppercase tracking-caps text-white/60 md:text-[10.5px]">
                 Jummah · {jummahTimes.length} khutba
                 {jummahTimes.length > 1 ? 's' : ''}
               </span>
@@ -160,7 +162,7 @@ export default function PrayerStrip({
                 {jummahTimes.map((t, i) => (
                   <span
                     key={`${t}-${i}`}
-                    className="inline-flex items-baseline gap-1 font-mono text-[14px] font-semibold text-white"
+                    className="inline-flex items-baseline gap-1 font-mono text-[13px] font-semibold text-white md:text-[14px]"
                   >
                     <span className="inline-flex items-center rounded-[3px] bg-[rgba(184,149,79,0.18)] px-[5px] py-[2px] font-body text-[9.5px] font-semibold text-gold-300">
                       {i + 1}
@@ -176,7 +178,7 @@ export default function PrayerStrip({
         {showFullScheduleLink && (
           <Link
             href="/prayer-times"
-            className="flex-shrink-0 text-fs-sm font-medium text-teal-200 transition-colors duration-fast hover:text-white"
+            className="self-start text-fs-sm font-medium text-teal-200 transition-colors duration-fast hover:text-white md:flex-shrink-0 md:self-auto"
           >
             Full schedule →
           </Link>

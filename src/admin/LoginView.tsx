@@ -20,7 +20,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LogIn } from 'lucide-react'
 
-import Logo from './Logo'
+import OpenMasjidWordmark from './OpenMasjidWordmark'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -81,7 +81,7 @@ export default function LoginView() {
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center gap-4 p-8 pb-4 text-center">
           <div className="flex justify-center">
-            <Logo />
+            <OpenMasjidWordmark />
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl md:text-3xl font-semibold text-foreground">

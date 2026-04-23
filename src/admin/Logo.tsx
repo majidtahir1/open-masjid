@@ -1,70 +1,65 @@
+import { headers as getHeaders } from 'next/headers'
+import { getPayload } from 'payload'
 import React from 'react'
 
-/**
- * Admin panel logo (brand mark in the nav bar).
- *
- * For now this renders the OpenMasjid wordmark in navy. In a later pass,
- * resolve the current tenant at admin time and swap in that tenant's logo
- * (tenant.branding.logo) so each masjid's staff sees their own brand.
- */
-const Logo: React.FC = () => {
-  // The wordmark uses `--theme-elevation-1000` so it stays readable in both
-  // light (dark text on white nav) and dark (light text on near-black nav)
-  // admin themes. The pill is always navy+gold — the mark is brand-critical.
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '4px 0',
-      }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 28,
-          height: 28,
-          borderRadius: 6,
-          background: '#0F1E4A',
-          color: '#F0C88C',
-          fontFamily: 'Fraunces, Georgia, serif',
-          fontSize: 18,
-          fontWeight: 600,
-          lineHeight: 1,
-        }}
-      >
-        ﷻ
-      </span>
-      <span
-        style={{
-          fontFamily: 'Fraunces, Georgia, serif',
-          fontSize: 18,
-          fontWeight: 600,
-          color: 'var(--theme-elevation-1000, #0F1E4A)',
-          letterSpacing: '0.01em',
-        }}
-      >
-        OpenMasjid
-      </span>
-      <span
-        style={{
-          fontFamily: 'Inter, system-ui, sans-serif',
-          fontSize: 11,
-          fontWeight: 500,
-          color: '#28A0B4',
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          marginLeft: 4,
-        }}
-      >
-        Admin
-      </span>
-    </div>
-  )
+import config from '@payload-config'
+import OpenMasjidWordmark from './OpenMasjidWordmark'
+
+type TenantRef =
+  | string
+  | number
+  | { id: string | number; name?: string; branding?: { logo?: unknown } }
+  | null
+  | undefined
+
+type TenantLogo = { url: string; alt: string; name: string }
+
+function tenantIdOf(t: TenantRef): string | number | null {
+  if (!t) return null
+  if (typeof t === 'object' && 'id' in t) return t.id
+  return t as string | number
 }
 
-export default Logo
+async function resolveTenantLogo(): Promise<TenantLogo | null> {
+  try {
+    const payload = await getPayload({ config })
+    const { user } = await payload.auth({ headers: await getHeaders() })
+    if (!user) return null
+
+    const u = user as { tenant?: TenantRef; role?: string }
+    const tenantId = tenantIdOf(u.tenant)
+    if (!tenantId) return null
+
+    const tenant = (await payload.findByID({
+      collection: 'tenants',
+      id: tenantId,
+      depth: 1,
+      overrideAccess: true,
+    })) as Record<string, unknown>
+
+    const name = (tenant.name as string) ?? 'Tenant'
+    const branding = tenant.branding as { logo?: unknown } | undefined
+    const logo = branding?.logo as { url?: string | null; alt?: string | null } | undefined
+
+    if (!logo?.url) return null
+    return { url: logo.url, alt: logo.alt ?? name, name }
+  } catch {
+    return null
+  }
+}
+
+export default async function Logo() {
+  const tenantLogo = await resolveTenantLogo()
+
+  if (tenantLogo) {
+    return (
+      <img
+        className="graphic-logo graphic-logo--tenant"
+        src={tenantLogo.url}
+        alt={tenantLogo.alt}
+      />
+    )
+  }
+
+  return <OpenMasjidWordmark />
+}

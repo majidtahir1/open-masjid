@@ -73,6 +73,10 @@ export const Media: CollectionConfig = {
         position: 'sidebar',
         description:
           'Automatically set from your account for non-platform users. Only a Platform Owner can reassign media across tenants.',
+        condition: (_, __, { user }) => {
+          const u = user as { role?: string } | null | undefined
+          return u?.role === 'platformOwner'
+        },
       },
       access: {
         update: ({ req: { user } }) => {

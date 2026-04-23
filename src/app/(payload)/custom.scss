@@ -194,6 +194,21 @@ body {
 }
 
 /* -------------------------------------------------------------------------
+ * Tenant logo — rendered on the Login/Verify screens via graphics.Logo.
+ * The breadcrumb icon slot intentionally uses Payload's default icon so
+ * the tenant brand has one prominent home: the dashboard banner.
+ * ----------------------------------------------------------------------- */
+
+.graphic-logo--tenant {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-height: 48px;
+  max-width: 220px;
+  object-fit: contain;
+}
+
+/* -------------------------------------------------------------------------
  * Side nav — larger, spaced out, colored hover states, and per-collection
  * icons rendered via ::before pseudo-elements keyed on the href.
  *
@@ -221,6 +236,7 @@ aside.template-default__nav,
 }
 
 .nav__link,
+.nav__link--dashboard,
 .nav a[href*='/collections/'],
 .nav a[href*='/globals/'] {
   display: flex;
@@ -281,6 +297,13 @@ aside.template-default__nav,
       border-left-color: var(--icp-teal-400);
     }
   }
+}
+
+/* Dashboard link icon (it has a different class, so give it its own rule). */
+.nav__link--dashboard::before {
+  $dashboard-svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>';
+  mask-image: url("data:image/svg+xml;utf8,#{$dashboard-svg}");
+  -webkit-mask-image: url("data:image/svg+xml;utf8,#{$dashboard-svg}");
 }
 
 /* Per-collection icons (lucide outline style, inlined as mask SVGs). */

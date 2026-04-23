@@ -199,23 +199,25 @@ async function TenantDashboard({
   user: NonNullable<UserLite>
   tenantId: string | number
 }) {
-  // Resolve tenant name for the context line — user.tenant may already be
-  // populated, in which case we skip the extra query.
+  // Resolve tenant name + logo. Always fetch with depth: 1 so the
+  // branding.logo upload is populated with a `url` field.
   let tenantName = 'your masjid'
-  if (typeof user.tenant === 'object' && user.tenant && 'name' in user.tenant && user.tenant.name) {
-    tenantName = user.tenant.name
-  } else {
-    try {
-      const t = await payload.findByID({
-        collection: 'tenants',
-        id: tenantId,
-        depth: 0,
-        overrideAccess: true,
-      })
-      if (t?.name) tenantName = t.name as string
-    } catch {
-      // ignore; fall back to the default label
+  let tenantLogo: { url: string; alt: string } | null = null
+  try {
+    const t = (await payload.findByID({
+      collection: 'tenants',
+      id: tenantId,
+      depth: 1,
+      overrideAccess: true,
+    })) as Record<string, unknown>
+    if (t?.name) tenantName = t.name as string
+    const branding = t.branding as { logo?: unknown } | undefined
+    const logo = branding?.logo as { url?: string | null; alt?: string | null } | undefined
+    if (logo?.url) {
+      tenantLogo = { url: logo.url, alt: logo.alt ?? tenantName }
     }
+  } catch {
+    // ignore; fall back to the default label / no logo
   }
 
   // Fetch all three cards in parallel — keeps first paint snappy even with
@@ -265,17 +267,26 @@ async function TenantDashboard({
 
   return (
     <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
-          Salam, {displayName}
-        </h1>
-        <div className="flex flex-wrap items-center gap-2 text-base text-muted-foreground">
-          <span>Managing</span>
-          <Badge variant="secondary" className="gap-1 text-base px-3 py-1.5">
-            <Building className="size-4" aria-hidden />
-            {tenantName}
-          </Badge>
+      <header className="flex items-center justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
+            Salam, {displayName}
+          </h1>
+          <div className="flex flex-wrap items-center gap-2 text-base text-muted-foreground">
+            <span>Managing</span>
+            <Badge variant="secondary" className="gap-1 text-base px-3 py-1.5">
+              <Building className="size-4" aria-hidden />
+              {tenantName}
+            </Badge>
+          </div>
         </div>
+        {tenantLogo && (
+          <img
+            src={tenantLogo.url}
+            alt={tenantLogo.alt}
+            className="h-20 md:h-24 w-auto object-contain shrink-0"
+          />
+        )}
       </header>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
