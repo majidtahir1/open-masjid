@@ -150,7 +150,7 @@ async function seed() {
   const tenantId = icp.id
 
   // 3. Admin user
-  const adminEmail = 'admin@icprosper.org'
+  const adminEmail = 'mtahir@gmail.com'
   const existingAdmin = await findOne<{ id: string | number }>(payload, 'users', {
     email: { equals: adminEmail },
   })
@@ -313,6 +313,19 @@ async function seed() {
       displayMode: 'text' as const,
       location: 'Community room',
       audience: ['youth' as const],
+    },
+    {
+      title: 'AI Tech Night',
+      slug: 'tech-night',
+      shortDescription: 'Explore how Muslims are building with AI — demos, discussion, Q&A.',
+      tag: 'community' as const,
+      when: 'May 1st after Maghrib',
+      startDate: new Date('2026-05-02T01:00:00Z').toISOString(),
+      displayMode: 'template' as const,
+      templateVariant: 'gold' as const,
+      featured: true,
+      heroAccent: 'gold' as const,
+      audience: ['all' as const],
     },
   ]
   for (const ev of events) {
