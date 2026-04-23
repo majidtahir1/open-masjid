@@ -73,9 +73,10 @@ export default buildConfig({
         dashboard: {
           Component: '/src/admin/Dashboard#default',
         },
-        invite: {
+        Invite: {
           Component: '/src/admin/InvitePage#default',
           path: '/invite',
+          exact: true,
         },
         // The login screen is replaced via a Next.js file-system route at
         // `src/app/(payload)/admin/login/page.tsx`. Payload 3.39 does not
