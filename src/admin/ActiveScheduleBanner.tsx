@@ -3,15 +3,7 @@
  *
  * A Payload `ui` field component injected at the top of each PrayerSchedule
  * edit page. Makes it unmistakable whether the schedule being edited is the
- * one currently shown on the public site.
- *
- * - Green "ACTIVE NOW" badge if this schedule is the active one.
- * - Amber "Not active" badge with a link to the actually-active schedule if
- *   not.
- *
- * The active-schedule lookup lives server-side at /api/active-schedule and
- * uses the same resolver as the public site, so the banner can never drift
- * out of sync with what's actually rendered.
+ * one currently shown on the public site, and surfaces the range + day count.
  */
 
 'use client'
@@ -24,8 +16,40 @@ type ActiveInfo = {
   activeName: string | null
 }
 
+type SavedDoc = {
+  startDate?: string | null
+  endDate?: string | null
+  days?: unknown[] | null
+}
+
+function fmtDate(iso?: string | null): string | null {
+  if (!iso) return null
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  } catch {
+    return iso.slice(0, 10)
+  }
+}
+
+function detectStatus(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  now = new Date(),
+): 'active' | 'future' | 'expired' | 'unknown' {
+  if (!startDate || !endDate) return 'unknown'
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  if (now < start) return 'future'
+  if (now > end) return 'expired'
+  return 'active'
+}
+
 export default function ActiveScheduleBanner() {
-  const { id } = useDocumentInfo()
+  const { id, savedDocumentData } = useDocumentInfo()
   const [info, setInfo] = useState<ActiveInfo | null>(null)
 
   useEffect(() => {
@@ -35,52 +59,91 @@ export default function ActiveScheduleBanner() {
       .then((data) => {
         if (!cancelled && data && 'activeId' in data) setInfo(data)
       })
-      .catch(() => {
-        // Silently ignore — the banner is an enhancement, not critical.
-      })
+      .catch(() => undefined)
     return () => {
       cancelled = true
     }
   }, [])
 
-  // Nothing to show on the create form (no id yet) or before the fetch resolves.
-  if (!id || !info) return null
-  if (info.activeId == null) return null
+  if (!id) return null
 
-  const isActive = String(info.activeId) === String(id)
+  const doc = (savedDocumentData as SavedDoc | undefined) ?? {}
+  const dayCount = Array.isArray(doc.days) ? doc.days.length : 0
+  const status = detectStatus(doc.startDate, doc.endDate)
+  const thisIsActive =
+    info?.activeId != null && String(info.activeId) === String(id)
 
-  const style: React.CSSProperties = {
-    marginBottom: '16px',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    background: isActive ? '#dcfce7' : '#fef3c7',
-    borderLeft: `4px solid ${isActive ? '#16a34a' : '#d97706'}`,
-    color: isActive ? '#14532d' : '#78350f',
-    fontWeight: 500,
-    fontSize: '14px',
-    lineHeight: 1.5,
-  }
+  const rangeText =
+    doc.startDate && doc.endDate
+      ? `${fmtDate(doc.startDate)} → ${fmtDate(doc.endDate)}`
+      : null
 
-  if (isActive) {
-    return (
-      <div style={style} role="status">
-        <strong>ACTIVE NOW</strong> — this schedule is currently shown on your
-        public site.
-      </div>
+  let tone: 'green' | 'amber' | 'gray' = 'gray'
+  let title = ''
+  let body: React.ReactNode = null
+
+  if (thisIsActive) {
+    tone = 'green'
+    title = 'ACTIVE NOW'
+    body = (
+      <>
+        This schedule is currently shown on your public site.
+        {rangeText ? ` Range: ${rangeText}.` : ''}{' '}
+        <strong>{dayCount}</strong> day{dayCount === 1 ? '' : 's'} configured.
+      </>
     )
+  } else if (status === 'future') {
+    tone = 'amber'
+    title = 'Not yet active'
+    body = (
+      <>
+        Starts {fmtDate(doc.startDate)}.
+        {rangeText ? ` Range: ${rangeText}.` : ''}{' '}
+        <strong>{dayCount}</strong> day{dayCount === 1 ? '' : 's'} configured.
+      </>
+    )
+  } else if (status === 'expired') {
+    tone = 'gray'
+    title = 'Expired'
+    body = <>Ended {fmtDate(doc.endDate)}. No longer shown on the public site.</>
+  } else if (info?.activeId != null) {
+    tone = 'amber'
+    title = 'Not active right now'
+    const activeHref = `/admin/collections/prayer-schedules/${info.activeId}`
+    body = (
+      <>
+        The active schedule is{' '}
+        <a href={activeHref} style={{ color: 'inherit', textDecoration: 'underline' }}>
+          {info.activeName ?? 'another schedule'}
+        </a>
+        . Edit that one to change what shows on the public site.
+      </>
+    )
+  } else {
+    return null
   }
 
-  const activeHref = `/admin/collections/prayer-schedules/${info.activeId}`
+  const palette = {
+    green: { bg: '#dcfce7', border: '#16a34a', text: '#14532d' },
+    amber: { bg: '#fef3c7', border: '#d97706', text: '#78350f' },
+    gray: { bg: '#f1f5f9', border: '#64748b', text: '#334155' },
+  }[tone]
+
   return (
-    <div style={style} role="status">
-      <strong>Not active right now</strong> — the active schedule is{' '}
-      <a
-        href={activeHref}
-        style={{ color: 'inherit', textDecoration: 'underline' }}
-      >
-        {info.activeName ?? 'another schedule'}
-      </a>
-      . Edit that one to change what shows on the public site.
+    <div
+      role="status"
+      style={{
+        marginBottom: '16px',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        background: palette.bg,
+        borderLeft: `4px solid ${palette.border}`,
+        color: palette.text,
+        fontSize: '14px',
+        lineHeight: 1.5,
+      }}
+    >
+      <strong>{title}</strong> — {body}
     </div>
   )
 }
