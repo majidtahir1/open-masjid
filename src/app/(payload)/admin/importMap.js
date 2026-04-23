@@ -31,8 +31,11 @@ import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../..
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
 import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
 import { default as default_1b061eb5b281695d53709027f168847b } from '../../../../src/admin/ScheduleListBanner'
+import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
+import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
 import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
+import { default as default_79a85695b376b830c5fc9180be7fd47b } from '../../../../src/admin/SiteSettingsLink'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 
 export const importMap = {
@@ -69,7 +72,10 @@ export const importMap = {
   "/src/admin/ScheduleNameCell#default": default_dd3aaf7dfdea38a3f5207a0e64556a07,
   "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
   "/src/admin/ScheduleListBanner#default": default_1b061eb5b281695d53709027f168847b,
+  "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
+  "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
+  "/src/admin/SiteSettingsLink#default": default_79a85695b376b830c5fc9180be7fd47b,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }
