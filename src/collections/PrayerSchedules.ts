@@ -16,39 +16,46 @@ const iqamahRuleFields = (prayer: (typeof PRAYERS)[number]) => ({
   name: prayer,
   type: 'group' as const,
   label: prayer.charAt(0).toUpperCase() + prayer.slice(1),
+  admin: { hideGutter: true },
   fields: [
     {
-      name: 'mode',
-      type: 'select' as const,
-      required: true,
-      defaultValue: prayer === 'maghrib' ? 'offset' : 'absolute',
-      label: 'Mode',
-      options: [
-        { label: 'Absolute time (same clock time every day)', value: 'absolute' },
-        { label: 'Offset from adhan (N min after adhan)', value: 'offset' },
+      type: 'row' as const,
+      fields: [
+        {
+          name: 'mode',
+          type: 'select' as const,
+          required: true,
+          defaultValue: prayer === 'maghrib' ? 'offset' : 'absolute',
+          label: 'Mode',
+          options: [
+            { label: 'Absolute', value: 'absolute' },
+            { label: 'Offset from adhan', value: 'offset' },
+          ],
+          admin: { width: '40%' },
+        },
+        {
+          name: 'absoluteValue',
+          type: 'text' as const,
+          label: 'Time',
+          admin: {
+            placeholder: '5:45 AM',
+            width: '60%',
+            condition: (_: unknown, sibling: unknown) =>
+              (sibling as { mode?: string })?.mode === 'absolute',
+          },
+        },
+        {
+          name: 'offsetMinutes',
+          type: 'number' as const,
+          label: 'Minutes after adhan',
+          defaultValue: prayer === 'maghrib' ? 5 : 15,
+          admin: {
+            width: '60%',
+            condition: (_: unknown, sibling: unknown) =>
+              (sibling as { mode?: string })?.mode === 'offset',
+          },
+        },
       ],
-    },
-    {
-      name: 'absoluteValue',
-      type: 'text' as const,
-      label: 'Absolute Time',
-      admin: {
-        description: 'Example: "5:45 AM". Used when Mode = absolute.',
-        placeholder: '5:45 AM',
-        condition: (_: unknown, sibling: unknown) =>
-          (sibling as { mode?: string })?.mode === 'absolute',
-      },
-    },
-    {
-      name: 'offsetMinutes',
-      type: 'number' as const,
-      label: 'Offset (minutes)',
-      defaultValue: prayer === 'maghrib' ? 5 : 15,
-      admin: {
-        description: 'Whole minutes added to the computed adhan. Used when Mode = offset.',
-        condition: (_: unknown, sibling: unknown) =>
-          (sibling as { mode?: string })?.mode === 'offset',
-      },
     },
   ],
 })
