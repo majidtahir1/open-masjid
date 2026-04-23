@@ -29,6 +29,7 @@ import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../..
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
+import { default as default_6e33277718055fbb7815dc8494c4827c } from '../../../../src/admin/DateOnlyCell'
 import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
 import { default as default_2072c8cf6a80ba06a874b6cbb7dd9df6 } from '../../../../src/admin/AdhanRangePreview'
 import { default as default_8dc5433bae6533c545f57c14ecdbdd63 } from '../../../../src/admin/GenerateTimesButton'
@@ -75,6 +76,7 @@ export const importMap = {
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/ActiveScheduleBanner#default": default_07d961590be6dea90e3f89bf0ec85650,
   "/src/admin/ScheduleNameCell#default": default_dd3aaf7dfdea38a3f5207a0e64556a07,
+  "/src/admin/DateOnlyCell#default": default_6e33277718055fbb7815dc8494c4827c,
   "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
   "/src/admin/AdhanRangePreview#default": default_2072c8cf6a80ba06a874b6cbb7dd9df6,
   "/src/admin/GenerateTimesButton#default": default_8dc5433bae6533c545f57c14ecdbdd63,

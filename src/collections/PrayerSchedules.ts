@@ -142,6 +142,7 @@ export const PrayerSchedules: CollectionConfig = {
             description: 'First day this schedule covers.',
             components: {
               Field: '/src/fields/DateField#default',
+              Cell: '/src/admin/DateOnlyCell#default',
             },
           },
         },
@@ -156,6 +157,7 @@ export const PrayerSchedules: CollectionConfig = {
               'Last day this schedule covers. "Generate times" builds one day-row per date in this range.',
             components: {
               Field: '/src/fields/DateField#default',
+              Cell: '/src/admin/DateOnlyCell#default',
             },
           },
           validate: (value: unknown, { data }: { data?: { startDate?: string } }) => {

@@ -46,6 +46,12 @@ export async function getActiveSchedule(
   noStore()
   const payload = await payloadClient()
   const iso = date.toISOString()
+  // endDate is inclusive: a schedule with endDate = Apr 30 00:00 UTC should
+  // still be active at any moment on Apr 30 UTC. Compare against the UTC
+  // midnight of the query date so the match is inclusive through that day.
+  const dayFloorISO = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  ).toISOString()
 
   try {
     const res = await payload.find({
@@ -53,7 +59,7 @@ export async function getActiveSchedule(
       where: {
         tenant: { equals: tenantId },
         startDate: { less_than_equal: iso },
-        endDate: { greater_than_equal: iso },
+        endDate: { greater_than_equal: dayFloorISO },
       },
       sort: '-startDate',
       limit: 1,

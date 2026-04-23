@@ -38,8 +38,16 @@ function addMonths(d: Date, n: number): Date {
 }
 
 function fmtMonth(d: Date): string {
-  return d.toLocaleDateString(undefined, { month: 'short', year: '2-digit', timeZone: 'UTC' })
+  // Full year so "Jun 2026" doesn't read as "Jun 26" (day 26).
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 }
+
+/** Treat endDate as inclusive-end-of-day: the bar covers through end of that UTC day. */
+const DAY_MS = 24 * 60 * 60 * 1000
 
 function fmtDay(iso: string | null | undefined): string {
   if (!iso) return ''
@@ -128,9 +136,12 @@ export default async function ScheduleTimeline() {
     const laneCount = Math.max(...lanes.map((l) => l.lane)) + 1
     const activeId = findActiveId(datedSchedules)
 
-    // Axis span: pad a week on each side.
+    // Axis span: pad a week on each side. endDate is inclusive (covers through
+    // end of that UTC day), so add 24h before measuring the max.
     const minMs = Math.min(...lanes.map((l) => new Date(l.startDate!).getTime()))
-    const maxMs = Math.max(...lanes.map((l) => new Date(l.endDate!).getTime()))
+    const maxMs = Math.max(
+      ...lanes.map((l) => new Date(l.endDate!).getTime() + DAY_MS),
+    )
     const padMs = 7 * 24 * 60 * 60 * 1000
     const axisStart = new Date(minMs - padMs)
     const axisEnd = new Date(maxMs + padMs)
@@ -220,7 +231,8 @@ export default async function ScheduleTimeline() {
           {/* Schedule bars */}
           {lanes.map((s, i) => {
             const start = new Date(s.startDate!).getTime()
-            const end = new Date(s.endDate!).getTime()
+            // Inclusive end-of-day: extend 24h so consecutive schedules are flush.
+            const end = new Date(s.endDate!).getTime() + DAY_MS
             const left = pct(start)
             const width = Math.max(pct(end) - pct(start), 1)
             const color = BAR_COLORS[i % BAR_COLORS.length]
