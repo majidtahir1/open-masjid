@@ -28,7 +28,10 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
-      beforeNavLinks: ['/src/admin/DashboardLink#default'],
+      beforeNavLinks: [
+        '/src/admin/DashboardLink#default',
+        '/src/admin/SiteSettingsLink#default',
+      ],
       header: ['/src/admin/Favicon#default'],
       graphics: {
         Logo: '/src/admin/Logo#default',
