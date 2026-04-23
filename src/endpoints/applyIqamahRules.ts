@@ -37,7 +37,7 @@ const handler: PayloadHandler = async (req) => {
   }
 
   const updatedDays = days.map((d) => {
-    const next: DayShape = { ...d }
+    const next: DayShape = { ...d } // preserves `date` and `sunrise`
     for (const p of PRAYERS) {
       const adhan = d[p]?.adhan ?? ''
       next[p] = { adhan, iqamah: applyIqamahRule(ruleFor(rules[p]), adhan) }

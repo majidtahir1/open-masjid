@@ -28,6 +28,8 @@ export interface AdhanInput {
 
 export interface AdhanTimes {
   fajr: string
+  /** Sunrise — marks the end of the Fajr prayer window. */
+  sunrise: string
   zuhr: string
   asr: string
   maghrib: string
@@ -61,6 +63,7 @@ export function computeAdhanTimes(input: AdhanInput): AdhanTimes {
 
   return {
     fajr: formatTime(prayerTimes.fajr, input.timezone),
+    sunrise: formatTime(prayerTimes.sunrise, input.timezone),
     zuhr: formatTime(prayerTimes.dhuhr, input.timezone),
     asr: formatTime(prayerTimes.asr, input.timezone),
     maghrib: formatTime(prayerTimes.maghrib, input.timezone),

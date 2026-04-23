@@ -235,6 +235,16 @@ export const PrayerSchedules: CollectionConfig = {
           required: true,
           admin: { date: { pickerAppearance: 'dayOnly' } },
         },
+        {
+          name: 'sunrise',
+          type: 'text',
+          label: 'Sunrise (Fajr ends)',
+          admin: {
+            description:
+              'Fajr must be prayed before sunrise. Informational — not shown on the public site by default.',
+            placeholder: '6:45 AM',
+          },
+        },
         ...PRAYERS.map(dayPrayerGroup),
       ],
     },

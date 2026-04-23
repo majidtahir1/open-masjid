@@ -6,6 +6,7 @@ import React from 'react'
 type Pair = { adhan?: string | null; iqamah?: string | null } | null | undefined
 type DayRow = {
   date?: string | null
+  sunrise?: string | null
   fajr?: Pair
   zuhr?: Pair
   asr?: Pair
@@ -13,12 +14,17 @@ type DayRow = {
   isha?: Pair
 }
 
-const PRAYERS: Array<{ key: keyof DayRow; name: string }> = [
-  { key: 'fajr', name: 'Fajr' },
-  { key: 'zuhr', name: 'Zuhr' },
-  { key: 'asr', name: 'Asr' },
-  { key: 'maghrib', name: 'Maghrib' },
-  { key: 'isha', name: 'Isha' },
+type Row =
+  | { kind: 'adhan'; key: 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha'; name: string }
+  | { kind: 'sunrise'; name: string }
+
+const ROWS: Row[] = [
+  { kind: 'adhan', key: 'fajr', name: 'Fajr' },
+  { kind: 'sunrise', name: 'Sunrise (Fajr ends)' },
+  { kind: 'adhan', key: 'zuhr', name: 'Zuhr' },
+  { kind: 'adhan', key: 'asr', name: 'Asr' },
+  { kind: 'adhan', key: 'maghrib', name: 'Maghrib' },
+  { kind: 'adhan', key: 'isha', name: 'Isha' },
 ]
 
 function fmt(iso?: string | null): string {
@@ -115,14 +121,55 @@ export default function AdhanRangePreview() {
           </tr>
         </thead>
         <tbody>
-          {PRAYERS.map(({ key, name }) => {
-            const f = (first?.[key] as Pair)?.adhan ?? '—'
-            const l = (last?.[key] as Pair)?.adhan ?? '—'
+          {ROWS.map((row) => {
+            const rowKey = row.kind === 'adhan' ? row.key : 'sunrise'
+            const f =
+              row.kind === 'adhan'
+                ? (first?.[row.key] as Pair)?.adhan ?? '—'
+                : first?.sunrise ?? '—'
+            const l =
+              row.kind === 'adhan'
+                ? (last?.[row.key] as Pair)?.adhan ?? '—'
+                : last?.sunrise ?? '—'
+            const isSunrise = row.kind === 'sunrise'
             return (
-              <tr key={key}>
-                <td style={{ ...cellStyle, fontWeight: 600 }}>{name}</td>
-                <td style={cellStyle}>{f}</td>
-                {last ? <td style={cellStyle}>{l}</td> : null}
+              <tr key={rowKey}>
+                <td
+                  style={{
+                    ...cellStyle,
+                    fontWeight: isSunrise ? 500 : 600,
+                    fontStyle: isSunrise ? 'italic' : undefined,
+                    color: isSunrise
+                      ? 'var(--theme-text-light, #64748b)'
+                      : undefined,
+                  }}
+                >
+                  {row.name}
+                </td>
+                <td
+                  style={{
+                    ...cellStyle,
+                    fontStyle: isSunrise ? 'italic' : undefined,
+                    color: isSunrise
+                      ? 'var(--theme-text-light, #64748b)'
+                      : undefined,
+                  }}
+                >
+                  {f}
+                </td>
+                {last ? (
+                  <td
+                    style={{
+                      ...cellStyle,
+                      fontStyle: isSunrise ? 'italic' : undefined,
+                      color: isSunrise
+                        ? 'var(--theme-text-light, #64748b)'
+                        : undefined,
+                    }}
+                  >
+                    {l}
+                  </td>
+                ) : null}
               </tr>
             )
           })}

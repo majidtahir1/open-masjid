@@ -19,6 +19,8 @@ export interface GenerateDaysInput {
 
 export interface GeneratedDay {
   date: string
+  /** Sunrise — end of the Fajr window. No iqamah; informational only. */
+  sunrise: string
   fajr: { adhan: string; iqamah: string }
   zuhr: { adhan: string; iqamah: string }
   asr: { adhan: string; iqamah: string }
@@ -59,6 +61,7 @@ export function generateDays(input: GenerateDaysInput): GeneratedDay[] {
     })
     const row: GeneratedDay = {
       date: date.toISOString(),
+      sunrise: adhan.sunrise,
       fajr: { adhan: '', iqamah: '' },
       zuhr: { adhan: '', iqamah: '' },
       asr: { adhan: '', iqamah: '' },
