@@ -5,10 +5,12 @@
  *
  * All fetchers accept an optional `{ draft }` flag. When `draft: true`, the
  * fetcher returns the latest version (published or draft). When omitted or
- * false, Payload returns only published content. Public pages pass `draft`
- * only after verifying an authenticated admin session — see `previewMode.ts`.
+ * false, an explicit `_status: published` where-clause is added so drafts
+ * are filtered out even though we pass `overrideAccess: true` (which would
+ * otherwise skip Payload's automatic draft filtering).
  */
 
+import type { Where } from 'payload'
 import { unstable_noStore as noStore } from 'next/cache'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -23,21 +25,31 @@ async function payloadClient() {
   return getPayload({ config })
 }
 
+/** Merge an `_status: published` filter into a where-clause unless draft mode is on. */
+function gate(where: Where, draft: boolean): Where {
+  if (draft) return where
+  return { ...where, _status: { equals: 'published' } }
+}
+
 export async function fetchHeroSlides(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
   const payload = await payloadClient()
+  const draft = opts.draft ?? false
   try {
     const res = await payload.find({
       collection: 'hero-slides',
-      where: {
-        tenant: { equals: tenant.id },
-        active: { equals: true },
-      },
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          active: { equals: true },
+        },
+        draft,
+      ),
       sort: 'sortOrder',
       limit: 20,
       depth: 1,
       overrideAccess: true,
-      draft: opts.draft ?? false,
+      draft,
     })
     return res.docs as unknown[]
   } catch {
@@ -51,17 +63,16 @@ export async function fetchEvents(
 ) {
   noStore()
   const payload = await payloadClient()
+  const draft = opts.draft ?? false
   try {
     const res = await payload.find({
       collection: 'events',
-      where: {
-        tenant: { equals: tenant.id },
-      },
+      where: gate({ tenant: { equals: tenant.id } }, draft),
       sort: '-startDate',
       limit: opts.limit ?? 50,
       depth: 1,
       overrideAccess: true,
-      draft: opts.draft ?? false,
+      draft,
     })
     return res.docs as unknown[]
   } catch {
@@ -76,17 +87,21 @@ export async function fetchEventBySlug(
 ) {
   noStore()
   const payload = await payloadClient()
+  const draft = opts.draft ?? false
   try {
     const res = await payload.find({
       collection: 'events',
-      where: {
-        tenant: { equals: tenant.id },
-        slug: { equals: slug },
-      },
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          slug: { equals: slug },
+        },
+        draft,
+      ),
       limit: 1,
       depth: 1,
       overrideAccess: true,
-      draft: opts.draft ?? false,
+      draft,
     })
     return (res.docs[0] as unknown) ?? null
   } catch {
@@ -97,15 +112,16 @@ export async function fetchEventBySlug(
 export async function fetchServices(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
   const payload = await payloadClient()
+  const draft = opts.draft ?? false
   try {
     const res = await payload.find({
       collection: 'services',
-      where: { tenant: { equals: tenant.id } },
+      where: gate({ tenant: { equals: tenant.id } }, draft),
       sort: 'sortOrder',
       limit: 50,
       depth: 1,
       overrideAccess: true,
-      draft: opts.draft ?? false,
+      draft,
     })
     return res.docs as unknown[]
   } catch {
@@ -128,17 +144,21 @@ export async function fetchPageBySlug(
 ) {
   noStore()
   const payload = await payloadClient()
+  const draft = opts.draft ?? false
   try {
     const res = await payload.find({
       collection: 'pages',
-      where: {
-        tenant: { equals: tenant.id },
-        slug: { equals: slug },
-      },
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          slug: { equals: slug },
+        },
+        draft,
+      ),
       limit: 1,
       depth: 1,
       overrideAccess: true,
-      draft: opts.draft ?? false,
+      draft,
     })
     return (res.docs[0] as unknown) ?? null
   } catch {
@@ -149,18 +169,22 @@ export async function fetchPageBySlug(
 export async function fetchAnnouncements(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
   const payload = await payloadClient()
+  const draft = opts.draft ?? false
   try {
     const res = await payload.find({
       collection: 'announcements',
-      where: {
-        tenant: { equals: tenant.id },
-        active: { equals: true },
-      },
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          active: { equals: true },
+        },
+        draft,
+      ),
       sort: '-priority',
       limit: 20,
       depth: 0,
       overrideAccess: true,
-      draft: opts.draft ?? false,
+      draft,
     })
     return res.docs as unknown[]
   } catch {
