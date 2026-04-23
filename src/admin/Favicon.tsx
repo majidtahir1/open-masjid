@@ -10,7 +10,7 @@ const FALLBACK_MIME = 'image/jpeg'
 type TenantRef =
   | string
   | number
-  | { id: string | number; branding?: { logo?: unknown } }
+  | { id: string | number; branding?: { favicon?: unknown } }
   | null
   | undefined
 
@@ -37,13 +37,13 @@ async function resolveFavicon(): Promise<{ href: string; type: string }> {
       overrideAccess: true,
     })) as Record<string, unknown>
 
-    const branding = tenant.branding as { logo?: unknown } | undefined
-    const logo = branding?.logo as
+    const branding = tenant.branding as { favicon?: unknown } | undefined
+    const favicon = branding?.favicon as
       | { url?: string | null; mimeType?: string | null }
       | undefined
 
-    if (!logo?.url) return { href: FALLBACK_HREF, type: FALLBACK_MIME }
-    return { href: logo.url, type: logo.mimeType ?? FALLBACK_MIME }
+    if (!favicon?.url) return { href: FALLBACK_HREF, type: FALLBACK_MIME }
+    return { href: favicon.url, type: favicon.mimeType ?? FALLBACK_MIME }
   } catch {
     return { href: FALLBACK_HREF, type: FALLBACK_MIME }
   }

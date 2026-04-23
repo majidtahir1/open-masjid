@@ -172,6 +172,16 @@ export const Tenants: CollectionConfig = {
                   },
                 },
                 {
+                  name: 'favicon',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Favicon',
+                  admin: {
+                    description:
+                      'Square icon shown in the browser tab for both the public site and the admin panel. 32×32 or 64×64 PNG/ICO — NOT the full logo. If left blank, a neutral OpenMasjid icon is used.',
+                  },
+                },
+                {
                   name: 'primaryColor',
                   type: 'text',
                   label: 'Primary Color',
