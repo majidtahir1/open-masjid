@@ -28,6 +28,7 @@ import { default as default_5065215e438fef22269547c6432587f3 } from '../../../..
 import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../../src/fields/CheckboxField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
+import { default as default_8dc5433bae6533c545f57c14ecdbdd63 } from '../../../../src/admin/GenerateTimesButton'
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
 import { default as default_826fe83b6b9586fe22777b8eb6d4d250 } from '../../../../src/fields/DateField'
 import { default as default_1b061eb5b281695d53709027f168847b } from '../../../../src/admin/ScheduleListBanner'
@@ -70,6 +71,7 @@ export const importMap = {
   "/src/fields/CheckboxField#default": default_020349c8fbd548aa796ba56590815903,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/ActiveScheduleBanner#default": default_07d961590be6dea90e3f89bf0ec85650,
+  "/src/admin/GenerateTimesButton#default": default_8dc5433bae6533c545f57c14ecdbdd63,
   "/src/admin/ScheduleNameCell#default": default_dd3aaf7dfdea38a3f5207a0e64556a07,
   "/src/fields/DateField#default": default_826fe83b6b9586fe22777b8eb6d4d250,
   "/src/admin/ScheduleListBanner#default": default_1b061eb5b281695d53709027f168847b,
