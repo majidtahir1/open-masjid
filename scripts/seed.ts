@@ -217,7 +217,7 @@ async function seed() {
   for (let i = 0; i < services.length; i++) {
     await payload.create({
       collection: 'services',
-      data: { ...services[i], sortOrder: i + 1, tenant: tenantId },
+      data: { ...services[i], sortOrder: i + 1, _status: 'published', tenant: tenantId },
       overrideAccess: true,
       req: seedReq,
     })
@@ -263,7 +263,7 @@ async function seed() {
   for (const slide of heroSlides) {
     await payload.create({
       collection: 'hero-slides',
-      data: { ...slide, tenant: tenantId },
+      data: { ...slide, _status: 'published', tenant: tenantId },
       overrideAccess: true,
       req: seedReq,
     })
@@ -321,7 +321,7 @@ async function seed() {
       data: {
         ...ev,
         description: richText(ev.shortDescription),
-        status: 'published' as const,
+        _status: 'published',
         tenant: tenantId,
       },
       overrideAccess: true,
