@@ -80,6 +80,36 @@ export async function fetchEvents(
   }
 }
 
+/** Events marked as featured — rendered alongside hero-slides on the homepage carousel. */
+export async function fetchFeaturedEvents(
+  tenant: TenantRecord,
+  opts: ReadOpts = {},
+) {
+  noStore()
+  const payload = await payloadClient()
+  const draft = opts.draft ?? false
+  try {
+    const res = await payload.find({
+      collection: 'events',
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          featured: { equals: true },
+        },
+        draft,
+      ),
+      sort: '-startDate',
+      limit: 6,
+      depth: 1,
+      overrideAccess: true,
+      draft,
+    })
+    return res.docs as unknown[]
+  } catch {
+    return []
+  }
+}
+
 export async function fetchEventBySlug(
   tenant: TenantRecord,
   slug: string,

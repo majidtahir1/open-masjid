@@ -11,9 +11,11 @@ import type {
 import { getCurrentTenant } from '@/lib/tenant-server'
 import {
   fetchEvents,
+  fetchFeaturedEvents,
   fetchHeroSlides,
   fetchServices,
 } from '@/lib/data'
+import { eventToHeroSlide } from '@/lib/eventToHeroSlide'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
@@ -24,15 +26,23 @@ export default async function HomePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const [slides, events, services] = await Promise.all([
+  const [slides, featuredEvents, events, services] = await Promise.all([
     fetchHeroSlides(tenant),
+    fetchFeaturedEvents(tenant),
     fetchEvents(tenant, { limit: 4 }),
     fetchServices(tenant),
   ])
 
+  // Interleave manually-authored hero slides with featured events so both
+  // appear in the homepage carousel — slides first, then events.
+  const allSlides: HeroSlideLike[] = [
+    ...(slides as HeroSlideLike[]),
+    ...((featuredEvents as Parameters<typeof eventToHeroSlide>[0][]).map(eventToHeroSlide)),
+  ]
+
   return (
     <>
-      <Hero slides={slides as HeroSlideLike[]} />
+      <Hero slides={allSlides} />
 
       <section className="bg-bg py-24">
         <div className="mx-auto max-w-page px-6">
