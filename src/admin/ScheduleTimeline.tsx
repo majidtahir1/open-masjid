@@ -259,9 +259,6 @@ export default async function ScheduleTimeline() {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  outline: isActive ? '2px solid #16a34a' : 'none',
-                  outlineOffset: 2,
-                  boxShadow: isActive ? '0 0 0 1px rgba(22,163,74,0.4)' : 'none',
                   zIndex: 1,
                 }}
                 title={`${s.name ?? 'Schedule'} — ${fmtDay(s.startDate)} → ${fmtDay(s.endDate)}${isActive ? ' · ACTIVE NOW' : ''}`}
