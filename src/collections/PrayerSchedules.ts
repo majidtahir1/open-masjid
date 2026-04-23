@@ -166,6 +166,15 @@ export const PrayerSchedules: CollectionConfig = {
       ],
     },
     {
+      name: 'adhanPreview',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/src/admin/AdhanRangePreview#default',
+        },
+      },
+    },
+    {
       name: 'iqamahRules',
       type: 'group',
       label: 'Iqamah Rules',
