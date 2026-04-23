@@ -15,6 +15,7 @@ import { PrayerSchedules } from './collections/PrayerSchedules'
 import { Services } from './collections/Services'
 import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
+import { applyIqamahRulesEndpoint } from './endpoints/applyIqamahRules'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 
 const filename = fileURLToPath(import.meta.url)
@@ -64,7 +65,7 @@ export default buildConfig({
     Services,
     Pages,
   ],
-  endpoints: [generatePrayerTimesEndpoint],
+  endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
