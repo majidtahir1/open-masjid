@@ -50,6 +50,9 @@ export const Pages: CollectionConfig = {
       ],
     },
   },
+  versions: {
+    drafts: true,
+  },
   access: {
     read: tenantScopedRead,
     create: tenantScopedCreate,

@@ -27,6 +27,9 @@ export const Announcements: CollectionConfig = {
     // livePreview because there's no single URL that "is" an announcement.
     preview: (doc, { req }) => buildHomePreviewUrl(doc, req),
   },
+  versions: {
+    drafts: true,
+  },
   access: {
     read: tenantScopedRead,
     create: tenantScopedCreate,

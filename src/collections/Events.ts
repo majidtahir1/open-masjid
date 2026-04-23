@@ -41,7 +41,7 @@ export const Events: CollectionConfig = {
     group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'tag', 'status', 'startDate', 'featured'],
+    defaultColumns: ['title', 'tag', '_status', 'startDate', 'featured'],
     description:
       'Classes, programs, and gatherings. Published events appear on the public Events page; featured events also appear in the homepage hero.',
     preview: (doc, { req }) => buildPreviewUrl(doc, req, 'events'),
@@ -53,6 +53,9 @@ export const Events: CollectionConfig = {
         { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
       ],
     },
+  },
+  versions: {
+    drafts: true,
   },
   access: {
     read: tenantScopedRead,
@@ -303,24 +306,9 @@ export const Events: CollectionConfig = {
                 },
               },
             },
-            {
-              name: 'status',
-              type: 'select',
-              required: true,
-              defaultValue: 'draft',
-              label: 'Status',
-              options: [
-                { label: 'Draft — not visible publicly', value: 'draft' },
-                { label: 'Published — live on the site', value: 'published' },
-              ],
-              admin: {
-                description: 'Only Published events appear on the public site.',
-                position: 'sidebar',
-                components: {
-                  Field: '/src/fields/SelectField#default',
-                },
-              },
-            },
+            // Publish/Draft control is provided by Payload's versions.drafts —
+            // no custom `status` field needed. The Publish button lives in the
+            // default admin sidebar.
           ],
         },
       ],

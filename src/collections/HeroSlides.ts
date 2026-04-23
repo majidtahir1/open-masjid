@@ -261,6 +261,9 @@ export const HeroSlides: CollectionConfig = {
       },
     },
   ],
+  versions: {
+    drafts: true,
+  },
 }
 
 export default HeroSlides

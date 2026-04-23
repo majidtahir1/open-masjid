@@ -71,7 +71,7 @@ export async function buildPreviewUrl(
   if (!base) return null
 
   const prefix = path ? `/${path.replace(/^\/+|\/+$/g, '')}` : ''
-  return `${base}${prefix}/${encodeURIComponent(slug)}`
+  return `${base}${prefix}/${encodeURIComponent(slug)}?draft=1`
 }
 
 /**
@@ -82,5 +82,7 @@ export async function buildHomePreviewUrl(
   doc: Record<string, unknown>,
   req: PayloadRequest,
 ): Promise<string | null> {
-  return tenantBaseUrl(doc.tenant as TenantRef, req.payload)
+  const base = await tenantBaseUrl(doc.tenant as TenantRef, req.payload)
+  if (!base) return null
+  return `${base}/?draft=1`
 }
