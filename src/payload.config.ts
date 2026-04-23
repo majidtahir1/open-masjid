@@ -32,6 +32,7 @@ export default buildConfig({
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
       ],
+      afterNavLinks: ['/src/admin/ViewPublicSiteLink#default'],
       header: ['/src/admin/Favicon#default'],
       graphics: {
         Logo: '/src/admin/Logo#default',
