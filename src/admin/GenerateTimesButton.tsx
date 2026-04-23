@@ -64,12 +64,35 @@ export default function GenerateTimesButton() {
     setBusy(null)
   }
 
+  const baseButtonStyle: React.CSSProperties = {
+    padding: '8px 16px',
+    borderRadius: 4,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: busy ? 'not-allowed' : 'pointer',
+    opacity: busy ? 0.6 : 1,
+    transition: 'background 120ms, border-color 120ms',
+    lineHeight: 1.2,
+  }
+  const primaryStyle: React.CSSProperties = {
+    ...baseButtonStyle,
+    background: 'var(--theme-elevation-800, #0F1E4A)',
+    color: 'var(--theme-elevation-0, #fff)',
+    border: '1px solid var(--theme-elevation-800, #0F1E4A)',
+  }
+  const secondaryStyle: React.CSSProperties = {
+    ...baseButtonStyle,
+    background: 'transparent',
+    color: 'var(--theme-elevation-800, #0F1E4A)',
+    border: '1px solid var(--theme-elevation-400, #94a3b8)',
+  }
+
   return (
     <div className="field-type ui-field" style={{ marginBottom: '1rem' }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <button
           type="button"
-          className="btn btn--style-primary"
+          style={primaryStyle}
           onClick={onGenerate}
           disabled={busy !== null}
         >
@@ -77,7 +100,7 @@ export default function GenerateTimesButton() {
         </button>
         <button
           type="button"
-          className="btn btn--style-secondary"
+          style={secondaryStyle}
           onClick={onApplyIqamah}
           disabled={busy !== null}
         >
