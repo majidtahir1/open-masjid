@@ -17,6 +17,7 @@ import { Services } from './collections/Services'
 import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
 import { applyIqamahRulesEndpoint } from './endpoints/applyIqamahRules'
+import { createTenantEndpoint } from './endpoints/createTenant'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
 import { runJobsDevEndpoint } from './endpoints/runJobsDev'
@@ -97,6 +98,7 @@ export default buildConfig({
     applyIqamahRulesEndpoint,
     inviteUserEndpoint,
     runJobsDevEndpoint,
+    createTenantEndpoint,
   ],
   jobs: {
     // Dev: `src/instrumentation.ts` ticks the queue every 30s.

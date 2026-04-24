@@ -23,6 +23,9 @@ export const Tenants: CollectionConfig = {
     defaultColumns: ['name', 'slug', 'siteType'],
     description:
       'A tenant is a masjid (or umbrella org) served by the platform. Each tenant has its own domain, branding, and content.',
+    components: {
+      beforeListTable: ['/src/admin/CreateTenantPanel#default'],
+    },
   },
   hooks: {
     beforeChange: [geocodeTenantAddress],
