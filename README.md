@@ -89,6 +89,137 @@ On Vercel use a Cron Job pointing at the same URL (set the secret as a Vercel en
 npm run seed
 ```
 
+## Deploying to your own server
+
+A rough guide for deploying to a single Linux VM (Ubuntu/Debian). Adjust paths to your setup.
+
+### 1. Prereqs on the box
+
+- Node.js ≥ 20.9.0
+- Postgres 16 (either `apt install` or Docker — mirror the local `docker-compose.yml` if you want the Docker route)
+- A reverse proxy terminating TLS (nginx, Caddy, or Traefik)
+
+### 2. Clone + build
+
+```bash
+git clone https://github.com/majidtahir1/open-masjid.git /opt/openmasjid
+cd /opt/openmasjid
+npm ci
+npm run build
+```
+
+### 3. Environment
+
+Create `/opt/openmasjid/.env`:
+
+```env
+DATABASE_URI=postgres://USER:PASSWORD@localhost:5432/openmasjid
+PAYLOAD_SECRET=<32-byte random hex, from openssl rand -hex 32>
+NEXT_PUBLIC_SERVER_URL=https://your-domain.tld
+
+# Email (optional — unset = console log only)
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
+EMAIL_FROM_ADDRESS=noreply@your-domain.tld
+EMAIL_FROM_NAME=YourMasjid
+
+# Scheduled publishing cron
+CRON_SECRET=<another 32-byte random hex>
+```
+
+Tighten permissions so only the service user can read it:
+
+```bash
+chown openmasjid:openmasjid /opt/openmasjid/.env
+chmod 600 /opt/openmasjid/.env
+```
+
+### 4. systemd unit
+
+Create `/etc/systemd/system/openmasjid.service`:
+
+```ini
+[Unit]
+Description=OpenMasjid (Next.js + Payload)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=openmasjid
+WorkingDirectory=/opt/openmasjid
+EnvironmentFile=/opt/openmasjid/.env
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable + start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now openmasjid
+sudo systemctl status openmasjid
+sudo journalctl -u openmasjid -f    # live logs
+```
+
+### 5. Reverse proxy (nginx example)
+
+Point a server block at `http://localhost:3000`, terminate TLS with Let's Encrypt, forward the `Host` header (middleware needs it for tenant resolution):
+
+```nginx
+server {
+  server_name your-domain.tld *.your-domain.tld;
+  listen 443 ssl http2;
+  # ... ssl_certificate / ssl_certificate_key ...
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+### 6. Scheduled-publishing cron
+
+The app doesn't run its own scheduler in production. A host crontab drains Payload's job queue every minute:
+
+```bash
+crontab -e -u openmasjid
+```
+
+Add (replace `<cron-secret>` with your `CRON_SECRET` value — cron doesn't read your `.env`):
+
+```cron
+* * * * * curl -fsS -X POST https://your-domain.tld/api/payload-jobs/run -H "X-Cron-Secret: <cron-secret>" >> /var/log/openmasjid-jobs.log 2>&1
+```
+
+Make sure the log file is writable:
+
+```bash
+sudo touch /var/log/openmasjid-jobs.log
+sudo chown openmasjid:openmasjid /var/log/openmasjid-jobs.log
+```
+
+Verify: `tail -f /var/log/openmasjid-jobs.log` — you should see a JSON response each minute (`{"noJobsRemaining":true,...}` when the queue is empty).
+
+### 7. Deploy updates
+
+```bash
+cd /opt/openmasjid
+git pull
+npm ci
+npm run build
+sudo systemctl restart openmasjid
+```
+
+Payload auto-syncs DB schema on boot in dev; for prod you should switch to explicit migration files via `npx payload migrate:create` (tracked separately — see backlog).
+
 ## Scripts
 
 | Command | Description |
