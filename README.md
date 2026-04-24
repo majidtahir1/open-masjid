@@ -68,15 +68,20 @@ Events, Pages, Announcements, and Hero Slides support **scheduled publish / unpu
 
 In dev, Payload's job queue auto-runs every minute (wired in `payload.config.ts` under `jobs.autoRun`), so scheduled jobs fire without extra setup.
 
-In production, the auto-runner is disabled. A cron or platform scheduler must POST to the jobs endpoint each minute:
+In production, the auto-runner is disabled. A cron drains the queue by POSTing to `/api/payload-jobs/run` every minute with a shared secret:
 
 ```bash
-# every minute
-curl -X POST https://<your-domain>/api/payload-jobs/run \
-  -H "Authorization: Bearer <PAYLOAD_SECRET>"
+# generate a secret once, add to .env
+openssl rand -hex 32   # → CRON_SECRET=...
+
+# crontab -e, add:
+* * * * * curl -fsS -X POST https://your-domain.tld/api/payload-jobs/run \
+  -H "X-Cron-Secret: $CRON_SECRET" >> /var/log/openmasjid-jobs.log 2>&1
 ```
 
-On Vercel use a Cron Job; on Fly/Render use the platform scheduler; on a plain VM a system crontab works.
+Payload's `jobs.access.run` accepts either an authenticated admin session **or** a matching `X-Cron-Secret` header — pick whichever suits your host. Without the env var set, the endpoint refuses unauthenticated calls entirely, so leaving `CRON_SECRET` unset in a production `.env` closes the route.
+
+On Vercel use a Cron Job pointing at the same URL (set the secret as a Vercel env var and inject via header). On Fly/Render use the platform scheduler. On a plain VM the crontab snippet above is enough.
 
 ### Seed (optional)
 

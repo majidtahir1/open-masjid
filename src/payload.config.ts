@@ -99,11 +99,27 @@ export default buildConfig({
     runJobsDevEndpoint,
   ],
   jobs: {
-    // Payload's built-in `autoRun` cron doesn't tick reliably under Next.js
-    // dev because HMR recycles the module that owns it. Our
-    // `src/instrumentation.ts` runs a plain `setInterval` that drains the
-    // queue every 30s — more durable. In production a platform cron should
-    // POST to `/api/payload-jobs/run` every minute instead (see README).
+    // Dev: `src/instrumentation.ts` ticks the queue every 30s.
+    // Prod: a crontab on the host POSTs to `/api/payload-jobs/run` every
+    //       minute with `X-Cron-Secret: $CRON_SECRET`. Authenticated admins
+    //       can also trigger a manual run from the browser.
+    access: {
+      run: ({ req }) => {
+        if (req.user) return true
+        const provided = req.headers.get('x-cron-secret') ?? ''
+        const expected = process.env.CRON_SECRET ?? ''
+        // Reject when no secret is configured — avoids accidentally exposing
+        // an unauthenticated job runner in a prod where the env var is unset.
+        if (!expected) return false
+        // Constant-time compare to defuse timing attacks on the secret.
+        if (provided.length !== expected.length) return false
+        let diff = 0
+        for (let i = 0; i < provided.length; i++) {
+          diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i)
+        }
+        return diff === 0
+      },
+    },
   },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
