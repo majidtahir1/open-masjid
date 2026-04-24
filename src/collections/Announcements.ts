@@ -28,7 +28,9 @@ export const Announcements: CollectionConfig = {
     preview: (doc, { req }) => buildHomePreviewUrl(doc, req),
   },
   versions: {
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
   },
   access: {
     read: tenantScopedRead,

@@ -262,7 +262,9 @@ export const HeroSlides: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
   },
 }
 

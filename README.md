@@ -62,6 +62,22 @@ npm run dev
 
 Open http://localhost:3000 for the site and http://localhost:3000/admin for the Payload admin. Create the first admin user on first visit.
 
+### Scheduled publishing
+
+Events, Pages, Announcements, and Hero Slides support **scheduled publish / unpublish** — click the ▾ next to Publish in the admin and pick a future date/time.
+
+In dev, Payload's job queue auto-runs every minute (wired in `payload.config.ts` under `jobs.autoRun`), so scheduled jobs fire without extra setup.
+
+In production, the auto-runner is disabled. A cron or platform scheduler must POST to the jobs endpoint each minute:
+
+```bash
+# every minute
+curl -X POST https://<your-domain>/api/payload-jobs/run \
+  -H "Authorization: Bearer <PAYLOAD_SECRET>"
+```
+
+On Vercel use a Cron Job; on Fly/Render use the platform scheduler; on a plain VM a system crontab works.
+
 ### Seed (optional)
 
 ```bash

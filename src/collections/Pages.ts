@@ -51,7 +51,9 @@ export const Pages: CollectionConfig = {
     },
   },
   versions: {
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
   },
   access: {
     read: tenantScopedRead,

@@ -92,6 +92,22 @@ export default buildConfig({
     Pages,
   ],
   endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint, inviteUserEndpoint],
+  jobs: {
+    // In dev we auto-run the scheduled-publish queue every minute so editors
+    // can test scheduled publish/unpublish flows without standing up a real
+    // cron. In production a cron (or platform scheduler) should POST to
+    // /api/payload-jobs/run every minute to tick the queue — see README.
+    autoRun:
+      process.env.NODE_ENV === 'development'
+        ? [
+            {
+              cron: '* * * * *',
+              limit: 100,
+              queue: 'default',
+            },
+          ]
+        : [],
+  },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
