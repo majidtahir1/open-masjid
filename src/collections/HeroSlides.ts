@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { validateLucideIcon } from '../lib/validateLucideIcon'
 
 export const HeroSlides: CollectionConfig = {
   slug: 'hero-slides',
@@ -196,6 +197,7 @@ export const HeroSlides: CollectionConfig = {
               Field: '/src/fields/TextField#default',
             },
           },
+          validate: (value: unknown) => validateLucideIcon(value),
         },
         {
           name: 'primary',

@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { validateLucideIcon } from '../lib/validateLucideIcon'
 
 export const Services: CollectionConfig = {
   slug: 'services',
@@ -70,6 +71,7 @@ export const Services: CollectionConfig = {
           Field: '/src/fields/TextField#default',
         },
       },
+      validate: (value: unknown) => validateLucideIcon(value),
     },
     {
       name: 'sortOrder',

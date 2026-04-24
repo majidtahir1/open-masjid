@@ -6,11 +6,10 @@ import {
   ArrowLeft,
   ArrowRight,
   Calendar,
-  Heart,
-  HeartHandshake,
-  type LucideIcon,
+  ArrowRight as ArrowRightIcon,
 } from 'lucide-react'
 
+import LucideIconByName from './LucideIcon'
 import type { Accent, HeroCta, HeroSlideLike } from './types'
 
 export interface HeroProps {
@@ -19,11 +18,6 @@ export interface HeroProps {
   intervalMs?: number
 }
 
-/** Small icon map for known hero CTA icons. */
-const CTA_ICONS: Record<string, LucideIcon> = {
-  heart: Heart,
-  'heart-handshake': HeartHandshake,
-}
 
 function resolveCtaHref(cta: HeroCta): string {
   if (cta.href) return cta.href
@@ -238,7 +232,6 @@ export default function Hero({ slides, intervalMs = 7000 }: HeroProps) {
                       {slide.ctas.map((cta, j) => {
                         const href = resolveCtaHref(cta)
                         const isPrimary = cta.primary ?? false
-                        const Icon = cta.icon ? CTA_ICONS[cta.icon] : null
                         const primaryClasses =
                           accent === 'navy'
                             ? 'bg-white text-brand hover:bg-white/90'
@@ -255,7 +248,14 @@ export default function Hero({ slides, intervalMs = 7000 }: HeroProps) {
                         ].join(' ')
                         const content = (
                           <>
-                            {Icon && <Icon size={16} strokeWidth={1.75} />}
+                            {cta.icon ? (
+                              <LucideIconByName
+                                name={cta.icon}
+                                fallback={ArrowRightIcon}
+                                size={16}
+                                strokeWidth={1.75}
+                              />
+                            ) : null}
                             <span>{cta.label}</span>
                           </>
                         )
