@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { buildHomePreviewUrl } from '../lib/previewUrl'
 
 export const Announcements: CollectionConfig = {
   slug: 'announcements',
@@ -21,6 +22,13 @@ export const Announcements: CollectionConfig = {
     defaultColumns: ['title', 'priority', 'active', 'expiresAt'],
     description:
       'Short-lived notices shown at the top of the public site (closures, schedule changes, reminders). Use Events for programs; use Announcements for quick updates.',
+    // Announcements render as site-wide banners, not individual pages — preview
+    // opens the tenant homepage so the admin can see the banner in place. No
+    // livePreview because there's no single URL that "is" an announcement.
+    preview: (doc, { req }) => buildHomePreviewUrl(doc, req),
+  },
+  versions: {
+    drafts: true,
   },
   access: {
     read: tenantScopedRead,

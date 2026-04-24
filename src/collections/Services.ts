@@ -107,6 +107,9 @@ export const Services: CollectionConfig = {
       },
     },
   ],
+  versions: {
+    drafts: true,
+  },
 }
 
 export default Services

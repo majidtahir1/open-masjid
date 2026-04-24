@@ -1,5 +1,6 @@
 import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
 import { default as default_ff3268629584f3c8482e80b479334e91 } from '../../../../src/fields/SelectField'
+import { default as default_6be9fe46a5d0b8701eabd18cf8509bb0 } from '../../../../src/admin/InviteUserPanel'
 import { default as default_0ffd719fe552e7f96260b5b4f16226bb } from '../../../../src/fields/TextareaField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -47,6 +48,7 @@ import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../..
 export const importMap = {
   "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
   "/src/fields/SelectField#default": default_ff3268629584f3c8482e80b479334e91,
+  "/src/admin/InviteUserPanel#default": default_6be9fe46a5d0b8701eabd18cf8509bb0,
   "/src/fields/TextareaField#default": default_0ffd719fe552e7f96260b5b4f16226bb,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,

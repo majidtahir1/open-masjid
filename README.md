@@ -34,6 +34,18 @@ PAYLOAD_SECRET=<32-byte random hex>
 NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ```
 
+### Email (optional, required for forgot-password + invites)
+
+Leaving the Resend env vars unset makes Payload log outgoing email to the console — fine for local dev. To send real email:
+
+```env
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+EMAIL_FROM_ADDRESS=noreply@openmasjid.app
+EMAIL_FROM_NAME=OpenMasjid
+```
+
+Get a key at [resend.com](https://resend.com) (free tier: 100/day, 3000/mo). Verify the sending domain in Resend before using a custom `EMAIL_FROM_ADDRESS` in production; for local testing you can use `onboarding@resend.dev` without verification.
+
 ### Database
 
 ```bash

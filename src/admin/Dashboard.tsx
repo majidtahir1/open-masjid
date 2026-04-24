@@ -239,7 +239,6 @@ async function TenantDashboard({
       collection: 'events',
       where: {
         tenant: { equals: tenantId },
-        status: { equals: 'published' },
         or: [
           { startDate: { greater_than_equal: new Date().toISOString() } },
           { startDate: { exists: false } },

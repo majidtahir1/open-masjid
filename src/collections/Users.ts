@@ -16,6 +16,45 @@ export const Users: CollectionConfig = {
   },
   auth: {
     depth: 0,
+    forgotPassword: {
+      generateEmailSubject: () => 'Set your password — OpenMasjid',
+      generateEmailHTML: (args) => {
+        const token = (args as { token?: string } | undefined)?.token ?? ''
+        const user = (args as { user?: { email?: string; firstName?: string | null } } | undefined)?.user
+        const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
+        const link = `${serverURL}/admin/reset/${token}`
+        const greeting = user?.firstName
+          ? `Assalamu alaikum ${user.firstName},`
+          : 'Assalamu alaikum,'
+        return `
+          <!doctype html>
+          <html>
+            <body style="font-family: system-ui, -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #1f2937;">
+              <h1 style="font-size: 20px; margin: 0 0 16px;">OpenMasjid — set your password</h1>
+              <p style="margin: 0 0 16px;">${greeting}</p>
+              <p style="margin: 0 0 16px;">
+                You've been invited to the OpenMasjid admin panel (or you asked to reset your password).
+                Click the button below to set your password and sign in.
+              </p>
+              <p style="margin: 24px 0;">
+                <a href="${link}" style="display: inline-block; background: #0F1E4A; color: #fff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                  Set password
+                </a>
+              </p>
+              <p style="margin: 0 0 8px; font-size: 13px; color: #6b7280;">
+                This link is single-use. If the button doesn't work, paste this URL into your browser:
+              </p>
+              <p style="margin: 0 0 16px; font-size: 12px; color: #6b7280; word-break: break-all;">
+                ${link}
+              </p>
+              <p style="margin: 24px 0 0; font-size: 12px; color: #9ca3af;">
+                If you didn't expect this email, you can ignore it — no action is needed.
+              </p>
+            </body>
+          </html>
+        `
+      },
+    },
   },
   admin: {
     group: 'People',
@@ -23,6 +62,9 @@ export const Users: CollectionConfig = {
     defaultColumns: ['firstName', 'lastName', 'email', 'role', 'tenant'],
     description:
       'People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant\'s content.',
+    components: {
+      beforeListTable: ['/src/admin/InviteUserPanel#default'],
+    },
   },
   access: {
     // Who can create a new user?

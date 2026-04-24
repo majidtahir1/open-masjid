@@ -150,7 +150,7 @@ async function seed() {
   const tenantId = icp.id
 
   // 3. Admin user
-  const adminEmail = 'admin@icprosper.org'
+  const adminEmail = 'mtahir@gmail.com'
   const existingAdmin = await findOne<{ id: string | number }>(payload, 'users', {
     email: { equals: adminEmail },
   })
@@ -217,7 +217,7 @@ async function seed() {
   for (let i = 0; i < services.length; i++) {
     await payload.create({
       collection: 'services',
-      data: { ...services[i], sortOrder: i + 1, tenant: tenantId },
+      data: { ...services[i], sortOrder: i + 1, _status: 'published', tenant: tenantId },
       overrideAccess: true,
       req: seedReq,
     })
@@ -263,7 +263,7 @@ async function seed() {
   for (const slide of heroSlides) {
     await payload.create({
       collection: 'hero-slides',
-      data: { ...slide, tenant: tenantId },
+      data: { ...slide, _status: 'published', tenant: tenantId },
       overrideAccess: true,
       req: seedReq,
     })
@@ -314,6 +314,19 @@ async function seed() {
       location: 'Community room',
       audience: ['youth' as const],
     },
+    {
+      title: 'AI Tech Night',
+      slug: 'tech-night',
+      shortDescription: 'Explore how Muslims are building with AI — demos, discussion, Q&A.',
+      tag: 'community' as const,
+      when: 'May 1st after Maghrib',
+      startDate: new Date('2026-05-02T01:00:00Z').toISOString(),
+      displayMode: 'template' as const,
+      templateVariant: 'gold' as const,
+      featured: true,
+      heroAccent: 'gold' as const,
+      audience: ['all' as const],
+    },
   ]
   for (const ev of events) {
     await payload.create({
@@ -321,7 +334,7 @@ async function seed() {
       data: {
         ...ev,
         description: richText(ev.shortDescription),
-        status: 'published' as const,
+        _status: 'published',
         tenant: tenantId,
       },
       overrideAccess: true,

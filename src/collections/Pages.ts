@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { buildPreviewUrl } from '../lib/previewUrl'
 
 const slugify = (value: string): string =>
   value
@@ -39,6 +40,18 @@ export const Pages: CollectionConfig = {
     defaultColumns: ['title', 'slug'],
     description:
       'Static content pages (About, Our Story, Bylaws, etc.). Each page becomes a URL under the tenant\'s site. Use the built-in pages (Home, Events, Prayer Times, Donate) for standard sections.',
+    preview: (doc, { req }) => buildPreviewUrl(doc, req, ''),
+    livePreview: {
+      url: ({ data, req }) => buildPreviewUrl(data, req, ''),
+      breakpoints: [
+        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
+        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
+        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
+      ],
+    },
+  },
+  versions: {
+    drafts: true,
   },
   access: {
     read: tenantScopedRead,

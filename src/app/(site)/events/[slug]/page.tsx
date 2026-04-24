@@ -4,13 +4,16 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, Calendar, Mail, MapPin } from 'lucide-react'
 
 import Flyer from '@/components/Flyer'
+import PreviewBanner from '@/components/PreviewBanner'
 import RichText from '@/components/RichText'
 import { mediaAlt, mediaUrl, type EventLike } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { fetchEventBySlug } from '@/lib/data'
+import { isPreviewMode } from '@/lib/previewMode'
 
 interface EventPageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ draft?: string | string[] }>
 }
 
 export const dynamic = 'force-dynamic'
@@ -21,12 +24,14 @@ type EventDoc = EventLike & {
   contact?: string | null
 }
 
-export default async function EventDetailPage({ params }: EventPageProps) {
+export default async function EventDetailPage({ params, searchParams }: EventPageProps) {
   const { slug } = await params
+  const sp = await searchParams
   const tenant = await getCurrentTenant()
   if (!tenant) notFound()
 
-  const event = (await fetchEventBySlug(tenant, slug)) as EventDoc | null
+  const draft = await isPreviewMode(sp)
+  const event = (await fetchEventBySlug(tenant, slug, { draft })) as EventDoc | null
   if (!event) notFound()
 
   const displayMode = event.displayMode ?? 'text'
@@ -34,6 +39,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
   return (
     <article className="py-16">
+      {draft ? <PreviewBanner /> : null}
       <div className="mx-auto max-w-[880px] px-6">
         <Link
           href="/events"
