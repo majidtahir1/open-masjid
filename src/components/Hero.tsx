@@ -2,12 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ArrowLeft,
-  ArrowRight,
-  Calendar,
-  ArrowRight as ArrowRightIcon,
-} from 'lucide-react'
+import { ArrowLeft, ArrowRight, Calendar } from 'lucide-react'
 
 import LucideIconByName from './LucideIcon'
 import type { Accent, HeroCta, HeroSlideLike } from './types'
@@ -251,7 +246,7 @@ export default function Hero({ slides, intervalMs = 7000 }: HeroProps) {
                             {cta.icon ? (
                               <LucideIconByName
                                 name={cta.icon}
-                                fallback={ArrowRightIcon}
+                                fallbackName="arrow-right"
                                 size={16}
                                 strokeWidth={1.75}
                               />

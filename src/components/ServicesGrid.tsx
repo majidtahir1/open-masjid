@@ -1,5 +1,3 @@
-import { HandHeart } from 'lucide-react'
-
 import LucideIconByName from './LucideIcon'
 import type { ServiceLike } from './types'
 
@@ -54,7 +52,7 @@ export default function ServicesGrid({
               >
                 <LucideIconByName
                   name={s.icon}
-                  fallback={HandHeart}
+                  fallbackName="hand-heart"
                   size={24}
                   strokeWidth={1.75}
                   aria-hidden="true"
