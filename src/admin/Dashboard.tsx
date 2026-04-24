@@ -452,39 +452,71 @@ async function TenantDashboard({
 
       <Separator />
 
-      {/* Quick actions */}
+      {/* Quick actions.
+          `setTenantFromUser` hook on each collection pre-fills the tenant on
+          save for non-platformOwner users; platformOwners pick a tenant on the
+          form. With drafts enabled on Events/Announcements/Pages/HeroSlides/
+          Services, a fresh create saves as Draft until the admin clicks
+          Publish — giving them a safe preview loop. */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Quick actions
         </h2>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="lg" asChild className="text-base">
-            <Link href="/admin/collections/events/create">
-              <CalendarPlus className="h-5 w-5" aria-hidden />
-              New Event
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" asChild className="text-base">
-            <Link href="/admin/collections/announcements/create">
-              <Megaphone className="h-5 w-5" aria-hidden />
-              New Announcement
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" asChild className="text-base">
-            <Link href={newScheduleHref}>
-              <Clock className="h-5 w-5" aria-hidden />
-              New Prayer Schedule
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" asChild className="text-base">
-            <Link href="/admin/collections/hero-slides/create">
-              <ImageIcon className="h-5 w-5" aria-hidden />
-              New Hero Slide
-            </Link>
-          </Button>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <QuickActionCard
+            href="/admin/collections/events/create"
+            icon={<CalendarPlus className="h-5 w-5" aria-hidden />}
+            title="New Event"
+            description="Class, program, or gathering"
+          />
+          <QuickActionCard
+            href="/admin/collections/announcements/create"
+            icon={<Megaphone className="h-5 w-5" aria-hidden />}
+            title="New Announcement"
+            description="Short notice for the site banner"
+          />
+          <QuickActionCard
+            href={newScheduleHref}
+            icon={<Clock className="h-5 w-5" aria-hidden />}
+            title="New Prayer Schedule"
+            description="Seasonal iqamah + adhan range"
+          />
+          <QuickActionCard
+            href="/admin/collections/hero-slides/create"
+            icon={<ImageIcon className="h-5 w-5" aria-hidden />}
+            title="New Hero Slide"
+            description="Homepage hero card"
+          />
         </div>
       </section>
     </div>
+  )
+}
+
+function QuickActionCard({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string
+  icon: React.ReactNode
+  title: string
+  description: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-3 rounded-lg border border-border bg-white p-4 transition-colors hover:border-primary hover:bg-accent/50"
+    >
+      <span className="grid h-10 w-10 place-items-center rounded-md bg-secondary/10 text-secondary group-hover:bg-primary/10 group-hover:text-primary">
+        {icon}
+      </span>
+      <span className="flex min-w-0 flex-col">
+        <span className="text-base font-semibold text-foreground">{title}</span>
+        <span className="text-sm text-muted-foreground">{description}</span>
+      </span>
+    </Link>
   )
 }
 
@@ -606,19 +638,19 @@ async function PlatformDashboard({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Quick actions
         </h2>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="lg" asChild className="text-base">
-            <Link href="/admin/collections/tenants/create">
-              <Building className="h-5 w-5" aria-hidden />
-              Add Tenant
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" asChild className="text-base">
-            <Link href="/admin/collections/users/create">
-              <Users className="h-5 w-5" aria-hidden />
-              Add User
-            </Link>
-          </Button>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <QuickActionCard
+            href="/admin/collections/tenants/create"
+            icon={<Building className="h-5 w-5" aria-hidden />}
+            title="Add Tenant"
+            description="Provision a new masjid site"
+          />
+          <QuickActionCard
+            href="/admin/collections/users/create"
+            icon={<Users className="h-5 w-5" aria-hidden />}
+            title="Add User"
+            description="Invite staff or admins"
+          />
         </div>
       </section>
     </div>

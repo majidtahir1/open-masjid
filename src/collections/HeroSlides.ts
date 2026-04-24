@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { validateLucideIcon } from '../lib/validateLucideIcon'
 
 export const HeroSlides: CollectionConfig = {
   slug: 'hero-slides',
@@ -187,15 +188,14 @@ export const HeroSlides: CollectionConfig = {
         {
           name: 'icon',
           type: 'text',
-          label: 'Icon Name',
+          label: 'Icon',
           admin: {
-            description:
-              'Optional. Name of a Lucide icon (kebab-case), e.g. "hand-heart". See lucide.dev for the full list.',
-            placeholder: 'hand-heart',
+            description: 'Optional. Pick an icon for the button.',
             components: {
-              Field: '/src/fields/TextField#default',
+              Field: '/src/fields/IconPickerField#default',
             },
           },
+          validate: (value: unknown) => validateLucideIcon(value),
         },
         {
           name: 'primary',

@@ -1,17 +1,6 @@
-import {
-  BookHeart,
-  GraduationCap,
-  HandHeart,
-  Heart,
-  HeartHandshake,
-  type LucideIcon,
-  type LucideProps,
-  Scale,
-  Stethoscope,
-  Users,
-  UtensilsCrossed,
-} from 'lucide-react'
+import { HandHeart } from 'lucide-react'
 
+import LucideIconByName from './LucideIcon'
 import type { ServiceLike } from './types'
 
 export interface ServicesGridProps {
@@ -22,32 +11,6 @@ export interface ServicesGridProps {
   title?: string
   /** Optional subtitle below the title. */
   subtitle?: string
-}
-
-/**
- * Curated icon map for services. Keys are the kebab-case icon names admins type
- * into the Services collection's `icon` field. Covering the icons used by the
- * design prototype plus a few safe fallbacks. Unknown names fall back to
- * HandHeart.
- *
- * To add a new icon: import it at the top and register it here. Keeping the
- * map explicit prevents arbitrary icon bundles from being pulled in.
- */
-const ICON_MAP: Record<string, LucideIcon> = {
-  'hand-heart': HandHeart,
-  'heart-handshake': HeartHandshake,
-  stethoscope: Stethoscope,
-  scale: Scale,
-  'book-heart': BookHeart,
-  heart: Heart,
-  users: Users,
-  'graduation-cap': GraduationCap,
-  'utensils-crossed': UtensilsCrossed,
-}
-
-function ServiceIcon({ name, ...rest }: { name: string | null | undefined } & LucideProps) {
-  const Icon = (name && ICON_MAP[name]) || HandHeart
-  return <Icon {...rest} />
 }
 
 export default function ServicesGrid({
@@ -89,7 +52,13 @@ export default function ServicesGrid({
                   'bg-brand-soft text-brand',
                 ].join(' ')}
               >
-                <ServiceIcon name={s.icon} size={24} strokeWidth={1.75} aria-hidden="true" />
+                <LucideIconByName
+                  name={s.icon}
+                  fallback={HandHeart}
+                  size={24}
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
               </div>
               <h3 className="mb-[6px] font-display text-[20px] font-semibold text-fg1">
                 {s.title}

@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { validateLucideIcon } from '../lib/validateLucideIcon'
 
 export const Services: CollectionConfig = {
   slug: 'services',
@@ -61,15 +62,14 @@ export const Services: CollectionConfig = {
       name: 'icon',
       type: 'text',
       required: true,
-      label: 'Icon Name',
+      label: 'Icon',
       admin: {
-        description:
-          'Name of a Lucide icon (kebab-case), e.g. "hand-heart", "book-open", "users". Browse lucide.dev for the full list.',
-        placeholder: 'hand-heart',
+        description: 'Pick an icon that represents this service.',
         components: {
-          Field: '/src/fields/TextField#default',
+          Field: '/src/fields/IconPickerField#default',
         },
       },
+      validate: (value: unknown) => validateLucideIcon(value),
     },
     {
       name: 'sortOrder',
