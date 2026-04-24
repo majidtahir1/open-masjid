@@ -19,6 +19,7 @@ import { Users } from './collections/Users'
 import { applyIqamahRulesEndpoint } from './endpoints/applyIqamahRules'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
+import { runJobsDevEndpoint } from './endpoints/runJobsDev'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -91,7 +92,12 @@ export default buildConfig({
     Services,
     Pages,
   ],
-  endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint, inviteUserEndpoint],
+  endpoints: [
+    generatePrayerTimesEndpoint,
+    applyIqamahRulesEndpoint,
+    inviteUserEndpoint,
+    runJobsDevEndpoint,
+  ],
   jobs: {
     // Payload's built-in `autoRun` cron doesn't tick reliably under Next.js
     // dev because HMR recycles the module that owns it. Our

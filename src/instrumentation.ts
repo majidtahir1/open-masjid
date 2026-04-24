@@ -17,22 +17,22 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return
   if (process.env.NODE_ENV !== 'development') return
 
-  const { getPayload } = await import('payload')
-  const config = (await import('@payload-config')).default
-  const payload = await getPayload({ config })
-
+  const url =
+    (process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000') +
+    '/api/run-jobs-dev'
   const INTERVAL_MS = 30_000
-  const LIMIT = 25
 
   const tick = async () => {
     try {
-      await payload.jobs.run({ limit: LIMIT, queue: 'default' })
+      await fetch(url, { method: 'POST' })
     } catch {
-      // Swallow errors — a failed tick shouldn't crash dev.
+      // Swallow errors — a failed tick shouldn't crash dev, and early ticks
+      // may hit the server before the route registers.
     }
   }
 
-  // Kick once immediately so already-due jobs run right after boot.
-  tick()
+  // Delay the first tick a few seconds so the Next.js server is up and the
+  // custom endpoint is registered.
+  setTimeout(tick, 5_000)
   setInterval(tick, INTERVAL_MS)
 }
