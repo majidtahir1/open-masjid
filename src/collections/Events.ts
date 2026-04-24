@@ -55,7 +55,9 @@ export const Events: CollectionConfig = {
     },
   },
   versions: {
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
   },
   access: {
     read: tenantScopedRead,

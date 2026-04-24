@@ -19,6 +19,7 @@ import { Users } from './collections/Users'
 import { applyIqamahRulesEndpoint } from './endpoints/applyIqamahRules'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
+import { runJobsDevEndpoint } from './endpoints/runJobsDev'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -91,7 +92,35 @@ export default buildConfig({
     Services,
     Pages,
   ],
-  endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint, inviteUserEndpoint],
+  endpoints: [
+    generatePrayerTimesEndpoint,
+    applyIqamahRulesEndpoint,
+    inviteUserEndpoint,
+    runJobsDevEndpoint,
+  ],
+  jobs: {
+    // Dev: `src/instrumentation.ts` ticks the queue every 30s.
+    // Prod: a crontab on the host POSTs to `/api/payload-jobs/run` every
+    //       minute with `X-Cron-Secret: $CRON_SECRET`. Authenticated admins
+    //       can also trigger a manual run from the browser.
+    access: {
+      run: ({ req }) => {
+        if (req.user) return true
+        const provided = req.headers.get('x-cron-secret') ?? ''
+        const expected = process.env.CRON_SECRET ?? ''
+        // Reject when no secret is configured — avoids accidentally exposing
+        // an unauthenticated job runner in a prod where the env var is unset.
+        if (!expected) return false
+        // Constant-time compare to defuse timing attacks on the secret.
+        if (provided.length !== expected.length) return false
+        let diff = 0
+        for (let i = 0; i < provided.length; i++) {
+          diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i)
+        }
+        return diff === 0
+      },
+    },
+  },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
