@@ -27,6 +27,7 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_5065215e438fef22269547c6432587f3 } from '../../../../src/fields/EmailField'
 import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../../src/fields/CheckboxField'
+import { default as default_737df59d0032b50354e46d5ff0b71d1c } from '../../../../src/fields/IconPickerField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
@@ -75,6 +76,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/src/fields/EmailField#default": default_5065215e438fef22269547c6432587f3,
   "/src/fields/CheckboxField#default": default_020349c8fbd548aa796ba56590815903,
+  "/src/fields/IconPickerField#default": default_737df59d0032b50354e46d5ff0b71d1c,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/ActiveScheduleBanner#default": default_07d961590be6dea90e3f89bf0ec85650,
   "/src/admin/ScheduleNameCell#default": default_dd3aaf7dfdea38a3f5207a0e64556a07,
