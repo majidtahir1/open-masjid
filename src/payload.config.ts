@@ -93,20 +93,11 @@ export default buildConfig({
   ],
   endpoints: [generatePrayerTimesEndpoint, applyIqamahRulesEndpoint, inviteUserEndpoint],
   jobs: {
-    // In dev we auto-run the scheduled-publish queue every minute so editors
-    // can test scheduled publish/unpublish flows without standing up a real
-    // cron. In production a cron (or platform scheduler) should POST to
-    // /api/payload-jobs/run every minute to tick the queue — see README.
-    autoRun:
-      process.env.NODE_ENV === 'development'
-        ? [
-            {
-              cron: '* * * * *',
-              limit: 100,
-              queue: 'default',
-            },
-          ]
-        : [],
+    // Payload's built-in `autoRun` cron doesn't tick reliably under Next.js
+    // dev because HMR recycles the module that owns it. Our
+    // `src/instrumentation.ts` runs a plain `setInterval` that drains the
+    // queue every 30s — more durable. In production a platform cron should
+    // POST to `/api/payload-jobs/run` every minute instead (see README).
   },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
