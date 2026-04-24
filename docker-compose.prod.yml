@@ -1,0 +1,72 @@
+# Production Docker Compose stack for OpenMasjid.
+#
+#   app   - Next.js + Payload (standalone build, non-root, port 3000 internal)
+#   db    - Postgres 16 (persistent pgdata volume)
+#   cron  - Alpine crond sidecar that ticks /api/payload-jobs/run every minute
+#
+# Expected to sit behind an external reverse proxy (Nginx Proxy Manager is the
+# recommended choice — lives in its own compose stack). NPM reaches the app
+# via the shared Docker network declared at the bottom.
+#
+# Media uploads live in `public/media` inside the container; a host/TrueNAS
+# bind mount survives container rebuilds. See README "Deploying with Docker".
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-openmasjid}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openmasjid/app:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    expose:
+      - "3000"
+    volumes:
+      # Host/TrueNAS mount for uploaded media. Point MEDIA_PATH at a local
+      # directory OR an NFS-mounted share. Default: ./media (host).
+      - ${MEDIA_PATH:-./media}:/app/public/media
+
+  cron:
+    image: alpine:3.20
+    restart: unless-stopped
+    depends_on:
+      - app
+    env_file: .env
+    command: >
+      sh -c "apk add --no-cache curl tzdata >/dev/null &&
+      echo '* * * * * curl -fsS -X POST http://app:3000/api/payload-jobs/run -H \"X-Cron-Secret: $$CRON_SECRET\" >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
+      crond -f -L /dev/stdout"
+
+volumes:
+  pgdata:
+
+# Declare a shared external network so Nginx Proxy Manager (running in its
+# own stack) can reach `app:3000` by name. Create it once on the host:
+#   docker network create openmasjid-public
+#
+# Then in NPM's compose file, attach the same network:
+#   networks:
+#     openmasjid-public:
+#       external: true
+networks:
+  default:
+    name: openmasjid-public
+    external: true
