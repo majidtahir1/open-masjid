@@ -36,7 +36,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file: .env
+    env_file: ${ENV_FILE:-.env}
     ports:
       # Publish on the LAN so an off-box NPM can proxy to http://<host-ip>:3000.
       # Use APP_BIND=127.0.0.1 to restrict to localhost only (e.g. when NPM
@@ -52,7 +52,7 @@ services:
     restart: unless-stopped
     depends_on:
       - app
-    env_file: .env
+    env_file: ${ENV_FILE:-.env}
     command: >
       sh -c "apk add --no-cache curl tzdata >/dev/null &&
       echo '* * * * * curl -fsS -X POST http://app:3000/api/payload-jobs/run -H \"X-Cron-Secret: $$CRON_SECRET\" >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
