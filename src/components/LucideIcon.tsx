@@ -4,7 +4,7 @@ import { DynamicIcon } from 'lucide-react/dynamic'
 import { HandHeart, type LucideProps } from 'lucide-react'
 import React from 'react'
 
-export interface LucideIconProps extends LucideProps {
+export interface LucideIconProps extends Omit<LucideProps, 'name'> {
   /** Kebab-case icon name (e.g. `hand-heart`). See https://lucide.dev/icons. */
   name?: string | null
   /**
