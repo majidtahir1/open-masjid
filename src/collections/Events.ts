@@ -7,7 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
-import { buildPreviewUrl } from '../lib/previewUrl'
+import { buildLivePreviewUrl, buildPreviewUrl } from '../lib/previewUrl'
 
 /**
  * Auto-generate a URL-safe slug from the title unless one has been manually
@@ -46,7 +46,7 @@ export const Events: CollectionConfig = {
       'Classes, programs, and gatherings. Published events appear on the public Events page; featured events also appear in the homepage hero.',
     preview: (doc, { req }) => buildPreviewUrl(doc, req, 'events'),
     livePreview: {
-      url: ({ data, req }) => buildPreviewUrl(data, req, 'events'),
+      url: ({ data, req }) => buildLivePreviewUrl(data, req, 'events'),
       breakpoints: [
         { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
         { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
