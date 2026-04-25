@@ -1,7 +1,7 @@
 'use client'
 
 import { FieldLabel, useField } from '@payloadcms/ui'
-import { DynamicIcon, iconNames } from 'lucide-react/dynamic'
+import { DynamicIcon, iconNames, type IconName } from 'lucide-react/dynamic'
 import React, { useDeferredValue, useMemo, useState } from 'react'
 import { Grid, type CellComponentProps } from 'react-window'
 
@@ -66,7 +66,7 @@ function IconCell({
           cursor: 'pointer',
         }}
       >
-        <DynamicIcon name={name} size={22} strokeWidth={1.75} />
+        <DynamicIcon name={name as IconName} size={22} strokeWidth={1.75} />
         <span
           style={{
             fontSize: 9,

@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicIcon } from 'lucide-react/dynamic'
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic'
 import { HandHeart, type LucideProps } from 'lucide-react'
 import React from 'react'
 
@@ -30,11 +30,19 @@ export default function LucideIconByName({
   const trimmed = (name ?? '').trim()
   const fallbackTrimmed = (fallbackName ?? '').trim()
 
+  // DynamicIcon types `name` as the literal union of kebab-case Lucide names
+  // and `fallback` as a no-arg component. Cast through unknown — we validate
+  // the shape on save (kebab-case regex) and DynamicIcon falls back at runtime
+  // if a name doesn't resolve.
+  const fallback = HandHeart as unknown as () => React.ReactElement
+
   if (trimmed) {
-    return <DynamicIcon name={trimmed} fallback={HandHeart} {...rest} />
+    return <DynamicIcon name={trimmed as IconName} fallback={fallback} {...rest} />
   }
   if (fallbackTrimmed) {
-    return <DynamicIcon name={fallbackTrimmed} fallback={HandHeart} {...rest} />
+    return (
+      <DynamicIcon name={fallbackTrimmed as IconName} fallback={fallback} {...rest} />
+    )
   }
   return <HandHeart {...rest} />
 }

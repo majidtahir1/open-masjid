@@ -38,7 +38,7 @@ async function tenantBaseUrl(
         id,
         depth: 0,
         overrideAccess: true,
-      })) as typeof resolved
+      })) as unknown as typeof resolved
     } catch {
       return null
     }
