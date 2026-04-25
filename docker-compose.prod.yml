@@ -27,6 +27,18 @@ services:
       timeout: 5s
       retries: 5
 
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    image: openmasjid/migrator:latest
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: ${ENV_FILE:-.env}
+
   app:
     build:
       context: .
@@ -36,6 +48,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     env_file: ${ENV_FILE:-.env}
     ports:
       # Publish on the LAN so an off-box NPM can proxy to http://<host-ip>:3000.

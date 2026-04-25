@@ -67,3 +67,23 @@ EXPOSE 3000
 # down gracefully instead of SIGKILL'ing it after 10s.
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "server.js"]
+
+# -----------------------------------------------------------------------------
+# Stage 4 — migrator: tiny image for running Payload migrations against the DB
+# before the app boots. Uses full node_modules (payload CLI + tsx) so it can
+# evaluate the TypeScript config + migration files directly.
+# -----------------------------------------------------------------------------
+FROM node:20-alpine AS migrator
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat tini
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY src ./src
+COPY tsconfig.json ./
+
+ENV NODE_ENV=production
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["npx", "payload", "migrate"]
