@@ -181,7 +181,7 @@ In the NPM UI → **Proxy Hosts → Add Proxy Host**:
 
 The Host header is non-negotiable — middleware reads it for tenant resolution.
 
-### 7. Deploy updates
+### 6. Deploy updates
 
 ```bash
 cd /opt/openmasjid
