@@ -24,7 +24,7 @@ const handler: PayloadHandler = async (req) => {
     depth: 0,
     overrideAccess: false,
     user,
-  })) as Record<string, unknown>
+  })) as unknown as Record<string, unknown>
 
   const rules = schedule.iqamahRules as IqamahRulesShape | undefined
   const days = (schedule.days as DayShape[] | undefined) ?? []

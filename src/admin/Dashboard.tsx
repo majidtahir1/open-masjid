@@ -128,7 +128,7 @@ async function fetchActiveSchedule(
       depth: 0,
       overrideAccess: true,
     })
-    const doc = dated.docs[0] as Record<string, unknown> | undefined
+    const doc = dated.docs[0] as unknown as Record<string, unknown> | undefined
 
     if (doc) {
       type DayPair = { adhan?: string | null; iqamah?: string | null }
@@ -176,7 +176,7 @@ async function fetchActiveSchedule(
       depth: 0,
       overrideAccess: true,
     })
-    const doc = legacy.docs[0] as Record<string, unknown> | undefined
+    const doc = legacy.docs[0] as unknown as Record<string, unknown> | undefined
     if (!doc) return null
     const s = (k: string) => (doc[k] as string) || '—'
     const date = doc.date ? new Date(doc.date as string).toLocaleDateString() : 'today'
@@ -220,7 +220,7 @@ async function TenantDashboard({
       id: tenantId,
       depth: 1,
       overrideAccess: true,
-    })) as Record<string, unknown>
+    })) as unknown as Record<string, unknown>
     if (t?.name) tenantName = t.name as string
     const branding = t.branding as { logo?: unknown } | undefined
     const logo = branding?.logo as { url?: string | null; alt?: string | null } | undefined

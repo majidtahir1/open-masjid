@@ -35,7 +35,7 @@ async function resolveFavicon(): Promise<{ href: string; type: string }> {
       id: tenantId,
       depth: 1,
       overrideAccess: true,
-    })) as Record<string, unknown>
+    })) as unknown as Record<string, unknown>
 
     const branding = tenant.branding as { favicon?: unknown } | undefined
     const favicon = branding?.favicon as
