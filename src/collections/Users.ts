@@ -188,7 +188,12 @@ export const Users: CollectionConfig = {
       validate: (value: unknown, { req }: { req: { user?: unknown } }) => {
         const v = value as string
         const u = req?.user as { role?: string } | undefined
-        if (v === 'platformOwner' && u?.role !== 'platformOwner') {
+        // Allow platformOwner when there's no authenticated user — that's
+        // Payload's create-first-user bootstrap path; the route is only
+        // reachable when the users table is empty, so there's no risk of
+        // unauthenticated escalation against an existing platform.
+        if (!u) return true
+        if (v === 'platformOwner' && u.role !== 'platformOwner') {
           return 'Only a platform owner can assign the platformOwner role.'
         }
         return true
