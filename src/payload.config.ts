@@ -132,6 +132,15 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    // Auto-sync schema on boot.
+    //   Dev → always on.
+    //   Production builds (NODE_ENV=production) → off by default; flip on with
+    //     PAYLOAD_DB_PUSH=true so the Docker stack can stand up an empty DB
+    //     without an explicit migrate step. Real prod should generate proper
+    //     migrations via `npx payload migrate:create` instead.
+    push:
+      process.env.NODE_ENV !== 'production' ||
+      process.env.PAYLOAD_DB_PUSH === 'true',
   }),
   email: email(),
   sharp,
