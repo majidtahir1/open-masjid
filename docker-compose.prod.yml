@@ -4,9 +4,9 @@
 #   db    - Postgres 16 (persistent pgdata volume)
 #   cron  - Alpine crond sidecar that ticks /api/payload-jobs/run every minute
 #
-# Expected to sit behind an external reverse proxy (Nginx Proxy Manager is the
-# recommended choice — lives in its own compose stack). NPM reaches the app
-# via the shared Docker network declared at the bottom.
+# Expected to sit behind an external reverse proxy (Nginx Proxy Manager
+# running on a different host on the LAN, in its own compose stack). The app
+# publishes port 3000 on the host's LAN interface so NPM can reach it by IP.
 #
 # Media uploads live in `public/media` inside the container; a host/TrueNAS
 # bind mount survives container rebuilds. See README "Deploying with Docker".
@@ -37,8 +37,11 @@ services:
       db:
         condition: service_healthy
     env_file: .env
-    expose:
-      - "3000"
+    ports:
+      # Publish on the LAN so an off-box NPM can proxy to http://<host-ip>:3000.
+      # Use APP_BIND=127.0.0.1 to restrict to localhost only (e.g. when NPM
+      # runs on the same machine).
+      - "${APP_BIND:-0.0.0.0}:3000:3000"
     volumes:
       # Host/TrueNAS mount for uploaded media. Point MEDIA_PATH at a local
       # directory OR an NFS-mounted share. Default: ./media (host).
@@ -57,16 +60,3 @@ services:
 
 volumes:
   pgdata:
-
-# Declare a shared external network so Nginx Proxy Manager (running in its
-# own stack) can reach `app:3000` by name. Create it once on the host:
-#   docker network create openmasjid-public
-#
-# Then in NPM's compose file, attach the same network:
-#   networks:
-#     openmasjid-public:
-#       external: true
-networks:
-  default:
-    name: openmasjid-public
-    external: true
