@@ -100,7 +100,7 @@ const handler: PayloadHandler = async (req) => {
         email: adminEmail,
         password: placeholderPassword,
         role: 'admin',
-        tenant: tenantId,
+        tenant: tenantId as number,
         firstName: adminFirstName,
         lastName: adminLastName,
       },

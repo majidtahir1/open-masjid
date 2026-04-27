@@ -93,7 +93,7 @@ const handler: PayloadHandler = async (req) => {
         email,
         password: placeholderPassword,
         role,
-        tenant: role === 'platformOwner' ? null : targetTenant,
+        tenant: role === 'platformOwner' ? null : (targetTenant as number),
         firstName,
         lastName,
       },

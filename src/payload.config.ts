@@ -132,6 +132,15 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    // Use explicit migrations in production. Auto-push only in dev so
+    // local schema iteration stays fast; the Docker prod image runs
+    // `npx payload migrate` before booting the app (see compose `migrate`
+    // service). Override with PAYLOAD_DB_PUSH=true if you ever need
+    // auto-push in a deployed env.
+    push:
+      process.env.PAYLOAD_DB_PUSH === 'true' ||
+      process.env.NODE_ENV !== 'production',
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
   email: email(),
   sharp,

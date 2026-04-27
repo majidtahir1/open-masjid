@@ -35,7 +35,7 @@ async function resolveTenantLogo(): Promise<TenantLogo | null> {
       id: tenantId,
       depth: 1,
       overrideAccess: true,
-    })) as Record<string, unknown>
+    })) as unknown as Record<string, unknown>
 
     const name = (tenant.name as string) ?? 'Tenant'
     const branding = tenant.branding as { logo?: unknown } | undefined

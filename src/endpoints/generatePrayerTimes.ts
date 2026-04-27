@@ -17,7 +17,7 @@ const handler: PayloadHandler = async (req) => {
     depth: 1,
     overrideAccess: false,
     user,
-  })) as Record<string, unknown>
+  })) as unknown as Record<string, unknown>
 
   if (!schedule) return Response.json({ error: 'Schedule not found' }, { status: 404 })
 

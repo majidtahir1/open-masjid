@@ -38,7 +38,7 @@ async function tenantBaseUrl(
         id,
         depth: 0,
         overrideAccess: true,
-      })) as typeof resolved
+      })) as unknown as typeof resolved
     } catch {
       return null
     }
@@ -91,4 +91,18 @@ export async function buildHomePreviewUrl(
   const base = await tenantBaseUrl(doc.tenant as TenantRef, req.payload)
   if (!base) return null
   return `${base}/?draft=1`
+}
+
+/**
+ * Variant of `buildPreviewUrl` for Payload's `livePreview.url` slot, which
+ * requires `string | Promise<string>` — null isn't allowed there. Coerces a
+ * missing URL to an empty string so the iframe renders nothing rather than
+ * crashing the typecheck.
+ */
+export async function buildLivePreviewUrl(
+  doc: Record<string, unknown>,
+  req: PayloadRequest,
+  path: string,
+): Promise<string> {
+  return (await buildPreviewUrl(doc, req, path)) ?? ''
 }

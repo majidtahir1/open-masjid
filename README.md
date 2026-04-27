@@ -89,9 +89,124 @@ On Vercel use a Cron Job pointing at the same URL (set the secret as a Vercel en
 npm run seed
 ```
 
-## Deploying to your own server
+## Deploying with Docker (recommended)
 
-A rough guide for deploying to a single Linux VM (Ubuntu/Debian). Adjust paths to your setup.
+The production stack is three containers defined in `docker-compose.prod.yml`:
+
+- **app** — Next.js + Payload, built from `Dockerfile` (multi-stage, standalone output, non-root, ~150 MB).
+- **db** — Postgres 16 with a persistent `pgdata` volume.
+- **cron** — Alpine crond sidecar that hits `/api/payload-jobs/run` every minute (scheduled-publish queue drain).
+
+The stack sits behind an external reverse proxy — **Nginx Proxy Manager** typically running on a different host on your LAN. The app container publishes port 3000 on the host's LAN interface; NPM proxies to `http://<openmasjid-host-ip>:3000`.
+
+### 1. Prereqs on the host
+
+- Docker 24+ and Docker Compose v2 (`docker compose version`).
+- An NFS mount from your TrueNAS (or any durable volume) for media uploads (optional but strongly recommended — container filesystems are ephemeral).
+- Nginx Proxy Manager reachable on your LAN, already running.
+
+### 2. Clone + configure
+
+```bash
+git clone https://github.com/majidtahir1/open-masjid.git /opt/openmasjid
+cd /opt/openmasjid
+cp .env.prod.example .env
+chmod 600 .env
+$EDITOR .env    # fill in DATABASE_URI, PAYLOAD_SECRET, RESEND_*, CRON_SECRET, MEDIA_PATH
+```
+
+Required env vars (see `.env.prod.example` for the full list):
+
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- `DATABASE_URI` (reuses the Postgres creds, points at `db` service)
+- `PAYLOAD_SECRET` — `openssl rand -hex 32`
+- `NEXT_PUBLIC_SERVER_URL` — the public HTTPS URL NPM serves
+- `RESEND_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` — for invites / password resets
+- `CRON_SECRET` — `openssl rand -hex 32`, shared between app + cron sidecar
+- `MEDIA_PATH` — host path mounted into the app container at `/app/public/media`
+- `APP_BIND` — interface to publish port 3000 on. Default `0.0.0.0` (all LAN interfaces, needed for off-box NPM). Set `127.0.0.1` if NPM runs on the same host.
+
+### 3. TrueNAS media mount
+
+On TrueNAS:
+
+1. **Datasets** → create `tank/openmasjid/media`.
+2. **Shares → NFS** → add the dataset; allow the web server's IP; check "Maproot user" = root.
+
+On the web server:
+
+```bash
+sudo apt install nfs-common
+sudo mkdir -p /mnt/truenas/openmasjid-media
+# /etc/fstab:
+truenas.local:/mnt/tank/openmasjid/media  /mnt/truenas/openmasjid-media  nfs  defaults,_netdev,soft,timeo=30  0 0
+sudo mount -a
+```
+
+Then in `.env`:
+
+```env
+MEDIA_PATH=/mnt/truenas/openmasjid-media
+```
+
+The compose `app` service bind-mounts that path into `/app/public/media`. ZFS snapshots on TrueNAS now cover your uploads.
+
+### 4. First boot
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml logs -f app    # watch Payload init + DB sync
+```
+
+Payload auto-syncs the schema on first boot. Once it's up, create the first user at `https://your-domain.tld/admin`.
+
+### 5. Configure NPM
+
+In the NPM UI → **Proxy Hosts → Add Proxy Host**:
+
+- Domain names: `openmasjid.app`, `*.openmasjid.app`, plus any tenant custom domains (e.g. `icprosper.org`).
+- Forward hostname: the openmasjid host's LAN IP or hostname (e.g. `192.168.1.50` or `openmasjid.lan`).
+- Forward port: `3000`
+- Scheme: `http` (NPM terminates TLS — talks to the app over plain HTTP on the LAN).
+- **Block common exploits** on, **Websockets support** on.
+- **SSL → Request a new SSL certificate with Let's Encrypt** (DNS challenge if you want the wildcard, HTTP challenge otherwise).
+- **Advanced** tab, add:
+
+  ```nginx
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  ```
+
+The Host header is non-negotiable — middleware reads it for tenant resolution.
+
+### 6. Deploy updates
+
+```bash
+cd /opt/openmasjid
+git pull
+docker compose -f docker-compose.prod.yml build app
+docker compose -f docker-compose.prod.yml up -d app cron
+```
+
+The rebuild is a clean image swap — no downtime for db/cron, ~5–10s of request drop while the new app container replaces the old. For true zero-downtime swap later, add a second app replica + loadbalance via NPM (or switch the compose to a rolling update pattern).
+
+### 7. Backups
+
+Add a Postgres dump to your TrueNAS daily via the host's cron:
+
+```cron
+0 3 * * * docker compose -f /opt/openmasjid/docker-compose.prod.yml exec -T db pg_dump -U $POSTGRES_USER $POSTGRES_DB | gzip > /mnt/truenas/openmasjid-backups/db-$(date +\%F).sql.gz
+```
+
+Media is already on TrueNAS → snapshot the dataset on whatever schedule you prefer.
+
+---
+
+## Deploying without Docker (alternative)
+
+If you'd rather run Node directly on the host, here's a plain-systemd setup. Skip this section if you're using Docker above.
 
 ### 1. Prereqs on the box
 

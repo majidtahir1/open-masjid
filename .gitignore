@@ -21,6 +21,7 @@ public/media/
 .env
 .env.local
 .env*.local
+.env.docker
 
 # IDE / OS
 .DS_Store
