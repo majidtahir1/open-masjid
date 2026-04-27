@@ -53,10 +53,12 @@ services:
         condition: service_completed_successfully
     env_file: ${ENV_FILE:-.env}
     ports:
-      # Publish on the LAN so an off-box NPM can proxy to http://<host-ip>:3000.
-      # Use APP_BIND=127.0.0.1 to restrict to localhost only (e.g. when NPM
-      # runs on the same machine).
-      - "${APP_BIND:-0.0.0.0}:3000:3000"
+      # Publish on the LAN so an off-box NPM can proxy to
+      # http://<host-ip>:${APP_HOST_PORT}. Use APP_BIND=127.0.0.1 to restrict
+      # to localhost only (e.g. when NPM runs on the same machine).
+      # APP_HOST_PORT lets you avoid collisions with other services on the
+      # host; the container always listens on 3000 internally.
+      - "${APP_BIND:-0.0.0.0}:${APP_HOST_PORT:-3000}:3000"
     volumes:
       # Host/TrueNAS mount for uploaded media. Point MEDIA_PATH at a local
       # directory OR an NFS-mounted share. Default: ./media (host).
