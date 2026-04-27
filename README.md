@@ -124,7 +124,8 @@ Required env vars (see `.env.prod.example` for the full list):
 - `RESEND_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` — for invites / password resets
 - `CRON_SECRET` — `openssl rand -hex 32`, shared between app + cron sidecar
 - `MEDIA_PATH` — host path mounted into the app container at `/app/public/media`
-- `APP_BIND` — interface to publish port 3000 on. Default `0.0.0.0` (all LAN interfaces, needed for off-box NPM). Set `127.0.0.1` if NPM runs on the same host.
+- `APP_BIND` — interface to publish on. Default `0.0.0.0` (all LAN interfaces, needed for off-box NPM). Set `127.0.0.1` if NPM runs on the same host.
+- `APP_HOST_PORT` — host port to publish (container always listens on 3000 internally). Default `3000`. Change if the host already runs something on 3000.
 
 ### 3. TrueNAS media mount
 
