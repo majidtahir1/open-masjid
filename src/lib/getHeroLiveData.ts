@@ -65,10 +65,40 @@ interface NextIqamahResult {
 }
 
 /**
+ * Read the current wall-clock hour/minute/second for a given IANA timezone.
+ * Falls back to the server's local time if `tz` is missing or invalid —
+ * which is correct on a dev box but wrong in production where the container
+ * runs in UTC, so callers should always pass the tenant's timezone.
+ */
+function partsInTimezone(now: Date, tz: string | null | undefined) {
+  try {
+    if (!tz) throw new Error('no tz')
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false,
+    })
+    const parts = fmt.formatToParts(now)
+    const h = Number(parts.find((p) => p.type === 'hour')?.value ?? '0')
+    const m = Number(parts.find((p) => p.type === 'minute')?.value ?? '0')
+    const s = Number(parts.find((p) => p.type === 'second')?.value ?? '0')
+    // Intl can produce "24" for midnight in some Node versions — normalize.
+    return { h: h % 24, m, s }
+  } catch {
+    return { h: now.getHours(), m: now.getMinutes(), s: now.getSeconds() }
+  }
+}
+
+/**
  * Pure function exposed for testing. Given a day row and a "now" reference,
  * pick the next iqamah whose minutes value is >= now's minutes. Returns null
  * if every prayer for that day has already passed (caller can roll over to
  * the next day's Fajr separately).
+ *
+ * `tz` is the tenant's IANA timezone — required for correct results on a
+ * UTC server. Tests can omit it and rely on `now`'s local interpretation.
  */
 export function pickNextIqamahFromDay(
   day: {
@@ -79,9 +109,11 @@ export function pickNextIqamahFromDay(
     isha?: { iqamah?: string | null } | null
   } | null,
   now: Date,
+  tz?: string | null,
 ): NextIqamahResult | null {
   if (!day) return null
-  const nowMins = now.getHours() * 60 + now.getMinutes()
+  const { h, m, s } = partsInTimezone(now, tz)
+  const nowMins = h * 60 + m
   for (const { key, label } of PRAYER_ORDER) {
     const pair = day[key]
     const raw = pair?.iqamah?.trim()
@@ -89,7 +121,7 @@ export function pickNextIqamahFromDay(
     const mins = parseTimeToMinutes(raw, key)
     if (mins === null) continue
     if (mins >= nowMins) {
-      const secondsUntil = (mins - nowMins) * 60 - now.getSeconds()
+      const secondsUntil = (mins - nowMins) * 60 - s
       return {
         name: label,
         atTime: formatDisplayTime(mins),
@@ -103,17 +135,22 @@ export function pickNextIqamahFromDay(
 /**
  * Compute next iqamah for a tenant. After Isha, rolls over to tomorrow's
  * Fajr. Returns null if no schedule exists or no iqamahs are configured.
+ *
+ * `tz` should be the tenant's IANA timezone (e.g. 'America/Chicago'). On a
+ * UTC production server, omitting it would walk past prayers that haven't
+ * happened yet in the masjid's local time.
  */
 export async function getNextIqamah(
   tenantId: string | number,
   now: Date = new Date(),
+  tz?: string | null,
 ): Promise<NextIqamahResult | null> {
   try {
     const schedule = await getActiveSchedule(tenantId, now)
     if (!schedule) return null
 
     const today = findDayRow(schedule, now)
-    const todayHit = pickNextIqamahFromDay(today, now)
+    const todayHit = pickNextIqamahFromDay(today, now, tz)
     if (todayHit) return todayHit
 
     // Nothing left today — roll forward to tomorrow's Fajr.
@@ -221,9 +258,10 @@ function formatEventDate(iso: string | null | undefined): string {
  */
 export async function getHeroLiveData(
   tenantId: string | number,
+  tz?: string | null,
 ): Promise<HeroLiveData> {
   const [nextIqamah, upcomingEvents] = await Promise.all([
-    getNextIqamah(tenantId),
+    getNextIqamah(tenantId, new Date(), tz),
     getUpcomingEvents(tenantId, 2),
   ])
   return { nextIqamah, upcomingEvents }

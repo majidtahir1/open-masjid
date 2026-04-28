@@ -32,7 +32,10 @@ export default async function HomePage() {
     fetchFeaturedEvents(tenant),
     fetchEvents(tenant, { limit: 4, upcomingOnly: true }),
     fetchServices(tenant),
-    getHeroLiveData(tenant.id),
+    getHeroLiveData(
+      tenant.id,
+      (tenant as { location?: { timezone?: string | null } }).location?.timezone ?? null,
+    ),
   ])
 
   // Interleave manually-authored hero slides with featured events so both
