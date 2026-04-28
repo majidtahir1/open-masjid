@@ -80,7 +80,18 @@ export function OnboardingShell({
               : 'Pick up where you left off.'}
           </p>
         </div>
-        <Button variant="secondary" onClick={() => setOpen(true)}>
+        <Button
+          variant="secondary"
+          onClick={async () => {
+            if (allDone) {
+              await postAction({ type: 'reset' })
+              // Reload so the dashboard re-reads onboarding state with dismissed cleared.
+              window.location.reload()
+              return
+            }
+            setOpen(true)
+          }}
+        >
           {allDone ? 'Re-run onboarding' : 'Continue setup'}
         </Button>
       </div>
