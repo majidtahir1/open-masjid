@@ -63,7 +63,10 @@ export default buildConfig({
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
       ],
-      afterNavLinks: ['/src/admin/ViewPublicSiteLink#default'],
+      afterNavLinks: [
+        '/src/admin/ViewPublicSiteLink#default',
+        '/src/admin/onboarding/RerunMenuItem#default',
+      ],
       header: [
         '/src/admin/Favicon#default',
         '/src/admin/HideTenantsNav#default',
