@@ -508,27 +508,40 @@ export const Tenants: CollectionConfig = {
             {
               name: 'onboarding',
               type: 'group',
+              label: 'Milestone State',
               admin: {
                 description:
                   'Per-milestone state for the post-login setup wizard. Auto-detected milestones are not stored here; only explicit user actions (skip, mark-complete) are persisted.',
               },
-              fields: (
-                ['branding', 'identity', 'prayer', 'firstEvent', 'hero', 'donations'] as const
-              ).map((slug) => ({
-                name: slug,
-                type: 'select' as const,
-                options: [
-                  { label: 'Complete', value: 'complete' },
-                  { label: 'Dismissed', value: 'dismissed' },
-                ],
-                admin: { description: `Explicit user action for the ${slug} milestone.` },
-              })),
+              fields: (() => {
+                const SLUG_LABELS = {
+                  branding: 'Branding',
+                  identity: 'Identity & Contact',
+                  prayer: 'Prayer Times',
+                  firstEvent: 'First Event',
+                  hero: 'Hero & Homepage',
+                  donations: 'Donations',
+                } as const
+                return (
+                  ['branding', 'identity', 'prayer', 'firstEvent', 'hero', 'donations'] as const
+                ).map((slug) => ({
+                  name: slug,
+                  type: 'select' as const,
+                  label: SLUG_LABELS[slug],
+                  options: [
+                    { label: 'Complete', value: 'complete' },
+                    { label: 'Dismissed', value: 'dismissed' },
+                  ],
+                  admin: { description: `Explicit user action for the ${slug} milestone.` },
+                }))
+              })(),
             },
             {
               name: 'onboardingCompletedAt',
               type: 'date',
               admin: {
                 description: 'Set when the user dismisses the celebratory screen.',
+                readOnly: true,
               },
             },
           ],
