@@ -1,6 +1,6 @@
 # Tenant Onboarding Flow — Design Spec
 
-**Status:** Draft for designer
+**Status:** Approved — implementing Option C (modal + persistent banner)
 **Owner:** OpenMasjid platform
 **Date:** 2026-04-28
 **Audience:** Product designer producing visual comps; engineering reviewing scope.
@@ -29,7 +29,7 @@ The public tenant site is **live and viewable from the moment the tenant is prov
 - Not a tutorial for Payload itself. Onboarding is about *the masjid site*, not how the CMS works.
 - Not migration tooling — separate flow for "import from WordPress / MadinaApps."
 - Not user/role provisioning — admins inviting more admins is a separate admin task.
-- Not a re-run path for already-set-up tenants. Power users edit fields directly in the admin.
+- ~~Not a re-run path for already-set-up tenants.~~ **Updated:** the wizard is re-launchable from the dashboard tile's collapsed "Setup complete · review →" link and from a "Re-run onboarding" link in the user menu. Re-running resets dismissed milestones to `not started` (does not delete tenant data) and re-fires the welcome modal flow.
 
 ---
 
@@ -163,7 +163,24 @@ The spec does not enumerate analytics events. Engineering should fire events for
 
 ---
 
-## 5. Surface treatments — designer to comp ALL three
+## 5. Surface treatment — Option C (locked)
+
+**Decision:** Implementing Option C — first-login modal + persistent banner. Options A and B remain documented below for reference but are not being built.
+
+### Re-run path
+The wizard is launchable on demand from two places, regardless of completion state:
+1. **The collapsed dashboard tile** — once setup is complete, the "Setup complete · review →" link re-opens the welcome modal.
+2. **The user menu** — a "Re-run onboarding" item under the user avatar dropdown (visible to `admin` and `platformOwner` roles only).
+
+Re-running:
+- Re-fires the welcome modal flow.
+- Resets all `dismissed` milestones to `not started`. Milestones already `complete` stay `complete` (the user can re-open them as "Review").
+- Does NOT delete or alter any tenant data (logo, colors, events, etc.). It only resets the *checklist state*.
+- Does NOT re-prefill the sample event in the First Event milestone — the user already saw / interacted with it once.
+
+---
+
+## 5b. Surface treatments — alternates considered
 
 The functional spec in §§1–4 is fixed. The designer is asked to produce mockups of the **same six milestones, same fields, same hints** in three different shells, so the team can pick a winner from real comps rather than diagrams.
 
@@ -245,7 +262,6 @@ When the designer presents the three options, evaluate against:
 - WordPress / MadinaApps content migration (separate flow).
 - A/B testing the wizard.
 - Gamification beyond the celebratory "Site is ready" screen — no streaks, no badges.
-- Re-running onboarding on demand for an already-set-up tenant.
 - Concrete analytics event schema.
 - Localization of microcopy.
 - A/B test variants of the three surface treatments — designer picks one after comps.
