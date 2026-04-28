@@ -74,6 +74,31 @@ export interface HeroCta {
   primary?: boolean | null
 }
 
+export type HeroStyle = 'original' | 'split' | 'live' | 'photo'
+export type PhotoTone = 'teal' | 'gold' | 'navy'
+export type HeroPhotoPattern = 'arch' | 'geometric' | 'stars' | 'lattice'
+
+/** Variant-specific fields shown only when style === 'split'. */
+export interface HeroSplitFields {
+  photoLabel?: string | null
+  photoTone?: PhotoTone | null
+  cardTag?: string | null
+  cardTitle?: string | null
+  /** Optional Media upload. URL resolved at render time. */
+  image?: MediaLike | string | number | null
+}
+
+/** Variant-specific fields shown only when style === 'photo'. */
+export interface HeroPhotoFields {
+  photoLabel?: string | null
+  photoTone?: PhotoTone | null
+  photoPattern?: HeroPhotoPattern | null
+  image?: MediaLike | string | number | null
+  ayahArabic?: string | null
+  ayahTranslation?: string | null
+  ayahCitation?: string | null
+}
+
 export interface HeroSlideLike {
   id?: string | number
   eyebrow?: string | null
@@ -81,9 +106,32 @@ export interface HeroSlideLike {
   body?: string | null
   meta?: string | null
   accent: Accent
+  /** Layout variant. Defaults to 'original' (single column, current behavior). */
+  style?: HeroStyle | null
+  splitFields?: HeroSplitFields | null
+  photoFields?: HeroPhotoFields | null
   ctas?: HeroCta[] | null
   /** Used only for hero-wrapped events. Optional. */
   kind?: 'mission' | 'program' | 'flyer' | 'announcement' | null
+}
+
+/** Live data passed in from the server for variants that show real-time info. */
+export interface HeroLiveData {
+  /** Next iqamah from the tenant's prayer schedule. */
+  nextIqamah?: {
+    name: string
+    /** Display string, e.g. "6:00 pm". */
+    atTime: string
+    /** Seconds until iqamah. Used for the countdown. */
+    secondsUntil: number
+  } | null
+  /** Up to N upcoming events for the "Live" widget. */
+  upcomingEvents?: Array<{
+    id: string | number
+    title: string
+    when: string
+    href: string
+  }> | null
 }
 
 export interface ServiceLike {

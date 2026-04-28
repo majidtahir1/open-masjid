@@ -15,6 +15,19 @@
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return
+
+  // Warm Payload at server boot so the first user request doesn't pay the
+  // singleton-init + DB pool open + collection-schema build cost. We can't
+  // import `payload` directly here — Next.js's webpack bundles instrumentation
+  // for both client + server runtimes and trips on Node-only deps (busboy,
+  // stream). Instead, fire-and-forget HTTP to our /api/warmup route once the
+  // server is listening; that route runs in pure server context and primes
+  // the Payload singleton for every subsequent page handler.
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
+  setTimeout(() => {
+    fetch(`${baseUrl}/api/warmup`).catch(() => {})
+  }, 2_000)
+
   if (process.env.NODE_ENV !== 'development') return
 
   const url =
