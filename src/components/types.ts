@@ -75,7 +75,10 @@ export interface HeroCta {
 }
 
 export type HeroStyle = 'original' | 'split' | 'live' | 'photo'
-export type PhotoTone = 'teal' | 'gold' | 'navy'
+/** Brand-neutral tone slot. Maps to the tenant's --brand / --secondary /
+ *  --accent CSS variable at render time, so per-tenant skinning flows
+ *  through automatically. */
+export type PhotoTone = 'brand' | 'secondary' | 'accent'
 export type HeroPhotoPattern = 'arch' | 'geometric' | 'stars' | 'lattice'
 
 /** Variant-specific fields shown only when style === 'split'. */

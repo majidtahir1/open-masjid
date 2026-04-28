@@ -238,9 +238,21 @@ export function BgOrnament({ big }: { big?: boolean }) {
   )
 }
 
+/**
+ * Map a semantic tone slot to the CSS variable that drives its color.
+ * The wrapping `<div>` sets `color` to this variable so the SVG inside
+ * can reference `currentColor` everywhere — meaning per-tenant brand
+ * overrides flow through automatically with no React-level palette tables.
+ */
+const TONE_TO_VAR: Record<PhotoTone, string> = {
+  brand: 'var(--brand)',
+  secondary: 'var(--secondary)',
+  accent: 'var(--accent)',
+}
+
 export function PlaceholderImg({
   label,
-  tone = 'teal',
+  tone = 'secondary',
   full,
   uid,
   pattern = 'arch',
@@ -251,14 +263,11 @@ export function PlaceholderImg({
   uid: string
   pattern?: HeroPhotoPattern
 }) {
-  const palette =
-    {
-      teal: { a: '#5CB8C3', b: '#114751' },
-      navy: { a: '#28A0B4', b: '#0A1638' },
-      gold: { a: '#E8C97A', b: '#5B3F18' },
-    }[tone] ?? { a: '#5CB8C3', b: '#114751' }
   return (
-    <div className={`om-hero-ph om-hero-ph-${tone} ${full ? 'is-full' : ''}`}>
+    <div
+      className={`om-hero-ph om-hero-ph-${tone} ${full ? 'is-full' : ''}`}
+      style={{ color: TONE_TO_VAR[tone] ?? TONE_TO_VAR.secondary }}
+    >
       <svg
         viewBox="0 0 400 280"
         preserveAspectRatio="xMidYMid slice"
@@ -267,8 +276,8 @@ export function PlaceholderImg({
       >
         <defs>
           <radialGradient id={`om-ph-grad-${uid}`} cx="60%" cy="35%" r="80%">
-            <stop offset="0%" stopColor={palette.a} stopOpacity="0.55" />
-            <stop offset="100%" stopColor={palette.b} stopOpacity="1" />
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="1" />
           </radialGradient>
         </defs>
         <rect width="400" height="280" fill={`url(#om-ph-grad-${uid})`} />

@@ -109,6 +109,16 @@
   --secondary-soft:var(--icp-teal-50);
   --accent-soft:   var(--icp-gold-100);
 
+  /* Derived semantic tokens — for components that need on-dark variants
+     or stronger/weaker tints. All compose from --brand / --secondary /
+     --accent so per-tenant skinning (middleware sets those three) flows
+     through automatically. color-mix is supported in all modern browsers
+     (Safari 16.4+, Chrome 111+, Firefox 113+). */
+  --secondary-on-dark: color-mix(in oklab, var(--secondary) 70%, #ffffff);
+  --secondary-glow:    color-mix(in oklab, var(--secondary) 35%, transparent);
+  --accent-strong:     color-mix(in oklab, var(--accent) 70%, #000000);
+  --accent-tint:       color-mix(in oklab, var(--accent) 12%, transparent);
+
   /* -------------------- shadcn/ui semantic tokens --------------------
      These are consumed by the shadcn Tailwind color mappings in
      tailwind.config.ts and by shadcn primitives (Card/Button/Badge/etc.).

@@ -157,14 +157,15 @@ export const HeroSlides: CollectionConfig = {
           name: 'photoTone',
           type: 'select',
           label: 'Photo Tone',
-          defaultValue: 'teal',
+          defaultValue: 'secondary',
           options: [
-            { label: 'Teal', value: 'teal' },
-            { label: 'Gold', value: 'gold' },
-            { label: 'Navy', value: 'navy' },
+            { label: 'Secondary (default)', value: 'secondary' },
+            { label: 'Accent', value: 'accent' },
+            { label: 'Brand', value: 'brand' },
           ],
           admin: {
-            description: 'Color tint for the placeholder if no image is uploaded.',
+            description:
+              'Tint for the placeholder when no image is uploaded. Picks from your tenant theme: Brand = primary, Secondary = secondary, Accent = highlight.',
             components: { Field: '/src/fields/SelectField#default' },
           },
         },
@@ -221,14 +222,15 @@ export const HeroSlides: CollectionConfig = {
           name: 'photoTone',
           type: 'select',
           label: 'Background Tone',
-          defaultValue: 'navy',
+          defaultValue: 'brand',
           options: [
-            { label: 'Navy (default)', value: 'navy' },
-            { label: 'Teal', value: 'teal' },
-            { label: 'Gold', value: 'gold' },
+            { label: 'Brand (default)', value: 'brand' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Accent', value: 'accent' },
           ],
           admin: {
-            description: 'Color tint for the background placeholder when no image is uploaded.',
+            description:
+              'Tint for the background placeholder when no image is uploaded. Picks from your tenant theme.',
             components: { Field: '/src/fields/SelectField#default' },
           },
         },
