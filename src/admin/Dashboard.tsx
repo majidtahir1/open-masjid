@@ -39,6 +39,8 @@ import {
 } from 'lucide-react'
 
 import config from '@payload-config'
+import { OnboardingShell } from './onboarding/OnboardingShell'
+import { computeMilestoneStates, type MilestoneSlug, type MilestoneStatus } from '@/lib/onboarding'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -59,6 +61,7 @@ type UserLite = {
   lastName?: string
   role?: 'platformOwner' | 'admin' | 'staff'
   tenant?: TenantRef
+  onboardingWelcomeSeenAt?: string | null
 } | null
 
 /** Greeting name: prefer firstName, fall back to the local part of email. */
@@ -261,6 +264,60 @@ async function TenantDashboard({
     }),
   ])
 
+  const [tenantDoc, prayerSchedulesCount, heroSlidesCount] = await Promise.all([
+    payload.findByID({
+      collection: 'tenants',
+      id: tenantId,
+      depth: 0,
+      overrideAccess: true,
+    }) as Promise<unknown>,
+    payload
+      .find({
+        collection: 'prayer-schedules' as never,
+        where: { tenant: { equals: tenantId } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs)
+      .catch(() => 0),
+    payload
+      .find({
+        collection: 'hero-slides',
+        where: { tenant: { equals: tenantId } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs)
+      .catch(() => 0),
+  ])
+
+  const onboardingStates = computeMilestoneStates({
+    tenant: {
+      branding:
+        (tenantDoc as { branding?: { logo?: string | number | { id?: string | number } | null } | null }).branding ?? null,
+      contactInfo:
+        (tenantDoc as { contactInfo?: { address?: string | null } | null }).contactInfo ?? null,
+      donationConfig:
+        (tenantDoc as { donationConfig?: { mode?: string | null } | null }).donationConfig ?? null,
+      onboarding:
+        ((tenantDoc as { onboarding?: Partial<Record<MilestoneSlug, MilestoneStatus>> | null })
+          .onboarding) ?? null,
+    },
+    counts: {
+      prayerSchedules: prayerSchedulesCount,
+      events: eventsRes.totalDocs,
+      heroSlides: heroSlidesCount,
+    },
+  })
+  const showWelcome = !user.onboardingWelcomeSeenAt
+  const alreadyCelebrated = Boolean(
+    (tenantDoc as { onboardingCompletedAt?: string | null }).onboardingCompletedAt,
+  )
+  const tenantSlug = (tenantDoc as { slug?: string }).slug ?? ''
+  const publicUrl = `https://${tenantSlug}.openmasjid.app`
+
   const scheduleCollection = schedule?.collectionSlug ?? 'prayer-schedules'
   const scheduleEditHref = schedule
     ? `/admin/collections/${scheduleCollection}/${schedule.id}`
@@ -277,6 +334,12 @@ async function TenantDashboard({
 
   return (
     <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
+      <OnboardingShell
+        initialStates={onboardingStates}
+        publicUrl={publicUrl}
+        showWelcome={showWelcome}
+        alreadyCelebrated={alreadyCelebrated}
+      />
       <header className="flex items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
