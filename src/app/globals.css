@@ -105,7 +105,12 @@
   --brand-hover:   var(--icp-navy-800);
   --brand-press:   var(--icp-navy-900);
   --brand-soft:    var(--icp-navy-50);
-  --brand-ink:     var(--icp-navy-900);
+  /* --brand-ink is the very-dark variant used as a deep background base
+     (e.g. the photo hero variant's full-bleed). We derive it from --brand
+     via color-mix so per-tenant skinning automatically produces a dark
+     version of THEIR brand color, not a hardcoded ICP navy. ~35% mix with
+     black lands close to ICP's existing navy-900 for the ICP tenant. */
+  --brand-ink:     color-mix(in oklab, var(--brand) 35%, #000);
   --secondary-soft:var(--icp-teal-50);
   --accent-soft:   var(--icp-gold-100);
 
