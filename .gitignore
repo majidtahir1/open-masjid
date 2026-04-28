@@ -41,3 +41,6 @@ pnpm-debug.log*
 .turbo
 .vercel
 coverage/
+
+# Design source kits (kept locally for reference, not shipped)
+*Design System*.zip

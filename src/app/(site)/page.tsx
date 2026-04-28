@@ -16,6 +16,7 @@ import {
   fetchServices,
 } from '@/lib/data'
 import { eventToHeroSlide } from '@/lib/eventToHeroSlide'
+import { getHeroLiveData } from '@/lib/getHeroLiveData'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
@@ -26,11 +27,12 @@ export default async function HomePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const [slides, featuredEvents, events, services] = await Promise.all([
+  const [slides, featuredEvents, events, services, liveData] = await Promise.all([
     fetchHeroSlides(tenant),
     fetchFeaturedEvents(tenant),
     fetchEvents(tenant, { limit: 4, upcomingOnly: true }),
     fetchServices(tenant),
+    getHeroLiveData(tenant.id),
   ])
 
   // Interleave manually-authored hero slides with featured events so both
@@ -42,7 +44,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero slides={allSlides} />
+      <Hero slides={allSlides} liveData={liveData} />
 
       <section className="bg-bg py-24">
         <div className="mx-auto max-w-page px-6">

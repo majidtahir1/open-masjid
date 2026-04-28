@@ -233,6 +233,23 @@ export const HeroSlides: CollectionConfig = {
           },
         },
         {
+          name: 'photoPattern',
+          type: 'select',
+          label: 'Background Pattern',
+          defaultValue: 'arch',
+          options: [
+            { label: 'Arch — minaret silhouette (default)', value: 'arch' },
+            { label: 'Geometric — 8-pointed star tessellation', value: 'geometric' },
+            { label: 'Stars — scattered subtle stars', value: 'stars' },
+            { label: 'Lattice — interlocking circles', value: 'lattice' },
+          ],
+          admin: {
+            description:
+              'Decorative pattern shown when no Background Photo is uploaded.',
+            components: { Field: '/src/fields/SelectField#default' },
+          },
+        },
+        {
           name: 'image',
           type: 'upload',
           relationTo: 'media',

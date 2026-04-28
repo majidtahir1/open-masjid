@@ -76,6 +76,7 @@ export interface HeroCta {
 
 export type HeroStyle = 'original' | 'split' | 'live' | 'photo'
 export type PhotoTone = 'teal' | 'gold' | 'navy'
+export type HeroPhotoPattern = 'arch' | 'geometric' | 'stars' | 'lattice'
 
 /** Variant-specific fields shown only when style === 'split'. */
 export interface HeroSplitFields {
@@ -91,6 +92,7 @@ export interface HeroSplitFields {
 export interface HeroPhotoFields {
   photoLabel?: string | null
   photoTone?: PhotoTone | null
+  photoPattern?: HeroPhotoPattern | null
   image?: MediaLike | string | number | null
   ayahArabic?: string | null
   ayahTranslation?: string | null
