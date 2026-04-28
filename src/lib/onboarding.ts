@@ -29,7 +29,10 @@ export type MilestoneState = {
 
 export type OnboardingInput = {
   tenant: {
-    branding?: { logo?: unknown } | null
+    // `logo` is a Payload media reference: id (number/string), populated Media object, or null.
+    // We use a permissive shape rather than importing the Payload-generated type so this module
+    // stays edge-safe.
+    branding?: { logo?: string | number | { id?: string | number } | null } | null
     contactInfo?: { address?: string | null } | null
     donationConfig?: { mode?: string | null } | null
     onboarding?: Partial<Record<MilestoneSlug, MilestoneStatus>> | null
@@ -44,8 +47,12 @@ export type OnboardingInput = {
 function isAutoComplete(slug: MilestoneSlug, input: OnboardingInput): boolean {
   const t = input.tenant
   switch (slug) {
-    case 'branding':
-      return Boolean(t.branding?.logo)
+    case 'branding': {
+      const logo = t.branding?.logo
+      if (logo == null) return false
+      if (typeof logo === 'object') return Boolean(logo.id)
+      return Boolean(logo)
+    }
     case 'identity':
       return Boolean(t.contactInfo?.address?.trim())
     case 'prayer':
@@ -65,7 +72,7 @@ export function computeMilestoneStates(input: OnboardingInput): MilestoneState[]
     if (isAutoComplete(slug, input)) {
       return { slug, status: 'complete' as const }
     }
-    return { slug, status: (explicit[slug] ?? null) as MilestoneStatus }
+    return { slug, status: explicit[slug] ?? null }
   })
 }
 
@@ -73,6 +80,11 @@ export function isAllDoneOrDismissed(states: MilestoneState[]): boolean {
   return states.every((s) => s.status === 'complete' || s.status === 'dismissed')
 }
 
-export function completedCount(states: MilestoneState[]): number {
+/**
+ * Total milestones in a "done" state — counts both `complete` and `dismissed`.
+ * Used for the "X of 6 done" progress display where a skipped milestone is
+ * considered "addressed" by the user just like a completed one.
+ */
+export function doneCount(states: MilestoneState[]): number {
   return states.filter((s) => s.status === 'complete' || s.status === 'dismissed').length
 }
