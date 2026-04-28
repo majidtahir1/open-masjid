@@ -264,7 +264,7 @@ async function TenantDashboard({
     }),
   ])
 
-  const [tenantDoc, prayerSchedulesCount, heroSlidesCount] = await Promise.all([
+  const [tenantDoc, prayerSchedulesCount, heroSlidesCount, eventsTotal] = await Promise.all([
     payload.findByID({
       collection: 'tenants',
       id: tenantId,
@@ -291,6 +291,15 @@ async function TenantDashboard({
       })
       .then((r) => r.totalDocs)
       .catch(() => 0),
+    payload
+      .find({
+        collection: 'events',
+        where: { tenant: { equals: tenantId } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs),
   ])
 
   const onboardingStates = computeMilestoneStates({
@@ -307,7 +316,7 @@ async function TenantDashboard({
     },
     counts: {
       prayerSchedules: prayerSchedulesCount,
-      events: eventsRes.totalDocs,
+      events: eventsTotal,
       heroSlides: heroSlidesCount,
     },
   })
