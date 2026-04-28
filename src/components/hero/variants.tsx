@@ -73,7 +73,8 @@ export function HeroPhoto({ slide, active, liveData, uid }: VariantProps) {
   const f = slide.photoFields
   const url = mediaUrl(f?.image)
   const alt = mediaAlt(f?.image, f?.photoLabel ?? slide.title ?? '')
-  const tone = (f?.photoTone ?? 'navy') as PhotoTone
+  const tone = (f?.photoTone ?? 'brand') as PhotoTone
+  const customColor = f?.customColor ?? null
   const pattern = (f?.photoPattern ?? 'arch') as HeroPhotoPattern
   return (
     <div className="om-hero-photo-bg">
@@ -85,6 +86,7 @@ export function HeroPhoto({ slide, active, liveData, uid }: VariantProps) {
           <PlaceholderImg
             label={f?.photoLabel ?? null}
             tone={tone}
+            customColor={customColor}
             pattern={pattern}
             full
             uid={`photo-${uid}`}

@@ -75,16 +75,19 @@ export interface HeroCta {
 }
 
 export type HeroStyle = 'original' | 'split' | 'live' | 'photo'
-/** Brand-neutral tone slot. Maps to the tenant's --brand / --secondary /
- *  --accent CSS variable at render time, so per-tenant skinning flows
- *  through automatically. */
-export type PhotoTone = 'brand' | 'secondary' | 'accent'
+/** Brand-neutral tone slot. `brand`/`secondary`/`accent` map to the tenant's
+ *  --brand / --secondary / --accent CSS variable at render time so per-tenant
+ *  skinning flows through automatically. `custom` lets an editor pick a
+ *  one-off hex via the sibling `customColor` field (any literal CSS color). */
+export type PhotoTone = 'brand' | 'secondary' | 'accent' | 'custom'
 export type HeroPhotoPattern = 'arch' | 'geometric' | 'stars' | 'lattice'
 
 /** Variant-specific fields shown only when style === 'split'. */
 export interface HeroSplitFields {
   photoLabel?: string | null
   photoTone?: PhotoTone | null
+  /** Hex/CSS color used when photoTone === 'custom'. */
+  customColor?: string | null
   cardTag?: string | null
   cardTitle?: string | null
   /** Optional Media upload. URL resolved at render time. */
@@ -95,6 +98,8 @@ export interface HeroSplitFields {
 export interface HeroPhotoFields {
   photoLabel?: string | null
   photoTone?: PhotoTone | null
+  /** Hex/CSS color used when photoTone === 'custom'. */
+  customColor?: string | null
   photoPattern?: HeroPhotoPattern | null
   image?: MediaLike | string | number | null
   ayahArabic?: string | null

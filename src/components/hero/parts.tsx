@@ -243,22 +243,36 @@ export function BgOrnament({ big }: { big?: boolean }) {
  * The wrapping `<div>` sets `color` to this variable so the SVG inside
  * can reference `currentColor` everywhere — meaning per-tenant brand
  * overrides flow through automatically with no React-level palette tables.
+ *
+ * `custom` is special-cased by the caller: when tone === 'custom', the
+ * placeholder uses the literal `customColor` hex from the slide instead.
  */
-const TONE_TO_VAR: Record<PhotoTone, string> = {
+const TONE_TO_VAR: Record<Exclude<PhotoTone, 'custom'>, string> = {
   brand: 'var(--brand)',
   secondary: 'var(--secondary)',
   accent: 'var(--accent)',
 }
 
+function resolveToneColor(
+  tone: PhotoTone,
+  customColor: string | null | undefined,
+): string {
+  if (tone === 'custom' && customColor) return customColor
+  if (tone === 'custom') return 'var(--secondary)'
+  return TONE_TO_VAR[tone] ?? TONE_TO_VAR.secondary
+}
+
 export function PlaceholderImg({
   label,
   tone = 'secondary',
+  customColor,
   full,
   uid,
   pattern = 'arch',
 }: {
   label?: string | null
   tone?: PhotoTone
+  customColor?: string | null
   full?: boolean
   uid: string
   pattern?: HeroPhotoPattern
@@ -266,7 +280,7 @@ export function PlaceholderImg({
   return (
     <div
       className={`om-hero-ph om-hero-ph-${tone} ${full ? 'is-full' : ''}`}
-      style={{ color: TONE_TO_VAR[tone] ?? TONE_TO_VAR.secondary }}
+      style={{ color: resolveToneColor(tone, customColor) }}
     >
       <svg
         viewBox="0 0 400 280"
@@ -528,7 +542,8 @@ export function FeaturePhotoCard({
   const f = slide.splitFields
   const url = mediaUrl(f?.image)
   const alt = mediaAlt(f?.image, f?.photoLabel ?? slide.title ?? '')
-  const tone = (f?.photoTone ?? 'teal') as PhotoTone
+  const tone = (f?.photoTone ?? 'secondary') as PhotoTone
+  const customColor = f?.customColor ?? null
   const tag = f?.cardTag ?? slide.eyebrow ?? ''
   const title = f?.cardTitle ?? slide.title ?? ''
   const label = f?.photoLabel ?? null
@@ -539,7 +554,12 @@ export function FeaturePhotoCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={alt} loading="lazy" />
         ) : (
-          <PlaceholderImg label={label} tone={tone} uid={`split-${uid}`} />
+          <PlaceholderImg
+            label={label}
+            tone={tone}
+            customColor={customColor}
+            uid={`split-${uid}`}
+          />
         )}
       </div>
       <div className="om-hero-photo-card-cap">

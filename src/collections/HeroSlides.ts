@@ -162,15 +162,26 @@ export const HeroSlides: CollectionConfig = {
           label: 'Photo Tone',
           defaultValue: 'secondary',
           options: [
-            { label: 'Secondary (default)', value: 'secondary' },
-            { label: 'Accent', value: 'accent' },
             { label: 'Brand', value: 'brand' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Accent', value: 'accent' },
+            { label: 'Custom…', value: 'custom' },
           ],
           admin: {
             description:
-              'Tint for the placeholder when no image is uploaded. Picks from your tenant theme: Brand = primary, Secondary = secondary, Accent = highlight.',
-            components: { Field: '/src/fields/SelectField#default' },
+              'Tint for the placeholder when no image is uploaded. Brand / Secondary / Accent pull from your tenant theme; Custom lets you pick a one-off color.',
+            components: { Field: '/src/fields/PhotoToneField#default' },
           },
+        },
+        {
+          // Stored value for `photoTone: 'custom'`. The PhotoToneField swatch
+          // picker renders its own inline color input + hex text box and
+          // writes here directly via the form-field reducer, so we hide the
+          // auto-rendered field to avoid duplicating the UI.
+          name: 'customColor',
+          type: 'text',
+          label: 'Custom Color',
+          admin: { hidden: true },
         },
         {
           name: 'cardTag',
@@ -227,15 +238,26 @@ export const HeroSlides: CollectionConfig = {
           label: 'Background Tone',
           defaultValue: 'brand',
           options: [
-            { label: 'Brand (default)', value: 'brand' },
+            { label: 'Brand', value: 'brand' },
             { label: 'Secondary', value: 'secondary' },
             { label: 'Accent', value: 'accent' },
+            { label: 'Custom…', value: 'custom' },
           ],
           admin: {
             description:
-              'Tint for the background placeholder when no image is uploaded. Picks from your tenant theme.',
-            components: { Field: '/src/fields/SelectField#default' },
+              'Tint for the background placeholder when no image is uploaded. Brand / Secondary / Accent pull from your tenant theme; Custom lets you pick a one-off color.',
+            components: { Field: '/src/fields/PhotoToneField#default' },
           },
+        },
+        {
+          // Stored value for `photoTone: 'custom'`. The PhotoToneField swatch
+          // picker renders its own inline color input + hex text box and
+          // writes here directly via the form-field reducer, so we hide the
+          // auto-rendered field to avoid duplicating the UI.
+          name: 'customColor',
+          type: 'text',
+          label: 'Custom Color',
+          admin: { hidden: true },
         },
         {
           name: 'photoPattern',
