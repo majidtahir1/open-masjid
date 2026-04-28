@@ -81,13 +81,18 @@ export default async function EventDetailPage({ params, searchParams }: EventPag
         </header>
 
         {displayMode === 'image' && flyerUrl && (
-          <div className="relative mb-10 aspect-[16/9] w-full overflow-hidden rounded-[var(--r-md)] border border-border bg-bg-alt">
+          <div className="mb-10 mx-auto w-full max-w-[880px] overflow-hidden rounded-[var(--r-md)] border border-border bg-bg-alt">
             <Image
               src={flyerUrl}
               alt={mediaAlt(event.flyerImage, `${event.title} flyer`)}
-              fill
+              width={
+                (event.flyerImage as { width?: number | null } | null)?.width ?? 880
+              }
+              height={
+                (event.flyerImage as { height?: number | null } | null)?.height ?? 1100
+              }
               sizes="(max-width: 880px) 100vw, 880px"
-              className="object-cover"
+              className="h-auto w-full object-contain"
               priority
             />
           </div>

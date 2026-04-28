@@ -116,14 +116,14 @@ export default function EventCard({ event }: EventCardProps) {
         >
           <span className="sr-only">{event.title}</span>
         </Link>
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-bg-alt">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-bg-alt">
           {flyerUrl ? (
             <Image
               src={flyerUrl}
               alt={flyerAltText}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 560px"
-              className="object-cover transition-transform duration-base ease-out group-hover:scale-[1.02]"
+              className="object-contain transition-transform duration-base ease-out group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-fs-sm text-fg3">
