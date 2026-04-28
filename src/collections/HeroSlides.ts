@@ -6,6 +6,7 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { applyHeroStyleDefaults } from '../hooks/applyHeroStyleDefaults'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateLucideIcon } from '../lib/validateLucideIcon'
 
@@ -30,7 +31,7 @@ export const HeroSlides: CollectionConfig = {
     delete: tenantScopedDelete,
   },
   hooks: {
-    beforeChange: [setTenantFromUser],
+    beforeChange: [setTenantFromUser, applyHeroStyleDefaults],
   },
   fields: [
     {
@@ -93,6 +94,26 @@ export const HeroSlides: CollectionConfig = {
       ],
     },
     {
+      name: 'style',
+      type: 'select',
+      required: true,
+      defaultValue: 'original',
+      label: 'Layout Style',
+      options: [
+        { label: 'Original — centered editorial (single column)', value: 'original' },
+        { label: 'Split — copy + card stack (next iqamah, photo, up next)', value: 'split' },
+        { label: 'Live — copy + "Right now at ICP" widget', value: 'live' },
+        { label: 'Photo — full-bleed dark + ayah card', value: 'photo' },
+      ],
+      admin: {
+        description:
+          'Visual layout for this slide. Each style has a built-in color treatment that you can override via Slide Theme below.',
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
+      },
+    },
+    {
       name: 'accent',
       type: 'select',
       required: true,
@@ -106,11 +127,150 @@ export const HeroSlides: CollectionConfig = {
       ],
       admin: {
         description:
-          'Controls the background color and typography contrast for this slide. Rotate themes across slides so adjacent slides look distinct.',
+          'Color treatment for the slide. Defaults to the style\'s built-in color (Cream for most, Navy for the Photo style). Pick a different theme to override.',
         components: {
           Field: '/src/fields/SelectField#default',
         },
       },
+    },
+    {
+      name: 'splitFields',
+      type: 'group',
+      label: 'Split Layout — Card Content',
+      admin: {
+        description:
+          'Content shown in the right-side card stack for the Split layout. Only used when Layout Style is "Split".',
+        condition: (_, siblingData) => siblingData?.style === 'split',
+      },
+      fields: [
+        {
+          name: 'photoLabel',
+          type: 'text',
+          label: 'Photo Label',
+          admin: {
+            description: 'Caption shown over the photo card. e.g. "Friday gathering".',
+            placeholder: 'Friday gathering',
+            components: { Field: '/src/fields/TextField#default' },
+          },
+        },
+        {
+          name: 'photoTone',
+          type: 'select',
+          label: 'Photo Tone',
+          defaultValue: 'teal',
+          options: [
+            { label: 'Teal', value: 'teal' },
+            { label: 'Gold', value: 'gold' },
+            { label: 'Navy', value: 'navy' },
+          ],
+          admin: {
+            description: 'Color tint for the placeholder if no image is uploaded.',
+            components: { Field: '/src/fields/SelectField#default' },
+          },
+        },
+        {
+          name: 'cardTag',
+          type: 'text',
+          label: 'Photo Card Tag',
+          admin: {
+            description: 'Eyebrow above the photo card title. e.g. "Jummah · this week".',
+            placeholder: 'Jummah · this week',
+            components: { Field: '/src/fields/TextField#default' },
+          },
+        },
+        {
+          name: 'cardTitle',
+          type: 'text',
+          label: 'Photo Card Title',
+          admin: {
+            description: 'Main line on the photo card. e.g. "On Tawakkul — Shaykh Omar".',
+            components: { Field: '/src/fields/TextField#default' },
+          },
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Photo (optional)',
+          admin: {
+            description: 'Real photo for the card. Falls back to a tinted placeholder if empty.',
+          },
+        },
+      ],
+    },
+    {
+      name: 'photoFields',
+      type: 'group',
+      label: 'Photo Layout — Background + Ayah',
+      admin: {
+        description:
+          'Background image and ayah card content for the full-bleed Photo layout. Only used when Layout Style is "Photo".',
+        condition: (_, siblingData) => siblingData?.style === 'photo',
+      },
+      fields: [
+        {
+          name: 'photoLabel',
+          type: 'text',
+          label: 'Background Label',
+          admin: {
+            description: 'Caption corner-tag for the background. e.g. "Masjid prayer hall · golden hour".',
+            components: { Field: '/src/fields/TextField#default' },
+          },
+        },
+        {
+          name: 'photoTone',
+          type: 'select',
+          label: 'Background Tone',
+          defaultValue: 'navy',
+          options: [
+            { label: 'Navy (default)', value: 'navy' },
+            { label: 'Teal', value: 'teal' },
+            { label: 'Gold', value: 'gold' },
+          ],
+          admin: {
+            description: 'Color tint for the background placeholder when no image is uploaded.',
+            components: { Field: '/src/fields/SelectField#default' },
+          },
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Background Photo (optional)',
+          admin: {
+            description: 'Full-bleed photo. Falls back to a tinted placeholder if empty.',
+          },
+        },
+        {
+          name: 'ayahArabic',
+          type: 'textarea',
+          label: 'Ayah (Arabic)',
+          admin: {
+            description: 'Right-to-left Arabic verse displayed in the side card.',
+            placeholder: 'إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا',
+            components: { Field: '/src/fields/TextareaField#default' },
+          },
+        },
+        {
+          name: 'ayahTranslation',
+          type: 'textarea',
+          label: 'Ayah (English Translation)',
+          admin: {
+            description: 'Translation displayed below the Arabic.',
+            components: { Field: '/src/fields/TextareaField#default' },
+          },
+        },
+        {
+          name: 'ayahCitation',
+          type: 'text',
+          label: 'Ayah Citation',
+          admin: {
+            description: 'Reference for the verse, e.g. "An-Nisa · 4:103".',
+            placeholder: 'An-Nisa · 4:103',
+            components: { Field: '/src/fields/TextField#default' },
+          },
+        },
+      ],
     },
     {
       name: 'ctas',

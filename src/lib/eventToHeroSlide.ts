@@ -22,6 +22,7 @@ export function eventToHeroSlide(event: FeaturedEvent): HeroSlideLike {
     body: event.shortDescription ?? null,
     meta: event.when ?? null,
     accent: event.heroAccent ?? 'cream',
+    style: 'original',
     ctas: event.slug
       ? [
           {
