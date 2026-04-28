@@ -501,6 +501,38 @@ export const Tenants: CollectionConfig = {
             },
           ],
         },
+        {
+          label: 'Onboarding',
+          description: 'Internal setup-checklist state. Managed by the welcome wizard.',
+          fields: [
+            {
+              name: 'onboarding',
+              type: 'group',
+              admin: {
+                description:
+                  'Per-milestone state for the post-login setup wizard. Auto-detected milestones are not stored here; only explicit user actions (skip, mark-complete) are persisted.',
+              },
+              fields: (
+                ['branding', 'identity', 'prayer', 'firstEvent', 'hero', 'donations'] as const
+              ).map((slug) => ({
+                name: slug,
+                type: 'select' as const,
+                options: [
+                  { label: 'Complete', value: 'complete' },
+                  { label: 'Dismissed', value: 'dismissed' },
+                ],
+                admin: { description: `Explicit user action for the ${slug} milestone.` },
+              })),
+            },
+            {
+              name: 'onboardingCompletedAt',
+              type: 'date',
+              admin: {
+                description: 'Set when the user dismisses the celebratory screen.',
+              },
+            },
+          ],
+        },
       ],
     },
   ],
