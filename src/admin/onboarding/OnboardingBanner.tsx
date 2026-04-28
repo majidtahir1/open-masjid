@@ -19,7 +19,7 @@ function tenantIdOf(t: unknown): string | number | null {
 export default async function OnboardingBanner() {
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers: await getHeaders() })
-  if (!user || user.role === 'platformOwner') return null
+  if (!user || user.role !== 'admin') return null
   const tenantId = tenantIdOf((user as { tenant?: unknown }).tenant)
   if (!tenantId) return null
 

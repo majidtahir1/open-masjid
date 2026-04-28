@@ -7,7 +7,7 @@ import { RefreshCw } from 'lucide-react'
 export default async function RerunMenuItem() {
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers: await getHeaders() })
-  if (!user || user.role === 'platformOwner') return null
+  if (!user || user.role !== 'admin') return null
   return (
     <Link
       href="/admin"
