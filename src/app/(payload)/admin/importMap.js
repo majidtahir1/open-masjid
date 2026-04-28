@@ -28,6 +28,7 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_5065215e438fef22269547c6432587f3 } from '../../../../src/fields/EmailField'
 import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../../src/fields/CheckboxField'
+import { default as default_61b04b208665b6f3018adf7337542037 } from '../../../../src/fields/PhotoToneField'
 import { default as default_737df59d0032b50354e46d5ff0b71d1c } from '../../../../src/fields/IconPickerField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
@@ -43,6 +44,8 @@ import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../..
 import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
+import { default as default_9752121c5e28fe5da9a9b60c62f37629 } from '../../../../src/admin/onboarding/RerunMenuItem'
+import { default as default_8cbcecd357807e8c27e7c48ba30ad9a1 } from '../../../../src/admin/onboarding/OnboardingBanner'
 import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
 import { default as default_79a85695b376b830c5fc9180be7fd47b } from '../../../../src/admin/SiteSettingsLink'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
@@ -78,6 +81,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/src/fields/EmailField#default": default_5065215e438fef22269547c6432587f3,
   "/src/fields/CheckboxField#default": default_020349c8fbd548aa796ba56590815903,
+  "/src/fields/PhotoToneField#default": default_61b04b208665b6f3018adf7337542037,
   "/src/fields/IconPickerField#default": default_737df59d0032b50354e46d5ff0b71d1c,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/ActiveScheduleBanner#default": default_07d961590be6dea90e3f89bf0ec85650,
@@ -93,6 +97,8 @@ export const importMap = {
   "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
   "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
+  "/src/admin/onboarding/RerunMenuItem#default": default_9752121c5e28fe5da9a9b60c62f37629,
+  "/src/admin/onboarding/OnboardingBanner#default": default_8cbcecd357807e8c27e7c48ba30ad9a1,
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/SiteSettingsLink#default": default_79a85695b376b830c5fc9180be7fd47b,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
