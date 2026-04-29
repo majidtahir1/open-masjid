@@ -439,18 +439,20 @@ export function BrandingStep({
         }}
       >
         <div>
-          <p
-            style={{
-              margin: 0,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: '0.14em',
-              color: 'var(--fg3)',
-              textTransform: 'uppercase',
-            }}
-          >
-            Step 01 of 06
-          </p>
+          {mode === 'modal' && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.14em',
+                color: 'var(--fg3)',
+                textTransform: 'uppercase',
+              }}
+            >
+              Step 01 of 06
+            </p>
+          )}
           <h2
             style={{
               margin: 0,
@@ -486,27 +488,29 @@ export function BrandingStep({
         )}
       </div>
 
-      {/* ---------- 6-segment progress bar ---------- */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 4,
-          padding: '0 var(--sp-8)',
-          background: 'var(--bg)',
-        }}
-      >
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              flex: 1,
-              height: 4,
-              background: i === 0 ? 'var(--brand)' : 'var(--icp-gray-100)',
-              borderRadius: 2,
-            }}
-          />
-        ))}
-      </div>
+      {/* ---------- 6-segment progress bar (wizard only) ---------- */}
+      {mode === 'modal' && (
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+            padding: '0 var(--sp-8)',
+            background: 'var(--bg)',
+          }}
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                height: 4,
+                background: i === 0 ? 'var(--brand)' : 'var(--icp-gray-100)',
+                borderRadius: 2,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* ---------- Body ---------- */}
       <div
@@ -528,7 +532,7 @@ export function BrandingStep({
               textTransform: 'uppercase',
             }}
           >
-            Step 01 of 06 · Branding
+            {mode === 'modal' ? 'Step 01 of 06 · Branding' : 'Branding'}
           </p>
           <h1
             style={{
