@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Geist } from 'next/font/google'
 
 import '../globals.css'
@@ -17,7 +17,7 @@ import type {
 } from '@/components/types'
 import { mediaUrl } from '@/components/types'
 import { TenantProvider } from '@/lib/context'
-import { getCurrentTenant } from '@/lib/tenant-server'
+import { getCurrentTenant, getTenantContext } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
 import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
 import { resolveTenantFavicon } from '@/lib/tenantFavicon'
@@ -44,11 +44,17 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   const tenant = await getCurrentTenant()
 
   if (!tenant) {
-    // No tenant resolves here — fall through to the platform marketing site.
-    // On the platform marketing host, middleware rewrites root paths into
-    // `/marketing/*` so this branch should not normally render. The redirect
-    // is kept as a safety net for unexpected hosts (e.g. local IPs) and points
-    // back to root, where the rewrite will take over.
+    // No tenant resolves here. What we do depends on which host the request
+    // came in on:
+    //   - Tenant subdomain or custom domain with no matching DB row: render a
+    //     404. Redirecting to '/' would loop forever because the same host
+    //     would re-enter this layout with the same null tenant.
+    //   - Platform-marketing or localhost: redirect to '/' so middleware can
+    //     rewrite into `/marketing/*` (the safety-net path).
+    const ctx = await getTenantContext()
+    if (ctx.type === 'tenant-subdomain' || ctx.type === 'tenant-custom') {
+      notFound()
+    }
     redirect('/')
   }
 
