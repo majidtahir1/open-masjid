@@ -11,6 +11,7 @@ import {
 import { MilestoneTile } from './MilestoneTile'
 import { MilestonePanel } from './MilestonePanel'
 import { CelebrationScreen } from './CelebrationScreen'
+import { BrandingStep, type BrandingInitial } from './steps/BrandingStep'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 type Props = {
@@ -22,6 +23,8 @@ type Props = {
   showWelcome: boolean
   /** True iff onboardingCompletedAt is set on the tenant — celebratory was already dismissed. */
   alreadyCelebrated: boolean
+  /** Current branding values used to seed the rich Branding step. */
+  brandingInitial?: BrandingInitial
 }
 
 async function postAction(action: object): Promise<void> {
@@ -38,6 +41,7 @@ export function OnboardingShell({
   tenantName,
   showWelcome,
   alreadyCelebrated,
+  brandingInitial,
 }: Props) {
   const [states] = useState(initialStates)
   const [activeSlug, setActiveSlug] = useState<MilestoneSlug | null>(null)
@@ -158,6 +162,17 @@ export function OnboardingShell({
 
   /* ---------- Active milestone panel (inline replacement) ---------- */
   if (activeSlug) {
+    if (activeSlug === 'branding') {
+      return (
+        <BrandingStep
+          initial={brandingInitial ?? {}}
+          tenantName={tenantName}
+          publicUrl={publicUrl}
+          onClose={() => setActiveSlug(null)}
+          onSaved={refresh}
+        />
+      )
+    }
     return (
       <div
         style={{

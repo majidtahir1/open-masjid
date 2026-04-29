@@ -235,7 +235,8 @@ export const Tenants: CollectionConfig = {
                   options: [
                     { label: 'Fraunces (warm serif)', value: 'Fraunces' },
                     { label: 'Playfair Display (editorial serif)', value: 'Playfair Display' },
-                    { label: 'Lora (readable serif)', value: 'Lora' },
+                    { label: 'DM Serif Display (modern serif)', value: 'DM Serif Display' },
+                    { label: 'IBM Plex Sans (geometric sans)', value: 'IBM Plex Sans' },
                   ],
                   admin: {
                     description:

@@ -268,7 +268,7 @@ async function TenantDashboard({
     payload.findByID({
       collection: 'tenants',
       id: tenantId,
-      depth: 0,
+      depth: 1,
       overrideAccess: true,
     }) as Promise<unknown>,
     payload
@@ -327,6 +327,39 @@ async function TenantDashboard({
   const tenantSlug = (tenantDoc as { slug?: string }).slug ?? ''
   const publicUrl = `https://${tenantSlug}.openmasjid.app`
 
+  // Build branding initial values for the rich Branding step. The tenant doc
+  // was fetched at depth 1 above, so `branding.logo` is populated as a Media
+  // object with `url`, `filename`, `filesize`.
+  const brandingDoc = (tenantDoc as {
+    branding?: {
+      logo?:
+        | string
+        | number
+        | { id?: string | number; url?: string; filename?: string; filesize?: number }
+        | null
+      primaryColor?: string | null
+      secondaryColor?: string | null
+      accentColor?: string | null
+      displayFont?: string | null
+    } | null
+  }).branding
+  const logoVal = brandingDoc?.logo
+  const brandingInitial = {
+    logo:
+      logoVal && typeof logoVal === 'object' && logoVal.id != null
+        ? {
+            id: logoVal.id as string | number,
+            url: logoVal.url ?? undefined,
+            filename: logoVal.filename ?? undefined,
+            filesize: logoVal.filesize ?? undefined,
+          }
+        : null,
+    primaryColor: brandingDoc?.primaryColor ?? undefined,
+    secondaryColor: brandingDoc?.secondaryColor ?? undefined,
+    accentColor: brandingDoc?.accentColor ?? undefined,
+    displayFont: brandingDoc?.displayFont ?? undefined,
+  }
+
   const scheduleCollection = schedule?.collectionSlug ?? 'prayer-schedules'
   const scheduleEditHref = schedule
     ? `/admin/collections/${scheduleCollection}/${schedule.id}`
@@ -349,6 +382,7 @@ async function TenantDashboard({
         tenantName={tenantName}
         showWelcome={showWelcome}
         alreadyCelebrated={alreadyCelebrated}
+        brandingInitial={brandingInitial}
       />
       <header className="flex items-center justify-between gap-6">
         <div className="space-y-2">
