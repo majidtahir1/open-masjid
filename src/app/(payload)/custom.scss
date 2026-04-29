@@ -74,6 +74,92 @@
   --input:                  var(--icp-gray-200);
   --ring:                   var(--icp-teal-500);
   --radius:                 0.625rem;
+
+  /* ICP Prosper design-system tokens (mirrored from src/app/globals.css so
+   * admin-side custom components can use the same vars as the public site). */
+  --icp-navy-200:  #9BA4D1;
+  --icp-navy-300:  #5E6AA8;
+  --icp-teal-50:   #E6F5F7;
+  --icp-teal-100:  #BEE4E9;
+  --icp-teal-200:  #8DCED6;
+  --icp-teal-300:  #5CB8C3;
+  --icp-teal-700:  #175F6B;
+  --icp-teal-800:  #114751;
+  --icp-teal-900:  #0B2F36;
+  --icp-gray-50:   #F7F8F8;
+  --icp-gray-400:  #9CA4A4;
+  --icp-gray-500:  #747C7C;
+  --icp-gray-700:  #3A3F3F;
+  --icp-gray-800:  #242828;
+  --icp-gold-50:   #FBF5E6;
+  --icp-gold-100:  #F6E6BF;
+  --icp-gold-500:  #D9A84E;
+  --icp-gold-700:  #9A7428;
+  --icp-success:   #4C8B5B;
+
+  /* Surfaces */
+  --bg:            #FFFFFF;
+  --bg-alt:        var(--icp-gray-50);
+  --bg-ink:        var(--icp-navy-900);
+
+  /* Foreground scale */
+  --fg1:           var(--icp-gray-900);
+  --fg2:           var(--icp-gray-700);
+  --fg3:           var(--icp-gray-500);
+  --fg4:           var(--icp-gray-400);
+
+  /* Border tints */
+  --border-strong: var(--icp-gray-300);
+  --border-teal:   var(--icp-teal-100);
+  --border-navy:   var(--icp-navy-100);
+
+  /* Brand layer */
+  --brand:         var(--icp-navy-700);
+  --brand-hover:   var(--icp-navy-800);
+  --brand-press:   var(--icp-navy-900);
+  --brand-soft:    var(--icp-navy-50);
+  --brand-ink:     var(--icp-navy-900);
+
+  /* Type stack */
+  --font-display:  'Fraunces', 'Georgia', 'Times New Roman', serif;
+  --font-body:     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-arabic:   'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* Type scale */
+  --fs-xs:    0.75rem;
+  --fs-sm:    0.875rem;
+  --fs-base:  1rem;
+  --fs-md:    1.125rem;
+  --fs-lg:    1.375rem;
+  --fs-xl:    1.75rem;
+  --fs-2xl:   2.25rem;
+  --fs-3xl:   3rem;
+  --fs-4xl:   4rem;
+
+  /* Spacing scale */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px; --sp-20: 80px;
+
+  /* Radii */
+  --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --r-xl: 22px; --r-2xl: 32px; --r-pill: 999px;
+
+  /* Shadows — soft, teal-tinted */
+  --sh-xs: 0 1px 2px rgba(19, 46, 48, 0.05);
+  --sh-sm: 0 2px 6px rgba(19, 46, 48, 0.06), 0 1px 2px rgba(19, 46, 48, 0.04);
+  --sh-md: 0 6px 18px rgba(19, 46, 48, 0.08), 0 2px 4px rgba(19, 46, 48, 0.04);
+  --sh-lg: 0 14px 32px rgba(19, 46, 48, 0.10), 0 4px 8px rgba(19, 46, 48, 0.05);
+  --sh-xl: 0 24px 56px rgba(19, 46, 48, 0.14);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 120ms; --dur-base: 220ms; --dur-slow: 420ms;
+
+  /* Tracking */
+  --tracking-tight:  -0.02em;
+  --tracking-caps:   0.12em;
 }
 
 /* Dark mode — keyed on Payload's admin theme attribute. Do not add `.dark`
