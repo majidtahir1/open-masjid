@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Clock, Check, RotateCcw, Sparkles } from 'lucide-react'
 import {
   type MilestoneSlug,
   type MilestoneState,
@@ -10,6 +11,7 @@ import {
 import { MilestoneTile } from './MilestoneTile'
 import { MilestonePanel } from './MilestonePanel'
 import { CelebrationScreen } from './CelebrationScreen'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 type Props = {
   initialStates: MilestoneState[]
@@ -44,8 +46,10 @@ export function OnboardingShell({
   )
   // When true the full card collapses to a thin strip ("Hide for now")
   const [hidden, setHidden] = useState(false)
+  // Welcome modal — open on first login, independent of the inline card
+  const [welcomeOpen, setWelcomeOpen] = useState(showWelcome)
 
-  // Fire seen-welcome API call once on first render if needed — no modal is shown.
+  // Fire seen-welcome API call once when the modal first opens.
   useEffect(() => {
     if (showWelcome) {
       void postAction({ type: 'seen-welcome' })
@@ -176,8 +180,191 @@ export function OnboardingShell({
     )
   }
 
+  /* ---------- Welcome modal — first-login overlay, always portal-rendered ---------- */
+  const welcomeModal = (
+    <Dialog open={welcomeOpen} onOpenChange={setWelcomeOpen}>
+      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0">
+        {/* Top zone — dark navy with radial gradient accents */}
+        <div
+          style={{
+            backgroundImage: [
+              'radial-gradient(ellipse 60% 50% at 90% 10%, rgba(20,184,166,0.18) 0%, transparent 70%)',
+              'radial-gradient(ellipse 50% 45% at 85% 85%, rgba(234,179,8,0.14) 0%, transparent 70%)',
+            ].join(', '),
+            backgroundColor: 'var(--icp-navy-900)',
+            padding: 'var(--sp-12)',
+          }}
+        >
+          {/* Bismillah */}
+          <p
+            style={{
+              fontFamily: 'var(--font-arabic)',
+              color: 'var(--icp-teal-300)',
+              fontSize: 'clamp(1.75rem, 3vw, 2.25rem)',
+              letterSpacing: '0.04em',
+              opacity: 0.85,
+              margin: '0 0 var(--sp-8) 0',
+            }}
+          >
+            ﷽
+          </p>
+
+          {/* Headline */}
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 500,
+              fontSize: 'clamp(2rem, 4vw, 2.75rem)',
+              color: 'white',
+              lineHeight: 1.1,
+              marginBottom: 'var(--sp-6)',
+              marginTop: 0,
+            }}
+          >
+            Welcome to{' '}
+            <em
+              style={{
+                fontStyle: 'italic',
+                color: 'var(--om-gold, var(--icp-gold-500))',
+              }}
+            >
+              OpenMasjid.
+            </em>
+          </h2>
+
+          {/* Body */}
+          <p
+            style={{
+              color: 'rgba(255,255,255,0.85)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 16,
+              lineHeight: 1.6,
+              margin: 0,
+            }}
+          >
+            <span style={{ fontWeight: 600, color: 'white' }}>{tenantName}</span>{' '}
+            is already live at{' '}
+            <code
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.9em',
+                padding: '2px 6px',
+                borderRadius: 4,
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+              }}
+            >
+              {publicHost}.openmasjid.app
+            </code>{' '}
+            with our defaults. Take 15 minutes now to make it look like your
+            masjid — or jump straight into the admin and come back later.
+          </p>
+        </div>
+
+        {/* Bottom zone — white */}
+        <div
+          style={{
+            background: 'white',
+            padding: 'var(--sp-8) var(--sp-12)',
+          }}
+        >
+          {/* Trust pills */}
+          <div
+            className="flex flex-wrap items-center"
+            style={{ gap: 'var(--sp-8)', marginBottom: 'var(--sp-8)' }}
+          >
+            <span
+              className="flex items-center gap-1.5"
+              style={{ color: 'var(--fg2)', fontSize: 14, fontFamily: 'var(--font-body)' }}
+            >
+              <Clock size={16} strokeWidth={1.75} style={{ color: 'var(--icp-teal-500)', flexShrink: 0 }} />
+              ~15 minutes
+            </span>
+            <span
+              className="flex items-center gap-1.5"
+              style={{ color: 'var(--fg2)', fontSize: 14, fontFamily: 'var(--font-body)' }}
+            >
+              <Check size={16} strokeWidth={1.75} style={{ color: 'var(--icp-teal-500)', flexShrink: 0 }} />
+              Skip anything
+            </span>
+            <span
+              className="flex items-center gap-1.5"
+              style={{ color: 'var(--fg2)', fontSize: 14, fontFamily: 'var(--font-body)' }}
+            >
+              <RotateCcw size={16} strokeWidth={1.75} style={{ color: 'var(--icp-teal-500)', flexShrink: 0 }} />
+              Resume any time
+            </span>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Primary */}
+            <button
+              type="button"
+              onClick={() => setWelcomeOpen(false)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'var(--brand)',
+                color: 'white',
+                padding: '12px 22px',
+                borderRadius: 'var(--r-md)',
+                fontFamily: 'var(--font-body)',
+                fontWeight: 600,
+                fontSize: 14,
+                border: 'none',
+                cursor: 'pointer',
+                transition:
+                  'background var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--brand-hover)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = 'var(--sh-md)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--brand)'
+                e.currentTarget.style.transform = 'none'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            >
+              <Sparkles size={16} strokeWidth={2} />
+              Set up your site
+            </button>
+
+            {/* Secondary */}
+            <button
+              type="button"
+              onClick={() => setWelcomeOpen(false)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--fg2)',
+                fontFamily: 'var(--font-body)',
+                fontWeight: 500,
+                fontSize: 14,
+                padding: '12px 18px',
+                cursor: 'pointer',
+                transition: 'color var(--dur-base) var(--ease-out)',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--fg1)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--fg2)')}
+            >
+              Take me to the admin
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+
   /* ---------- Full editorial grid card ---------- */
   return (
+    <>
+      {welcomeModal}
     <div
       className="relative"
       style={{
@@ -418,5 +605,6 @@ export function OnboardingShell({
         </button>
       </div>
     </div>
+    </>
   )
 }
