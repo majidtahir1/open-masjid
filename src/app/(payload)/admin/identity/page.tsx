@@ -5,6 +5,10 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import IdentityStandalone from '@/admin/onboarding/steps/IdentityStandalone'
 
+// Hits Postgres on every render; never pre-render at build time.
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 type TenantRef = string | number | { id: string | number } | null | undefined
 
 function tenantIdOf(t: TenantRef): string | number | null {
