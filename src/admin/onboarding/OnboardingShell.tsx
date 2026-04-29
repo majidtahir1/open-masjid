@@ -5,6 +5,7 @@ import { Clock, Check, RotateCcw, Sparkles, ArrowLeft } from 'lucide-react'
 import {
   type MilestoneSlug,
   type MilestoneState,
+  MILESTONES,
   isAllDoneOrDismissed,
   doneCount,
 } from '@/lib/onboarding'
@@ -584,6 +585,18 @@ export function OnboardingShell({
     setView('grid')
   }
 
+  const advanceTo = (current: MilestoneSlug) => {
+    const idx = MILESTONES.indexOf(current)
+    const next = MILESTONES[idx + 1]
+    if (next) {
+      setActiveSlug(next)
+      setView('milestone')
+    } else {
+      setActiveSlug(null)
+      setView('celebration')
+    }
+  }
+
   const milestoneView = activeSlug ? (
     activeSlug === 'branding' ? (
       <div className="overflow-y-auto flex-1">
@@ -593,6 +606,7 @@ export function OnboardingShell({
           publicUrl={publicUrl}
           onClose={goBackToGrid}
           onSaved={refresh}
+          onAdvance={() => advanceTo('branding')}
         />
       </div>
     ) : activeSlug === 'identity' ? (
@@ -603,6 +617,7 @@ export function OnboardingShell({
           publicUrl={publicUrl}
           onClose={goBackToGrid}
           onSaved={refresh}
+          onAdvance={() => advanceTo('identity')}
         />
       </div>
     ) : (
@@ -612,6 +627,7 @@ export function OnboardingShell({
           status={states.find((s) => s.slug === activeSlug)?.status ?? null}
           onBack={goBackToGrid}
           onChanged={refresh}
+          onAdvance={() => advanceTo(activeSlug)}
         />
       </div>
     )
@@ -637,7 +653,7 @@ export function OnboardingShell({
 
       {/* Modal — all views live inside here */}
       <Dialog open={welcomeOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-5xl p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-5xl p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col" hideCloseButton>
           {/* Visually-hidden title for screen readers — Radix requires it on every DialogContent. */}
           <DialogTitle
             style={{

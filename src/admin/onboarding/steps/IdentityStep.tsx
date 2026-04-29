@@ -24,6 +24,7 @@ type Props = {
   publicUrl: string
   onClose: () => void
   onSaved: () => void
+  onAdvance?: () => void
   mode?: 'modal' | 'standalone'
   markCompleteOnSave?: boolean
 }
@@ -129,6 +130,7 @@ export function IdentityStep({
   publicUrl,
   onClose,
   onSaved,
+  onAdvance,
   mode = 'modal',
   markCompleteOnSave = true,
 }: Props) {
@@ -161,9 +163,10 @@ export function IdentityStep({
   const [saving, setSaving] = useState<'draft' | 'continue' | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const submit = async (markComplete: boolean) => {
+  const submit = async (kind: 'draft' | 'continue') => {
+    const markComplete = kind === 'continue'
     setError(null)
-    setSaving(markComplete ? 'continue' : 'draft')
+    setSaving(kind)
     try {
       const socialLinks = SOCIAL_PLATFORMS.map((p) => ({
         platform: p.key,
@@ -189,7 +192,11 @@ export function IdentityStep({
         const text = await res.text().catch(() => '')
         throw new Error(text || `Save failed (${res.status})`)
       }
-      onSaved()
+      if (kind === 'continue' && onAdvance) {
+        onAdvance()
+      } else {
+        onSaved()
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed')
     } finally {
@@ -592,14 +599,14 @@ export function IdentityStep({
           {mode === 'modal' && (
             <SecondaryFooterButton
               disabled={saving !== null}
-              onClick={() => void submit(false)}
+              onClick={() => void submit('draft')}
             >
               {saving === 'draft' ? 'Saving...' : 'Save draft'}
             </SecondaryFooterButton>
           )}
           <PrimaryFooterButton
             disabled={saving !== null}
-            onClick={() => void submit(markCompleteOnSave)}
+            onClick={() => void submit(markCompleteOnSave ? 'continue' : 'draft')}
           >
             {saving !== null && (markCompleteOnSave ? saving === 'continue' : saving === 'draft')
               ? 'Saving...'

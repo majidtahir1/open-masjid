@@ -31,6 +31,7 @@ type Props = {
   publicUrl: string
   onClose: () => void
   onSaved: () => void
+  onAdvance?: () => void
   mode?: 'modal' | 'standalone'
   markCompleteOnSave?: boolean
 }
@@ -329,6 +330,7 @@ export function BrandingStep({
   publicUrl,
   onClose,
   onSaved,
+  onAdvance,
   mode = 'modal',
   markCompleteOnSave = true,
 }: Props) {
@@ -431,9 +433,10 @@ export function BrandingStep({
     }
   }
 
-  const submit = async (markComplete: boolean) => {
+  const submit = async (kind: 'draft' | 'continue') => {
+    const markComplete = kind === 'continue'
     setError(null)
-    setSaving(markComplete ? 'continue' : 'draft')
+    setSaving(kind)
     try {
       const res = await fetch('/admin/api/onboarding/branding', {
         method: 'POST',
@@ -452,7 +455,11 @@ export function BrandingStep({
         const text = await res.text().catch(() => '')
         throw new Error(text || `Save failed (${res.status})`)
       }
-      onSaved()
+      if (kind === 'continue' && onAdvance) {
+        onAdvance()
+      } else {
+        onSaved()
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed')
     } finally {
@@ -1192,14 +1199,14 @@ export function BrandingStep({
           {mode === 'modal' && (
             <SecondaryFooterButton
               disabled={saving !== null}
-              onClick={() => void submit(false)}
+              onClick={() => void submit('draft')}
             >
               {saving === 'draft' ? 'Saving...' : 'Save draft'}
             </SecondaryFooterButton>
           )}
           <PrimaryFooterButton
             disabled={saving !== null}
-            onClick={() => void submit(markCompleteOnSave)}
+            onClick={() => void submit(markCompleteOnSave ? 'continue' : 'draft')}
           >
             {saving !== null && (markCompleteOnSave ? saving === 'continue' : saving === 'draft')
               ? 'Saving...'

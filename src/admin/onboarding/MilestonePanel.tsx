@@ -174,20 +174,26 @@ export function MilestonePanel({
   status,
   onBack,
   onChanged,
+  onAdvance,
 }: {
   slug: MilestoneSlug
   status: MilestoneStatus
   onBack: () => void
   onChanged: () => void
+  onAdvance?: () => void
 }) {
   const meta = PANELS[slug]
   const [busy, setBusy] = useState(false)
 
-  const act = async (action: object) => {
+  const act = async (action: { type: string; [key: string]: unknown }) => {
     setBusy(true)
     try {
       await postAction(action)
-      onChanged()
+      if (action.type === 'mark-complete' && onAdvance) {
+        onAdvance()
+      } else {
+        onChanged()
+      }
     } finally {
       setBusy(false)
     }
