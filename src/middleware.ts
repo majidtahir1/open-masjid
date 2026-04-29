@@ -42,6 +42,33 @@ export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-tenant-context', serialized)
 
+  // On the platform marketing host (`openmasjid.app`), rewrite root-level
+  // requests to the internal `/marketing/*` route group so URLs stay clean
+  // (`openmasjid.app/pricing`) while the Next.js app keeps its real routes
+  // colocated under `(marketing)/marketing/*`. This avoids colliding with
+  // the `(site)/[slug]` catch-all that owns root paths on tenant hosts.
+  //
+  // In dev, bare `localhost` / `127.0.0.1` (no subdomain) is treated as the
+  // platform marketing host so the marketing site is reachable at
+  // `localhost:3000/`. Tenant subdomains (`icp.localhost:3000`) still
+  // classify as `localhost` but include a subdomain, so we exclude those.
+  const bareHost = host.split(':')[0].toLowerCase()
+  const isBareLocalhost = bareHost === 'localhost' || bareHost === '127.0.0.1' || bareHost === '0.0.0.0'
+  const treatAsMarketing =
+    context.type === 'platform-marketing' || (context.type === 'localhost' && isBareLocalhost)
+
+  if (
+    treatAsMarketing &&
+    !pathname.startsWith('/marketing') &&
+    !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/api') &&
+    !pathname.startsWith('/_next')
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname === '/' ? '/marketing' : `/marketing${pathname}`
+    return NextResponse.rewrite(url, { request: { headers: requestHeaders } })
+  }
+
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   })

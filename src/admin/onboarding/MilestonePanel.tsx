@@ -4,7 +4,7 @@ import { useState, type CSSProperties } from 'react'
 import type { MilestoneSlug, MilestoneStatus } from '@/lib/onboarding'
 import { HINTS } from '@/lib/onboardingHints'
 import { HintRail } from './HintRail'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Check } from 'lucide-react'
 
 type PanelMeta = {
   title: string
@@ -38,14 +38,14 @@ const PANELS: Record<MilestoneSlug, PanelMeta> = {
   firstEvent: {
     title: 'Your first event is ready to edit',
     intro:
-      "We've prefilled a sample Jummah event. Edit it, save it, or skip and add your own later.",
+      "We've prefilled a sample Jummah event. Edit it, save it, or add your own later.",
     primaryHref: '/admin/collections/events/create',
     primaryLabel: 'Open the event editor',
   },
   hero: {
     title: 'Set your homepage hero',
     intro:
-      "Featured events become hero slides automatically — or you can upload a photo. Skip if you'd rather use the default.",
+      'Featured events become hero slides automatically — or you can upload a photo.',
     primaryHref: '/admin/collections/hero-slides/create',
     primaryLabel: 'Open the hero editor',
   },
@@ -56,14 +56,6 @@ const PANELS: Record<MilestoneSlug, PanelMeta> = {
     primaryHref: '/admin/collections/tenants',
     primaryLabel: 'Open donation settings',
   },
-}
-
-async function postAction(action: object): Promise<void> {
-  await fetch('/admin/api/onboarding', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(action),
-  })
 }
 
 const baseBtn: CSSProperties = {
@@ -110,94 +102,16 @@ function PrimaryLink({
   )
 }
 
-function SecondaryButton({
-  onClick,
-  disabled,
-  children,
-}: {
-  onClick: () => void
-  disabled?: boolean
-  children: React.ReactNode
-}) {
-  const [hover, setHover] = useState(false)
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        ...baseBtn,
-        background: hover ? 'var(--brand-soft)' : '#fff',
-        color: 'var(--brand)',
-        borderColor: 'var(--border-navy)',
-        opacity: disabled ? 0.6 : 1,
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function GhostButton({
-  onClick,
-  disabled,
-  children,
-}: {
-  onClick: () => void
-  disabled?: boolean
-  children: React.ReactNode
-}) {
-  const [hover, setHover] = useState(false)
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        ...baseBtn,
-        background: hover ? 'var(--icp-gray-100)' : 'transparent',
-        color: 'var(--fg1)',
-        opacity: disabled ? 0.6 : 1,
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
 export function MilestonePanel({
   slug,
   status,
   onBack,
-  onChanged,
-  onAdvance,
 }: {
   slug: MilestoneSlug
   status: MilestoneStatus
   onBack: () => void
-  onChanged: () => void
-  onAdvance?: () => void
 }) {
   const meta = PANELS[slug]
-  const [busy, setBusy] = useState(false)
-
-  const act = async (action: { type: string; [key: string]: unknown }) => {
-    setBusy(true)
-    try {
-      await postAction(action)
-      if (action.type === 'mark-complete' && onAdvance) {
-        onAdvance()
-      } else {
-        onChanged()
-      }
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
     <div
@@ -253,27 +167,30 @@ export function MilestonePanel({
           </p>
         </div>
 
+        {status === 'complete' && (
+          <div
+            className="inline-flex items-center"
+            style={{
+              gap: 8,
+              alignSelf: 'start',
+              padding: '8px 14px',
+              borderRadius: 'var(--r-md)',
+              background: 'var(--brand-soft)',
+              color: 'var(--brand)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
+              fontWeight: 600,
+            }}
+          >
+            <Check size={16} aria-hidden /> This step is complete.
+          </div>
+        )}
+
         <div className="flex flex-wrap" style={{ gap: 'var(--sp-3)' }}>
           <PrimaryLink href={meta.primaryHref}>
             {meta.primaryLabel}
             <ExternalLink size={16} aria-hidden />
           </PrimaryLink>
-          {status !== 'complete' && (
-            <SecondaryButton
-              disabled={busy}
-              onClick={() => act({ type: 'mark-complete', slug })}
-            >
-              Mark complete
-            </SecondaryButton>
-          )}
-          {status !== 'dismissed' && status !== 'complete' && (
-            <GhostButton
-              disabled={busy}
-              onClick={() => act({ type: 'skip', slug })}
-            >
-              Skip for now
-            </GhostButton>
-          )}
         </div>
       </div>
 

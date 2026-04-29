@@ -1,7 +1,7 @@
 'use client'
 
 import type { MilestoneSlug, MilestoneStatus } from '@/lib/onboarding'
-import { Check, Minus } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useState } from 'react'
 
 const COPY: Record<
@@ -62,12 +62,7 @@ export function MilestoneTile({
 }) {
   const meta = COPY[slug]
   const num = (index ?? DEFAULT_INDEX[slug]).toString().padStart(2, '0')
-  const actionLabel =
-    status === 'complete'
-      ? 'Review'
-      : status === 'dismissed'
-        ? 'Open anyway'
-        : meta.action
+  const actionLabel = status === 'complete' ? 'Review' : meta.action
 
   const [hover, setHover] = useState(false)
 
@@ -85,21 +80,6 @@ export function MilestoneTile({
         }}
       >
         <Check size={16} strokeWidth={2} />
-      </span>
-    ) : status === 'dismissed' ? (
-      <span
-        aria-hidden
-        className="grid place-items-center shrink-0"
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          border: '1px dashed var(--border-strong)',
-          color: 'var(--fg3)',
-          background: 'var(--bg)',
-        }}
-      >
-        <Minus size={16} strokeWidth={2} />
       </span>
     ) : (
       <span
@@ -137,6 +117,9 @@ export function MilestoneTile({
         gap: 'var(--sp-4)',
         transition: 'background var(--dur-base) var(--ease-out)',
         fontFamily: 'var(--font-body)',
+        border: 'none',
+        outline: 'none',
+        cursor: 'pointer',
       }}
     >
       <div className="flex items-center" style={{ gap: 'var(--sp-4)' }}>

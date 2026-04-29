@@ -1,32 +1,28 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock, Check, RotateCcw, Sparkles, ArrowLeft } from 'lucide-react'
+import { Clock, Check, Sparkles } from 'lucide-react'
 import {
   type MilestoneSlug,
   type MilestoneState,
   MILESTONES,
-  isAllDoneOrDismissed,
   doneCount,
 } from '@/lib/onboarding'
 import { MilestoneTile } from './MilestoneTile'
 import { MilestonePanel } from './MilestonePanel'
-import { CelebrationScreen } from './CelebrationScreen'
 import { BrandingStep, type BrandingInitial } from './steps/BrandingStep'
 import { IdentityStep, type IdentityInitial } from './steps/IdentityStep'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 
-type View = 'welcome' | 'grid' | 'milestone' | 'celebration'
+type View = 'welcome' | 'grid' | 'milestone'
 
 type Props = {
   initialStates: MilestoneState[]
   publicUrl: string
   /** Tenant display name for the card header. */
   tenantName: string
-  /** True iff this user has never seen the welcome modal yet — used only to fire seen-welcome API call. */
+  /** True iff this user has never seen the welcome modal yet — auto-opens the wizard once. */
   showWelcome: boolean
-  /** True iff onboardingCompletedAt is set on the tenant — celebratory was already dismissed. */
-  alreadyCelebrated: boolean
   /** Current branding values used to seed the rich Branding step. */
   brandingInitial?: BrandingInitial
   /** Current identity values used to seed the rich Identity step. */
@@ -41,17 +37,11 @@ async function postAction(action: object): Promise<void> {
   })
 }
 
-function initialView(allDone: boolean, alreadyCelebrated: boolean): View {
-  if (allDone && !alreadyCelebrated) return 'celebration'
-  return 'welcome'
-}
-
 export function OnboardingShell({
   initialStates,
   publicUrl,
   tenantName,
   showWelcome,
-  alreadyCelebrated,
   brandingInitial,
   identityInitial,
 }: Props) {
@@ -60,24 +50,18 @@ export function OnboardingShell({
 
   const done = doneCount(states)
   const total = states.length || 6
-  const allDone = isAllDoneOrDismissed(states)
   const remaining = Math.max(0, total - done)
   const pct = Math.min(100, Math.round((done / total) * 100))
 
   // Public URL stripped to "<slug>.openmasjid.app" for editorial display
   const publicHost = publicUrl.replace(/^https?:\/\//, '')
 
-  const hasResettable = states.some(
-    (s) => s.status === 'complete' || s.status === 'dismissed',
-  )
-
-  // Modal open/close state
   const [welcomeOpen, setWelcomeOpen] = useState(showWelcome)
 
-  // Internal view state — always reset to 'welcome' (or 'celebration') when modal opens
-  const [view, setView] = useState<View>(() => initialView(allDone, alreadyCelebrated))
+  // Auto-open shows the welcome view first; manual open jumps straight to the grid.
+  const [view, setView] = useState<View>(showWelcome ? 'welcome' : 'grid')
 
-  // Fire seen-welcome API call once when the modal first opens.
+  // Fire seen-welcome API call once when the modal first auto-opens.
   useEffect(() => {
     if (showWelcome) {
       void postAction({ type: 'seen-welcome' })
@@ -88,9 +72,8 @@ export function OnboardingShell({
     window.location.reload()
   }
 
-  // When modal opens, reset view to welcome (or celebration if appropriate)
   const openModal = () => {
-    setView(initialView(allDone, alreadyCelebrated))
+    setView('grid')
     setActiveSlug(null)
     setWelcomeOpen(true)
   }
@@ -99,33 +82,13 @@ export function OnboardingShell({
     setWelcomeOpen(false)
   }
 
-  // Handle dialog's own close (via X button / Escape key)
   const handleOpenChange = (open: boolean) => {
     if (!open) closeModal()
     else setWelcomeOpen(true)
   }
 
   /* ---------- Dashboard strip ---------- */
-  const dashboardStrip = alreadyCelebrated && allDone ? (
-    <button
-      type="button"
-      onClick={openModal}
-      style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: 'var(--fs-sm)',
-        color: 'var(--fg3)',
-        transition: 'color var(--dur-base) var(--ease-out)',
-        background: 'transparent',
-        border: 'none',
-        cursor: 'pointer',
-        padding: 0,
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--fg1)')}
-      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--fg3)')}
-    >
-      Setup complete · review →
-    </button>
-  ) : (
+  const dashboardStrip = (
     <div
       className="flex items-center justify-between gap-4"
       style={{
@@ -169,7 +132,7 @@ export function OnboardingShell({
           e.currentTarget.style.transform = 'none'
         }}
       >
-        {allDone ? 'Re-run onboarding' : 'Continue setup'}
+        Run onboarding wizard
       </button>
     </div>
   )
@@ -177,7 +140,6 @@ export function OnboardingShell({
   /* ---------- Welcome view (inside modal) ---------- */
   const welcomeView = (
     <div className="flex flex-col overflow-y-auto" style={{ maxHeight: '90vh' }}>
-      {/* Top zone — dark navy with radial gradient accents */}
       <div
         style={{
           backgroundImage: [
@@ -188,9 +150,7 @@ export function OnboardingShell({
           padding: 'var(--sp-12)',
         }}
       >
-        {/* Inner max-width constraint for welcome feel */}
         <div style={{ maxWidth: '36rem' }}>
-          {/* Bismillah */}
           <p
             style={{
               fontFamily: 'var(--font-arabic)',
@@ -203,8 +163,6 @@ export function OnboardingShell({
           >
             ﷽
           </p>
-
-          {/* Headline */}
           <h2
             style={{
               fontFamily: 'var(--font-display)',
@@ -226,8 +184,6 @@ export function OnboardingShell({
               OpenMasjid.
             </em>
           </h2>
-
-          {/* Body */}
           <p
             style={{
               color: 'rgba(255,255,255,0.85)',
@@ -257,7 +213,6 @@ export function OnboardingShell({
         </div>
       </div>
 
-      {/* Bottom zone — white */}
       <div
         style={{
           background: 'white',
@@ -265,7 +220,6 @@ export function OnboardingShell({
         }}
       >
         <div style={{ maxWidth: '36rem' }}>
-          {/* Trust pills */}
           <div
             className="flex flex-wrap items-center"
             style={{ gap: 'var(--sp-8)', marginBottom: 'var(--sp-8)' }}
@@ -282,20 +236,11 @@ export function OnboardingShell({
               style={{ color: 'var(--fg2)', fontSize: 14, fontFamily: 'var(--font-body)' }}
             >
               <Check size={16} strokeWidth={1.75} style={{ color: 'var(--icp-teal-500)', flexShrink: 0 }} />
-              Skip anything
-            </span>
-            <span
-              className="flex items-center gap-1.5"
-              style={{ color: 'var(--fg2)', fontSize: 14, fontFamily: 'var(--font-body)' }}
-            >
-              <RotateCcw size={16} strokeWidth={1.75} style={{ color: 'var(--icp-teal-500)', flexShrink: 0 }} />
               Resume any time
             </span>
           </div>
 
-          {/* CTAs */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Primary — goes to grid view */}
             <button
               type="button"
               onClick={() => setView('grid')}
@@ -329,8 +274,6 @@ export function OnboardingShell({
               <Sparkles size={16} strokeWidth={2} />
               Set up your site
             </button>
-
-            {/* Secondary — closes modal */}
             <button
               type="button"
               onClick={closeModal}
@@ -361,42 +304,14 @@ export function OnboardingShell({
   /* ---------- Grid view (inside modal) ---------- */
   const gridView = (
     <div className="flex flex-col overflow-hidden" style={{ maxHeight: '90vh' }}>
-      {/* Header band */}
       <div
         style={{
           background: 'var(--bg-alt)',
-          padding: 'var(--sp-8) var(--sp-10)',
-          borderBottom: '1px solid var(--border)',
+          padding: 'var(--sp-10) var(--sp-12) var(--sp-8)',
           flexShrink: 0,
           position: 'relative',
         }}
       >
-        {hasResettable && (
-          <button
-            type="button"
-            onClick={async () => {
-              await postAction({ type: 'reset' })
-              refresh()
-            }}
-            className="absolute z-10"
-            style={{
-              right: 'var(--sp-5)',
-              top: 'var(--sp-4)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 'var(--fs-xs)',
-              color: 'var(--fg3)',
-              transition: 'color var(--dur-base) var(--ease-out)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--fg1)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--fg3)')}
-          >
-            Reset checklist
-          </button>
-        )}
-
         <div className="flex items-start justify-between gap-10">
           <div className="flex-1 min-w-0">
             <h2
@@ -430,12 +345,10 @@ export function OnboardingShell({
                 {publicHost}
               </span>{' '}
               is already live with platform defaults. About 15 minutes of setup
-              gets it looking like your masjid. Skip anything you&apos;d rather
-              come back to.
+              gets it looking like your masjid.
             </p>
           </div>
 
-          {/* Progress block */}
           <div className="shrink-0 w-[140px] md:w-[180px]">
             <div
               style={{
@@ -489,19 +402,33 @@ export function OnboardingShell({
         </div>
       </div>
 
-      {/* Tile grid — scrollable */}
-      <div className="overflow-y-auto flex-1" style={{ background: 'var(--bg)' }}>
+      <div
+        className="overflow-y-auto flex-1"
+        style={{
+          background: 'var(--bg-alt)',
+          padding: 'var(--sp-8) var(--sp-12) var(--sp-10)',
+        }}
+      >
         <ul
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          style={{ listStyle: 'none', margin: 0, padding: 0 }}
+          style={{
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            background: 'var(--bg)',
+            border: '1px solid rgba(15, 30, 74, 0.06)',
+            borderRadius: 'var(--r-lg)',
+            overflow: 'hidden',
+            boxShadow: 'var(--sh-xs)',
+          }}
         >
           {states.map((s, i) => (
             <li
               key={s.slug}
               className="flex"
               style={{
-                borderTop: i >= 3 ? '1px solid var(--border)' : 'none',
-                borderLeft: i % 3 === 0 ? 'none' : '1px solid var(--border)',
+                borderTop: i >= 3 ? '1px solid rgba(15, 30, 74, 0.06)' : 'none',
+                borderLeft: i % 3 === 0 ? 'none' : '1px solid rgba(15, 30, 74, 0.06)',
               }}
             >
               <MilestoneTile
@@ -517,13 +444,12 @@ export function OnboardingShell({
           ))}
         </ul>
 
-        {/* Footer row */}
         <div
           className="flex flex-wrap items-center justify-between gap-3"
           style={{
-            padding: 'var(--sp-6) var(--sp-8)',
-            borderTop: '1px solid var(--border)',
-            background: 'var(--bg)',
+            marginTop: 'var(--sp-6)',
+            padding: '0 var(--sp-1)',
+            background: 'transparent',
             fontFamily: 'var(--font-body)',
             fontSize: 'var(--fs-sm)',
           }}
@@ -572,7 +498,7 @@ export function OnboardingShell({
               e.currentTarget.style.color = 'var(--fg3)'
             }}
           >
-            Hide for now
+            Close
           </button>
         </div>
       </div>
@@ -592,8 +518,7 @@ export function OnboardingShell({
       setActiveSlug(next)
       setView('milestone')
     } else {
-      setActiveSlug(null)
-      setView('celebration')
+      goBackToGrid()
     }
   }
 
@@ -626,35 +551,17 @@ export function OnboardingShell({
           slug={activeSlug}
           status={states.find((s) => s.slug === activeSlug)?.status ?? null}
           onBack={goBackToGrid}
-          onChanged={refresh}
-          onAdvance={() => advanceTo(activeSlug)}
         />
       </div>
     )
   ) : null
 
-  /* ---------- Celebration view (inside modal) ---------- */
-  const celebrationView = (
-    <div className="overflow-y-auto flex-1">
-      <CelebrationScreen
-        publicUrl={publicUrl}
-        onDismiss={async () => {
-          await postAction({ type: 'celebrate-dismissed' })
-          closeModal()
-        }}
-      />
-    </div>
-  )
-
   return (
     <>
-      {/* Dashboard surface — small horizontal strip */}
       {dashboardStrip}
 
-      {/* Modal — all views live inside here */}
       <Dialog open={welcomeOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-5xl p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col" hideCloseButton>
-          {/* Visually-hidden title for screen readers — Radix requires it on every DialogContent. */}
           <DialogTitle
             style={{
               position: 'absolute',
@@ -671,12 +578,10 @@ export function OnboardingShell({
             {view === 'welcome' && 'Welcome to OpenMasjid'}
             {view === 'grid' && 'Setup checklist'}
             {view === 'milestone' && 'Setup step'}
-            {view === 'celebration' && 'Site is ready'}
           </DialogTitle>
           {view === 'welcome' && welcomeView}
           {view === 'grid' && gridView}
           {view === 'milestone' && milestoneView}
-          {view === 'celebration' && celebrationView}
         </DialogContent>
       </Dialog>
     </>

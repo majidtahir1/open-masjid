@@ -1,9 +1,10 @@
 /**
  * Pure milestone-state computation for tenant onboarding.
  *
- * Auto-detected completion always wins over an explicit `dismissed` flag —
- * so when an admin actually does the work of adding a logo / event / etc.
- * after dismissing, the milestone correctly flips to `complete`.
+ * Status is purely auto-detected from tenant data — there is no persisted
+ * skip/complete override. The wizard is a navigational tool: clicking a tile
+ * deep-links to the relevant editor; doing the work flips the milestone to
+ * `complete`. Hitting the wizard again always shows live state.
  *
  * Edge-safe: zero runtime dependencies. Importable from RSC, client, or
  * the API endpoint without pulling Payload.
@@ -20,7 +21,7 @@ export const MILESTONES = [
 
 export type MilestoneSlug = (typeof MILESTONES)[number]
 
-export type MilestoneStatus = 'complete' | 'dismissed' | null
+export type MilestoneStatus = 'complete' | null
 
 export type MilestoneState = {
   slug: MilestoneSlug
@@ -35,7 +36,6 @@ export type OnboardingInput = {
     branding?: { logo?: string | number | { id?: string | number } | null } | null
     contactInfo?: { address?: string | null } | null
     donationConfig?: { mode?: string | null } | null
-    onboarding?: Partial<Record<MilestoneSlug, MilestoneStatus>> | null
   }
   counts: {
     prayerSchedules: number
@@ -67,24 +67,16 @@ function isAutoComplete(slug: MilestoneSlug, input: OnboardingInput): boolean {
 }
 
 export function computeMilestoneStates(input: OnboardingInput): MilestoneState[] {
-  const explicit = input.tenant.onboarding ?? {}
-  return MILESTONES.map((slug) => {
-    if (isAutoComplete(slug, input)) {
-      return { slug, status: 'complete' as const }
-    }
-    return { slug, status: explicit[slug] ?? null }
-  })
+  return MILESTONES.map((slug) => ({
+    slug,
+    status: isAutoComplete(slug, input) ? ('complete' as const) : null,
+  }))
 }
 
-export function isAllDoneOrDismissed(states: MilestoneState[]): boolean {
-  return states.every((s) => s.status === 'complete' || s.status === 'dismissed')
+export function isAllDone(states: MilestoneState[]): boolean {
+  return states.every((s) => s.status === 'complete')
 }
 
-/**
- * Total milestones in a "done" state — counts both `complete` and `dismissed`.
- * Used for the "X of 6 done" progress display where a skipped milestone is
- * considered "addressed" by the user just like a completed one.
- */
 export function doneCount(states: MilestoneState[]): number {
-  return states.filter((s) => s.status === 'complete' || s.status === 'dismissed').length
+  return states.filter((s) => s.status === 'complete').length
 }

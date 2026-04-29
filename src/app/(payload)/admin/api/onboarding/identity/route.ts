@@ -12,7 +12,6 @@ type Body = {
     email?: string
   }
   socialLinks?: Array<{ platform: string; url: string }>
-  markComplete?: boolean
 }
 
 function tenantIdOf(t: unknown): string | number | null {
@@ -47,7 +46,6 @@ export async function POST(req: Request) {
     overrideAccess: true,
   })) as unknown as {
     contactInfo?: Record<string, unknown> | null
-    onboarding?: Record<string, string | null> | null
   }
 
   const data: Record<string, unknown> = {}
@@ -72,12 +70,6 @@ export async function POST(req: Request) {
     data.socialLinks = body.socialLinks
       .filter((s) => s && typeof s.url === 'string' && s.url.trim().length > 0)
       .map((s) => ({ platform: s.platform, url: s.url.trim() }))
-  }
-
-  if (body.markComplete) {
-    const onboarding = { ...(tenant.onboarding ?? {}) }
-    onboarding.identity = 'complete'
-    data.onboarding = onboarding
   }
 
   await payload.update({

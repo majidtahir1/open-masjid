@@ -5,9 +5,7 @@ import Link from 'next/link'
 import {
   computeMilestoneStates,
   doneCount,
-  isAllDoneOrDismissed,
-  type MilestoneSlug,
-  type MilestoneStatus,
+  isAllDone,
 } from '@/lib/onboarding'
 
 function tenantIdOf(t: unknown): string | number | null {
@@ -29,9 +27,6 @@ export default async function OnboardingBanner() {
     depth: 0,
     overrideAccess: true,
   })) as unknown as Record<string, unknown>
-
-  // Skip the banner once the user has dismissed the celebratory screen.
-  if (tenantDoc.onboardingCompletedAt) return null
 
   const [prayerCount, eventsCount, heroCount] = await Promise.all([
     payload
@@ -73,13 +68,11 @@ export default async function OnboardingBanner() {
           | null) ?? null,
       contactInfo: (tenantDoc.contactInfo as { address?: string | null } | null) ?? null,
       donationConfig: (tenantDoc.donationConfig as { mode?: string | null } | null) ?? null,
-      onboarding:
-        (tenantDoc.onboarding as Partial<Record<MilestoneSlug, MilestoneStatus>> | null) ?? null,
     },
     counts: { prayerSchedules: prayerCount, events: eventsCount, heroSlides: heroCount },
   })
 
-  if (isAllDoneOrDismissed(states)) return null
+  if (isAllDone(states)) return null
 
   const done = doneCount(states)
 

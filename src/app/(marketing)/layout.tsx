@@ -3,15 +3,16 @@ import type { ReactNode } from 'react'
 import { Geist } from 'next/font/google'
 
 import '../globals.css'
+import './marketing.css'
 import { fraunces, inter, amiri } from '@/lib/fonts'
 import { cn } from '@/lib/utils'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata: Metadata = {
-  title: 'OpenMasjid — the platform for masajid',
+  title: 'OpenMasjid — Modern websites for masajid. Open-source.',
   description:
-    'OpenMasjid is a self-hosted, open-source platform for masajid. Coming soon.',
+    "The masjid website platform that's secure, beautifully designed, and yours to keep. Hosted from $49/mo, or self-host free. MIT-licensed.",
 }
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {

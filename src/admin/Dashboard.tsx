@@ -40,7 +40,7 @@ import {
 
 import config from '@payload-config'
 import { OnboardingShell } from './onboarding/OnboardingShell'
-import { computeMilestoneStates, type MilestoneSlug, type MilestoneStatus } from '@/lib/onboarding'
+import { computeMilestoneStates } from '@/lib/onboarding'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -310,9 +310,6 @@ async function TenantDashboard({
         (tenantDoc as { contactInfo?: { address?: string | null } | null }).contactInfo ?? null,
       donationConfig:
         (tenantDoc as { donationConfig?: { mode?: string | null } | null }).donationConfig ?? null,
-      onboarding:
-        ((tenantDoc as { onboarding?: Partial<Record<MilestoneSlug, MilestoneStatus>> | null })
-          .onboarding) ?? null,
     },
     counts: {
       prayerSchedules: prayerSchedulesCount,
@@ -321,9 +318,6 @@ async function TenantDashboard({
     },
   })
   const showWelcome = !user.onboardingWelcomeSeenAt
-  const alreadyCelebrated = Boolean(
-    (tenantDoc as { onboardingCompletedAt?: string | null }).onboardingCompletedAt,
-  )
   const tenantSlug = (tenantDoc as { slug?: string }).slug ?? ''
   const publicUrl = `https://${tenantSlug}.openmasjid.app`
 
@@ -421,7 +415,6 @@ async function TenantDashboard({
         publicUrl={publicUrl}
         tenantName={tenantName}
         showWelcome={showWelcome}
-        alreadyCelebrated={alreadyCelebrated}
         brandingInitial={brandingInitial}
         identityInitial={identityInitial}
       />

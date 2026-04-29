@@ -1,12 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { computeMilestoneStates, doneCount, isAllDoneOrDismissed, MILESTONES, type MilestoneState, type OnboardingInput } from './onboarding'
+import { computeMilestoneStates, doneCount, isAllDone, MILESTONES, type MilestoneState, type OnboardingInput } from './onboarding'
 
 const empty: OnboardingInput = {
   tenant: {
     branding: { logo: null },
     contactInfo: { address: null },
     donationConfig: { mode: null },
-    onboarding: null,
   },
   counts: { prayerSchedules: 0, events: 0, heroSlides: 0 },
 }
@@ -72,26 +71,6 @@ describe('computeMilestoneStates', () => {
     expect(states.find((s) => s.slug === 'donations')?.status).toBe('complete')
   })
 
-  it('returns dismissed when explicitly dismissed and not auto-detected', () => {
-    const states = computeMilestoneStates({
-      ...empty,
-      tenant: { ...empty.tenant, onboarding: { branding: 'dismissed' } },
-    })
-    expect(states.find((s) => s.slug === 'branding')?.status).toBe('dismissed')
-  })
-
-  it('auto-detected complete trumps explicit dismissed', () => {
-    const states = computeMilestoneStates({
-      ...empty,
-      tenant: {
-        ...empty.tenant,
-        branding: { logo: 'm1' },
-        onboarding: { branding: 'dismissed' },
-      },
-    })
-    expect(states.find((s) => s.slug === 'branding')?.status).toBe('complete')
-  })
-
   it('returns not-started by default', () => {
     const states = computeMilestoneStates(empty)
     expect(states.every((s) => s.status === null)).toBe(true)
@@ -108,7 +87,6 @@ describe('computeMilestoneStates', () => {
   it('treats logo id 0 as not complete', () => {
     const states = computeMilestoneStates({
       ...empty,
-      // 0 is technically assignable to a numeric Payload id but never a valid one
       tenant: { ...empty.tenant, branding: { logo: 0 } },
     })
     expect(states.find((s) => s.slug === 'branding')?.status).toBeNull()
@@ -123,32 +101,29 @@ describe('computeMilestoneStates', () => {
   })
 })
 
-describe('isAllDoneOrDismissed', () => {
-  const make = (statuses: Array<'complete' | 'dismissed' | null>): MilestoneState[] =>
+describe('isAllDone', () => {
+  const make = (statuses: Array<'complete' | null>): MilestoneState[] =>
     MILESTONES.map((slug, i) => ({ slug, status: statuses[i] }))
 
   it('is true when all six are complete', () => {
-    expect(isAllDoneOrDismissed(make(['complete', 'complete', 'complete', 'complete', 'complete', 'complete']))).toBe(true)
-  })
-  it('is true when mixed complete + dismissed', () => {
-    expect(isAllDoneOrDismissed(make(['complete', 'dismissed', 'complete', 'dismissed', 'complete', 'complete']))).toBe(true)
+    expect(isAllDone(make(['complete', 'complete', 'complete', 'complete', 'complete', 'complete']))).toBe(true)
   })
   it('is false when any milestone is null', () => {
-    expect(isAllDoneOrDismissed(make(['complete', 'complete', null, 'complete', 'complete', 'complete']))).toBe(false)
+    expect(isAllDone(make(['complete', 'complete', null, 'complete', 'complete', 'complete']))).toBe(false)
   })
 })
 
 describe('doneCount', () => {
-  const make = (statuses: Array<'complete' | 'dismissed' | null>): MilestoneState[] =>
+  const make = (statuses: Array<'complete' | null>): MilestoneState[] =>
     MILESTONES.map((slug, i) => ({ slug, status: statuses[i] }))
 
-  it('counts complete + dismissed together', () => {
-    expect(doneCount(make(['complete', 'dismissed', null, null, null, null]))).toBe(2)
+  it('counts complete', () => {
+    expect(doneCount(make(['complete', null, null, null, null, null]))).toBe(1)
   })
   it('returns 0 for all null', () => {
     expect(doneCount(make([null, null, null, null, null, null]))).toBe(0)
   })
   it('returns 6 when all done', () => {
-    expect(doneCount(make(['complete', 'complete', 'complete', 'dismissed', 'dismissed', 'dismissed']))).toBe(6)
+    expect(doneCount(make(['complete', 'complete', 'complete', 'complete', 'complete', 'complete']))).toBe(6)
   })
 })

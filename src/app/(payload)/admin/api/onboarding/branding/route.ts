@@ -10,7 +10,6 @@ type Body = {
   secondaryColor?: string
   accentColor?: string
   displayFont?: string
-  markComplete?: boolean
 }
 
 function tenantIdOf(t: unknown): string | number | null {
@@ -45,7 +44,6 @@ export async function POST(req: Request) {
     overrideAccess: true,
   })) as unknown as {
     branding?: Record<string, unknown> | null
-    onboarding?: Record<string, string | null> | null
   }
 
   const existingBranding = tenant.branding ?? {}
@@ -71,12 +69,6 @@ export async function POST(req: Request) {
   }
 
   const data: Record<string, unknown> = { branding }
-
-  if (body.markComplete) {
-    const onboarding = { ...(tenant.onboarding ?? {}) }
-    onboarding.branding = 'complete'
-    data.onboarding = onboarding
-  }
 
   await payload.update({
     collection: 'tenants',
