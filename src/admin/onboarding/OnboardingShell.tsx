@@ -13,7 +13,7 @@ import { MilestonePanel } from './MilestonePanel'
 import { CelebrationScreen } from './CelebrationScreen'
 import { BrandingStep, type BrandingInitial } from './steps/BrandingStep'
 import { IdentityStep, type IdentityInitial } from './steps/IdentityStep'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 
 type View = 'welcome' | 'grid' | 'milestone' | 'celebration'
 
@@ -638,6 +638,25 @@ export function OnboardingShell({
       {/* Modal — all views live inside here */}
       <Dialog open={welcomeOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-5xl p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
+          {/* Visually-hidden title for screen readers — Radix requires it on every DialogContent. */}
+          <DialogTitle
+            style={{
+              position: 'absolute',
+              width: 1,
+              height: 1,
+              padding: 0,
+              margin: -1,
+              overflow: 'hidden',
+              clip: 'rect(0, 0, 0, 0)',
+              whiteSpace: 'nowrap',
+              border: 0,
+            }}
+          >
+            {view === 'welcome' && 'Welcome to OpenMasjid'}
+            {view === 'grid' && 'Setup checklist'}
+            {view === 'milestone' && 'Setup step'}
+            {view === 'celebration' && 'Site is ready'}
+          </DialogTitle>
           {view === 'welcome' && welcomeView}
           {view === 'grid' && gridView}
           {view === 'milestone' && milestoneView}
