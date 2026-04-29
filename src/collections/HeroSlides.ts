@@ -114,23 +114,26 @@ export const HeroSlides: CollectionConfig = {
       },
     },
     {
+      // Legacy field — kept in the schema so existing rows still validate,
+      // but hidden from admin and unused at render. The hero variants
+      // determine their colors from `style` + the per-tenant theme; the
+      // old palette-named "Slide Theme" picker collided semantically with
+      // the new Brand / Secondary / Accent tone selectors and confused
+      // editors. A follow-up migration can drop this column entirely once
+      // we're confident no consumer reads it.
       name: 'accent',
       type: 'select',
       required: true,
       defaultValue: 'cream',
-      label: 'Slide Theme',
+      label: 'Slide Theme (legacy)',
       options: [
-        { label: 'Cream — warm, neutral (default welcome slides)', value: 'cream' },
-        { label: 'Teal — fresh, calm (mission / about)', value: 'teal' },
-        { label: 'Navy — serious, premium (flagship programs)', value: 'navy' },
-        { label: 'Gold — celebratory (Eid, fundraisers, milestones)', value: 'gold' },
+        { label: 'Cream', value: 'cream' },
+        { label: 'Teal', value: 'teal' },
+        { label: 'Navy', value: 'navy' },
+        { label: 'Gold', value: 'gold' },
       ],
       admin: {
-        description:
-          'Color treatment for the slide. Defaults to the style\'s built-in color (Cream for most, Navy for the Photo style). Pick a different theme to override.',
-        components: {
-          Field: '/src/fields/SelectField#default',
-        },
+        hidden: true,
       },
     },
     {
@@ -157,16 +160,28 @@ export const HeroSlides: CollectionConfig = {
           name: 'photoTone',
           type: 'select',
           label: 'Photo Tone',
-          defaultValue: 'teal',
+          defaultValue: 'secondary',
           options: [
-            { label: 'Teal', value: 'teal' },
-            { label: 'Gold', value: 'gold' },
-            { label: 'Navy', value: 'navy' },
+            { label: 'Brand', value: 'brand' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Accent', value: 'accent' },
+            { label: 'Custom…', value: 'custom' },
           ],
           admin: {
-            description: 'Color tint for the placeholder if no image is uploaded.',
-            components: { Field: '/src/fields/SelectField#default' },
+            description:
+              'Tint for the placeholder when no image is uploaded. Brand / Secondary / Accent pull from your tenant theme; Custom lets you pick a one-off color.',
+            components: { Field: '/src/fields/PhotoToneField#default' },
           },
+        },
+        {
+          // Stored value for `photoTone: 'custom'`. The PhotoToneField swatch
+          // picker renders its own inline color input + hex text box and
+          // writes here directly via the form-field reducer, so we hide the
+          // auto-rendered field to avoid duplicating the UI.
+          name: 'customColor',
+          type: 'text',
+          label: 'Custom Color',
+          admin: { hidden: true },
         },
         {
           name: 'cardTag',
@@ -221,16 +236,28 @@ export const HeroSlides: CollectionConfig = {
           name: 'photoTone',
           type: 'select',
           label: 'Background Tone',
-          defaultValue: 'navy',
+          defaultValue: 'brand',
           options: [
-            { label: 'Navy (default)', value: 'navy' },
-            { label: 'Teal', value: 'teal' },
-            { label: 'Gold', value: 'gold' },
+            { label: 'Brand', value: 'brand' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Accent', value: 'accent' },
+            { label: 'Custom…', value: 'custom' },
           ],
           admin: {
-            description: 'Color tint for the background placeholder when no image is uploaded.',
-            components: { Field: '/src/fields/SelectField#default' },
+            description:
+              'Tint for the background placeholder when no image is uploaded. Brand / Secondary / Accent pull from your tenant theme; Custom lets you pick a one-off color.',
+            components: { Field: '/src/fields/PhotoToneField#default' },
           },
+        },
+        {
+          // Stored value for `photoTone: 'custom'`. The PhotoToneField swatch
+          // picker renders its own inline color input + hex text box and
+          // writes here directly via the form-field reducer, so we hide the
+          // auto-rendered field to avoid duplicating the UI.
+          name: 'customColor',
+          type: 'text',
+          label: 'Custom Color',
+          admin: { hidden: true },
         },
         {
           name: 'photoPattern',

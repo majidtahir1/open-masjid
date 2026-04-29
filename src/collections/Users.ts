@@ -224,6 +224,16 @@ export const Users: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'onboardingWelcomeSeenAt',
+      type: 'date',
+      admin: {
+        description:
+          'Set the first time this user sees the onboarding welcome dialog. Used to suppress re-showing it on subsequent logins.',
+        readOnly: true,
+        hidden: true,
+      },
+    },
   ],
 }
 

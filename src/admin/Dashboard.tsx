@@ -39,6 +39,8 @@ import {
 } from 'lucide-react'
 
 import config from '@payload-config'
+import { OnboardingShell } from './onboarding/OnboardingShell'
+import { computeMilestoneStates } from '@/lib/onboarding'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -59,6 +61,7 @@ type UserLite = {
   lastName?: string
   role?: 'platformOwner' | 'admin' | 'staff'
   tenant?: TenantRef
+  onboardingWelcomeSeenAt?: string | null
 } | null
 
 /** Greeting name: prefer firstName, fall back to the local part of email. */
@@ -261,6 +264,136 @@ async function TenantDashboard({
     }),
   ])
 
+  const [tenantDoc, prayerSchedulesCount, heroSlidesCount, eventsTotal] = await Promise.all([
+    payload.findByID({
+      collection: 'tenants',
+      id: tenantId,
+      depth: 1,
+      overrideAccess: true,
+    }) as Promise<unknown>,
+    payload
+      .find({
+        collection: 'prayer-schedules' as never,
+        where: { tenant: { equals: tenantId } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs)
+      .catch(() => 0),
+    payload
+      .find({
+        collection: 'hero-slides',
+        where: { tenant: { equals: tenantId } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs)
+      .catch(() => 0),
+    payload
+      .find({
+        collection: 'events',
+        where: { tenant: { equals: tenantId } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs),
+  ])
+
+  const onboardingStates = computeMilestoneStates({
+    tenant: {
+      branding:
+        (tenantDoc as { branding?: { logo?: string | number | { id?: string | number } | null } | null }).branding ?? null,
+      contactInfo:
+        (tenantDoc as { contactInfo?: { address?: string | null } | null }).contactInfo ?? null,
+      donationConfig:
+        (tenantDoc as { donationConfig?: { mode?: string | null } | null }).donationConfig ?? null,
+    },
+    counts: {
+      prayerSchedules: prayerSchedulesCount,
+      events: eventsTotal,
+      heroSlides: heroSlidesCount,
+    },
+  })
+  const showWelcome = !user.onboardingWelcomeSeenAt
+  const tenantSlug = (tenantDoc as { slug?: string }).slug ?? ''
+  const publicUrl = `https://${tenantSlug}.openmasjid.app`
+
+  // Build branding initial values for the rich Branding step. The tenant doc
+  // was fetched at depth 1 above, so `branding.logo` is populated as a Media
+  // object with `url`, `filename`, `filesize`.
+  const brandingDoc = (tenantDoc as {
+    branding?: {
+      logo?:
+        | string
+        | number
+        | { id?: string | number; url?: string; filename?: string; filesize?: number }
+        | null
+      favicon?:
+        | string
+        | number
+        | { id?: string | number; url?: string; filename?: string; filesize?: number }
+        | null
+      primaryColor?: string | null
+      secondaryColor?: string | null
+      accentColor?: string | null
+      displayFont?: string | null
+    } | null
+  }).branding
+  const logoVal = brandingDoc?.logo
+  const faviconVal = brandingDoc?.favicon
+  const brandingInitial = {
+    logo:
+      logoVal && typeof logoVal === 'object' && logoVal.id != null
+        ? {
+            id: logoVal.id as string | number,
+            url: logoVal.url ?? undefined,
+            filename: logoVal.filename ?? undefined,
+            filesize: logoVal.filesize ?? undefined,
+          }
+        : null,
+    favicon:
+      faviconVal && typeof faviconVal === 'object' && faviconVal.id != null
+        ? {
+            id: faviconVal.id as string | number,
+            url: faviconVal.url ?? undefined,
+            filename: faviconVal.filename ?? undefined,
+            filesize: faviconVal.filesize ?? undefined,
+          }
+        : null,
+    primaryColor: brandingDoc?.primaryColor ?? undefined,
+    secondaryColor: brandingDoc?.secondaryColor ?? undefined,
+    accentColor: brandingDoc?.accentColor ?? undefined,
+    displayFont: brandingDoc?.displayFont ?? undefined,
+  }
+
+  const identityDoc = tenantDoc as {
+    name?: string | null
+    footerTagline?: string | null
+    contactInfo?: {
+      address?: string | null
+      phone?: string | null
+      email?: string | null
+    } | null
+    socialLinks?: Array<{ platform?: string; url?: string }> | null
+  }
+  const identityInitial = {
+    name: identityDoc.name ?? '',
+    footerTagline: identityDoc.footerTagline ?? '',
+    contactInfo: {
+      address: identityDoc.contactInfo?.address ?? '',
+      phone: identityDoc.contactInfo?.phone ?? '',
+      email: identityDoc.contactInfo?.email ?? '',
+    },
+    socialLinks: (identityDoc.socialLinks ?? [])
+      .filter((s): s is { platform: string; url: string } =>
+        Boolean(s?.platform && s?.url),
+      )
+      .map((s) => ({ platform: s.platform, url: s.url })),
+  }
+
   const scheduleCollection = schedule?.collectionSlug ?? 'prayer-schedules'
   const scheduleEditHref = schedule
     ? `/admin/collections/${scheduleCollection}/${schedule.id}`
@@ -277,6 +410,14 @@ async function TenantDashboard({
 
   return (
     <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
+      <OnboardingShell
+        initialStates={onboardingStates}
+        publicUrl={publicUrl}
+        tenantName={tenantName}
+        showWelcome={showWelcome}
+        brandingInitial={brandingInitial}
+        identityInitial={identityInitial}
+      />
       <header className="flex items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground">

@@ -6,7 +6,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   test: {
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     environment: 'node',
     globals: false,
     clearMocks: true,

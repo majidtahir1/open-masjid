@@ -78,7 +78,7 @@ export const Tenants: CollectionConfig = {
                   'Public-facing name shown in the site header, footer, and emails, e.g. "Islamic Center of Prosper".',
                 placeholder: 'Islamic Center of Prosper',
                 components: {
-                  Field: '/src/fields/TextField#default',
+                  Field: '/src/admin/SiteSettingsIdentityField#default',
                 },
               },
             },
@@ -90,6 +90,7 @@ export const Tenants: CollectionConfig = {
               index: true,
               label: 'URL Slug',
               admin: {
+                hidden: true,
                 description:
                   'Short identifier used for the platform subdomain (e.g. "icp" becomes icp.openmasjid.app). Lowercase letters, numbers, and dashes only. Avoid changing after launch.',
                 placeholder: 'icp',
@@ -109,6 +110,7 @@ export const Tenants: CollectionConfig = {
                 { label: 'Umbrella Organization', value: 'umbrella' },
               ],
               admin: {
+                hidden: true,
                 description:
                   'Choose "Masjid" for a single-community site, or "Umbrella Organization" for a parent org that groups multiple masajid.',
                 components: {
@@ -132,6 +134,7 @@ export const Tenants: CollectionConfig = {
                 plural: 'Custom Domains',
               },
               admin: {
+                hidden: true,
                 description:
                   'Add each custom domain the masjid owns (both with and without www if applicable). Visitors reaching these domains will see this tenant\'s public site.',
               },
@@ -166,6 +169,9 @@ export const Tenants: CollectionConfig = {
               admin: {
                 description:
                   'Upload a logo and set brand colors. Hover/pressed/soft shades are derived automatically — you only choose three colors.',
+                components: {
+                  Field: '/src/admin/SiteSettingsBrandingField#default',
+                },
               },
               fields: [
                 {
@@ -235,7 +241,8 @@ export const Tenants: CollectionConfig = {
                   options: [
                     { label: 'Fraunces (warm serif)', value: 'Fraunces' },
                     { label: 'Playfair Display (editorial serif)', value: 'Playfair Display' },
-                    { label: 'Lora (readable serif)', value: 'Lora' },
+                    { label: 'DM Serif Display (modern serif)', value: 'DM Serif Display' },
+                    { label: 'IBM Plex Sans (geometric sans)', value: 'IBM Plex Sans' },
                   ],
                   admin: {
                     description:
@@ -340,6 +347,7 @@ export const Tenants: CollectionConfig = {
               type: 'group',
               label: 'Contact Info',
               admin: {
+                hidden: true,
                 description: 'Shown in the site footer and the About page.',
               },
               fields: [
@@ -389,6 +397,7 @@ export const Tenants: CollectionConfig = {
               admin: {
                 description:
                   'Links to the masjid\'s social accounts. Rendered as icons in the footer.',
+                hidden: true,
               },
               fields: [
                 {
@@ -432,6 +441,7 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Optional short phrase shown beneath the logo in the footer, e.g. "Serving Prosper since 2010".',
                 placeholder: 'A community rooted in service.',
+                hidden: true,
                 components: {
                   Field: '/src/fields/TextField#default',
                 },
@@ -498,6 +508,51 @@ export const Tenants: CollectionConfig = {
                   },
                 },
               ],
+            },
+          ],
+        },
+        {
+          label: 'Onboarding',
+          description: 'Internal setup-checklist state. Managed by the welcome wizard.',
+          fields: [
+            {
+              name: 'onboarding',
+              type: 'group',
+              label: 'Milestone State',
+              admin: {
+                description:
+                  'Per-milestone state for the post-login setup wizard. Auto-detected milestones are not stored here; only explicit user actions (skip, mark-complete) are persisted.',
+              },
+              fields: (() => {
+                const SLUG_LABELS = {
+                  branding: 'Branding',
+                  identity: 'Identity & Contact',
+                  prayer: 'Prayer Times',
+                  firstEvent: 'First Event',
+                  hero: 'Hero & Homepage',
+                  donations: 'Donations',
+                } as const
+                return (
+                  ['branding', 'identity', 'prayer', 'firstEvent', 'hero', 'donations'] as const
+                ).map((slug) => ({
+                  name: slug,
+                  type: 'select' as const,
+                  label: SLUG_LABELS[slug],
+                  options: [
+                    { label: 'Complete', value: 'complete' },
+                    { label: 'Dismissed', value: 'dismissed' },
+                  ],
+                  admin: { description: `Explicit user action for the ${slug} milestone.` },
+                }))
+              })(),
+            },
+            {
+              name: 'onboardingCompletedAt',
+              type: 'date',
+              admin: {
+                description: 'Set when the user dismisses the celebratory screen.',
+                readOnly: true,
+              },
             },
           ],
         },

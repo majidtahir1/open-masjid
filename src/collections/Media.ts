@@ -63,11 +63,10 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      required: true,
       label: 'Alt Text',
       admin: {
         description:
-          'Describe the image in one short sentence for screen readers and SEO. Required for every upload.',
+          'Describe the image in one short sentence for screen readers and SEO. Strongly recommended on every upload — leave blank only for purely decorative images.',
         placeholder: 'ICP event flyer for the Evidences of Islam class',
       },
     },

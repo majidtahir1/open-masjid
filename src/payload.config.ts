@@ -59,10 +59,14 @@ export default buildConfig({
     },
     components: {
       beforeNavLinks: [
+        '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
       ],
-      afterNavLinks: ['/src/admin/ViewPublicSiteLink#default'],
+      afterNavLinks: [
+        '/src/admin/ViewPublicSiteLink#default',
+        '/src/admin/onboarding/RerunMenuItem#default',
+      ],
       header: [
         '/src/admin/Favicon#default',
         '/src/admin/HideTenantsNav#default',
@@ -137,9 +141,12 @@ export default buildConfig({
     // `npx payload migrate` before booting the app (see compose `migrate`
     // service). Override with PAYLOAD_DB_PUSH=true if you ever need
     // auto-push in a deployed env.
-    push:
-      process.env.PAYLOAD_DB_PUSH === 'true' ||
-      process.env.NODE_ENV !== 'production',
+    // Auto-push has been disabled because drizzle's schema diff regenerates
+    // a broken `text → enum` ALTER for `_hero_slides_v.version_split_fields_photo_tone`
+    // on every boot (no USING clause), failing the whole transaction. All
+    // schema changes go through explicit migrations via `npx payload migrate:create`.
+    // Re-enable temporarily by setting PAYLOAD_DB_PUSH=true if you ever need to.
+    push: process.env.PAYLOAD_DB_PUSH === 'true',
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
   email: email(),

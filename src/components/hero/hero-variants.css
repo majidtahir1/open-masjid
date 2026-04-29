@@ -55,9 +55,9 @@
 
 /* On-dark text overrides (used inside Photo variant) */
 .om-hero-copy.is-on-dark .om-hero-title { color: #fff; }
-.om-hero-copy.is-on-dark .om-hero-title em { color: var(--icp-gold-300); }
+.om-hero-copy.is-on-dark .om-hero-title em { color: var(--accent); }
 .om-hero-copy.is-on-dark .om-hero-sub { color: rgba(255, 255, 255, 0.88); }
-.om-hero-copy.is-on-dark .om-hero-eyebrow { color: var(--icp-teal-200); }
+.om-hero-copy.is-on-dark .om-hero-eyebrow { color: var(--secondary-on-dark); }
 .om-hero-copy.is-on-dark .om-hero-trust {
   color: rgba(255, 255, 255, 0.7);
   border-top-color: rgba(255, 255, 255, 0.18);
@@ -109,14 +109,14 @@
 .om-hero-meta {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 13px; font-weight: 500; color: var(--secondary);
-  background: var(--icp-teal-50); border: 1px solid var(--border-teal);
+  background: var(--secondary-soft); border: 1px solid var(--border-teal);
   padding: 6px 12px; border-radius: 999px;
   margin: 0 0 24px;
 }
 .om-hero-copy.is-on-dark .om-hero-meta {
-  color: var(--icp-gold-300);
-  background: rgba(184, 149, 79, 0.12);
-  border-color: rgba(184, 149, 79, 0.35);
+  color: var(--accent);
+  background: var(--accent-tint);
+  border-color: color-mix(in oklab, var(--accent) 35%, transparent);
 }
 
 /* ---------- SPLIT — stack column ---------- */
@@ -124,7 +124,7 @@
 
 /* Iqamah card — used in split + photo */
 .om-hero-iqamah {
-  background: var(--icp-navy-700); color: #fff;
+  background: var(--brand); color: #fff;
   border-radius: 14px; padding: 18px 22px;
   box-shadow: var(--sh-md);
   position: relative; overflow: hidden;
@@ -132,24 +132,24 @@
 .om-hero-iqamah::after {
   content: ""; position: absolute; right: -40px; top: -40px;
   width: 160px; height: 160px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(40, 160, 180, 0.35) 0%, rgba(40, 160, 180, 0) 70%);
+  background: radial-gradient(circle, var(--secondary-glow) 0%, transparent 70%);
   pointer-events: none;
 }
 .om-hero-iqamah-top {
   display: flex; align-items: center; justify-content: space-between;
   font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--icp-teal-200); font-weight: 600;
+  color: var(--secondary-on-dark); font-weight: 600;
   margin-bottom: 14px;
 }
 .om-hero-iqamah-eye { display: inline-flex; align-items: center; gap: 6px; }
 .om-hero-iqamah-pulse {
   display: inline-flex; align-items: center; gap: 6px;
-  color: var(--icp-gold-300);
+  color: var(--accent);
   font-family: var(--font-mono); letter-spacing: .05em;
 }
 .om-hero-pulse-dot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--icp-gold-300);
+  background: var(--accent);
   animation: om-hero-pulse 1.6s var(--ease-out) infinite;
 }
 @keyframes om-hero-pulse {
@@ -168,7 +168,7 @@
   letter-spacing: -0.01em; line-height: 1; color: #fff;
 }
 .om-hero-iqamah-at {
-  font-size: 13px; color: var(--icp-teal-200); margin-top: 4px;
+  font-size: 13px; color: var(--secondary-on-dark); margin-top: 4px;
 }
 .om-hero-iqamah-count { display: flex; align-items: baseline; gap: 4px; }
 .om-hero-iqamah-num {
@@ -178,19 +178,19 @@
 }
 .om-hero-iqamah-unit {
   font-family: var(--font-mono); font-weight: 500;
-  font-size: 16px; color: var(--icp-teal-300);
+  font-size: 16px; color: var(--secondary-on-dark);
   margin-right: 4px; letter-spacing: 0;
 }
 .om-hero-iqamah-prefix {
   font-family: var(--font-body); font-size: 14px; font-weight: 500;
-  color: var(--icp-teal-200); margin-right: 6px;
+  color: var(--secondary-on-dark); margin-right: 6px;
   letter-spacing: 0;
 }
 
 /* Featured photo card */
 .om-hero-photo-card {
   border-radius: 14px; overflow: hidden;
-  background: var(--icp-cream); border: 1px solid var(--border);
+  background: var(--bg-sand); border: 1px solid var(--border);
   box-shadow: var(--sh-sm); transition: all var(--dur-base) var(--ease-out);
 }
 .om-hero-photo-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
@@ -230,7 +230,7 @@
   flex-shrink: 0; width: 50px; text-align: center;
   display: flex; flex-direction: column; gap: 2px;
   padding: 6px 0; border-radius: 8px;
-  background: var(--icp-gold-100); color: var(--icp-navy-700);
+  background: var(--accent-soft); color: var(--brand);
 }
 .om-hero-teaser-date .d-num {
   font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 1;
@@ -260,14 +260,15 @@
 .om-hero-now-head {
   display: flex; align-items: center; gap: 10px;
   padding: 14px 20px;
-  background: var(--icp-navy-700); color: #fff;
+  background: var(--brand); color: #fff;
 }
 .om-hero-now-pulse {
   width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(40, 160, 180, 0.2); display: grid; place-items: center;
+  background: color-mix(in oklab, var(--secondary) 20%, transparent);
+  display: grid; place-items: center;
 }
 .om-hero-now-pulse .om-hero-pulse-dot {
-  background: var(--icp-teal-300); width: 8px; height: 8px;
+  background: var(--secondary-on-dark); width: 8px; height: 8px;
 }
 .om-hero-now-title {
   font-family: var(--font-display); font-weight: 500; font-size: 15px;
@@ -275,7 +276,7 @@
 }
 .om-hero-now-time {
   font-family: var(--font-mono); font-size: 12px;
-  color: var(--icp-teal-200); letter-spacing: .04em;
+  color: var(--secondary-on-dark); letter-spacing: .04em;
 }
 .om-hero-now-body { padding: 6px 0; }
 .om-hero-now-row {
@@ -284,10 +285,12 @@
   text-decoration: none; color: inherit;
 }
 .om-hero-now-row:last-child { border-bottom: 0; }
-.om-hero-now-row.is-teal { background: linear-gradient(90deg, rgba(40, 160, 180, 0.06), transparent 60%); }
+.om-hero-now-row.is-teal {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--secondary) 6%, transparent), transparent 60%);
+}
 .om-hero-now-icon {
   width: 36px; height: 36px; flex-shrink: 0;
-  border-radius: 10px; background: var(--icp-teal-50);
+  border-radius: 10px; background: var(--secondary-soft);
   color: var(--secondary); display: grid; place-items: center;
 }
 .om-hero-now-row.is-teal .om-hero-now-icon {
@@ -312,7 +315,7 @@
   font-size: 13px; font-weight: 600; color: var(--secondary);
   cursor: pointer; text-decoration: none;
 }
-.om-hero-now-link:hover { color: var(--icp-teal-700); }
+.om-hero-now-link:hover { color: color-mix(in oklab, var(--secondary) 70%, black); }
 .om-hero-now-link svg { transition: transform var(--dur-base) var(--ease-out); }
 .om-hero-now-link:hover svg { transform: translateX(2px); }
 .om-hero-now-empty {
@@ -321,10 +324,10 @@
 }
 
 /* ---------- PHOTO — full-bleed ---------- */
-.om-hero-slide.is-photo { background: var(--icp-navy-900); color: #fff; }
+.om-hero-slide.is-photo { background: var(--brand-ink); color: #fff; }
 .om-hero-photo-bg {
   position: relative;
-  background: var(--icp-navy-900); color: #fff;
+  background: var(--brand-ink); color: #fff;
   min-height: 480px;
   height: 100%;
 }
@@ -337,9 +340,9 @@
 .om-hero-photo-bg-shade {
   position: absolute; inset: 0; z-index: 1;
   background: linear-gradient(95deg,
-    rgba(10, 22, 56, 0.92) 0%,
-    rgba(10, 22, 56, 0.78) 45%,
-    rgba(10, 22, 56, 0.50) 100%);
+    color-mix(in oklab, var(--brand-ink) 92%, transparent) 0%,
+    color-mix(in oklab, var(--brand-ink) 78%, transparent) 45%,
+    color-mix(in oklab, var(--brand-ink) 50%, transparent) 100%);
 }
 .om-hero-photo-bg-inner {
   position: relative; z-index: 2;
@@ -369,7 +372,7 @@
 }
 .om-hero-quote-cite {
   font-size: 11px; font-weight: 600; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--icp-gold-300);
+  text-transform: uppercase; color: var(--accent);
 }
 
 /* ---------- ORIGINAL — kept slim ---------- */
@@ -388,7 +391,12 @@
 /* ---------- Placeholder image (CSS-painted) ---------- */
 .om-hero-ph {
   position: relative; width: 100%; height: 100%;
-  background: var(--icp-teal-800); overflow: hidden;
+  /* Base is the tenant's deep-ink color; the radial gradient inside the
+     SVG paints currentColor (set inline via style={{ color: var(--brand|secondary|accent) }})
+     on top so the placeholder takes on the chosen tone without baking in any
+     specific palette. */
+  background: var(--brand-ink);
+  overflow: hidden;
 }
 .om-hero-ph.is-full { position: absolute; inset: 0; }
 .om-hero-ph-svg { width: 100%; height: 100%; display: block; }
@@ -440,9 +448,9 @@
   transition: all var(--dur-slow) var(--ease-out);
   overflow: hidden;
 }
-.om-hero-dot:hover { background: var(--icp-teal-200); }
+.om-hero-dot:hover { background: color-mix(in oklab, var(--secondary) 30%, white); }
 .om-hero-dot.is-active {
-  width: 64px; background: var(--icp-teal-100);
+  width: 64px; background: var(--secondary-soft);
 }
 .om-hero-dot.is-active::after {
   content: ""; position: absolute; inset: 0;
@@ -471,7 +479,7 @@
 }
 .om-hero-arrow:hover {
   border-color: var(--secondary); color: var(--secondary);
-  background: var(--icp-teal-50);
+  background: var(--secondary-soft);
   transform: translateY(-1px);
   box-shadow: var(--sh-sm);
 }
@@ -483,7 +491,7 @@
 .om-hero-ctrls.is-on-dark .om-hero-count strong { color: #fff; }
 .om-hero-ctrls.is-on-dark .om-hero-dot { background: rgba(255, 255, 255, 0.16); }
 .om-hero-ctrls.is-on-dark .om-hero-dot.is-active { background: rgba(255, 255, 255, 0.20); }
-.om-hero-ctrls.is-on-dark .om-hero-dot.is-active::after { background: var(--icp-gold-300); }
+.om-hero-ctrls.is-on-dark .om-hero-dot.is-active::after { background: var(--accent); }
 .om-hero-ctrls.is-on-dark .om-hero-arrow {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.22);
@@ -491,8 +499,8 @@
   box-shadow: none;
 }
 .om-hero-ctrls.is-on-dark .om-hero-arrow:hover {
-  border-color: var(--icp-gold-300); color: var(--icp-gold-300);
-  background: rgba(184, 149, 79, 0.12);
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-tint);
 }
 
 /* ---------- Crossfade between slides ---------- */
@@ -504,7 +512,7 @@
   background: var(--bg);
   transition: background-color 600ms var(--ease-out);
 }
-.om-hero-section.om-photo-active { background: var(--icp-navy-900); }
+.om-hero-section.om-photo-active { background: var(--brand-ink); }
 @media (prefers-reduced-motion: reduce) {
   .om-hero-section { transition: none; }
 }
