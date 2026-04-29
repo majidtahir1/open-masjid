@@ -1,6 +1,7 @@
 import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
 import { default as default_ff3268629584f3c8482e80b479334e91 } from '../../../../src/fields/SelectField'
 import { default as default_6be9fe46a5d0b8701eabd18cf8509bb0 } from '../../../../src/admin/InviteUserPanel'
+import { default as default_446124d7ee8ac8871d34efe9e97a216f } from '../../../../src/admin/SiteSettingsBrandingField'
 import { default as default_0ffd719fe552e7f96260b5b4f16226bb } from '../../../../src/fields/TextareaField'
 import { default as default_ed26a91d770179c222166a676f958f4e } from '../../../../src/admin/CreateTenantPanel'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -55,6 +56,7 @@ export const importMap = {
   "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
   "/src/fields/SelectField#default": default_ff3268629584f3c8482e80b479334e91,
   "/src/admin/InviteUserPanel#default": default_6be9fe46a5d0b8701eabd18cf8509bb0,
+  "/src/admin/SiteSettingsBrandingField#default": default_446124d7ee8ac8871d34efe9e97a216f,
   "/src/fields/TextareaField#default": default_0ffd719fe552e7f96260b5b4f16226bb,
   "/src/admin/CreateTenantPanel#default": default_ed26a91d770179c222166a676f958f4e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,

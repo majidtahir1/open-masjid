@@ -166,6 +166,9 @@ export const Tenants: CollectionConfig = {
               admin: {
                 description:
                   'Upload a logo and set brand colors. Hover/pressed/soft shades are derived automatically — you only choose three colors.',
+                components: {
+                  Field: '/src/admin/SiteSettingsBrandingField#default',
+                },
               },
               fields: [
                 {
