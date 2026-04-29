@@ -450,6 +450,47 @@ export const Tenants: CollectionConfig = {
           ],
         },
         {
+          label: 'Account',
+          description: 'Lifecycle and signup metadata for this tenant. Hidden from tenant admins.',
+          fields: [
+            {
+              name: 'status',
+              type: 'select',
+              defaultValue: 'pending',
+              label: 'Status',
+              options: [
+                { label: 'Pending — admin has not yet set their password', value: 'pending' },
+                { label: 'Active', value: 'active' },
+              ],
+              admin: {
+                hidden: true,
+                description:
+                  'A tenant is "pending" until its admin user signs in for the first time. Pending tenants are subject to auto-cleanup after 7 days.',
+              },
+            },
+            {
+              name: 'trialEndsAt',
+              type: 'date',
+              label: 'Trial Ends At',
+              admin: {
+                hidden: true,
+                description:
+                  'Recorded at signup (now + 14 days). Not enforced yet — billing/paywall will read this when introduced.',
+              },
+            },
+            {
+              name: 'signupMetadata',
+              type: 'json',
+              label: 'Signup Metadata',
+              admin: {
+                hidden: true,
+                description:
+                  'Free-form blob captured at public signup (role, migration source, etc.). Used for analytics, not for product logic.',
+              },
+            },
+          ],
+        },
+        {
           label: 'Donations',
           description: 'How donations are collected for this masjid.',
           fields: [

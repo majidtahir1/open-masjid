@@ -4,8 +4,8 @@ import React from 'react'
 
 import config from '@payload-config'
 
-const FALLBACK_HREF = '/brand/logo-icp.jpg'
-const FALLBACK_MIME = 'image/jpeg'
+const FALLBACK_HREF = '/brand/openmasjid-favicon.svg'
+const FALLBACK_MIME = 'image/svg+xml'
 
 type TenantRef =
   | string

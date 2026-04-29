@@ -44,6 +44,7 @@ import { default as default_1b061eb5b281695d53709027f168847b } from '../../../..
 import { default as default_0656dfb7fa7b07cc93c7a32edecbf59c } from '../../../../src/admin/ScheduleTimeline'
 import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
 import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
+import { default as default_93bdb0b944d761991c1e0bf71b7ac82d } from '../../../../src/admin/TenantThemeStyle'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
 import { default as default_9752121c5e28fe5da9a9b60c62f37629 } from '../../../../src/admin/onboarding/RerunMenuItem'
@@ -99,6 +100,7 @@ export const importMap = {
   "/src/admin/ScheduleTimeline#default": default_0656dfb7fa7b07cc93c7a32edecbf59c,
   "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
   "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,
+  "/src/admin/TenantThemeStyle#default": default_93bdb0b944d761991c1e0bf71b7ac82d,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
   "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
   "/src/admin/onboarding/RerunMenuItem#default": default_9752121c5e28fe5da9a9b60c62f37629,

@@ -15,6 +15,7 @@
     "payload": "payload",
     "generate:types": "payload generate:types",
     "seed": "node --env-file=.env --import tsx scripts/seed.ts",
+    "cleanup:pending-tenants": "node --env-file=.env --import tsx scripts/cleanupPendingTenants.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
