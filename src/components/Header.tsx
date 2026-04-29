@@ -14,8 +14,6 @@ export interface HeaderProps {
   currentPath?: string
 }
 
-const DEFAULT_LOGO = '/brand/logo-icp-horizontal.svg'
-
 const NAV_LINKS: Array<{ href: string; label: string }> = [
   { href: '/', label: 'Home' },
   { href: '/prayer-times', label: 'Prayer Times' },
@@ -55,8 +53,8 @@ export default function Header({ tenant, currentPath }: HeaderProps) {
     }
   }, [menuOpen])
 
-  const logoSrc = mediaUrl(tenant?.branding?.logo) ?? DEFAULT_LOGO
-  const tenantName = tenant?.name ?? 'Islamic Center of Prosper'
+  const logoSrc = mediaUrl(tenant?.branding?.logo)
+  const tenantName = tenant?.name ?? 'OpenMasjid'
 
   return (
     <header
@@ -74,15 +72,21 @@ export default function Header({ tenant, currentPath }: HeaderProps) {
           className="inline-flex h-28 items-center"
           aria-label={`${tenantName} — Home`}
         >
-          <Image
-            src={logoSrc}
-            alt={tenantName}
-            width={416}
-            height={112}
-            priority
-            className="h-28 w-[416px] object-contain"
-            unoptimized={logoSrc.startsWith('/')}
-          />
+          {logoSrc ? (
+            <Image
+              src={logoSrc}
+              alt={tenantName}
+              width={416}
+              height={112}
+              priority
+              className="h-28 w-[416px] object-contain"
+              unoptimized={logoSrc.startsWith('/')}
+            />
+          ) : (
+            <span className="font-display text-[28px] font-semibold leading-none text-brand-ink">
+              {tenantName}
+            </span>
+          )}
         </Link>
 
         {/* Desktop nav */}

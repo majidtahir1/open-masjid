@@ -14,15 +14,98 @@ export const Users: CollectionConfig = {
     singular: 'User',
     plural: 'Users',
   },
+  hooks: {
+    afterLogin: [
+      // Flip the user's tenant from 'pending' → 'active' on first successful
+      // login. Cheap to run on every login: it's a no-op for already-active
+      // tenants, and it removes the pending tenant from the 7-day cleanup
+      // sweep. Errors are swallowed — login should never fail because of
+      // this lifecycle bookkeeping.
+      async ({ req, user }) => {
+        try {
+          const tenant = (user as { tenant?: unknown }).tenant
+          const tenantId =
+            typeof tenant === 'object' && tenant !== null && 'id' in tenant
+              ? (tenant as { id: string | number }).id
+              : (tenant as string | number | undefined)
+          if (!tenantId) return
+          const tenantDoc = (await req.payload.findByID({
+            collection: 'tenants',
+            id: tenantId,
+            overrideAccess: true,
+          })) as { status?: string } | null
+          if (tenantDoc?.status === 'pending') {
+            await req.payload.update({
+              collection: 'tenants',
+              id: tenantId,
+              data: { status: 'active' },
+              overrideAccess: true,
+            })
+          }
+        } catch (err) {
+          req.payload.logger.error(
+            `users.afterLogin: failed to activate tenant: ${(err as Error).message}`,
+          )
+        }
+      },
+    ],
+  },
   auth: {
     depth: 0,
     forgotPassword: {
       generateEmailSubject: () => 'Set your password — OpenMasjid',
-      generateEmailHTML: (args) => {
+      generateEmailHTML: async (args) => {
         const token = (args as { token?: string } | undefined)?.token ?? ''
-        const user = (args as { user?: { email?: string; firstName?: string | null } } | undefined)?.user
+        const req = (args as { req?: { payload?: unknown } } | undefined)?.req
+        const user = (args as {
+          user?: {
+            email?: string
+            firstName?: string | null
+            tenant?: unknown
+          }
+        } | undefined)?.user
         const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000'
-        const link = `${serverURL}/admin/reset/${token}`
+        // If the user is tenant-scoped (admin/staff), point the reset link at
+        // their tenant subdomain so after setting a password they land in the
+        // right admin. Platform owners keep the apex URL.
+        const tenant = user?.tenant as
+          | { slug?: string }
+          | string
+          | number
+          | null
+          | undefined
+        let tenantSlug: string | undefined
+        if (typeof tenant === 'object' && tenant !== null && 'slug' in tenant) {
+          tenantSlug = (tenant as { slug?: string }).slug
+        } else if ((typeof tenant === 'string' || typeof tenant === 'number') && req?.payload) {
+          try {
+            const payload = req.payload as {
+              findByID: (a: { collection: string; id: string | number; overrideAccess?: boolean }) => Promise<{ slug?: string } | null>
+            }
+            const doc = await payload.findByID({
+              collection: 'tenants',
+              id: tenant,
+              overrideAccess: true,
+            })
+            tenantSlug = doc?.slug
+          } catch {
+            // Fall through to apex URL.
+          }
+        }
+        let resetBase = serverURL
+        if (tenantSlug) {
+          try {
+            const url = new URL(serverURL)
+            // Prepend the slug as a subdomain label. Works for both apex
+            // (openmasjid.app → alnoor.openmasjid.app) and bare-host dev
+            // (localhost → alnoor.localhost).
+            url.hostname = `${tenantSlug}.${url.hostname}`
+            resetBase = url.toString().replace(/\/$/, '')
+          } catch {
+            // Fall through to serverURL on any parse error.
+          }
+        }
+        const link = `${resetBase}/admin/reset/${token}`
         const greeting = user?.firstName
           ? `Assalamu alaikum ${user.firstName},`
           : 'Assalamu alaikum,'

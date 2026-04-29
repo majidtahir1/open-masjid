@@ -77,13 +77,12 @@ function normalizeHost(host: string): string {
   return stripPort(host.trim().toLowerCase())
 }
 
-function isLocalhostHost(host: string): boolean {
+function isBareLocalhostHost(host: string): boolean {
   if (host === 'localhost') return true
   if (host === '127.0.0.1') return true
   if (host === '::1') return true
   if (host === '[::1]') return true
   if (host === '0.0.0.0') return true
-  if (host.endsWith('.localhost')) return true
   return false
 }
 
@@ -96,7 +95,18 @@ export function parseHostContext(host: string): TenantContext {
 
   const normalized = normalizeHost(host)
 
-  if (isLocalhostHost(normalized)) {
+  if (isBareLocalhostHost(normalized)) {
+    return { type: 'localhost' }
+  }
+
+  // Dev: `<slug>.localhost` → tenant subdomain. Mirrors the prod behavior
+  // (`<slug>.openmasjid.app`) so multi-tenant testing works locally without
+  // needing real DNS or /etc/hosts entries.
+  if (normalized.endsWith('.localhost')) {
+    const subdomain = normalized.slice(0, normalized.length - '.localhost'.length)
+    if (subdomain && !subdomain.includes('.')) {
+      return { type: 'tenant-subdomain', slug: subdomain }
+    }
     return { type: 'localhost' }
   }
 

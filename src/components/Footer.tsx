@@ -9,6 +9,8 @@ export interface FooterTenant {
   contactInfo?: TenantContactInfo | null
   socialLinks?: TenantSocialLink[] | null
   footerTagline?: string | null
+  /** Optional tenant logo URL. When omitted, the footer renders no logo. */
+  logoUrl?: string | null
 }
 
 export interface FooterProps {
@@ -126,14 +128,16 @@ export default function Footer({ tenant }: FooterProps) {
           {/* Tagline + identity */}
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <Image
-                src="/brand/logo-icp-gold.svg"
-                alt=""
-                width={72}
-                height={72}
-                className="h-[72px] w-[72px] shrink-0"
-                unoptimized
-              />
+              {tenant.logoUrl && (
+                <Image
+                  src={tenant.logoUrl}
+                  alt=""
+                  width={72}
+                  height={72}
+                  className="h-[72px] w-[72px] shrink-0 object-contain"
+                  unoptimized={tenant.logoUrl.startsWith('/')}
+                />
+              )}
               <div className="font-display text-[22px] font-semibold leading-snug text-white">
                 {tenant.name}
               </div>
