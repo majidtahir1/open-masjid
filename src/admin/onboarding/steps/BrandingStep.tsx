@@ -351,6 +351,9 @@ export function BrandingStep({
     try {
       const fd = new FormData()
       fd.append('file', file)
+      // Pre-fill a sensible default alt text so the upload validates even if
+      // the user never opens the Media doc. Owners can refine it later.
+      fd.append('alt', `${tenantName} logo`)
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       if (!res.ok) {
         const text = await res.text().catch(() => '')
