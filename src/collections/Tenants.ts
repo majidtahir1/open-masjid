@@ -134,6 +134,7 @@ export const Tenants: CollectionConfig = {
                 plural: 'Custom Domains',
               },
               admin: {
+                hidden: true,
                 description:
                   'Add each custom domain the masjid owns (both with and without www if applicable). Visitors reaching these domains will see this tenant\'s public site.',
               },
