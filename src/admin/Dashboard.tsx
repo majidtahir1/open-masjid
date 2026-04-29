@@ -346,6 +346,7 @@ async function TenantDashboard({
       <OnboardingShell
         initialStates={onboardingStates}
         publicUrl={publicUrl}
+        tenantName={tenantName}
         showWelcome={showWelcome}
         alreadyCelebrated={alreadyCelebrated}
       />

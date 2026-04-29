@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
@@ -22,6 +21,8 @@ import { CelebrationScreen } from './CelebrationScreen'
 type Props = {
   initialStates: MilestoneState[]
   publicUrl: string
+  /** Tenant display name for the welcome zone + grid header. */
+  tenantName: string
   /** True iff this user has never seen the welcome modal yet. */
   showWelcome: boolean
   /** True iff onboardingCompletedAt is set on the tenant — celebratory was already dismissed. */
@@ -36,13 +37,19 @@ async function postAction(action: object): Promise<void> {
   })
 }
 
+type ViewMode = 'welcome' | 'grid'
+
 export function OnboardingShell({
   initialStates,
   publicUrl,
+  tenantName,
   showWelcome,
   alreadyCelebrated,
 }: Props) {
   const [open, setOpen] = useState(showWelcome)
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    showWelcome ? 'welcome' : 'grid',
+  )
   const [states] = useState(initialStates)
   const [activeSlug, setActiveSlug] = useState<MilestoneSlug | null>(null)
   const [showCelebration, setShowCelebration] = useState(
@@ -62,42 +69,279 @@ export function OnboardingShell({
   }
 
   const done = doneCount(states)
+  const total = states.length || 6
   const allDone = isAllDoneOrDismissed(states)
+  const remaining = Math.max(0, total - done)
+  const pct = Math.min(100, Math.round((done / total) * 100))
 
-  return (
-    <>
-      {/* Re-open trigger — the dashboard tile renders this when modal closed */}
-      <div className="rounded-xl border border-border bg-white p-5 flex items-center justify-between gap-4">
-        <div>
+  // Public URL stripped to "<slug>.openmasjid.app" for editorial display
+  const publicHost = publicUrl.replace(/^https?:\/\//, '')
+
+  /* ---------- Dashboard tile (always rendered) ---------- */
+  const dashboardTile =
+    alreadyCelebrated && allDone ? (
+      <button
+        type="button"
+        onClick={async () => {
+          await postAction({ type: 'reset' })
+          window.location.reload()
+        }}
+        className="text-sm text-muted-foreground hover:text-foreground"
+      >
+        Setup complete · review →
+      </button>
+    ) : (
+      <div className="rounded-xl border border-border bg-white px-5 py-4 flex items-center justify-between gap-6">
+        <div className="flex-1 min-w-0">
           <p className="text-base font-semibold text-foreground">
-            {showCelebration || allDone
-              ? 'Setup complete'
-              : `Setup checklist · ${done} of 6 done`}
+            {allDone ? 'Setup complete' : `Setup checklist · ${done} of ${total} done`}
           </p>
-          <p className="text-sm text-muted-foreground">
-            {showCelebration || allDone
-              ? 'Re-run the wizard any time to revisit the steps.'
-              : 'Pick up where you left off.'}
-          </p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="h-1 flex-1 max-w-xs rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${pct}%`,
+                  background:
+                    'linear-gradient(90deg, var(--brand, #0F1E4A), var(--accent, #28A0B4))',
+                }}
+              />
+            </div>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {pct}%
+            </span>
+          </div>
         </div>
         <Button
-          variant="secondary"
           onClick={async () => {
             if (allDone) {
               await postAction({ type: 'reset' })
-              // Reload so the dashboard re-reads onboarding state with dismissed cleared.
               window.location.reload()
               return
             }
+            setViewMode('grid')
             setOpen(true)
           }}
+          className="bg-[var(--brand,#0F1E4A)] text-white hover:bg-[var(--brand,#0F1E4A)]/90 shrink-0"
         >
           {allDone ? 'Re-run onboarding' : 'Continue setup'}
         </Button>
       </div>
+    )
+
+  /* ---------- Welcome view (dark zone + light zone) ---------- */
+  const welcomeView = (
+    <div>
+      {/* Upper dark navy zone */}
+      <div
+        className="relative px-8 pt-9 pb-10 md:px-12 md:pt-11 md:pb-12 text-white overflow-hidden"
+        style={{
+          background:
+            'radial-gradient(ellipse at top right, rgba(217,168,78,0.18), transparent 55%), radial-gradient(ellipse at bottom left, rgba(40,160,180,0.18), transparent 60%), var(--icp-navy-900, #0A1330)',
+        }}
+      >
+        {/* decorative star */}
+        <span
+          aria-hidden
+          className="absolute right-8 top-6 text-2xl opacity-60"
+          style={{ color: 'var(--om-gold, #D9A84E)' }}
+        >
+          ✦
+        </span>
+
+        {/* Bismillah */}
+        <p
+          className="text-center text-2xl md:text-3xl mb-6 opacity-90"
+          style={{
+            fontFamily: 'var(--font-arabic, serif)',
+            color: 'var(--icp-teal-300, #7AD0DD)',
+          }}
+        >
+          ﷽
+        </p>
+
+        <DialogTitle asChild>
+          <h2
+            className="text-3xl md:text-4xl text-center text-white"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontStyle: 'italic',
+              fontWeight: 400,
+            }}
+          >
+            Welcome to <span className="text-[var(--om-gold,#D9A84E)]">OpenMasjid.</span>
+          </h2>
+        </DialogTitle>
+
+        <DialogDescription asChild>
+          <p className="mt-4 text-center text-sm md:text-base text-white/75 max-w-md mx-auto leading-relaxed">
+            <span className="text-white/95">{tenantName}</span> is already live at{' '}
+            <span className="font-mono text-[var(--icp-teal-300,#7AD0DD)]">
+              {publicHost}
+            </span>
+            . A few quiet steps will make it feel like yours.
+          </p>
+        </DialogDescription>
+      </div>
+
+      {/* Lower white zone */}
+      <div className="px-8 py-8 md:px-12 md:py-10 bg-white">
+        {/* Trust pills */}
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs md:text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden>⏱</span> ~15 minutes
+          </span>
+          <span className="text-border" aria-hidden>
+            ·
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden>✓</span> Skip anything
+          </span>
+          <span className="text-border" aria-hidden>
+            ·
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden>↻</span> Resume any time
+          </span>
+        </div>
+
+        <div className="mt-7 flex flex-col items-center gap-3">
+          <Button
+            onClick={() => setViewMode('grid')}
+            className="bg-[var(--brand,#0F1E4A)] text-white hover:bg-[var(--brand,#0F1E4A)]/90 px-6"
+          >
+            <span aria-hidden className="mr-1.5 text-[var(--om-gold,#D9A84E)]">
+              ✦
+            </span>
+            Set up your site
+          </Button>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Take me to the admin
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ---------- Grid view (editorial tiles) ---------- */
+  const gridView = (
+    <div className="px-8 py-8 md:px-10 md:py-10 bg-white">
+      {/* Header band */}
+      <div className="flex items-start justify-between gap-6 mb-8">
+        <div className="flex-1 min-w-0">
+          <DialogTitle asChild>
+            <h2
+              className="text-2xl md:text-[28px] text-foreground leading-tight"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              Welcome — let&apos;s make{' '}
+              <em
+                className="text-[var(--brand,#0F1E4A)]"
+                style={{ fontStyle: 'italic' }}
+              >
+                {tenantName}
+              </em>{' '}
+              feel like yours.
+            </h2>
+          </DialogTitle>
+          <DialogDescription asChild>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl leading-relaxed">
+              Your site at{' '}
+              <span className="font-mono text-foreground/80">{publicHost}</span> is
+              already live with platform defaults. About 15 minutes of setup gets it
+              looking like your masjid. Skip anything you&apos;d rather come back to.
+            </p>
+          </DialogDescription>
+        </div>
+
+        {/* Progress block */}
+        <div className="text-right shrink-0">
+          <div className="w-24 h-1 ml-auto rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${pct}%`,
+                background:
+                  'linear-gradient(90deg, var(--brand, #0F1E4A), var(--accent, #28A0B4))',
+              }}
+            />
+          </div>
+          <p
+            className="mt-2 text-4xl md:text-5xl leading-none text-foreground tabular-nums"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontStyle: 'italic',
+              fontWeight: 400,
+            }}
+          >
+            {done}
+            <span className="text-muted-foreground">/{total}</span>
+          </p>
+          <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+            {remaining === 0 ? 'all done' : `${remaining} to go`}
+          </p>
+        </div>
+      </div>
+
+      {/* Tile grid */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {states.map((s, i) => (
+          <MilestoneTile
+            key={s.slug}
+            slug={s.slug}
+            status={s.status}
+            index={i + 1}
+            onOpen={() => setActiveSlug(s.slug)}
+          />
+        ))}
+      </div>
+
+      {/* Footer row */}
+      <div className="mt-8 pt-5 border-t border-border flex flex-wrap items-center justify-between gap-3 text-sm">
+        <span className="text-muted-foreground">
+          Need a hand?{' '}
+          <a
+            href="https://cal.com/openmasjid/15min"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-foreground hover:text-[var(--accent,#28A0B4)] underline-offset-4 hover:underline"
+          >
+            Schedule a 15-min call →
+          </a>
+        </span>
+        <div className="flex items-center gap-5">
+          <button
+            type="button"
+            onClick={async () => {
+              await postAction({ type: 'reset' })
+              refresh()
+            }}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Reset checklist
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Hide for now
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      {dashboardTile}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 max-h-[92vh] overflow-y-auto">
           {showCelebration ? (
             <CelebrationScreen
               publicUrl={publicUrl}
@@ -108,47 +352,20 @@ export function OnboardingShell({
               }}
             />
           ) : activeSlug ? (
-            <MilestonePanel
-              slug={activeSlug}
-              status={states.find((s) => s.slug === activeSlug)?.status ?? null}
-              onBack={() => setActiveSlug(null)}
-              onChanged={refresh}
-            />
+            <div className="p-6 md:p-8">
+              <MilestonePanel
+                slug={activeSlug}
+                status={
+                  states.find((s) => s.slug === activeSlug)?.status ?? null
+                }
+                onBack={() => setActiveSlug(null)}
+                onChanged={refresh}
+              />
+            </div>
+          ) : viewMode === 'welcome' ? (
+            welcomeView
           ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl">Welcome to OpenMasjid.</DialogTitle>
-                <DialogDescription className="text-base">
-                  Your site is already live with our defaults. Let&apos;s make it look like your masjid.
-                </DialogDescription>
-              </DialogHeader>
-              <ul className="grid gap-3 mt-4">
-                {states.map((s) => (
-                  <li key={s.slug}>
-                    <MilestoneTile
-                      slug={s.slug}
-                      status={s.status}
-                      onOpen={() => setActiveSlug(s.slug)}
-                    />
-                  </li>
-                ))}
-              </ul>
-              <div className="flex justify-between items-center pt-4 mt-2 border-t border-border">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await postAction({ type: 'reset' })
-                    refresh()
-                  }}
-                  className="text-sm text-muted-foreground hover:text-foreground"
-                >
-                  Reset checklist
-                </button>
-                <Button variant="ghost" onClick={() => setOpen(false)}>
-                  Take me to the admin
-                </Button>
-              </div>
-            </>
+            gridView
           )}
         </DialogContent>
       </Dialog>
