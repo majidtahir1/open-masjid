@@ -412,3 +412,71 @@ $icons: (
     -webkit-mask-image: url("data:image/svg+xml;utf8,#{$svg}");
   }
 }
+
+/* =========================================================================
+ * Brand-coloured sidebar — paint the admin nav navy regardless of theme.
+ *
+ * Payload's nav is a `<aside>` with `.nav` plus several inner wrappers
+ * (`.nav__wrap`, `.nav__content`, the user controls strip, etc.). Override
+ * just the surfaces and text colour so the rest of the admin chrome (forms,
+ * tables, modals) keeps its theme-driven contrast.
+ * ========================================================================= */
+
+aside.nav,
+.template-default__nav,
+.template-default__wrap > aside {
+  background-color: var(--icp-navy-900);
+  color: #F7F8F8;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+  /* Section labels (COLLECTIONS, GLOBALS, etc.) */
+  .nav__label,
+  .nav-group__label,
+  h6 {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* Default link colour. */
+  a,
+  .nav__link {
+    color: rgba(255, 255, 255, 0.82);
+
+    &:hover {
+      background-color: rgba(60, 164, 178, 0.14);
+      color: #F7F8F8;
+      border-left-color: var(--icp-teal-400);
+    }
+
+    &.active,
+    &[aria-current='page'] {
+      background-color: rgba(60, 164, 178, 0.18);
+      color: var(--icp-teal-300);
+      border-left-color: var(--icp-teal-400);
+    }
+  }
+
+  /* Account/avatar strip at the bottom. */
+  .account-popup,
+  .nav-bottom,
+  .nav__controls {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  /* Inputs that may render inside the nav (search etc.) */
+  input,
+  .search-filter input {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #F7F8F8;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+/* Mobile hamburger / nav toggle keeps brand surface. */
+.nav-toggler--style-without-nav {
+  background-color: var(--icp-navy-900);
+  color: #F7F8F8;
+}
