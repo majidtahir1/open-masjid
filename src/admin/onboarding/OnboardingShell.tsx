@@ -12,6 +12,7 @@ import { MilestoneTile } from './MilestoneTile'
 import { MilestonePanel } from './MilestonePanel'
 import { CelebrationScreen } from './CelebrationScreen'
 import { BrandingStep, type BrandingInitial } from './steps/BrandingStep'
+import { IdentityStep, type IdentityInitial } from './steps/IdentityStep'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 type View = 'welcome' | 'grid' | 'milestone' | 'celebration'
@@ -27,6 +28,8 @@ type Props = {
   alreadyCelebrated: boolean
   /** Current branding values used to seed the rich Branding step. */
   brandingInitial?: BrandingInitial
+  /** Current identity values used to seed the rich Identity step. */
+  identityInitial?: IdentityInitial
 }
 
 async function postAction(action: object): Promise<void> {
@@ -49,6 +52,7 @@ export function OnboardingShell({
   showWelcome,
   alreadyCelebrated,
   brandingInitial,
+  identityInitial,
 }: Props) {
   const [states] = useState(initialStates)
   const [activeSlug, setActiveSlug] = useState<MilestoneSlug | null>(null)
@@ -585,6 +589,16 @@ export function OnboardingShell({
       <div className="overflow-y-auto flex-1">
         <BrandingStep
           initial={brandingInitial ?? {}}
+          tenantName={tenantName}
+          publicUrl={publicUrl}
+          onClose={goBackToGrid}
+          onSaved={refresh}
+        />
+      </div>
+    ) : activeSlug === 'identity' ? (
+      <div className="overflow-y-auto flex-1">
+        <IdentityStep
+          initial={identityInitial ?? {}}
           tenantName={tenantName}
           publicUrl={publicUrl}
           onClose={goBackToGrid}

@@ -642,60 +642,16 @@ export function BrandingStep({
           <div
             style={{
               display: 'flex',
+              flexDirection: 'column',
               gap: 'var(--sp-4)',
               alignItems: 'stretch',
               marginTop: 'var(--sp-2)',
             }}
           >
-            {/* Logo preview tile */}
-            <div
-              style={{
-                width: 160,
-                height: 160,
-                borderRadius: 'var(--r-md)',
-                background: 'var(--bg-alt)',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 16,
-                flexShrink: 0,
-                overflow: 'hidden',
-              }}
-            >
-              {logo?.url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={logo.url}
-                  alt="Current logo"
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: 96,
-                    height: 96,
-                    borderRadius: 'var(--r-sm)',
-                    background:
-                      'linear-gradient(180deg, var(--icp-gray-100), var(--icp-gray-200))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--fg3)',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 40,
-                    fontWeight: 500,
-                  }}
-                >
-                  ﷲ
-                </div>
-              )}
-            </div>
-
             {/* Drop zone */}
             <div
               style={{
-                flex: 1,
+                width: '100%',
                 border: '1.5px dashed var(--border-strong, var(--border))',
                 borderRadius: 'var(--r-md)',
                 padding: 'var(--sp-6) var(--sp-8)',
@@ -786,6 +742,50 @@ export function BrandingStep({
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Logo preview tile — full width, below the drop zone */}
+            <div
+              style={{
+                width: '100%',
+                height: 240,
+                borderRadius: 'var(--r-md)',
+                background: 'var(--bg-alt)',
+                border: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 32,
+                overflow: 'hidden',
+              }}
+            >
+              {logo?.url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={logo.url}
+                  alt="Current logo"
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: 'var(--r-sm)',
+                    background:
+                      'linear-gradient(180deg, var(--icp-gray-100), var(--icp-gray-200))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--fg3)',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 56,
+                    fontWeight: 500,
+                  }}
+                >
+                  ﷲ
+                </div>
+              )}
             </div>
 
             {/* Hidden favicon file input */}

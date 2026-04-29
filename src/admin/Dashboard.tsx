@@ -375,6 +375,31 @@ async function TenantDashboard({
     displayFont: brandingDoc?.displayFont ?? undefined,
   }
 
+  const identityDoc = tenantDoc as {
+    name?: string | null
+    footerTagline?: string | null
+    contactInfo?: {
+      address?: string | null
+      phone?: string | null
+      email?: string | null
+    } | null
+    socialLinks?: Array<{ platform?: string; url?: string }> | null
+  }
+  const identityInitial = {
+    name: identityDoc.name ?? '',
+    footerTagline: identityDoc.footerTagline ?? '',
+    contactInfo: {
+      address: identityDoc.contactInfo?.address ?? '',
+      phone: identityDoc.contactInfo?.phone ?? '',
+      email: identityDoc.contactInfo?.email ?? '',
+    },
+    socialLinks: (identityDoc.socialLinks ?? [])
+      .filter((s): s is { platform: string; url: string } =>
+        Boolean(s?.platform && s?.url),
+      )
+      .map((s) => ({ platform: s.platform, url: s.url })),
+  }
+
   const scheduleCollection = schedule?.collectionSlug ?? 'prayer-schedules'
   const scheduleEditHref = schedule
     ? `/admin/collections/${scheduleCollection}/${schedule.id}`
@@ -398,6 +423,7 @@ async function TenantDashboard({
         showWelcome={showWelcome}
         alreadyCelebrated={alreadyCelebrated}
         brandingInitial={brandingInitial}
+        identityInitial={identityInitial}
       />
       <header className="flex items-center justify-between gap-6">
         <div className="space-y-2">

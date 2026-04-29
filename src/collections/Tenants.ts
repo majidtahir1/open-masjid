@@ -345,6 +345,9 @@ export const Tenants: CollectionConfig = {
               label: 'Contact Info',
               admin: {
                 description: 'Shown in the site footer and the About page.',
+                components: {
+                  Field: '/src/admin/SiteSettingsIdentityField#default',
+                },
               },
               fields: [
                 {
@@ -393,6 +396,7 @@ export const Tenants: CollectionConfig = {
               admin: {
                 description:
                   'Links to the masjid\'s social accounts. Rendered as icons in the footer.',
+                hidden: true,
               },
               fields: [
                 {
@@ -436,6 +440,7 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Optional short phrase shown beneath the logo in the footer, e.g. "Serving Prosper since 2010".',
                 placeholder: 'A community rooted in service.',
+                hidden: true,
                 components: {
                   Field: '/src/fields/TextField#default',
                 },

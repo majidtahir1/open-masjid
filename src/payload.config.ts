@@ -63,6 +63,7 @@ export default buildConfig({
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
         '/src/admin/BrandingLink#default',
+        '/src/admin/IdentityLink#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
