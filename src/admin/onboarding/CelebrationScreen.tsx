@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { ExternalLink } from 'lucide-react'
+import { useState } from 'react'
 
 export function CelebrationScreen({
   publicUrl,
@@ -28,62 +28,150 @@ export function CelebrationScreen({
     },
   ]
 
+  const [primaryHover, setPrimaryHover] = useState(false)
+  const [ghostHover, setGhostHover] = useState(false)
+
   return (
-    <div className="px-8 py-10 md:px-12 md:py-14 text-center">
+    <div
+      className="text-center"
+      style={{
+        padding: 'var(--sp-12) var(--sp-12)',
+        background: 'var(--bg)',
+        fontFamily: 'var(--font-body)',
+      }}
+    >
       <div className="space-y-5">
         <p
           aria-hidden
-          className="text-2xl"
-          style={{ color: 'var(--om-gold, #D9A84E)' }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--fs-xl)',
+            color: 'var(--icp-gold-500)',
+            margin: 0,
+          }}
         >
           ✦
         </p>
         <h2
-          className="text-4xl md:text-5xl text-foreground"
           style={{
             fontFamily: 'var(--font-display)',
-            fontStyle: 'italic',
-            fontWeight: 400,
+            fontWeight: 500,
+            fontSize: 'clamp(2rem, 4vw, 3rem)',
+            lineHeight: 1.1,
+            color: 'var(--fg1)',
+            margin: 0,
           }}
         >
           Your site is ready.
         </h2>
-        <p className="text-base text-muted-foreground">
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-sm)',
+            color: 'var(--fg2)',
+            margin: 0,
+          }}
+        >
           Live at{' '}
           <a
-            className="font-semibold text-[var(--brand,#0F1E4A)] underline-offset-4 hover:underline"
             href={publicUrl}
             target="_blank"
             rel="noopener noreferrer"
+            style={{
+              fontWeight: 600,
+              color: 'var(--brand)',
+              transition: 'color var(--dur-base) var(--ease-out)',
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.color = 'var(--brand-hover)')
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--brand)')}
           >
             {publicUrl}
           </a>
         </p>
       </div>
 
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <Button
-          asChild
-          className="bg-[var(--brand,#0F1E4A)] text-white hover:bg-[var(--brand,#0F1E4A)]/90"
+      <div
+        className="flex flex-wrap items-center justify-center"
+        style={{ marginTop: 'var(--sp-8)', gap: 'var(--sp-3)' }}
+      >
+        <a
+          href={publicUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onMouseEnter={() => setPrimaryHover(true)}
+          onMouseLeave={() => setPrimaryHover(false)}
+          className="inline-flex items-center"
+          style={{
+            gap: 'var(--sp-2)',
+            background: primaryHover
+              ? 'var(--brand-hover)'
+              : 'var(--brand)',
+            color: '#fff',
+            padding: '10px 18px',
+            borderRadius: 'var(--r-md)',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            fontSize: 14,
+            boxShadow: primaryHover ? 'var(--sh-md)' : 'none',
+            transform: primaryHover ? 'translateY(-1px)' : 'translateY(0)',
+            transition:
+              'background var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out)',
+          }}
         >
-          <a href={publicUrl} target="_blank" rel="noopener noreferrer">
-            Visit site <ExternalLink className="size-4" aria-hidden />
-          </a>
-        </Button>
-        <Button variant="ghost" onClick={onDismiss}>
+          Visit site <ExternalLink size={16} aria-hidden />
+        </a>
+        <button
+          type="button"
+          onClick={onDismiss}
+          onMouseEnter={() => setGhostHover(true)}
+          onMouseLeave={() => setGhostHover(false)}
+          style={{
+            background: ghostHover ? 'var(--icp-gray-100)' : 'transparent',
+            color: 'var(--fg1)',
+            border: 'none',
+            padding: '10px 18px',
+            borderRadius: 'var(--r-md)',
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: 'pointer',
+            transition: 'background var(--dur-base) var(--ease-out)',
+          }}
+        >
           Done
-        </Button>
+        </button>
       </div>
 
-      <div className="mx-auto mt-12 max-w-md">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+      <div
+        className="mx-auto"
+        style={{ marginTop: 'var(--sp-12)', maxWidth: 480 }}
+      >
+        <div
+          className="flex items-center"
+          style={{ marginBottom: 'var(--sp-5)', gap: 'var(--sp-3)' }}
+        >
+          <span
+            style={{ height: 1, flex: 1, background: 'var(--border)' }}
+          />
+          <span
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: 'var(--brand)',
+            }}
+          >
             What&apos;s next
           </span>
-          <span className="h-px flex-1 bg-border" />
+          <span
+            style={{ height: 1, flex: 1, background: 'var(--border)' }}
+          />
         </div>
-        <ul className="space-y-4 text-left">
+        <ul className="text-left" style={{ display: 'grid', gap: 'var(--sp-4)', listStyle: 'none', margin: 0, padding: 0 }}>
           {items.map((it) => (
             <li key={it.href}>
               <a
@@ -93,15 +181,29 @@ export function CelebrationScreen({
                 className="group block"
               >
                 <p
-                  className="text-lg text-foreground group-hover:text-[var(--accent,#28A0B4)] transition-colors"
+                  className="group-hover:[color:var(--brand-hover)]"
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontStyle: 'italic',
+                    fontWeight: 500,
+                    fontSize: 'var(--fs-md)',
+                    color: 'var(--brand)',
+                    margin: 0,
+                    transition: 'color var(--dur-base) var(--ease-out)',
                   }}
                 >
                   {it.title} <span aria-hidden>→</span>
                 </p>
-                <p className="text-sm text-muted-foreground">{it.desc}</p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'var(--fs-sm)',
+                    color: 'var(--fg2)',
+                    margin: 0,
+                    marginTop: 'var(--sp-1)',
+                  }}
+                >
+                  {it.desc}
+                </p>
               </a>
             </li>
           ))}

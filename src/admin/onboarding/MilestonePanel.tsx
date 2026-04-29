@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import type { MilestoneSlug, MilestoneStatus } from '@/lib/onboarding'
 import { HINTS } from '@/lib/onboardingHints'
 import { HintRail } from './HintRail'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 type PanelMeta = {
@@ -67,6 +66,109 @@ async function postAction(action: object): Promise<void> {
   })
 }
 
+const baseBtn: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '10px 18px',
+  borderRadius: 'var(--r-md)',
+  fontFamily: 'var(--font-body)',
+  fontSize: 14,
+  fontWeight: 600,
+  lineHeight: 1,
+  cursor: 'pointer',
+  border: '1px solid transparent',
+  transition:
+    'background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out)',
+}
+
+function PrimaryLink({
+  href,
+  children,
+}: {
+  href: string
+  children: React.ReactNode
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...baseBtn,
+        background: hover ? 'var(--brand-hover)' : 'var(--brand)',
+        color: '#fff',
+        boxShadow: hover ? 'var(--sh-md)' : 'none',
+        transform: hover ? 'translateY(-1px)' : 'translateY(0)',
+      }}
+    >
+      {children}
+    </a>
+  )
+}
+
+function SecondaryButton({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void
+  disabled?: boolean
+  children: React.ReactNode
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...baseBtn,
+        background: hover ? 'var(--brand-soft)' : '#fff',
+        color: 'var(--brand)',
+        borderColor: 'var(--border-navy)',
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function GhostButton({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void
+  disabled?: boolean
+  children: React.ReactNode
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...baseBtn,
+        background: hover ? 'var(--icp-gray-100)' : 'transparent',
+        color: 'var(--fg1)',
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
 export function MilestonePanel({
   slug,
   status,
@@ -92,44 +194,79 @@ export function MilestonePanel({
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-[1fr_280px]">
-      <div className="space-y-6">
+    <div
+      className="grid md:grid-cols-[1fr_280px]"
+      style={{ gap: 'var(--sp-8)', fontFamily: 'var(--font-body)' }}
+    >
+      <div style={{ display: 'grid', gap: 'var(--sp-6)' }}>
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center"
+          style={{
+            gap: 'var(--sp-1)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-sm)',
+            fontWeight: 600,
+            color: 'var(--fg3)',
+            background: 'transparent',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            transition: 'color var(--dur-base) var(--ease-out)',
+            justifySelf: 'start',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--fg1)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--fg3)')}
         >
-          <ArrowLeft className="size-4" aria-hidden /> Back to checklist
+          <ArrowLeft size={16} aria-hidden /> Back to checklist
         </button>
         <div>
-          <h2 className="text-2xl font-semibold text-foreground">{meta.title}</h2>
-          <p className="mt-2 text-base text-muted-foreground leading-relaxed">{meta.intro}</p>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 500,
+              fontSize: 'clamp(1.5rem, 2.4vw, 2rem)',
+              lineHeight: 1.25,
+              color: 'var(--fg1)',
+              margin: 0,
+            }}
+          >
+            {meta.title}
+          </h2>
+          <p
+            style={{
+              marginTop: 'var(--sp-2)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
+              lineHeight: 1.55,
+              color: 'var(--fg2)',
+            }}
+          >
+            {meta.intro}
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Button asChild>
-            <a href={meta.primaryHref} target="_blank" rel="noopener noreferrer">
-              {meta.primaryLabel}
-              <ExternalLink className="size-4" aria-hidden />
-            </a>
-          </Button>
+        <div className="flex flex-wrap" style={{ gap: 'var(--sp-3)' }}>
+          <PrimaryLink href={meta.primaryHref}>
+            {meta.primaryLabel}
+            <ExternalLink size={16} aria-hidden />
+          </PrimaryLink>
           {status !== 'complete' && (
-            <Button
-              variant="secondary"
+            <SecondaryButton
               disabled={busy}
               onClick={() => act({ type: 'mark-complete', slug })}
             >
               Mark complete
-            </Button>
+            </SecondaryButton>
           )}
           {status !== 'dismissed' && status !== 'complete' && (
-            <Button
-              variant="ghost"
+            <GhostButton
               disabled={busy}
               onClick={() => act({ type: 'skip', slug })}
             >
               Skip for now
-            </Button>
+            </GhostButton>
           )}
         </div>
       </div>

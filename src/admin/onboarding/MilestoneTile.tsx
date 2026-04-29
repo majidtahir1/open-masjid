@@ -1,7 +1,8 @@
 'use client'
 
 import type { MilestoneSlug, MilestoneStatus } from '@/lib/onboarding'
-import { Check } from 'lucide-react'
+import { Check, Minus } from 'lucide-react'
+import { useState } from 'react'
 
 const COPY: Record<
   MilestoneSlug,
@@ -68,25 +69,54 @@ export function MilestoneTile({
         ? 'Open anyway'
         : meta.action
 
+  const [hover, setHover] = useState(false)
+
   const badge =
     status === 'complete' ? (
       <span
         aria-hidden
-        className="grid size-7 shrink-0 place-items-center rounded-full bg-[var(--brand,#0F1E4A)] text-white"
+        className="grid place-items-center shrink-0"
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          background: 'var(--brand)',
+          color: '#fff',
+        }}
       >
-        <Check className="size-3.5" />
+        <Check size={16} strokeWidth={2} />
       </span>
     ) : status === 'dismissed' ? (
       <span
         aria-hidden
-        className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-muted text-muted-foreground"
+        className="grid place-items-center shrink-0"
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          border: '1px dashed var(--border-strong)',
+          color: 'var(--fg3)',
+          background: 'var(--bg)',
+        }}
       >
-        <span className="block h-px w-2.5 bg-current" />
+        <Minus size={14} strokeWidth={2} />
       </span>
     ) : (
       <span
         aria-hidden
-        className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-white text-[11px] font-semibold tracking-wider text-muted-foreground"
+        className="grid place-items-center shrink-0 tabular-nums"
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          border: '1px solid var(--border)',
+          background: 'var(--bg)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 600,
+          letterSpacing: '0.05em',
+          color: 'var(--fg3)',
+        }}
       >
         {num}
       </span>
@@ -96,21 +126,57 @@ export function MilestoneTile({
     <button
       type="button"
       onClick={onOpen}
-      className="group flex h-full w-full flex-col gap-4 bg-white p-8 text-left transition-colors hover:bg-muted/40"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onFocus={() => setHover(true)}
+      onBlur={() => setHover(false)}
+      className="group flex h-full w-full flex-col text-left"
+      style={{
+        background: hover ? 'var(--bg-alt)' : 'var(--bg)',
+        padding: 'var(--sp-8)',
+        gap: 'var(--sp-4)',
+        transition: 'background var(--dur-base) var(--ease-out)',
+        fontFamily: 'var(--font-body)',
+      }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center" style={{ gap: 'var(--sp-4)' }}>
         {badge}
         <h3
-          className="font-display text-2xl font-medium text-foreground leading-tight"
-          style={{ fontFamily: 'var(--font-display)' }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 500,
+            fontSize: 'var(--fs-lg)',
+            lineHeight: 1.25,
+            color: 'var(--fg1)',
+            margin: 0,
+          }}
         >
           {meta.title}
         </h3>
       </div>
-      <p className="text-base leading-relaxed text-muted-foreground">
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--fs-sm)',
+          lineHeight: 1.55,
+          color: 'var(--fg2)',
+          margin: 0,
+        }}
+      >
         {meta.desc}
       </p>
-      <span className="mt-auto inline-flex items-center gap-2 text-base font-semibold text-foreground">
+      <span
+        className="mt-auto inline-flex items-center"
+        style={{
+          gap: hover ? 'var(--sp-3)' : 'var(--sp-2)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--fs-sm)',
+          fontWeight: 600,
+          color: hover ? 'var(--brand-hover)' : 'var(--brand)',
+          transition:
+            'gap var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out)',
+        }}
+      >
         {actionLabel} <span aria-hidden>→</span>
       </span>
     </button>
