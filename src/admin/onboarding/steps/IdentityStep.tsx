@@ -220,91 +220,108 @@ export function IdentityStep({
     >
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
 
-      {/* ---------- Header ---------- */}
+      {/* ---------- Sticky header + progress bar ---------- */}
       <div
         style={{
-          padding: 'var(--sp-6) var(--sp-8)',
-          borderBottom: '1px solid var(--border)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
           background: 'var(--bg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 'var(--sp-6)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
-        <div>
-          {mode === 'modal' && (
-            <p
-              style={{
-                margin: 0,
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: '0.14em',
-                color: 'var(--fg3)',
-                textTransform: 'uppercase',
-              }}
-            >
-              Step 02 of 06
-            </p>
-          )}
-          <h2
-            style={{
-              margin: 0,
-              fontFamily: 'var(--font-display)',
-              fontWeight: 500,
-              fontSize: 28,
-              lineHeight: 1.15,
-              color: 'var(--fg1)',
-            }}
-          >
-            Identity & Contact
-          </h2>
-        </div>
-        {mode === 'modal' && (
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 6,
-              borderRadius: 'var(--r-sm)',
-              color: 'var(--fg2)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <X size={20} strokeWidth={1.75} />
-          </button>
-        )}
-      </div>
-
-      {/* ---------- Progress bar ---------- */}
-      {mode === 'modal' && (
         <div
           style={{
+            padding: 'var(--sp-6) var(--sp-8)',
             display: 'flex',
-            gap: 4,
-            padding: '0 var(--sp-8)',
-            background: 'var(--bg)',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'var(--sp-6)',
           }}
         >
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
+          <div>
+            {mode === 'modal' && (
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '0.14em',
+                  color: 'var(--fg3)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Step 02 of 06
+              </p>
+            )}
+            <h2
               style={{
-                flex: 1,
-                height: 4,
-                background: i === 1 ? 'var(--brand)' : 'var(--icp-gray-100)',
-                borderRadius: 2,
+                margin: 0,
+                fontFamily: 'var(--font-display)',
+                fontWeight: 500,
+                fontSize: 28,
+                lineHeight: 1.15,
+                color: 'var(--fg1)',
               }}
-            />
-          ))}
+            >
+              Identity & Contact
+            </h2>
+          </div>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 'var(--sp-3)',
+            }}
+          >
+            <HeaderSaveButton saving={saving} onSave={() => void submit(mode === 'modal' ? 'draft' : 'continue')} />
+            {mode === 'modal' && (
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={onClose}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 6,
+                  borderRadius: 'var(--r-sm)',
+                  color: 'var(--fg2)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <X size={20} strokeWidth={1.75} />
+              </button>
+            )}
+          </div>
         </div>
-      )}
+
+        {/* ---------- Progress bar ---------- */}
+        {mode === 'modal' && (
+          <div
+            style={{
+              display: 'flex',
+              gap: 4,
+              padding: '0 var(--sp-8)',
+              background: 'var(--bg)',
+            }}
+          >
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 4,
+                  background: i === 1 ? 'var(--brand)' : 'var(--icp-gray-100)',
+                  borderRadius: 2,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* ---------- Body ---------- */}
       <div
@@ -617,6 +634,45 @@ export function IdentityStep({
         </div>
       </div>
     </div>
+  )
+}
+
+function HeaderSaveButton({
+  saving,
+  onSave,
+}: {
+  saving: 'draft' | 'continue' | null
+  onSave: () => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  const isSaving = saving !== null
+  return (
+    <button
+      type="button"
+      onClick={onSave}
+      disabled={isSaving}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        background: hovered && !isSaving ? 'var(--brand-hover)' : 'var(--brand)',
+        color: 'white',
+        padding: '8px 16px',
+        borderRadius: 'var(--r-md)',
+        fontFamily: 'var(--font-body)',
+        fontSize: 'var(--fs-sm)',
+        fontWeight: 600,
+        border: 'none',
+        cursor: isSaving ? 'wait' : 'pointer',
+        opacity: isSaving ? 0.6 : 1,
+        transform: hovered && !isSaving ? 'translateY(-1px)' : 'translateY(0)',
+        transition: 'background var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out)',
+      }}
+    >
+      {isSaving ? 'Saving…' : 'Save'}
+    </button>
   )
 }
 
