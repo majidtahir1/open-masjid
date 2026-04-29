@@ -25,7 +25,10 @@ import { BrandingStep, type BrandingInitial } from '@/admin/onboarding/steps/Bra
 const HIDE_DOC_CONTROLS_CSS = `
   body.is-branding-tab .doc-controls,
   body.is-branding-tab .collection-edit__sub-header,
-  body.is-branding-tab .doc-header__divider {
+  body.is-branding-tab .doc-header__divider,
+  body.is-branding-tab .doc-tabs,
+  body.is-branding-tab .doc-tab,
+  body.is-branding-tab .doc-tabs__tabs-wrap {
     display: none !important;
   }
 `
