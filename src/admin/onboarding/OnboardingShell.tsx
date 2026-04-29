@@ -228,80 +228,104 @@ export function OnboardingShell({
   )
 
   /* ---------- Grid view (editorial tiles) ---------- */
-  const gridView = (
-    <div className="px-8 py-8 md:px-10 md:py-10 bg-white">
-      {/* Header band */}
-      <div className="flex items-start justify-between gap-6 mb-8">
-        <div className="flex-1 min-w-0">
-          <DialogTitle asChild>
-            <h2
-              className="text-2xl md:text-[28px] text-foreground leading-tight"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              Welcome — let&apos;s make{' '}
-              <em
-                className="text-[var(--brand,#0F1E4A)]"
-                style={{ fontStyle: 'italic' }}
-              >
-                {tenantName}
-              </em>{' '}
-              feel like yours.
-            </h2>
-          </DialogTitle>
-          <DialogDescription asChild>
-            <p className="mt-2 text-sm text-muted-foreground max-w-xl leading-relaxed">
-              Your site at{' '}
-              <span className="font-mono text-foreground/80">{publicHost}</span> is
-              already live with platform defaults. About 15 minutes of setup gets it
-              looking like your masjid. Skip anything you&apos;d rather come back to.
-            </p>
-          </DialogDescription>
-        </div>
+  const hasResettable = states.some(
+    (s) => s.status === 'complete' || s.status === 'dismissed',
+  )
 
-        {/* Progress block */}
-        <div className="text-right shrink-0">
-          <div className="w-24 h-1 ml-auto rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${pct}%`,
-                background:
-                  'linear-gradient(90deg, var(--brand, #0F1E4A), var(--accent, #28A0B4))',
-              }}
-            />
+  const gridView = (
+    <div className="bg-white">
+      {/* Top-right reset affordance (sits next to the dialog close X) */}
+      {hasResettable && (
+        <button
+          type="button"
+          onClick={async () => {
+            await postAction({ type: 'reset' })
+            refresh()
+          }}
+          className="absolute right-12 top-4 z-10 text-xs text-muted-foreground hover:text-foreground"
+        >
+          Reset checklist
+        </button>
+      )}
+
+      {/* Header band — soft tinted background */}
+      <div className="bg-muted/40 px-12 py-10">
+        <div className="flex items-start justify-between gap-10">
+          <div className="flex-1 min-w-0">
+            <DialogTitle asChild>
+              <h2
+                className="text-3xl md:text-[32px] text-foreground leading-tight"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                Welcome — let&apos;s make{' '}
+                <em
+                  className="text-[var(--brand,#0F1E4A)]"
+                  style={{ fontStyle: 'italic' }}
+                >
+                  {tenantName}
+                </em>{' '}
+                feel like yours.
+              </h2>
+            </DialogTitle>
+            <DialogDescription asChild>
+              <p className="mt-3 text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                Your site at{' '}
+                <span className="font-mono text-foreground/80">{publicHost}</span>{' '}
+                is already live with platform defaults. About 15 minutes of setup
+                gets it looking like your masjid. Skip anything you&apos;d rather
+                come back to.
+              </p>
+            </DialogDescription>
           </div>
-          <p
-            className="mt-2 text-4xl md:text-5xl leading-none text-foreground tabular-nums"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontStyle: 'italic',
-              fontWeight: 400,
-            }}
-          >
-            {done}
-            <span className="text-muted-foreground">/{total}</span>
-          </p>
-          <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
-            {remaining === 0 ? 'all done' : `${remaining} to go`}
-          </p>
+
+          {/* Progress block — bar above fraction */}
+          <div className="shrink-0 w-[200px]">
+            <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${pct}%`,
+                  background:
+                    'linear-gradient(90deg, var(--brand, #0F1E4A), var(--accent, #28A0B4))',
+                }}
+              />
+            </div>
+            <p
+              className="mt-3 text-right leading-none text-foreground tabular-nums"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontStyle: 'italic',
+                fontWeight: 400,
+              }}
+            >
+              <span className="text-6xl">{done}</span>
+              <span className="text-3xl text-muted-foreground/70">/{total}</span>
+            </p>
+            <p className="mt-2 text-right text-[11px] uppercase tracking-wider text-muted-foreground">
+              {remaining === 0 ? 'all done' : `${remaining} to go`}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Tile grid */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {states.map((s, i) => (
-          <MilestoneTile
-            key={s.slug}
-            slug={s.slug}
-            status={s.status}
-            index={i + 1}
-            onOpen={() => setActiveSlug(s.slug)}
-          />
-        ))}
+      {/* Tile grid — single bordered container with hairline dividers */}
+      <div className="px-12 pt-8 pb-2 bg-white">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 overflow-hidden rounded-2xl border border-border divide-x divide-y divide-border">
+          {states.map((s, i) => (
+            <li key={s.slug} className="flex">
+              <MilestoneTile
+                slug={s.slug}
+                status={s.status}
+                index={i + 1}
+                onOpen={() => setActiveSlug(s.slug)}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Footer row */}
-      <div className="mt-8 pt-5 border-t border-border flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div className="px-12 py-6 flex flex-wrap items-center justify-between gap-3 text-sm bg-white">
         <span className="text-muted-foreground">
           Need a hand?{' '}
           <a
@@ -313,25 +337,13 @@ export function OnboardingShell({
             Schedule a 15-min call →
           </a>
         </span>
-        <div className="flex items-center gap-5">
-          <button
-            type="button"
-            onClick={async () => {
-              await postAction({ type: 'reset' })
-              refresh()
-            }}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Reset checklist
-          </button>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Hide for now
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          Hide for now
+        </button>
       </div>
     </div>
   )
@@ -341,7 +353,7 @@ export function OnboardingShell({
       {dashboardTile}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 max-h-[92vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl p-0 overflow-hidden gap-0 max-h-[92vh] overflow-y-auto">
           {showCelebration ? (
             <CelebrationScreen
               publicUrl={publicUrl}
