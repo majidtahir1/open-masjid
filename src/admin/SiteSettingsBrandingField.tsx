@@ -15,6 +15,21 @@ import { useRouter } from 'next/navigation'
 import { useDocumentInfo, useAuth } from '@payloadcms/ui'
 import { BrandingStep, type BrandingInitial } from '@/admin/onboarding/steps/BrandingStep'
 
+/**
+ * The BrandingStep saves through its own endpoint (/admin/api/onboarding/branding),
+ * so Payload's document-level form never sees changes and the top "Save" / "Last
+ * Modified" bar would mislead the user. While this field is mounted, we hide
+ * those Payload chrome bits via a body class. The component below renders a
+ * <style> tag whose selectors target Payload's standard doc-control classes.
+ */
+const HIDE_DOC_CONTROLS_CSS = `
+  body.is-branding-tab .doc-controls,
+  body.is-branding-tab .collection-edit__sub-header,
+  body.is-branding-tab .doc-header__divider {
+    display: none !important;
+  }
+`
+
 type TenantDoc = {
   id: string | number
   name?: string
@@ -32,6 +47,15 @@ export default function SiteSettingsBrandingField() {
   const router = useRouter()
   const { id: docId } = useDocumentInfo()
   const { user } = useAuth()
+
+  // Hide Payload's top-of-page Save bar while this tab is mounted — our
+  // BrandingStep has its own "Save changes" button in its sticky footer.
+  useEffect(() => {
+    document.body.classList.add('is-branding-tab')
+    return () => {
+      document.body.classList.remove('is-branding-tab')
+    }
+  }, [])
 
   const [tenant, setTenant] = useState<TenantDoc | null>(null)
   const [loading, setLoading] = useState(true)
@@ -156,14 +180,17 @@ export default function SiteSettingsBrandingField() {
   const publicUrl = slug ? `https://${slug}.openmasjid.app` : 'https://openmasjid.app'
 
   return (
-    <BrandingStep
-      initial={initial}
-      tenantName={tenantName}
-      publicUrl={publicUrl}
-      mode="standalone"
-      markCompleteOnSave={false}
-      onClose={() => router.push('/admin')}
-      onSaved={() => router.refresh()}
-    />
+    <>
+      <style dangerouslySetInnerHTML={{ __html: HIDE_DOC_CONTROLS_CSS }} />
+      <BrandingStep
+        initial={initial}
+        tenantName={tenantName}
+        publicUrl={publicUrl}
+        mode="standalone"
+        markCompleteOnSave={false}
+        onClose={() => router.push('/admin')}
+        onSaved={() => router.refresh()}
+      />
+    </>
   )
 }
