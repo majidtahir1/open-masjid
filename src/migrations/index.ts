@@ -4,6 +4,7 @@ import * as migration_20260428_043733_hero_photo_pattern from './20260428_043733
 import * as migration_20260428_171104_hero_photo_tone_rename from './20260428_171104_hero_photo_tone_rename';
 import * as migration_20260428_173057_hero_photo_tone_custom from './20260428_173057_hero_photo_tone_custom';
 import * as migration_20260429_173503_tenant_signup_fields from './20260429_173503_tenant_signup_fields';
+import * as migration_20260429_204922_onboarding_state from './20260429_204922_onboarding_state';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260429_173503_tenant_signup_fields.up,
     down: migration_20260429_173503_tenant_signup_fields.down,
     name: '20260429_173503_tenant_signup_fields',
+  },
+  {
+    up: migration_20260429_204922_onboarding_state.up,
+    down: migration_20260429_204922_onboarding_state.down,
+    name: '20260429_204922_onboarding_state',
   },
 ];
