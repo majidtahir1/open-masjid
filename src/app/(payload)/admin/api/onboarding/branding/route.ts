@@ -5,6 +5,7 @@ import config from '@payload-config'
 
 type Body = {
   logoMediaId?: number | string | null
+  faviconMediaId?: number | string | null
   primaryColor?: string
   secondaryColor?: string
   accentColor?: string
@@ -52,6 +53,9 @@ export async function POST(req: Request) {
 
   if (body.logoMediaId !== undefined) {
     branding.logo = body.logoMediaId
+  }
+  if ('faviconMediaId' in body) {
+    branding.favicon = body.faviconMediaId
   }
   if (typeof body.primaryColor === 'string') {
     branding.primaryColor = body.primaryColor

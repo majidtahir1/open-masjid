@@ -39,6 +39,7 @@ type TenantDoc = {
   slug?: string
   branding?: {
     logo?: { id: string | number; url?: string; filename?: string; filesize?: number } | null
+    favicon?: { id: string | number; url?: string; filename?: string; filesize?: number } | null
     primaryColor?: string
     secondaryColor?: string
     accentColor?: string
@@ -172,6 +173,7 @@ export default function SiteSettingsBrandingField() {
   /* ---- Build BrandingInitial from fetched tenant doc ---- */
   const initial: BrandingInitial = {
     logo: tenant.branding?.logo ?? undefined,
+    favicon: tenant.branding?.favicon ?? undefined,
     primaryColor: tenant.branding?.primaryColor,
     secondaryColor: tenant.branding?.secondaryColor,
     accentColor: tenant.branding?.accentColor,

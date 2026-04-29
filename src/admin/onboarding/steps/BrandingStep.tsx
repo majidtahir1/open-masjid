@@ -18,6 +18,7 @@ type LogoRef = {
 
 export type BrandingInitial = {
   logo?: LogoRef
+  favicon?: { id: number | string; url?: string; filename?: string; filesize?: number } | null
   primaryColor?: string
   secondaryColor?: string
   accentColor?: string
@@ -332,7 +333,10 @@ export function BrandingStep({
   markCompleteOnSave = true,
 }: Props) {
   const [logo, setLogo] = useState<LogoRef>(initial.logo ?? null)
+  const [favicon, setFavicon] = useState<LogoRef>(initial.favicon ?? null)
+  const [faviconOpen, setFaviconOpen] = useState<boolean>(!!initial.favicon)
   const [uploading, setUploading] = useState(false)
+  const [uploadingFavicon, setUploadingFavicon] = useState(false)
   const [primary, setPrimary] = useState<string>(initial.primaryColor || DEFAULT_PRIMARY)
   const [secondary, setSecondary] = useState<string>(
     initial.secondaryColor || DEFAULT_SECONDARY,
@@ -342,8 +346,10 @@ export function BrandingStep({
   const [saving, setSaving] = useState<'draft' | 'continue' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const faviconInputRef = useRef<HTMLInputElement | null>(null)
 
   const onPickFile = () => fileInputRef.current?.click()
+  const onPickFavicon = () => faviconInputRef.current?.click()
 
   const handleFile = async (file: File) => {
     setError(null)
@@ -386,6 +392,45 @@ export function BrandingStep({
     }
   }
 
+  const handleFaviconFile = async (file: File) => {
+    setError(null)
+    setUploadingFavicon(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('alt', `${tenantName} favicon`)
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        throw new Error(text || `Upload failed (${res.status})`)
+      }
+      const json = (await res.json()) as {
+        doc?: { id: number | string; url?: string; filename?: string; filesize?: number }
+        id?: number | string
+        url?: string
+        filename?: string
+        filesize?: number
+      }
+      const doc = json.doc ?? {
+        id: json.id as number | string,
+        url: json.url,
+        filename: json.filename,
+        filesize: json.filesize,
+      }
+      if (doc.id == null) throw new Error('Upload returned no id')
+      setFavicon({
+        id: doc.id,
+        url: doc.url,
+        filename: doc.filename,
+        filesize: doc.filesize,
+      })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setUploadingFavicon(false)
+    }
+  }
+
   const submit = async (markComplete: boolean) => {
     setError(null)
     setSaving(markComplete ? 'continue' : 'draft')
@@ -395,6 +440,7 @@ export function BrandingStep({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           logoMediaId: logo?.id ?? null,
+          faviconMediaId: favicon?.id ?? null,
           primaryColor: primary,
           secondaryColor: secondary,
           accentColor: accent,
@@ -604,15 +650,15 @@ export function BrandingStep({
             {/* Logo preview tile */}
             <div
               style={{
-                width: 96,
-                height: 96,
+                width: 160,
+                height: 160,
                 borderRadius: 'var(--r-md)',
                 background: 'var(--bg-alt)',
                 border: '1px solid var(--border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: 12,
+                padding: 16,
                 flexShrink: 0,
                 overflow: 'hidden',
               }}
@@ -627,8 +673,8 @@ export function BrandingStep({
               ) : (
                 <div
                   style={{
-                    width: 56,
-                    height: 56,
+                    width: 96,
+                    height: 96,
                     borderRadius: 'var(--r-sm)',
                     background:
                       'linear-gradient(180deg, var(--icp-gray-100), var(--icp-gray-200))',
@@ -637,7 +683,7 @@ export function BrandingStep({
                     justifyContent: 'center',
                     color: 'var(--fg3)',
                     fontFamily: 'var(--font-display)',
-                    fontSize: 24,
+                    fontSize: 40,
                     fontWeight: 500,
                   }}
                 >
@@ -700,17 +746,175 @@ export function BrandingStep({
                   {logo?.filesize ? ` · ${formatBytes(logo.filesize)}` : ''}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--fg3)' }}>
-                  Favicon will auto-generate from this.{' '}
-                  <a
-                    href="#"
-                    onClick={(e) => e.preventDefault()}
-                    style={{ color: 'var(--brand)', fontWeight: 600 }}
-                  >
-                    Override →
-                  </a>
+                  {faviconOpen ? (
+                    <button
+                      type="button"
+                      onClick={() => setFaviconOpen(false)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        color: 'var(--brand)',
+                        fontWeight: 600,
+                        fontSize: 12,
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-body)',
+                      }}
+                    >
+                      Hide favicon override ←
+                    </button>
+                  ) : (
+                    <>
+                      Favicon will auto-generate from this.{' '}
+                      <button
+                        type="button"
+                        onClick={() => setFaviconOpen(true)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          color: 'var(--brand)',
+                          fontWeight: 600,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          fontFamily: 'var(--font-body)',
+                        }}
+                      >
+                        Override →
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Hidden favicon file input */}
+            <input
+              ref={faviconInputRef}
+              type="file"
+              accept="image/*,.ico"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) void handleFaviconFile(f)
+                e.target.value = ''
+              }}
+            />
+
+            {/* Favicon override section — collapsible */}
+            {faviconOpen && (
+              <div
+                style={{
+                  borderTop: '1px solid var(--border)',
+                  paddingTop: 'var(--sp-4)',
+                  display: 'flex',
+                  gap: 'var(--sp-4)',
+                  alignItems: 'center',
+                }}
+              >
+                {/* Favicon preview tile */}
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 'var(--r-md)',
+                    background: 'var(--bg-alt)',
+                    border: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 8,
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {favicon?.url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={favicon.url}
+                      alt="Current favicon"
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 'var(--r-sm)',
+                        background:
+                          'linear-gradient(180deg, var(--icp-gray-100), var(--icp-gray-200))',
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Favicon drop zone */}
+                <div
+                  style={{
+                    flex: 1,
+                    border: '1.5px dashed var(--border-strong, var(--border))',
+                    borderRadius: 'var(--r-md)',
+                    padding: 'var(--sp-4) var(--sp-6)',
+                    background: 'var(--bg-alt)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--sp-4)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={onPickFavicon}
+                    disabled={uploadingFavicon}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      background: 'var(--bg)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--r-md)',
+                      padding: '8px 12px',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--fg1)',
+                      cursor: uploadingFavicon ? 'wait' : 'pointer',
+                      opacity: uploadingFavicon ? 0.6 : 1,
+                    }}
+                  >
+                    <Upload size={14} strokeWidth={1.75} />
+                    {uploadingFavicon ? 'Uploading...' : 'Upload favicon'}
+                  </button>
+                  <div style={{ display: 'grid', gap: 3, minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 13, color: 'var(--fg2)' }}>
+                      {favicon?.filename ?? 'No favicon uploaded yet'}
+                      {favicon?.filesize ? ` · ${formatBytes(favicon.filesize)}` : ''}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--fg3)' }}>
+                      Square 32×32 or 64×64 PNG/ICO. Defaults to your logo if blank.
+                    </div>
+                  </div>
+                  {favicon && (
+                    <button
+                      type="button"
+                      onClick={() => setFavicon(null)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 12,
+                        color: 'var(--fg3)',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >
+                      Remove favicon
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

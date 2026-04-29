@@ -337,6 +337,11 @@ async function TenantDashboard({
         | number
         | { id?: string | number; url?: string; filename?: string; filesize?: number }
         | null
+      favicon?:
+        | string
+        | number
+        | { id?: string | number; url?: string; filename?: string; filesize?: number }
+        | null
       primaryColor?: string | null
       secondaryColor?: string | null
       accentColor?: string | null
@@ -344,6 +349,7 @@ async function TenantDashboard({
     } | null
   }).branding
   const logoVal = brandingDoc?.logo
+  const faviconVal = brandingDoc?.favicon
   const brandingInitial = {
     logo:
       logoVal && typeof logoVal === 'object' && logoVal.id != null
@@ -352,6 +358,15 @@ async function TenantDashboard({
             url: logoVal.url ?? undefined,
             filename: logoVal.filename ?? undefined,
             filesize: logoVal.filesize ?? undefined,
+          }
+        : null,
+    favicon:
+      faviconVal && typeof faviconVal === 'object' && faviconVal.id != null
+        ? {
+            id: faviconVal.id as string | number,
+            url: faviconVal.url ?? undefined,
+            filename: faviconVal.filename ?? undefined,
+            filesize: faviconVal.filesize ?? undefined,
           }
         : null,
     primaryColor: brandingDoc?.primaryColor ?? undefined,
