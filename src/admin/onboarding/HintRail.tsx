@@ -18,14 +18,14 @@ export function HintRail({ hints }: { hints: Hint[] }) {
         style={{
           gap: 'var(--sp-2)',
           fontFamily: 'var(--font-body)',
-          fontSize: 11,
+          fontSize: 'var(--fs-xs)',
           fontWeight: 600,
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
           color: 'var(--brand)',
         }}
       >
-        <Lightbulb size={14} aria-hidden /> Did you know?
+        <Lightbulb size={16} strokeWidth={2} aria-hidden /> Did you know?
       </div>
       <ul
         style={{
@@ -90,7 +90,7 @@ export function HintRail({ hints }: { hints: Hint[] }) {
                   (e.currentTarget.style.color = 'var(--brand)')
                 }
               >
-                Open in admin <ExternalLink size={12} aria-hidden />
+                Open in admin <ExternalLink size={16} strokeWidth={2} aria-hidden />
               </a>
             )}
           </li>

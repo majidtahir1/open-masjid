@@ -113,7 +113,7 @@ export function CelebrationScreen({
             borderRadius: 'var(--r-md)',
             fontFamily: 'var(--font-body)',
             fontWeight: 600,
-            fontSize: 14,
+            fontSize: 'var(--fs-sm)',
             boxShadow: primaryHover ? 'var(--sh-md)' : 'none',
             transform: primaryHover ? 'translateY(-1px)' : 'translateY(0)',
             transition:
@@ -135,7 +135,7 @@ export function CelebrationScreen({
             borderRadius: 'var(--r-md)',
             fontFamily: 'var(--font-body)',
             fontWeight: 600,
-            fontSize: 14,
+            fontSize: 'var(--fs-sm)',
             cursor: 'pointer',
             transition: 'background var(--dur-base) var(--ease-out)',
           }}
@@ -158,7 +158,7 @@ export function CelebrationScreen({
           <span
             style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 11,
+              fontSize: 'var(--fs-xs)',
               fontWeight: 600,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',

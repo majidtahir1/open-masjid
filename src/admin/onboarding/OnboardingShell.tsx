@@ -316,7 +316,7 @@ export function OnboardingShell({
               style={{
                 marginTop: 'var(--sp-2)',
                 fontFamily: 'var(--font-body)',
-                fontSize: 11,
+                fontSize: 'var(--fs-xs)',
                 fontWeight: 600,
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',

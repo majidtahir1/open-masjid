@@ -99,7 +99,7 @@ export function MilestoneTile({
           background: 'var(--bg)',
         }}
       >
-        <Minus size={14} strokeWidth={2} />
+        <Minus size={16} strokeWidth={2} />
       </span>
     ) : (
       <span
