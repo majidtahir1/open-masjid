@@ -78,7 +78,7 @@ export const Tenants: CollectionConfig = {
                   'Public-facing name shown in the site header, footer, and emails, e.g. "Islamic Center of Prosper".',
                 placeholder: 'Islamic Center of Prosper',
                 components: {
-                  Field: '/src/fields/TextField#default',
+                  Field: '/src/admin/SiteSettingsIdentityField#default',
                 },
               },
             },
@@ -90,6 +90,7 @@ export const Tenants: CollectionConfig = {
               index: true,
               label: 'URL Slug',
               admin: {
+                hidden: true,
                 description:
                   'Short identifier used for the platform subdomain (e.g. "icp" becomes icp.openmasjid.app). Lowercase letters, numbers, and dashes only. Avoid changing after launch.',
                 placeholder: 'icp',
@@ -109,6 +110,7 @@ export const Tenants: CollectionConfig = {
                 { label: 'Umbrella Organization', value: 'umbrella' },
               ],
               admin: {
+                hidden: true,
                 description:
                   'Choose "Masjid" for a single-community site, or "Umbrella Organization" for a parent org that groups multiple masajid.',
                 components: {
@@ -344,10 +346,8 @@ export const Tenants: CollectionConfig = {
               type: 'group',
               label: 'Contact Info',
               admin: {
+                hidden: true,
                 description: 'Shown in the site footer and the About page.',
-                components: {
-                  Field: '/src/admin/SiteSettingsIdentityField#default',
-                },
               },
               fields: [
                 {

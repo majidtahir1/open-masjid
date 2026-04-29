@@ -1,9 +1,9 @@
 import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
 import { default as default_ff3268629584f3c8482e80b479334e91 } from '../../../../src/fields/SelectField'
 import { default as default_6be9fe46a5d0b8701eabd18cf8509bb0 } from '../../../../src/admin/InviteUserPanel'
+import { default as default_b265241eae706a0b7cddb9ba85c0aab9 } from '../../../../src/admin/SiteSettingsIdentityField'
 import { default as default_446124d7ee8ac8871d34efe9e97a216f } from '../../../../src/admin/SiteSettingsBrandingField'
 import { default as default_0ffd719fe552e7f96260b5b4f16226bb } from '../../../../src/fields/TextareaField'
-import { default as default_b265241eae706a0b7cddb9ba85c0aab9 } from '../../../../src/admin/SiteSettingsIdentityField'
 import { default as default_ed26a91d770179c222166a676f958f4e } from '../../../../src/admin/CreateTenantPanel'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -50,17 +50,15 @@ import { default as default_9752121c5e28fe5da9a9b60c62f37629 } from '../../../..
 import { default as default_8cbcecd357807e8c27e7c48ba30ad9a1 } from '../../../../src/admin/onboarding/OnboardingBanner'
 import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
 import { default as default_79a85695b376b830c5fc9180be7fd47b } from '../../../../src/admin/SiteSettingsLink'
-import { default as default_ae86d4695f82c7652f738168ad6dc9b5 } from '../../../../src/admin/BrandingLink'
-import { default as default_d2990436d8257f6d0145a16732961a0c } from '../../../../src/admin/IdentityLink'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 
 export const importMap = {
   "/src/fields/TextField#default": default_f0552f6c115f158f58da132ed489990d,
   "/src/fields/SelectField#default": default_ff3268629584f3c8482e80b479334e91,
   "/src/admin/InviteUserPanel#default": default_6be9fe46a5d0b8701eabd18cf8509bb0,
+  "/src/admin/SiteSettingsIdentityField#default": default_b265241eae706a0b7cddb9ba85c0aab9,
   "/src/admin/SiteSettingsBrandingField#default": default_446124d7ee8ac8871d34efe9e97a216f,
   "/src/fields/TextareaField#default": default_0ffd719fe552e7f96260b5b4f16226bb,
-  "/src/admin/SiteSettingsIdentityField#default": default_b265241eae706a0b7cddb9ba85c0aab9,
   "/src/admin/CreateTenantPanel#default": default_ed26a91d770179c222166a676f958f4e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -107,7 +105,5 @@ export const importMap = {
   "/src/admin/onboarding/OnboardingBanner#default": default_8cbcecd357807e8c27e7c48ba30ad9a1,
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/SiteSettingsLink#default": default_79a85695b376b830c5fc9180be7fd47b,
-  "/src/admin/BrandingLink#default": default_ae86d4695f82c7652f738168ad6dc9b5,
-  "/src/admin/IdentityLink#default": default_d2990436d8257f6d0145a16732961a0c,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }
