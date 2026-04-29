@@ -1,7 +1,7 @@
 import type { TenantRecord } from './tenant-parse'
 
-const FALLBACK_HREF = '/brand/logo-icp.jpg'
-const FALLBACK_MIME = 'image/jpeg'
+const FALLBACK_HREF = '/brand/openmasjid-favicon.svg'
+const FALLBACK_MIME = 'image/svg+xml'
 
 export interface ResolvedFavicon {
   href: string

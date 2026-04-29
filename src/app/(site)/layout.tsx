@@ -15,6 +15,7 @@ import type {
   TenantLike,
   TenantSocialLink,
 } from '@/components/types'
+import { mediaUrl } from '@/components/types'
 import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
@@ -43,8 +44,12 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   const tenant = await getCurrentTenant()
 
   if (!tenant) {
-    // No tenant resolves here — redirect to the platform marketing page.
-    redirect('/marketing')
+    // No tenant resolves here — fall through to the platform marketing site.
+    // On the platform marketing host, middleware rewrites root paths into
+    // `/marketing/*` so this branch should not normally render. The redirect
+    // is kept as a safety net for unexpected hosts (e.g. local IPs) and points
+    // back to root, where the rewrite will take over.
+    redirect('/')
   }
 
   const [themeCss, schedule] = await Promise.all([
@@ -76,6 +81,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     socialLinks: tenant.socialLinks as TenantSocialLink[] | null | undefined,
     footerTagline:
       typeof tenant.footerTagline === 'string' ? tenant.footerTagline : null,
+    logoUrl: mediaUrl(tenant.branding?.logo),
   }
 
   return (

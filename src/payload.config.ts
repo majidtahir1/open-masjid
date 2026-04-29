@@ -70,6 +70,7 @@ export default buildConfig({
       header: [
         '/src/admin/Favicon#default',
         '/src/admin/HideTenantsNav#default',
+        '/src/admin/TenantThemeStyle#default',
       ],
       graphics: {
         Logo: '/src/admin/Logo#default',
