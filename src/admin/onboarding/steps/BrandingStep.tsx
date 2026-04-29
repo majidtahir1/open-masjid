@@ -30,6 +30,8 @@ type Props = {
   publicUrl: string
   onClose: () => void
   onSaved: () => void
+  mode?: 'modal' | 'standalone'
+  markCompleteOnSave?: boolean
 }
 
 /* ------------------------------------------------------------------ */
@@ -263,12 +265,14 @@ function FontCard({
   cssStack,
   active,
   onSelect,
+  sampleName,
 }: {
   fontValue: string
   label: string
   cssStack: string
   active: boolean
   onSelect: () => void
+  sampleName: string
 }) {
   return (
     <button
@@ -308,7 +312,7 @@ function FontCard({
           color: 'var(--fg1)',
         }}
       >
-        Masjid Al-Noor
+        {sampleName}
       </span>
     </button>
   )
@@ -318,7 +322,15 @@ function FontCard({
 /* Main                                                                */
 /* ------------------------------------------------------------------ */
 
-export function BrandingStep({ initial, publicUrl, onClose, onSaved }: Props) {
+export function BrandingStep({
+  initial,
+  tenantName,
+  publicUrl,
+  onClose,
+  onSaved,
+  mode = 'modal',
+  markCompleteOnSave = true,
+}: Props) {
   const [logo, setLogo] = useState<LogoRef>(initial.logo ?? null)
   const [uploading, setUploading] = useState(false)
   const [primary, setPrimary] = useState<string>(initial.primaryColor || DEFAULT_PRIMARY)
@@ -452,24 +464,26 @@ export function BrandingStep({ initial, publicUrl, onClose, onSaved }: Props) {
             Branding
           </h2>
         </div>
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            padding: 6,
-            borderRadius: 'var(--r-sm)',
-            color: 'var(--fg2)',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <X size={20} strokeWidth={1.75} />
-        </button>
+        {mode === 'modal' && (
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: 6,
+              borderRadius: 'var(--r-sm)',
+              color: 'var(--fg2)',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <X size={20} strokeWidth={1.75} />
+          </button>
+        )}
       </div>
 
       {/* ---------- 6-segment progress bar ---------- */}
@@ -793,6 +807,7 @@ export function BrandingStep({ initial, publicUrl, onClose, onSaved }: Props) {
                 cssStack={f.cssStack}
                 active={font === f.value}
                 onSelect={() => setFont(f.value)}
+                sampleName={tenantName}
               />
             ))}
           </div>
@@ -920,22 +935,24 @@ export function BrandingStep({ initial, publicUrl, onClose, onSaved }: Props) {
             gap: 'var(--sp-6)',
           }}
         >
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              fontFamily: 'var(--font-body)',
-              fontSize: 14,
-              fontWeight: 500,
-              color: 'var(--fg3)',
-              cursor: 'pointer',
-            }}
-          >
-            Skip
-          </button>
+          {mode === 'modal' && (
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                fontWeight: 500,
+                color: 'var(--fg3)',
+                cursor: 'pointer',
+              }}
+            >
+              Skip
+            </button>
+          )}
           <a
             href={publicUrl}
             target="_blank"
@@ -961,17 +978,23 @@ export function BrandingStep({ initial, publicUrl, onClose, onSaved }: Props) {
             gap: 'var(--sp-3)',
           }}
         >
-          <SecondaryFooterButton
-            disabled={saving !== null}
-            onClick={() => void submit(false)}
-          >
-            {saving === 'draft' ? 'Saving...' : 'Save draft'}
-          </SecondaryFooterButton>
+          {mode === 'modal' && (
+            <SecondaryFooterButton
+              disabled={saving !== null}
+              onClick={() => void submit(false)}
+            >
+              {saving === 'draft' ? 'Saving...' : 'Save draft'}
+            </SecondaryFooterButton>
+          )}
           <PrimaryFooterButton
             disabled={saving !== null}
-            onClick={() => void submit(true)}
+            onClick={() => void submit(markCompleteOnSave)}
           >
-            {saving === 'continue' ? 'Saving...' : 'Save & continue →'}
+            {saving !== null && (markCompleteOnSave ? saving === 'continue' : saving === 'draft')
+              ? 'Saving...'
+              : markCompleteOnSave
+                ? 'Save & continue →'
+                : 'Save changes →'}
           </PrimaryFooterButton>
         </div>
       </div>
