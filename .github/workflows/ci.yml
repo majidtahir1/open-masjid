@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Tests
+        run: npm test
+
+      # Run the same `next build` that prod's Dockerfile runs. This is what
+      # actually catches the strict TS overlap errors that `tsc --noEmit`
+      # alone misses (Next regenerates Payload types and runs its own
+      # typechecker pass during build). Skip the build-data collection
+      # phase — Next tries to render every page at build time, which would
+      # require a live Postgres connection that GHA doesn't have.
+      - name: Build
+        env:
+          # Stub env vars so the build doesn't crash on missing config.
+          # The build only needs these to be defined, not valid.
+          DATABASE_URI: postgres://stub:stub@localhost:5432/stub
+          PAYLOAD_SECRET: ci-stub-secret-not-used-at-runtime
+          NEXT_PUBLIC_SERVER_URL: https://example.com
+          STRIPE_SECRET_KEY: sk_test_stub
+          STRIPE_WEBHOOK_SECRET: whsec_stub
+          STRIPE_PRICE_MONTHLY: price_stub_monthly
+          STRIPE_PRICE_ANNUAL: price_stub_annual
+          STRIPE_BILLING_PORTAL_RETURN_URL: https://example.com/admin/billing
+          BILLING_SWEEP_TOKEN: ci-stub-token
+        run: npm run build
