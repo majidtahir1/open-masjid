@@ -1,6 +1,6 @@
 # Build Progress — OpenMasjid Platform
 
-_Last updated: Wave 4A complete — admin UX overhauled. Prayer schedules redesigned, custom dashboard, field polish._
+_Last updated: Wave 5 complete — Stripe subscription billing live ($49/mo, $490/yr) with 14-day trial, webhook sync, customer portal, and nightly sweep._
 
 Kanban-style tracking for the autonomous build. Updated as agents complete work.
 
@@ -118,6 +118,16 @@ _Nothing active. Ready for Wave 4B (Dockerfile, Caddyfile, deployment) when you'
 - ✅ Runtime branding injection helper (`src/lib/tenantTheme.ts`)
 - ✅ /admin blocked on custom domains (security)
 - ✅ Build passing (34.4kB middleware, Edge-safe)
+
+**Wave 5 — Subscription Billing**
+- ✅ Stripe Billing integration ($49/mo, $490/yr) for OpenMasjid platform itself
+- ✅ 14-day no-card trial (status: trialing → active on payment)
+- ✅ Webhook-driven status sync (invoice.payment_succeeded/failed, subscription.updated/deleted)
+- ✅ Admin billing page + admin-wide trial/past-due banner
+- ✅ Customer Portal for self-service card/cancel
+- ✅ Past-due/canceled → admin write-locked; public site read-only for 30 days, then offline
+- ✅ Existing tenants grandfathered (status='grandfathered', never enforced)
+- ✅ Nightly sweep job (/api/cron/billing-sweep) for trial-expiry & offline transitions
 
 ---
 
