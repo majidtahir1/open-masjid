@@ -460,7 +460,12 @@ export const Tenants: CollectionConfig = {
               label: 'Status',
               options: [
                 { label: 'Pending — admin has not yet set their password', value: 'pending' },
-                { label: 'Active', value: 'active' },
+                { label: 'Trialing — 14-day free trial in progress', value: 'trialing' },
+                { label: 'Active — paid subscription', value: 'active' },
+                { label: 'Past Due — payment failed or trial expired', value: 'past_due' },
+                { label: 'Canceled — subscription canceled (in grace period)', value: 'canceled' },
+                { label: 'Offline — grace period elapsed; public site disabled', value: 'offline' },
+                { label: 'Grandfathered — pre-billing tenant; never enforced', value: 'grandfathered' },
               ],
               admin: {
                 hidden: true,
@@ -486,6 +491,36 @@ export const Tenants: CollectionConfig = {
                 hidden: true,
                 description:
                   'Free-form blob captured at public signup (role, migration source, etc.). Used for analytics, not for product logic.',
+              },
+            },
+          ],
+        },
+        {
+          label: 'Billing',
+          description: 'Stripe Billing state. Read-only — Stripe webhooks keep this in sync.',
+          fields: [
+            {
+              name: 'subscriptionPlan',
+              type: 'select',
+              label: 'Plan',
+              options: [
+                { label: 'Monthly ($49/mo)', value: 'monthly' },
+                { label: 'Annual ($490/yr)', value: 'annual' },
+                { label: 'Grandfathered (free)', value: 'grandfathered' },
+              ],
+              admin: { hidden: true, readOnly: true },
+            },
+            { name: 'stripeCustomerId', type: 'text', admin: { hidden: true, readOnly: true } },
+            { name: 'stripeSubscriptionId', type: 'text', admin: { hidden: true, readOnly: true } },
+            { name: 'currentPeriodEnd', type: 'date', admin: { hidden: true, readOnly: true } },
+            {
+              name: 'gracePeriodEndsAt',
+              type: 'date',
+              admin: {
+                hidden: true,
+                readOnly: true,
+                description:
+                  'Set when entering past_due (from trial) or canceled. Public site goes offline after this date.',
               },
             },
           ],
