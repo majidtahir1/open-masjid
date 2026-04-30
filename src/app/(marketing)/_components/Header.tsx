@@ -11,7 +11,7 @@ const HEADER_NAV = [
 ]
 
 const FEATURE_DROPDOWN = [
-  { to: '/features/prayer-times', Icon: Sunrise, title: 'Prayer Times', desc: 'Manual, CSV, or Aladhan auto-update.' },
+  { to: '/features/prayer-times', Icon: Sunrise, title: 'Prayer Times', desc: 'Quick, easy setup for the whole year.' },
   { to: '/features/events', Icon: Calendar, title: 'Events & Flyers', desc: 'Three display modes. Recurring patterns.' },
   { to: '/features/donations', Icon: Heart, title: 'Donations', desc: 'Native Stripe. Sadaqah, Zakat, Building Fund.' },
   { to: '/features/branding', Icon: Palette, title: 'Branding', desc: 'Three colors. Your logo. Your font.' },

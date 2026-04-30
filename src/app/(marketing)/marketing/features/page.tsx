@@ -16,12 +16,12 @@ export const metadata = {
 }
 
 const FEATURES = [
-  { Icon: Sunrise, title: 'Prayer times', body: 'Multiple jummah slots, iqamah overrides, Hijri dates, bulk imports.', to: '/features/prayer-times' },
+  { Icon: Sunrise, title: 'Prayer times', body: 'Multiple jummah slots, iqamah overrides, Hijri dates, full-year setup in minutes.', to: '/features/prayer-times' },
   { Icon: Calendar, title: 'Events & flyers', body: 'Three display modes — uploaded, auto-generated, or text-only.', to: '/features/events' },
   { Icon: Heart, title: 'Donations', body: 'Native Stripe with Sadaqah / Zakat / Building Fund tabs.', to: '/features/donations' },
   { Icon: Palette, title: 'Branding', body: 'Logo, three colors, a font. We derive the full palette.', to: '/features/branding' },
   { Icon: Shield, title: 'Security', body: 'No plugin marketplace. No third-party scripts.', to: '/features/security' },
-  { Icon: Code, title: 'Open-source', body: 'MIT license. Self-host or migrate any time.', to: '/self-host' },
+  { Icon: Code, title: 'Open-source', body: 'Self-host or migrate any time.', to: '/self-host' },
 ]
 
 export default function FeaturesPage() {

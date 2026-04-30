@@ -173,6 +173,31 @@ export async function POST(req: Request) {
       overrideAccess: true,
     })
 
+    // Create the Stripe Customer now so we can attach a subscription later
+    // without juggling state. Failure to reach Stripe should not break signup —
+    // admins can retry from the billing page once they're logged in.
+    try {
+      const { getStripe } = await import('@/lib/stripe')
+      const { createCustomerForTenant } = await import('@/lib/billing-stripe-customer')
+      const stripeCustomerId = await createCustomerForTenant(getStripe(), {
+        tenantId: tenantId!,
+        slug: subdomain,
+        name: masjidName,
+        email,
+      })
+      await payload.update({
+        collection: 'tenants',
+        id: tenantId!,
+        data: { stripeCustomerId },
+        overrideAccess: true,
+      })
+    } catch (stripeErr) {
+      payload.logger.error(
+        `signup: tenant ${tenantId} created but Stripe customer creation failed: ${(stripeErr as Error).message}`,
+      )
+      // Continue — billing page will create the customer lazily if missing.
+    }
+
     try {
       await payload.forgotPassword({
         collection: 'users',

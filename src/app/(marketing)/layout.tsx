@@ -12,7 +12,7 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 export const metadata: Metadata = {
   title: 'OpenMasjid — Modern websites for masajid. Open-source.',
   description:
-    "The masjid website platform that's secure, beautifully designed, and yours to keep. Hosted from $49/mo, or self-host free. MIT-licensed.",
+    "The masjid website platform that's secure, beautifully designed, and yours to keep. Hosted from $49/mo, or self-host free. Open-source.",
 }
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {

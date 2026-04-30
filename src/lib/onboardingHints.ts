@@ -42,8 +42,8 @@ export const HINTS: Record<MilestoneSlug, Hint[]> = {
   ],
   prayer: [
     {
-      headline: 'Three ways to keep them current.',
-      body: 'Aladhan auto-update, CSV bulk import, or manual entry. Mix them however you like.',
+      headline: 'Quick setup for the whole year.',
+      body: 'Generate a full schedule in minutes — no spreadsheets, no copy-pasting.',
     },
     {
       headline: 'Iqamah overrides per day.',

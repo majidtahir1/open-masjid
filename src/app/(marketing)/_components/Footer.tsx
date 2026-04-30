@@ -12,7 +12,7 @@ export function MarketingFooter() {
           <div className="om-footer-brand">
             <OMLogo variant="arch" size={32} theme="dark" />
             <p>
-              A modern, open-source website platform built for masajid. MIT-licensed.
+              A modern, open-source website platform built for masajid.
               Run by your volunteers. Owned by you.
             </p>
           </div>

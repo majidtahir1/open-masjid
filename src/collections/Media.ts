@@ -5,6 +5,7 @@ import {
   tenantScopedDelete,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { withBillingLock } from '../access/billingLocked'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 /**
@@ -27,9 +28,9 @@ export const Media: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: tenantScopedCreate,
-    update: tenantScopedUpdate,
-    delete: tenantScopedDelete,
+    create: withBillingLock(tenantScopedCreate),
+    update: withBillingLock(tenantScopedUpdate),
+    delete: withBillingLock(tenantScopedDelete),
   },
   hooks: {
     beforeChange: [setTenantFromUser],

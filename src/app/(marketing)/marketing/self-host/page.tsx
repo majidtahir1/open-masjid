@@ -5,7 +5,7 @@ import { Database, Github, Layers, Server, X } from '../../_components/Icons'
 
 export const metadata = {
   title: 'Self-Host — OpenMasjid',
-  description: 'Run OpenMasjid on your own server, free, forever. MIT-licensed. Same code we host.',
+  description: 'Run OpenMasjid on your own server, free, forever. Open-source. Same code we host.',
 }
 
 export default function SelfHostPage() {
@@ -20,7 +20,7 @@ export default function SelfHostPage() {
               <em style={{ fontStyle: 'italic', color: 'var(--icp-teal-300)' }}>free, forever.</em>
             </h1>
             <p className="om-lede" style={{ color: 'var(--om-fg-on-night-soft)', maxWidth: 640, margin: '20px auto 0' }}>
-              MIT-licensed. Same code we host.{' '}
+              Open-source. Same code we host.{' '}
               <code style={{ fontFamily: 'var(--font-mono)', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 4 }}>
                 docker compose up
               </code>

@@ -6,6 +6,7 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { withBillingLock } from '../access/billingLocked'
 import { autoRegeneratePrayerDays } from '../hooks/autoRegeneratePrayerDays'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { trimDaysToRange } from '../hooks/trimDaysToRange'
@@ -100,9 +101,9 @@ export const PrayerSchedules: CollectionConfig = {
   defaultSort: '-startDate',
   access: {
     read: tenantScopedRead,
-    create: tenantScopedCreate,
-    update: tenantScopedUpdate,
-    delete: tenantScopedDelete,
+    create: withBillingLock(tenantScopedCreate),
+    update: withBillingLock(tenantScopedUpdate),
+    delete: withBillingLock(tenantScopedDelete),
   },
   hooks: {
     beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays],

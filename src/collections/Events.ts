@@ -6,6 +6,7 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { withBillingLock } from '../access/billingLocked'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { buildLivePreviewUrl, buildPreviewUrl } from '../lib/previewUrl'
 
@@ -61,9 +62,9 @@ export const Events: CollectionConfig = {
   },
   access: {
     read: tenantScopedRead,
-    create: tenantScopedCreate,
-    update: tenantScopedUpdate,
-    delete: tenantScopedDelete,
+    create: withBillingLock(tenantScopedCreate),
+    update: withBillingLock(tenantScopedUpdate),
+    delete: withBillingLock(tenantScopedDelete),
   },
   hooks: {
     beforeChange: [setTenantFromUser],
