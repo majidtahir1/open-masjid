@@ -93,10 +93,35 @@ export function mapStripeEventToTenantUpdate(event: Stripe.Event): TenantUpdate 
     case 'customer.subscription.updated': {
       const sub = event.data.object as unknown as Stripe.Subscription & {
         current_period_end?: number
+        cancel_at_period_end?: boolean
+        cancel_at?: number | null
         items?: { data?: Array<{ price?: PriceLike }> }
       }
       const customer = customerIdOf(sub.customer)
       if (!customer) return null
+      const periodEndIso = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : null
+      // Stripe Customer Portal "Cancel" defaults to cancel-at-period-end:
+      // sub.status stays 'active' until the period actually ends, but
+      // cancel_at_period_end flips to true and cancel_at carries the date.
+      // Treat this as canceled now so the admin sees the right state, with
+      // grace period running until the access actually ends.
+      if (sub.cancel_at_period_end) {
+        const cancelAt = sub.cancel_at ?? sub.current_period_end
+        return {
+          stripeCustomerId: customer,
+          data: {
+            status: 'canceled',
+            stripeSubscriptionId: sub.id,
+            currentPeriodEnd: periodEndIso,
+            gracePeriodEndsAt: cancelAt
+              ? new Date(cancelAt * 1000).toISOString()
+              : new Date(Date.now() + GRACE_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+          },
+          priceId: priceIdOf(sub.items?.data?.[0]?.price),
+        }
+      }
       const map: Record<string, TenantStatus | undefined> = {
         active: 'active',
         trialing: 'trialing',
@@ -111,9 +136,9 @@ export function mapStripeEventToTenantUpdate(event: Stripe.Event): TenantUpdate 
         data: {
           status,
           stripeSubscriptionId: sub.id,
-          currentPeriodEnd: sub.current_period_end
-            ? new Date(sub.current_period_end * 1000).toISOString()
-            : null,
+          currentPeriodEnd: periodEndIso,
+          // Reactivation: if the user un-cancels in the portal, clear grace.
+          gracePeriodEndsAt: status === 'active' ? null : undefined,
         },
         priceId: priceIdOf(sub.items?.data?.[0]?.price),
       }

@@ -81,6 +81,42 @@ describe('mapStripeEventToTenantUpdate — additional coverage', () => {
     expect(update?.stripeCustomerId).toBe('cus_expanded')
   })
 
+  it('treats cancel_at_period_end on subscription.updated as canceled with cancel_at as grace', () => {
+    const cancelAt = 1750000000
+    const update = mapStripeEventToTenantUpdate({
+      type: 'customer.subscription.updated',
+      data: {
+        object: {
+          id: 'sub_1',
+          customer: 'cus_1',
+          status: 'active', // Stripe keeps status='active' until period actually ends
+          cancel_at_period_end: true,
+          cancel_at: cancelAt,
+          current_period_end: cancelAt,
+        },
+      },
+    } as any)
+    expect(update?.data.status).toBe('canceled')
+    expect(update?.data.gracePeriodEndsAt).toBe(new Date(cancelAt * 1000).toISOString())
+  })
+
+  it('clears gracePeriodEndsAt when subscription.updated is plain active (reactivation)', () => {
+    const update = mapStripeEventToTenantUpdate({
+      type: 'customer.subscription.updated',
+      data: {
+        object: {
+          id: 'sub_1',
+          customer: 'cus_1',
+          status: 'active',
+          cancel_at_period_end: false,
+          current_period_end: 1747000000,
+        },
+      },
+    } as any)
+    expect(update?.data.status).toBe('active')
+    expect(update?.data.gracePeriodEndsAt).toBeNull()
+  })
+
   it('returns null when customer is missing entirely', () => {
     const update = mapStripeEventToTenantUpdate({
       type: 'invoice.payment_failed',
