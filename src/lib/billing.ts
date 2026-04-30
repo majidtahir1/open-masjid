@@ -52,6 +52,10 @@ export function getTenantBillingState(t: BillingTenantFields, now: Date = new Da
       if (end <= now) return { kind: 'offline' }
       return { kind: 'grace_period', daysRemaining: daysBetween(now, end) }
     }
+    default: {
+      const _exhaustive: never = t.status
+      throw new Error(`Unhandled tenant status: ${_exhaustive as string}`)
+    }
   }
 }
 
