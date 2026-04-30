@@ -46,10 +46,17 @@ export async function POST(req: Request) {
   if (tenant.status === 'grandfathered') {
     return NextResponse.json({ received: true, skipped: 'grandfathered' })
   }
+  // Translate the Stripe price id from the event into our plan enum.
+  // Done here (not in the mapper) so the mapper stays env-free and pure.
+  const data: Record<string, unknown> = { ...update.data }
+  if (update.priceId) {
+    if (update.priceId === process.env.STRIPE_PRICE_MONTHLY) data.subscriptionPlan = 'monthly'
+    else if (update.priceId === process.env.STRIPE_PRICE_ANNUAL) data.subscriptionPlan = 'annual'
+  }
   await payload.update({
     collection: 'tenants',
     id: tenant.id,
-    data: update.data,
+    data,
     overrideAccess: true,
   })
   return NextResponse.json({ received: true })

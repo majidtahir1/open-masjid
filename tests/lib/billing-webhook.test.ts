@@ -9,7 +9,7 @@ describe('mapStripeEventToTenantUpdate', () => {
         object: {
           customer: 'cus_1',
           subscription: 'sub_1',
-          lines: { data: [{ period: { end: 1747000000 } }] },
+          lines: { data: [{ period: { end: 1747000000 }, price: { id: 'price_monthly' } }] },
         },
       },
     } as any)
@@ -21,6 +21,7 @@ describe('mapStripeEventToTenantUpdate', () => {
         currentPeriodEnd: new Date(1747000000 * 1000).toISOString(),
         gracePeriodEndsAt: null,
       },
+      priceId: 'price_monthly',
     })
   })
 

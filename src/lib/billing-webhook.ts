@@ -9,6 +9,13 @@ export interface TenantUpdate {
     currentPeriodEnd?: string | null
     gracePeriodEndsAt?: string | null
   }
+  /**
+   * Stripe price id for the active subscription item, when the event carries
+   * one. The route translates this against STRIPE_PRICE_MONTHLY / _ANNUAL to
+   * write `subscriptionPlan` on the tenant — kept out of `data` so the mapper
+   * stays pure (no env reads).
+   */
+  priceId?: string | null
 }
 
 const GRACE_DAYS = 30
@@ -18,6 +25,13 @@ function customerIdOf(c: unknown): string | null {
   if (c && typeof c === 'object' && 'id' in c && typeof (c as { id: unknown }).id === 'string') {
     return (c as { id: string }).id
   }
+  return null
+}
+
+type PriceLike = { id?: string } | string | null | undefined
+function priceIdOf(p: PriceLike): string | null {
+  if (typeof p === 'string') return p
+  if (p && typeof p === 'object' && typeof p.id === 'string') return p.id
   return null
 }
 
@@ -33,7 +47,10 @@ export function mapStripeEventToTenantUpdate(event: Stripe.Event): TenantUpdate 
         typeof inv.subscription === 'string'
           ? inv.subscription
           : (inv.subscription?.id ?? null)
-      const periodEnd = inv.lines?.data?.[0]?.period?.end
+      const line = inv.lines?.data?.[0] as
+        | { period?: { end?: number }; price?: PriceLike }
+        | undefined
+      const periodEnd = line?.period?.end
       return {
         stripeCustomerId: customer,
         data: {
@@ -42,6 +59,7 @@ export function mapStripeEventToTenantUpdate(event: Stripe.Event): TenantUpdate 
           currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           gracePeriodEndsAt: null,
         },
+        priceId: priceIdOf(line?.price),
       }
     }
     case 'invoice.payment_failed': {
@@ -60,18 +78,22 @@ export function mapStripeEventToTenantUpdate(event: Stripe.Event): TenantUpdate 
       }
     }
     case 'customer.subscription.deleted': {
-      const sub = event.data.object as unknown as Stripe.Subscription
+      const sub = event.data.object as unknown as Stripe.Subscription & {
+        items?: { data?: Array<{ price?: PriceLike }> }
+      }
       const customer = customerIdOf(sub.customer)
       if (!customer) return null
       const grace = new Date(Date.now() + GRACE_DAYS * 24 * 60 * 60 * 1000).toISOString()
       return {
         stripeCustomerId: customer,
         data: { status: 'canceled', stripeSubscriptionId: sub.id, gracePeriodEndsAt: grace },
+        priceId: priceIdOf(sub.items?.data?.[0]?.price),
       }
     }
     case 'customer.subscription.updated': {
       const sub = event.data.object as unknown as Stripe.Subscription & {
         current_period_end?: number
+        items?: { data?: Array<{ price?: PriceLike }> }
       }
       const customer = customerIdOf(sub.customer)
       if (!customer) return null
@@ -93,6 +115,7 @@ export function mapStripeEventToTenantUpdate(event: Stripe.Event): TenantUpdate 
             ? new Date(sub.current_period_end * 1000).toISOString()
             : null,
         },
+        priceId: priceIdOf(sub.items?.data?.[0]?.price),
       }
     }
     default:
