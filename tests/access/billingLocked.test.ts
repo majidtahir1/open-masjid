@@ -65,3 +65,35 @@ describe('withBillingLock', () => {
     expect(await wrapped({ req } as any)).toBe(false)
   })
 })
+
+describe('withBillingLock — contract preservation', () => {
+  it('preserves a Where-filter return from inner when not locked', async () => {
+    const where = { tenant: { equals: 1 } }
+    const inner = vi.fn().mockReturnValue(where)
+    const wrapped = withBillingLock(inner)
+    const req = makeReq({ role: 'admin', tenantStatus: 'active' })
+    const result = await wrapped({ req } as any)
+    expect(result).toEqual(where)
+  })
+
+  it('calls findByID with overrideAccess: true to avoid recursion', async () => {
+    const inner = vi.fn().mockReturnValue(true)
+    const wrapped = withBillingLock(inner)
+    const req = makeReq({ role: 'admin', tenantStatus: 'active' })
+    await wrapped({ req } as any)
+    expect(req.payload.findByID).toHaveBeenCalledWith(
+      expect.objectContaining({ collection: 'tenants', overrideAccess: true }),
+    )
+  })
+
+  it('passes through to inner if the tenant doc is missing (deleted/race)', async () => {
+    const inner = vi.fn().mockReturnValue(true)
+    const wrapped = withBillingLock(inner)
+    const req = {
+      user: { role: 'admin', tenant: 999 },
+      payload: { findByID: vi.fn().mockResolvedValue(null) },
+    } as any
+    expect(await wrapped({ req } as any)).toBe(true)
+    expect(inner).toHaveBeenCalled()
+  })
+})

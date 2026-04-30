@@ -1,4 +1,5 @@
 import type { CollectionConfig, Where } from 'payload'
+import { withBillingLock } from '../access/billingLocked'
 
 /**
  * Users — extends Payload's built-in auth.
@@ -151,12 +152,12 @@ export const Users: CollectionConfig = {
   },
   access: {
     // Who can create a new user?
-    create: ({ req: { user } }) => {
+    create: withBillingLock(({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'platformOwner') return true
       // Admins can create users in their own tenant (hook will force tenant).
       return user.role === 'admin'
-    },
+    }),
     // Who can read users?
     read: ({ req: { user } }) => {
       if (!user) return false
@@ -182,7 +183,7 @@ export const Users: CollectionConfig = {
       return false
     },
     // Who can update a user?
-    update: ({ req: { user } }) => {
+    update: withBillingLock(({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'platformOwner') return true
 
@@ -201,9 +202,9 @@ export const Users: CollectionConfig = {
         return where
       }
       return false
-    },
+    }),
     // Who can delete a user?
-    delete: ({ req: { user } }) => {
+    delete: withBillingLock(({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'platformOwner') return true
       if (user.role !== 'admin') return false
@@ -214,7 +215,7 @@ export const Users: CollectionConfig = {
           : (tenant as string | number | undefined)
       if (!tenantId) return false
       return { tenant: { equals: tenantId } }
-    },
+    }),
   },
   fields: [
     {
