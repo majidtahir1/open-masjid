@@ -21,6 +21,8 @@ import { getCurrentTenant, getTenantContext } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
 import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
 import { resolveTenantFavicon } from '@/lib/tenantFavicon'
+import { getTenantBillingState, isPublicSiteOffline, type BillingTenantFields } from '@/lib/billing'
+import OfflineNotice from './_components/OfflineNotice'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
@@ -56,6 +58,19 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       notFound()
     }
     redirect('/')
+  }
+
+  if (tenant) {
+    const billingState = getTenantBillingState(tenant as unknown as BillingTenantFields)
+    if (isPublicSiteOffline(billingState)) {
+      return (
+        <html lang="en">
+          <body>
+            <OfflineNotice tenantName={tenant.name ?? 'This masjid'} />
+          </body>
+        </html>
+      )
+    }
   }
 
   const [themeCss, schedule] = await Promise.all([
