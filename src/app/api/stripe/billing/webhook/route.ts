@@ -15,20 +15,20 @@ export async function POST(req: Request) {
   }
   const raw = await req.text()
   const stripe = getStripe()
+  const payload = await getPayload({ config })
   let event
   try {
     event = stripe.webhooks.constructEvent(raw, sig, secret)
   } catch (err) {
-    return NextResponse.json(
-      { error: `signature verification failed: ${(err as Error).message}` },
-      { status: 400 },
+    payload.logger.warn(
+      `billing-webhook: signature verification failed: ${(err as Error).message}`,
     )
+    return NextResponse.json({ error: 'invalid signature' }, { status: 400 })
   }
 
   const update = mapStripeEventToTenantUpdate(event)
   if (!update) return NextResponse.json({ received: true, ignored: event.type })
 
-  const payload = await getPayload({ config })
   const found = await payload.find({
     collection: 'tenants',
     where: { stripeCustomerId: { equals: update.stripeCustomerId } },
