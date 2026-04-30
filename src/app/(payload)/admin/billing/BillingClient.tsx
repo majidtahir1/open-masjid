@@ -4,7 +4,7 @@ import type { BillingState } from '@/lib/billing'
 
 const FEATURES = [
   'Hosted on .openmasjid.app + your custom domain',
-  'Prayer times: manual, CSV, or Aladhan API',
+  'Prayer times are quick and easy to set up',
   'Events with uploaded or auto-generated flyer',
   'Native donations (Stripe — Sadaqah, Zakat, Building Fund)',
   'Custom branding: logo, three colors, font',
@@ -12,7 +12,6 @@ const FEATURES = [
   '50 GB media storage · daily backups',
   'Email support (24h response)',
   'One free 30-min onboarding session',
-  'Free WordPress / MadinaApps migration',
   'Quarterly security updates (zero-touch)',
 ]
 
