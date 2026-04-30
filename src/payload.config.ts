@@ -59,6 +59,7 @@ export default buildConfig({
     },
     components: {
       beforeNavLinks: [
+        '/src/admin/BillingBanner#default',
         '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
