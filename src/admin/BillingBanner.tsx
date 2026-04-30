@@ -18,7 +18,7 @@ export default async function BillingBanner() {
     collection: 'tenants',
     id: tenantId,
     overrideAccess: true,
-  })) as BillingTenantFields
+  })) as unknown as BillingTenantFields
 
   const state = getTenantBillingState(tenant)
   if (state.kind === 'grandfathered' || state.kind === 'active' || state.kind === 'pending') {
