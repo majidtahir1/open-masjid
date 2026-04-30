@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { platformOwnerOnly } from '../access/tenantScoped'
+import { withBillingLock } from '../access/billingLocked'
 import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
 
 /**
@@ -32,8 +33,8 @@ export const Tenants: CollectionConfig = {
   },
   access: {
     // Only platform owners can create or delete tenants.
-    create: platformOwnerOnly,
-    delete: platformOwnerOnly,
+    create: withBillingLock(platformOwnerOnly),
+    delete: withBillingLock(platformOwnerOnly),
     // Platform owners see all; tenant users (admin/staff) can read only their own tenant.
     read: ({ req: { user } }) => {
       if (!user) return false
@@ -47,7 +48,7 @@ export const Tenants: CollectionConfig = {
       return { id: { equals: tenantId } }
     },
     // Platform owners can update any tenant; admins can update their own.
-    update: ({ req: { user } }) => {
+    update: withBillingLock(({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'platformOwner') return true
       if (user.role !== 'admin') return false
@@ -58,7 +59,7 @@ export const Tenants: CollectionConfig = {
           : (tenant as string | number | undefined)
       if (!tenantId) return false
       return { id: { equals: tenantId } }
-    },
+    }),
   },
   fields: [
     {
