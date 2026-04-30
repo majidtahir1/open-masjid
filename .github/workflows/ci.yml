@@ -6,39 +6,57 @@ on:
   push:
     branches: [main]
 
-jobs:
-  build:
-    name: Build + test
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+# Cancel in-flight runs for the same branch when a new commit is pushed.
+# Saves CI minutes and gets you faster signal on the latest commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
+  # Fast gate (~1 min): typecheck + unit tests in parallel with the build.
+  test:
+    name: Type check + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
 
+  # Heavier gate (~3-5 min cold, ~1-2 min warm): runs the same `next build`
+  # the prod Dockerfile runs. Catches strict-TS overlap errors that tsc
+  # alone misses (Next regenerates Payload types). Caching .next/cache cuts
+  # repeat builds to ~half the cold time.
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Restore Next build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
-      - name: Type check
-        run: npx tsc --noEmit
+      - run: npm ci
 
-      - name: Tests
-        run: npm test
-
-      # Run the same `next build` that prod's Dockerfile runs. This is what
-      # actually catches the strict TS overlap errors that `tsc --noEmit`
-      # alone misses (Next regenerates Payload types and runs its own
-      # typechecker pass during build). Skip the build-data collection
-      # phase — Next tries to render every page at build time, which would
-      # require a live Postgres connection that GHA doesn't have.
       - name: Build
         env:
           # Stub env vars so the build doesn't crash on missing config.
-          # The build only needs these to be defined, not valid.
+          # Build is type-only; values don't need to be valid at runtime.
           DATABASE_URI: postgres://stub:stub@localhost:5432/stub
           PAYLOAD_SECRET: ci-stub-secret-not-used-at-runtime
           NEXT_PUBLIC_SERVER_URL: https://example.com
