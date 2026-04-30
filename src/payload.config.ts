@@ -63,6 +63,7 @@ export default buildConfig({
         '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
+        '/src/admin/BillingNavLink#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',

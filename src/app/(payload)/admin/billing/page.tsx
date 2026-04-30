@@ -19,9 +19,13 @@ export default async function BillingPage() {
       : (user.tenant as string | number | undefined)
   if (!tenantId) {
     return (
-      <main style={{ padding: 32 }}>
-        <h1>Billing</h1>
-        <p>Platform owners do not have a billing account.</p>
+      <main className="mx-auto max-w-[880px] px-6 py-10 md:px-10 md:py-12">
+        <h1 className="font-display text-3xl md:text-4xl text-[var(--icp-navy-700)] mb-4">
+          Billing
+        </h1>
+        <p className="text-[var(--icp-gray-700)]">
+          Platform owners do not have a billing account.
+        </p>
       </main>
     )
   }
@@ -29,13 +33,22 @@ export default async function BillingPage() {
     collection: 'tenants',
     id: tenantId,
     overrideAccess: true,
-  })) as BillingTenantFields & { name: string; subscriptionPlan?: string }
+  })) as BillingTenantFields & {
+    name: string
+    subscriptionPlan?: string | null
+    currentPeriodEnd?: string | null
+    gracePeriodEndsAt?: string | null
+  }
 
   const state = getTenantBillingState(tenant)
   return (
-    <main style={{ padding: 32, maxWidth: 720 }}>
-      <h1 style={{ marginBottom: 8 }}>Billing — {tenant.name}</h1>
-      <BillingClient state={state} plan={tenant.subscriptionPlan ?? null} />
-    </main>
+    <BillingClient
+      state={state}
+      plan={tenant.subscriptionPlan ?? null}
+      subscriptionPlan={tenant.subscriptionPlan ?? null}
+      currentPeriodEnd={tenant.currentPeriodEnd ?? null}
+      gracePeriodEndsAt={tenant.gracePeriodEndsAt ?? null}
+      tenantName={tenant.name}
+    />
   )
 }
