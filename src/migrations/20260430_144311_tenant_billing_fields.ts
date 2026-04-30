@@ -4,9 +4,6 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
  * Add Stripe billing fields to the Tenants collection and expand the
  * tenants.status enum to cover the full subscription lifecycle.
  *
- * Existing tenants are grandfathered (status='grandfathered',
- * subscription_plan='grandfathered') so they are never billed/enforced.
- *
  * Adds:
  *  - tenants.subscription_plan      (enum monthly/annual/grandfathered, nullable)
  *  - tenants.stripe_customer_id     (varchar, nullable)
@@ -17,7 +14,11 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
  * Extends:
  *  - enum_tenants_status: adds trialing, past_due, canceled, offline, grandfathered
  *
- * No enforcement is wired up in this migration — that lands in later tasks.
+ * Grandfathering of existing tenants happens in the NEXT migration
+ * (20260430_152000_grandfather_existing_tenants) — Postgres forbids using a
+ * newly-added enum value within the same transaction that ALTER TYPE'd it
+ * (55P04 "unsafe use of new value"), so the UPDATE has to live in its own
+ * migration that runs after this one's transaction commits.
  */
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
@@ -51,22 +52,12 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     ALTER TABLE "tenants" ADD COLUMN IF NOT EXISTS "current_period_end"     timestamp(3) with time zone;
     ALTER TABLE "tenants" ADD COLUMN IF NOT EXISTS "grace_period_ends_at"   timestamp(3) with time zone;
   `)
-
-  // Grandfather any pre-billing tenants so they are never enforced.
-  await db.execute(sql`
-    UPDATE "tenants"
-    SET "status" = 'grandfathered',
-        "subscription_plan" = 'grandfathered'
-    WHERE "status" IN ('pending', 'active');
-  `)
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
-  // Revert grandfathered rows back to 'active' before dropping new columns.
-  await db.execute(sql`
-    UPDATE "tenants" SET "status" = 'active' WHERE "status" = 'grandfathered';
-  `)
-
+  // The grandfather UPDATE is reverted by the down() of the next migration
+  // (20260430_152000_grandfather_existing_tenants). By the time we reach
+  // here, no rows reference the new columns or the new enum values.
   await db.execute(sql`
     ALTER TABLE "tenants" DROP COLUMN IF EXISTS "grace_period_ends_at";
     ALTER TABLE "tenants" DROP COLUMN IF EXISTS "current_period_end";
