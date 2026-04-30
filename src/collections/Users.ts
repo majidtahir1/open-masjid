@@ -16,7 +16,7 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     afterLogin: [
-      // Flip the user's tenant from 'pending' → 'active' on first successful
+      // Flip the user's tenant from 'pending' → 'trialing' on first successful
       // login. Cheap to run on every login: it's a no-op for already-active
       // tenants, and it removes the pending tenant from the 7-day cleanup
       // sweep. Errors are swallowed — login should never fail because of
@@ -38,7 +38,7 @@ export const Users: CollectionConfig = {
             await req.payload.update({
               collection: 'tenants',
               id: tenantId,
-              data: { status: 'active' },
+              data: { status: 'trialing' },
               overrideAccess: true,
             })
           }
