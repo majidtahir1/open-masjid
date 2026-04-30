@@ -4,7 +4,7 @@ import { Github } from '../../../_components/Icons'
 
 export const metadata = {
   title: 'Security — OpenMasjid',
-  description: "Secure because there's nothing to hack. No plugin marketplace. No third-party scripts you didn't approve.",
+  description: "Secure for large and small masajid. No plugin marketplace. No third-party scripts you didn't approve.",
 }
 
 export default function SecurityPage() {
@@ -24,8 +24,8 @@ export default function SecurityPage() {
     <MarketingShell current="/features/security">
       <FeatureHero
         eyebrow="Security"
-        title="Secure because there's"
-        em="nothing to hack."
+        title="Secure"
+        em="for large and small masajid."
         sub="No plugin marketplace, no theme ecosystem, no third-party scripts you didn't approve. The #1 attack surface on every masjid's WordPress site simply doesn't exist here."
       />
 

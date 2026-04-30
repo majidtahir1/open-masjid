@@ -22,7 +22,7 @@ export const metadata = {
 }
 
 const FEATURES = [
-  { Icon: Sunrise, title: 'Prayer times', body: 'Manual, CSV bulk import, or auto-update from Aladhan. Multiple jummah slots, iqamah overrides, Hijri dates.', to: '/features/prayer-times' },
+  { Icon: Sunrise, title: 'Prayer times', body: 'Set up the whole year in minutes. Multiple jummah slots, iqamah overrides, Hijri dates.', to: '/features/prayer-times' },
   { Icon: Calendar, title: 'Events & flyers', body: "Upload a flyer or auto-generate one in your masjid's branding. Recurring patterns ('Mondays after Isha') supported.", to: '/features/events' },
   { Icon: Heart, title: 'Donations', body: 'Native Stripe integration with Sadaqah / Zakat / Building Fund tabs. Or link out to your existing processor.', to: '/features/donations' },
   { Icon: Palette, title: 'Branding', body: 'Logo, three colors, a font. We derive the full palette automatically. 5-minute setup.', to: '/features/branding' },
@@ -50,7 +50,7 @@ export default function MarketingHome() {
             </span>
             <h1 className="om-h1">
               A modern website for your masjid.
-              <br /><em className="om-hero-em">Without the WordPress headaches.</em>
+              <br /><em className="om-hero-em">Without the headaches.</em>
             </h1>
             <p className="om-lede">
               Prayer times, events, donations, and your branding — managed by your volunteers, not your IT vendor.
