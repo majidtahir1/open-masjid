@@ -23,7 +23,7 @@ export function withBillingLock(inner: Access): Access {
       collection: 'tenants',
       id: tenantId,
       overrideAccess: true,
-    })) as BillingTenantFields | null
+    })) as unknown as BillingTenantFields | null
     if (!tenantDoc) return inner(args)
     const state = getTenantBillingState(tenantDoc)
     if (isAdminLocked(state)) return false

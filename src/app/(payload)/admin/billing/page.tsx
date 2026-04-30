@@ -57,7 +57,7 @@ export default async function BillingPage() {
       collection: 'tenants',
       id: tenantId,
       overrideAccess: true,
-    })) as BillingTenantFields & {
+    })) as unknown as BillingTenantFields & {
       name: string
       subscriptionPlan?: string | null
       currentPeriodEnd?: string | null
