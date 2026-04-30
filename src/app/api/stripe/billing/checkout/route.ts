@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     collection: 'tenants',
     id: tenantId,
     overrideAccess: true,
-  })) as { stripeCustomerId?: string; slug: string; name: string } | null
+  })) as unknown as { stripeCustomerId?: string; slug: string; name: string } | null
   if (!tenant?.stripeCustomerId) {
     return NextResponse.json(
       { error: 'no stripe customer; visit /admin/billing to provision' },

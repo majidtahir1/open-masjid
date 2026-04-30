@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     limit: 1,
     overrideAccess: true,
   })
-  const tenant = found.docs[0] as { id: string | number; status?: string } | undefined
+  const tenant = found.docs[0] as unknown as { id: string | number; status?: string } | undefined
   if (!tenant) {
     payload.logger.warn(
       `billing-webhook: no tenant for stripeCustomerId=${update.stripeCustomerId}`,

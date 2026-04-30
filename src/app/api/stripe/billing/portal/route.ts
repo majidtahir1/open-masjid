@@ -22,7 +22,7 @@ export async function POST() {
     collection: 'tenants',
     id: tenantId,
     overrideAccess: true,
-  })) as { stripeCustomerId?: string } | null
+  })) as unknown as { stripeCustomerId?: string } | null
   if (!tenant?.stripeCustomerId) {
     return NextResponse.json({ error: 'no stripe customer' }, { status: 400 })
   }
