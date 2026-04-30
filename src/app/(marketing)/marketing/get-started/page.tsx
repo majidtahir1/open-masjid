@@ -270,8 +270,7 @@ export default function GetStartedPage() {
 
             <ul className="om-signup-trust">
               <li><Check width={18} height={18} /> Free 14-day trial — no card required</li>
-              <li><Check width={18} height={18} /> Free WordPress migration on Hosted</li>
-              <li><Check width={18} height={18} /> MIT-licensed — self-host any time</li>
+              <li><Check width={18} height={18} /> Open-source — self-host any time</li>
               <li><Check width={18} height={18} /> Cancel any time, full data export</li>
             </ul>
           </div>

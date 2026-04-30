@@ -62,10 +62,9 @@ function PriceCard({
 
 const FAQS = [
   { q: 'Can a volunteer really run this?', a: 'Yes. Adding an event takes about two minutes. We onboard your first admin live for free on the Hosted plan.' },
-  { q: 'Do you handle migration from WordPress?', a: "Yes — free on Hosted. Send us your old site URL and we'll move events, pages, and prayer times for you." },
   { q: 'Are donations halal?', a: "Donations run through Stripe. You decide what to label them (Sadaqah, Zakat, Building Fund, General). Stripe charges its own fee (2.9% + 30¢ in the US); we don't take a cut." },
   { q: "What if our masjid can't afford this?", a: "Apply for a Sadaqah scholarship. Hosted at $0, funded by paying masajid. We've never turned down a masjid in genuine need." },
-  { q: 'Can we self-host?', a: 'Yes. Self-Host is free forever, MIT-licensed. git clone, docker compose up, you are live.' },
+  { q: 'Can we self-host?', a: 'Yes. Self-Host is free forever, fully open-source. git clone, docker compose up, you are live.' },
   { q: 'Will my custom domain still work?', a: 'Yes — point your DNS to us and we handle TLS automatically. Included on Hosted.' },
   { q: 'What happens to our donation history if we leave?', a: "You own your data. Export everything as Postgres dump + media archive any time, including donation records. There's no lock-in clause." },
 ]
@@ -120,7 +119,7 @@ export default function PricingPage() {
               ctaTo="/self-host"
               ctaKind="secondary"
               features={[
-                'Full source code (MIT license)',
+                'Full source code (open-source)',
                 'Every feature on the Hosted plan',
                 'Run on your own server (Docker compose)',
                 'Community support (GitHub Discussions)',

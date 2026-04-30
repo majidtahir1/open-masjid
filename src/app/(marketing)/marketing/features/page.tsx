@@ -21,7 +21,7 @@ const FEATURES = [
   { Icon: Heart, title: 'Donations', body: 'Native Stripe with Sadaqah / Zakat / Building Fund tabs.', to: '/features/donations' },
   { Icon: Palette, title: 'Branding', body: 'Logo, three colors, a font. We derive the full palette.', to: '/features/branding' },
   { Icon: Shield, title: 'Security', body: 'No plugin marketplace. No third-party scripts.', to: '/features/security' },
-  { Icon: Code, title: 'Open-source', body: 'MIT license. Self-host or migrate any time.', to: '/self-host' },
+  { Icon: Code, title: 'Open-source', body: 'Self-host or migrate any time.', to: '/self-host' },
 ]
 
 export default function FeaturesPage() {

@@ -15,7 +15,7 @@ const CARDS = [
   {
     eyebrow: 'Why open-source',
     title: 'Lock-in is incompatible with khidmah.',
-    body: 'If we ever stop being good for your masjid, you should be able to leave with your data and the same code. MIT was the only license that made sense.',
+    body: 'If we ever stop being good for your masjid, you should be able to leave with your data and the same code. Open-sourcing it was the only choice that made sense.',
   },
   {
     eyebrow: 'Why one template',

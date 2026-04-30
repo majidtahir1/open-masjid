@@ -27,13 +27,13 @@ const FEATURES = [
   { Icon: Heart, title: 'Donations', body: 'Native Stripe integration with Sadaqah / Zakat / Building Fund tabs. Or link out to your existing processor.', to: '/features/donations' },
   { Icon: Palette, title: 'Branding', body: 'Logo, three colors, a font. We derive the full palette automatically. 5-minute setup.', to: '/features/branding' },
   { Icon: Shield, title: 'Security', body: "No plugin marketplace, no theme ecosystem, no third-party scripts you didn't approve.", to: '/features/security' },
-  { Icon: Code, title: 'Open-source', body: 'MIT license. Self-host or migrate to your own server any time. Your data, full stop.', to: '/self-host' },
+  { Icon: Code, title: 'Open-source', body: 'Self-host or migrate to your own server any time. Your data, full stop.', to: '/self-host' },
 ]
 
 const STEPS = [
   { n: '01', title: 'Claim your subdomain', body: 'yourmasjid.openmasjid.app — live in 5 minutes.' },
   { n: '02', title: 'Skin it', body: 'Upload your logo, pick three colors, choose a font. Live preview, no designer needed.' },
-  { n: '03', title: 'Add your content', body: "Prayer times, events, donations. Or hand us your old WordPress URL — we'll migrate it free." },
+  { n: '03', title: 'Add your content', body: 'Prayer times, events, donations — all in one place. Add what you need, skip what you don’t.' },
   { n: '04', title: 'Connect your domain', body: 'Point yourmasjid.org at us when you ready. We handle TLS automatically.' },
 ]
 
@@ -46,7 +46,7 @@ export default function MarketingHome() {
           <div className="om-hero-text">
             <span className="om-pill">
               <Sparkles width={14} height={14} />
-              Open-source · MIT-licensed
+              Open-source
             </span>
             <h1 className="om-h1">
               A modern website for your masjid.
@@ -67,8 +67,7 @@ export default function MarketingHome() {
               </Link>
             </div>
             <p className="om-hero-trust">
-              <Check width={14} height={14} /> 14-day trial, no card &nbsp;·&nbsp;
-              <Check width={14} height={14} /> Free WordPress migration
+              <Check width={14} height={14} /> 14-day trial, no card
             </p>
           </div>
 
@@ -150,10 +149,10 @@ export default function MarketingHome() {
 
             <article className="om-card om-card-hover om-benefit-card">
               <span className="om-benefit-icon"><Shield /></span>
-              <h3 className="om-h3" style={{ fontSize: '1.4rem' }}>Secure because there's nothing to hack</h3>
+              <h3 className="om-h3" style={{ fontSize: '1.4rem' }}>A smaller attack surface</h3>
               <p className="om-body">
-                No plugin marketplace, no theme ecosystem, no third-party scripts you didn't approve. The #1 way
-                WordPress masajid get compromised doesn't exist here.
+                No plugin marketplace, no theme ecosystem, no third-party scripts you didn't approve.
+                Fewer moving parts means fewer ways for things to go wrong.
               </p>
               <Link className="om-link-arrow" href="/features/security">How we secure it <ArrowRight /></Link>
             </article>
@@ -162,10 +161,10 @@ export default function MarketingHome() {
               <span className="om-benefit-icon"><Code /></span>
               <h3 className="om-h3" style={{ fontSize: '1.4rem' }}>Yours, forever</h3>
               <p className="om-body">
-                MIT-licensed open source. Self-host the same code we host, on your own server, for free.
+                Open-source. Self-host the same code we host, on your own server, for free.
                 Export your data — including donations — any time.
               </p>
-              <Link className="om-link-arrow" href="/self-host">Read the license <ArrowRight /></Link>
+              <Link className="om-link-arrow" href="/self-host">Learn about self-hosting <ArrowRight /></Link>
             </article>
           </div>
         </div>
@@ -225,19 +224,7 @@ export default function MarketingHome() {
       >
         <div className="om-narrow on-dark">
           <p className="om-h3" style={{ color: 'white', fontStyle: 'italic', fontWeight: 400 }}>
-            "Open-source, MIT-licensed, and built by Muslims who attend masjid like you do."
-          </p>
-          <p
-            style={{
-              color: 'var(--icp-teal-300)',
-              marginTop: 16,
-              fontSize: 13,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              fontWeight: 600,
-            }}
-          >
-            Logos coming soon · accepting our first 25 hosted masajid
+            "Open-source, and built by Muslims who attend masjid like you do."
           </p>
         </div>
       </section>
