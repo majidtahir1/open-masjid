@@ -66,17 +66,20 @@ export default async function DonationsConnectPage({
       overrideAccess: true,
     })) as unknown as {
       name: string
-      stripeAccountId?: string | null
-      stripeChargesEnabled?: boolean | null
-      stripePayoutsEnabled?: boolean | null
+      donationConfig?: {
+        stripeAccountId?: string | null
+        stripeChargesEnabled?: boolean | null
+        stripePayoutsEnabled?: boolean | null
+      } | null
     }
 
+    const dc = tenant.donationConfig ?? {}
     body = (
       <ConnectClient
         tenantName={tenant.name}
-        stripeAccountId={tenant.stripeAccountId ?? null}
-        chargesEnabled={Boolean(tenant.stripeChargesEnabled)}
-        payoutsEnabled={Boolean(tenant.stripePayoutsEnabled)}
+        stripeAccountId={dc.stripeAccountId ?? null}
+        chargesEnabled={Boolean(dc.stripeChargesEnabled)}
+        payoutsEnabled={Boolean(dc.stripePayoutsEnabled)}
         status={status}
       />
     )
