@@ -15,6 +15,12 @@ export const Donations: CollectionConfig = {
     defaultColumns: ['createdAt', 'fund', 'amount', 'frequency', 'status'],
     description:
       'Aggregate donation records. No donor PII is stored — donor identity lives in Stripe.',
+    components: {
+      beforeList: ['/src/admin/donations/BackToOverview#default'],
+      edit: {
+        beforeDocumentControls: ['/src/admin/donations/BackToOverview#default'],
+      },
+    },
   },
   access: {
     create: () => false,
