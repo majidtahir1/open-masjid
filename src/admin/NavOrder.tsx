@@ -22,26 +22,33 @@ import React from 'react'
  */
 export default function NavOrder() {
   const css = `
-    /* Dashboard link is the first nav__link and stays at order 1 */
+    /* Reorder nav items via flex 'order'.
+       Default order is 0, so any item we don't list (e.g. an unknown group)
+       still renders. Payload's .nav__controls (logout) has margin-top:auto
+       and default order:0 — without overriding, it would visually render
+       FIRST and its auto-margin eats the entire top space, pushing the rest
+       of the items down. We move it to the end and clear its auto margin.
+       Site Settings then takes over as the bottom-pinned item. */
+
     .nav .nav__link--dashboard { order: 1; }
-
-    /* Prayer group: contains prayer-schedules */
     .nav .nav-group:has(a[href^="/admin/collections/prayer-schedules"]) { order: 2; }
-
-    /* Custom Donations link */
     .nav a[data-donations-nav-link] { order: 3; }
-
-    /* Content group: contains events (one of several content collections) */
     .nav .nav-group:has(a[href^="/admin/collections/events"]) { order: 4; }
-
-    /* Library group: contains media */
     .nav .nav-group:has(a[href^="/admin/collections/media"]) { order: 5; }
-
-    /* View public site */
     .nav a[data-view-public-site] { order: 7; }
 
-    /* Site Settings link (kept last; margin-top:auto pushes it to bottom) */
-    .nav a[data-site-settings-link] { order: 99; }
+    /* Pin Site Settings just above the logout, with all the empty space
+       above it (between View public site and Site Settings). */
+    .nav a[data-site-settings-link] {
+      order: 99;
+      margin-top: auto !important;
+    }
+
+    /* Logout sits at the very bottom, right under Site Settings. */
+    .nav .nav__controls {
+      order: 100;
+      margin-top: 0 !important;
+    }
   `
   return <style dangerouslySetInnerHTML={{ __html: css }} />
 }
