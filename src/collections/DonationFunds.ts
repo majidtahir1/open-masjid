@@ -16,6 +16,9 @@ export const DonationFunds: CollectionConfig = {
     defaultColumns: ['name', 'zakatEligible', 'active', 'sortOrder'],
     description:
       'Categories donors can give toward (Sadaqah, Zakat, Building Fund, etc.).',
+    components: {
+      beforeListTable: ['/src/admin/donations/FundsListIntro#default'],
+    },
   },
   access: tenantScopedAccess(),
   fields: [
