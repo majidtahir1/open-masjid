@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScopedAccess } from '../access/tenantScoped'
+import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 /**
  * DonationFunds — categories donors can give toward (Sadaqah, Zakat, Building
@@ -21,6 +22,9 @@ export const DonationFunds: CollectionConfig = {
     },
   },
   access: tenantScopedAccess(),
+  hooks: {
+    beforeChange: [setTenantFromUser],
+  },
   fields: [
     {
       name: 'tenant',
