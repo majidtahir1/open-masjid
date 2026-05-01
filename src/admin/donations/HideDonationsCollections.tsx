@@ -20,18 +20,21 @@ export default async function HideDonationsCollections() {
     const { user } = await payload.auth({ headers: await getHeaders() })
     if (!user) return null
 
+    // Scope all selectors under the sidebar nav (`.nav` / `.nav-group`) so
+    // the same hrefs rendered elsewhere (e.g. the Donations Overview action
+    // bar) stay visible.
     const css = `
-      a[href="/admin/collections/donation-funds"],
-      a[href^="/admin/collections/donation-funds?"],
-      a[href="/admin/collections/donations"],
-      a[href^="/admin/collections/donations?"] {
+      .nav a[href="/admin/collections/donation-funds"],
+      .nav a[href^="/admin/collections/donation-funds?"],
+      .nav a[href="/admin/collections/donations"],
+      .nav a[href^="/admin/collections/donations?"] {
         display: none !important;
       }
-      .nav__link-indicator:has(> a[href="/admin/collections/donation-funds"]),
-      .nav__link-indicator:has(> a[href="/admin/collections/donations"]) {
+      .nav .nav__link-indicator:has(> a[href="/admin/collections/donation-funds"]),
+      .nav .nav__link-indicator:has(> a[href="/admin/collections/donations"]) {
         display: none !important;
       }
-      .nav-group:has(a[href="/admin/collections/donation-funds"], a[href="/admin/collections/donations"]):not(
+      .nav .nav-group:has(a[href="/admin/collections/donation-funds"], a[href="/admin/collections/donations"]):not(
         :has(a:not([href="/admin/collections/donation-funds"]):not([href="/admin/collections/donations"]):not([href^="/admin/collections/donation-funds?"]):not([href^="/admin/collections/donations?"]))
       ) {
         display: none !important;
