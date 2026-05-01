@@ -37,7 +37,7 @@ export default async function DonationsNav() {
 
     return (
       <Link className="nav__link" href="/admin/donations/overview">
-        Donations
+        Donations Overview
       </Link>
     )
   } catch {

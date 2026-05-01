@@ -8,12 +8,9 @@ import { tenantScopedReadAccess } from '../access/tenantScoped'
  */
 export const Donations: CollectionConfig = {
   slug: 'donations',
-  labels: { singular: 'Donation', plural: 'Donations' },
+  labels: { singular: 'Donation', plural: 'All donations' },
   admin: {
-    // Hidden from the sidebar; reachable via URL or via the "All donations"
-    // link on the Donations Overview page. Overview is the single sidebar
-    // entry for the Donations feature.
-    hidden: true,
+    group: 'Donations',
     useAsTitle: 'stripePaymentIntentId',
     defaultColumns: ['createdAt', 'fund', 'amount', 'frequency', 'status'],
     description:

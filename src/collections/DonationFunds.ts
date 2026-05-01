@@ -10,12 +10,9 @@ import { setTenantFromUser } from '../hooks/setTenantFromUser'
  */
 export const DonationFunds: CollectionConfig = {
   slug: 'donation-funds',
-  labels: { singular: 'Donation Fund', plural: 'Donation Funds' },
+  labels: { singular: 'Fund', plural: 'Funds' },
   admin: {
-    // Hidden from the sidebar; reachable via URL or via the "Manage funds"
-    // link on the Donations Overview page. The Overview page is the single
-    // sidebar entry for the Donations feature.
-    hidden: true,
+    group: 'Donations',
     useAsTitle: 'name',
     defaultColumns: ['name', 'zakatEligible', 'active', 'sortOrder'],
     description:
