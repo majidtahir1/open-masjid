@@ -53,10 +53,10 @@ import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../..
 import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
 import { default as default_658c7ea3707a6bc2089ab24ef81b7161 } from '../../../../src/admin/donations/HideDonationsCollections'
 import { default as default_e8732dd03ff52626e7596a7e0450d743 } from '../../../../src/admin/HideMediaAndPeopleNav'
+import { default as default_5a77304c25d095fa2525a732ca036e46 } from '../../../../src/admin/NavOrder'
 import { default as default_93bdb0b944d761991c1e0bf71b7ac82d } from '../../../../src/admin/TenantThemeStyle'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
-import { default as default_9752121c5e28fe5da9a9b60c62f37629 } from '../../../../src/admin/onboarding/RerunMenuItem'
 import { default as default_01d61330f15c28209a242e90a2460c7d } from '../../../../src/admin/SiteSettingsCluster'
 import { default as default_01bbfbfd80ab6abe9b51ff2e0e76733f } from '../../../../src/admin/BillingBanner'
 import { default as default_8cbcecd357807e8c27e7c48ba30ad9a1 } from '../../../../src/admin/onboarding/OnboardingBanner'
@@ -120,10 +120,10 @@ export const importMap = {
   "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,
   "/src/admin/donations/HideDonationsCollections#default": default_658c7ea3707a6bc2089ab24ef81b7161,
   "/src/admin/HideMediaAndPeopleNav#default": default_e8732dd03ff52626e7596a7e0450d743,
+  "/src/admin/NavOrder#default": default_5a77304c25d095fa2525a732ca036e46,
   "/src/admin/TenantThemeStyle#default": default_93bdb0b944d761991c1e0bf71b7ac82d,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
   "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
-  "/src/admin/onboarding/RerunMenuItem#default": default_9752121c5e28fe5da9a9b60c62f37629,
   "/src/admin/SiteSettingsCluster#default": default_01d61330f15c28209a242e90a2460c7d,
   "/src/admin/BillingBanner#default": default_01bbfbfd80ab6abe9b51ff2e0e76733f,
   "/src/admin/onboarding/OnboardingBanner#default": default_8cbcecd357807e8c27e7c48ba30ad9a1,

@@ -60,10 +60,18 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
-      // Sidebar order intent (top → bottom):
-      //   beforeNavLinks: Dashboard, Donations Overview
-      //   <native collection groups>: Prayer, Content, (others)
-      //   afterNavLinks: View public site, Re-run setup, Site Settings cluster (Billing)
+      // Sidebar order intent (top → bottom), achieved via CSS `order` in NavOrder:
+      //   1. Dashboard
+      //   2. Prayer group        (native)
+      //   3. Donations           (custom link, slotted between Prayer and Content)
+      //   4. Content group       (native)
+      //   5. Library group       (native — Media)
+      //   6. View public site    (custom)
+      //   7. Site Settings       (custom, margin-top:auto pins it to the bottom)
+      //
+      // Billing has been removed from the sidebar entirely; it lives as a tab
+      // inside the tenant edit page (Site Settings → Billing tab) so masjid
+      // admins don't have to look at it day-to-day.
       beforeNavLinks: [
         '/src/admin/BillingBanner#default',
         '/src/admin/onboarding/OnboardingBanner#default',
@@ -72,7 +80,6 @@ export default buildConfig({
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
-        '/src/admin/onboarding/RerunMenuItem#default',
         '/src/admin/SiteSettingsCluster#default',
       ],
       header: [
@@ -80,6 +87,7 @@ export default buildConfig({
         '/src/admin/HideTenantsNav#default',
         '/src/admin/donations/HideDonationsCollections#default',
         '/src/admin/HideMediaAndPeopleNav#default',
+        '/src/admin/NavOrder#default',
         '/src/admin/TenantThemeStyle#default',
       ],
       graphics: {

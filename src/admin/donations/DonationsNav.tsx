@@ -36,8 +36,12 @@ export default async function DonationsNav() {
     if (!tenantId) return null
 
     return (
-      <Link className="nav__link" href="/admin/donations/overview">
-        Donations Overview
+      <Link
+        className="nav__link"
+        href="/admin/donations/overview"
+        data-donations-nav-link
+      >
+        Donations
       </Link>
     )
   } catch {

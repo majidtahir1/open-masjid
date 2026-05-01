@@ -19,13 +19,11 @@ function tenantIdOf(t: TenantRef): string | number | null {
 }
 
 /**
- * Bottom-of-nav cluster: a "Site Settings" section header followed by
- * "Site Settings" (the tenant edit page) and "Billing" as visually nested
- * sub-entries. Lives in `afterNavLinks` so it renders below all collection
- * groups regardless of how many groups are added.
- *
- * Hidden for unauthenticated users and platform owners (who don't have a
- * single tenant context).
+ * Bottom-anchored Site Settings link. Lives in `afterNavLinks` and uses
+ * `margin-top: auto` so it floats to the bottom of the flex sidebar
+ * regardless of how many groups are above it. Billing lives as a tab
+ * inside the tenant edit page (not as a separate sidebar entry) — admins
+ * rarely need to see it day-to-day.
  */
 export default async function SiteSettingsCluster() {
   try {
@@ -40,25 +38,14 @@ export default async function SiteSettingsCluster() {
     if (!tenantId) return null
 
     return (
-      <div className="nav-group" data-site-settings-cluster>
-        <div className="nav-group__toggle" aria-hidden>
-          <div className="nav-group__label">Site Settings</div>
-        </div>
-        <Link
-          className="nav__link"
-          href={`/admin/collections/tenants/${tenantId}`}
-          style={{ paddingLeft: 'calc(var(--base) * 1.5)' }}
-        >
-          General
-        </Link>
-        <Link
-          className="nav__link"
-          href="/admin/billing"
-          style={{ paddingLeft: 'calc(var(--base) * 1.5)' }}
-        >
-          Billing
-        </Link>
-      </div>
+      <Link
+        className="nav__link"
+        href={`/admin/collections/tenants/${tenantId}`}
+        data-site-settings-link
+        style={{ marginTop: 'auto' }}
+      >
+        Site Settings
+      </Link>
     )
   } catch {
     return null

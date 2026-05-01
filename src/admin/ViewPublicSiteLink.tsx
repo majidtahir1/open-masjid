@@ -57,6 +57,7 @@ export default async function ViewPublicSiteLink() {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
+      data-view-public-site
     >
       View public site ↗
     </a>
