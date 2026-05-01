@@ -22,6 +22,17 @@ import React from 'react'
  */
 export default function NavOrder() {
   const css = `
+    /* Force the nav stack to top-align. Payload's default centers content
+       vertically when the items don't fill the viewport. */
+    .nav,
+    .nav > *,
+    .nav__wrap,
+    .nav__list,
+    .template-default__nav {
+      justify-content: flex-start !important;
+      align-content: flex-start !important;
+    }
+
     /* Dashboard link is the first nav__link and stays at order 1 */
     .nav .nav__link--dashboard { order: 1; }
 
