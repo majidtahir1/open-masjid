@@ -80,7 +80,13 @@ export const Donations: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
-      admin: { readOnly: true },
+      admin: {
+        readOnly: true,
+        components: {
+          Cell: '/src/admin/donations/StripePaymentIntentCell#default',
+          Field: '/src/admin/donations/StripePaymentIntentField#default',
+        },
+      },
     },
     { name: 'stripeChargeId', type: 'text', admin: { readOnly: true } },
     { name: 'stripeSubscriptionId', type: 'text', admin: { readOnly: true } },
