@@ -34,7 +34,6 @@ export default function NavOrder() {
     .nav .nav-group:has(a[href^="/admin/collections/prayer-schedules"]) { order: 2; }
     .nav a[data-donations-nav-link] { order: 3; }
     .nav .nav-group:has(a[href^="/admin/collections/events"]) { order: 4; }
-    .nav .nav-group:has(a[href^="/admin/collections/media"]) { order: 5; }
     .nav a[data-view-public-site] { order: 7; }
 
     /* Pin Site Settings just above the logout, with all the empty space
