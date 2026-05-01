@@ -66,6 +66,7 @@ export default buildConfig({
         '/src/admin/DashboardLink#default',
         '/src/admin/SiteSettingsLink#default',
         '/src/admin/BillingNavLink#default',
+        '/src/admin/donations/DonationsNav#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
