@@ -66,8 +66,8 @@ describe('applyDonationAction — recordDonation', () => {
     const { payload, tables } = makeMockPayload()
     await applyDonationAction(payload, {
       kind: 'recordDonation',
-      tenantId: 't_1',
-      fundId: 'f_1',
+      tenantId: '1',
+      fundId: '1',
       frequency: 'one_time',
       amountCents: 5000,
       currency: 'usd',
@@ -77,8 +77,8 @@ describe('applyDonationAction — recordDonation', () => {
     })
     expect(tables.donations).toHaveLength(1)
     expect(tables.donations[0]).toMatchObject({
-      tenant: 't_1',
-      fund: 'f_1',
+      tenant: 1,
+      fund: 1,
       amount: 5000,
       currency: 'usd',
       frequency: 'one_time',
@@ -92,8 +92,8 @@ describe('applyDonationAction — recordDonation', () => {
     const { payload, tables } = makeMockPayload()
     const action = {
       kind: 'recordDonation' as const,
-      tenantId: 't_1',
-      fundId: 'f_1',
+      tenantId: '1',
+      fundId: '1',
       frequency: 'one_time' as const,
       amountCents: 5000,
       currency: 'usd',
