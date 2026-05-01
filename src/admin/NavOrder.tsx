@@ -22,15 +22,17 @@ import React from 'react'
  */
 export default function NavOrder() {
   const css = `
-    /* Force the nav stack to top-align. Payload's default centers content
-       vertically when the items don't fill the viewport. */
-    .nav,
-    .nav > *,
-    .nav__wrap,
-    .nav__list,
-    .template-default__nav {
-      justify-content: flex-start !important;
-      align-content: flex-start !important;
+    /* Pin Site Settings to the bottom of the scrollable nav region. Using
+       absolute positioning (rather than margin-top: auto inside .nav__wrap,
+       which has flex-grow: 1 and was centering siblings) so the rest of the
+       nav links stack from the top naturally. */
+    .nav__scroll { position: relative !important; }
+    .nav__wrap { padding-bottom: 64px !important; }
+    .nav a[data-site-settings-link] {
+      position: absolute !important;
+      bottom: 1.5384615385rem !important;
+      left: 1.5384615385rem !important;
+      right: 1.5384615385rem !important;
     }
 
     /* Dashboard link is the first nav__link and stays at order 1 */

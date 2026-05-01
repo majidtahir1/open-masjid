@@ -42,7 +42,6 @@ export default async function SiteSettingsCluster() {
         className="nav__link"
         href={`/admin/collections/tenants/${tenantId}`}
         data-site-settings-link
-        style={{ marginTop: 'auto' }}
       >
         Site Settings
       </Link>
