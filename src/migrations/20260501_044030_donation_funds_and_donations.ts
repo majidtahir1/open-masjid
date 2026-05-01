@@ -1,12 +1,22 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
-  // Rename any pre-existing tenants currently set to the old 'stripe' mode
-  // value over to the new 'connect' value. Must run BEFORE the enum is
-  // recreated below (which drops the 'stripe' label and would otherwise
-  // fail the cast).
+  // Rename pre-existing 'stripe' rows over to 'connect'. The destination value
+  // doesn't yet exist on the enum, so widen to text first, rename, then rebuild
+  // the enum with the new label set and cast the column back. The column's
+  // DEFAULT references the enum type, so drop+restore it around the rebuild.
+  await db.execute(sql`ALTER TABLE "public"."tenants" ALTER COLUMN "donation_config_mode" DROP DEFAULT`)
+  await db.execute(sql`ALTER TABLE "public"."tenants" ALTER COLUMN "donation_config_mode" SET DATA TYPE text`)
   await db.execute(
     sql`UPDATE tenants SET donation_config_mode = 'connect' WHERE donation_config_mode = 'stripe'`,
+  )
+  await db.execute(sql`DROP TYPE "public"."enum_tenants_donation_config_mode"`)
+  await db.execute(sql`CREATE TYPE "public"."enum_tenants_donation_config_mode" AS ENUM('external', 'connect')`)
+  await db.execute(
+    sql`ALTER TABLE "public"."tenants" ALTER COLUMN "donation_config_mode" SET DATA TYPE "public"."enum_tenants_donation_config_mode" USING "donation_config_mode"::"public"."enum_tenants_donation_config_mode"`,
+  )
+  await db.execute(
+    sql`ALTER TABLE "public"."tenants" ALTER COLUMN "donation_config_mode" SET DEFAULT 'external'::"public"."enum_tenants_donation_config_mode"`,
   )
 
   await db.execute(sql`
@@ -103,11 +113,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   END $$;
   
   CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_donation_funds_id_idx" ON "payload_locked_documents_rels" USING btree ("donation_funds_id");
-  CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_donations_id_idx" ON "payload_locked_documents_rels" USING btree ("donations_id");
-  ALTER TABLE "public"."tenants" ALTER COLUMN "donation_config_mode" SET DATA TYPE text;
-  DROP TYPE "public"."enum_tenants_donation_config_mode";
-  CREATE TYPE "public"."enum_tenants_donation_config_mode" AS ENUM('external', 'connect');
-  ALTER TABLE "public"."tenants" ALTER COLUMN "donation_config_mode" SET DATA TYPE "public"."enum_tenants_donation_config_mode" USING "donation_config_mode"::"public"."enum_tenants_donation_config_mode";`)
+  CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_donations_id_idx" ON "payload_locked_documents_rels" USING btree ("donations_id");`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
