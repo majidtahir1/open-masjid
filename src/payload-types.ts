@@ -67,17 +67,17 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    tenants: Tenant;
-    media: Media;
+    'prayer-schedules': PrayerSchedule;
     events: Event;
     'hero-slides': HeroSlide;
-    'prayer-schedules': PrayerSchedule;
     announcements: Announcement;
     services: Service;
     pages: Page;
     'donation-funds': DonationFund;
     donations: Donation;
+    media: Media;
+    users: User;
+    tenants: Tenant;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -85,17 +85,17 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    tenants: TenantsSelect<false> | TenantsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
+    'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
-    'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'donation-funds': DonationFundsSelect<false> | DonationFundsSelect<true>;
     donations: DonationsSelect<false> | DonationsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -140,43 +140,104 @@ export interface UserAuthOperations {
   };
 }
 /**
- * People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant's content.
+ * Prayer schedules cover a date range. Set the range + iqamah rules, then click "Generate times" to compute adhan times per day from the tenant’s location. Before any schedule’s start date has been reached, the public site shows "Prayer times coming soon".
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "prayer-schedules".
  */
-export interface User {
+export interface PrayerSchedule {
   id: number;
   /**
-   * First name, used for greetings and displayed in the admin panel
+   * e.g. "Summer 2026", "Ramadan 2026", "Winter".
    */
-  firstName: string;
+  name: string;
   /**
-   * Last name
+   * First day this schedule covers.
    */
-  lastName: string;
+  startDate: string;
   /**
-   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.
+   * Last day this schedule covers. "Generate times" builds one day-row per date in this range.
    */
-  role: 'platformOwner' | 'admin' | 'staff';
+  endDate: string;
   /**
-   * Which masjid this user belongs to. Required for Admin and Staff; leave blank for Platform Owner (they access every tenant). Only a Platform Owner can change this field.
+   * Bulk iqamah for every day in the range. Each prayer is either an absolute time or an offset from the computed adhan. Maghrib is usually an offset (e.g. "+5 min after sunset"); others are usually absolute. Click "Apply iqamah to range" after changing these to rewrite all days.
    */
+  iqamahRules: {
+    fajr: {
+      mode: 'absolute' | 'offset';
+      absoluteValue?: string | null;
+      offsetMinutes?: number | null;
+    };
+    zuhr: {
+      mode: 'absolute' | 'offset';
+      absoluteValue?: string | null;
+      offsetMinutes?: number | null;
+    };
+    asr: {
+      mode: 'absolute' | 'offset';
+      absoluteValue?: string | null;
+      offsetMinutes?: number | null;
+    };
+    maghrib: {
+      mode: 'absolute' | 'offset';
+      absoluteValue?: string | null;
+      offsetMinutes?: number | null;
+    };
+    isha: {
+      mode: 'absolute' | 'offset';
+      absoluteValue?: string | null;
+      offsetMinutes?: number | null;
+    };
+  };
+  /**
+   * Absolute times for Friday Jummah (e.g. 12:45 PM, 1:30 PM, 2:15 PM). Replaces Zuhr iqamah on Fridays on the public site.
+   */
+  jummahTimes?:
+    | {
+        time: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * One row per date in the range. Auto-filled on save when the range or iqamah rules change. Edit an individual row for per-day overrides; changing the range or rules will overwrite those edits on the next save.
+   */
+  days?:
+    | {
+        date: string;
+        /**
+         * Fajr must be prayed before sunrise. Informational — not shown on the public site by default.
+         */
+        sunrise?: string | null;
+        fajr?: {
+          adhan?: string | null;
+          iqamah?: string | null;
+        };
+        zuhr?: {
+          adhan?: string | null;
+          iqamah?: string | null;
+        };
+        asr?: {
+          adhan?: string | null;
+          iqamah?: string | null;
+        };
+        maghrib?: {
+          adhan?: string | null;
+          iqamah?: string | null;
+        };
+        isha?: {
+          adhan?: string | null;
+          iqamah?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional, e.g. "Taraweeh after Isha".
+   */
+  notes?: string | null;
   tenant?: (number | null) | Tenant;
-  /**
-   * Set the first time this user sees the onboarding welcome dialog. Used to suppress re-showing it on subsequent logins.
-   */
-  onboardingWelcomeSeenAt?: string | null;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * A tenant is a masjid (or umbrella org) served by the platform. Each tenant has its own domain, branding, and content.
@@ -663,106 +724,6 @@ export interface HeroSlide {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Prayer schedules cover a date range. Set the range + iqamah rules, then click "Generate times" to compute adhan times per day from the tenant’s location. Before any schedule’s start date has been reached, the public site shows "Prayer times coming soon".
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "prayer-schedules".
- */
-export interface PrayerSchedule {
-  id: number;
-  /**
-   * e.g. "Summer 2026", "Ramadan 2026", "Winter".
-   */
-  name: string;
-  /**
-   * First day this schedule covers.
-   */
-  startDate: string;
-  /**
-   * Last day this schedule covers. "Generate times" builds one day-row per date in this range.
-   */
-  endDate: string;
-  /**
-   * Bulk iqamah for every day in the range. Each prayer is either an absolute time or an offset from the computed adhan. Maghrib is usually an offset (e.g. "+5 min after sunset"); others are usually absolute. Click "Apply iqamah to range" after changing these to rewrite all days.
-   */
-  iqamahRules: {
-    fajr: {
-      mode: 'absolute' | 'offset';
-      absoluteValue?: string | null;
-      offsetMinutes?: number | null;
-    };
-    zuhr: {
-      mode: 'absolute' | 'offset';
-      absoluteValue?: string | null;
-      offsetMinutes?: number | null;
-    };
-    asr: {
-      mode: 'absolute' | 'offset';
-      absoluteValue?: string | null;
-      offsetMinutes?: number | null;
-    };
-    maghrib: {
-      mode: 'absolute' | 'offset';
-      absoluteValue?: string | null;
-      offsetMinutes?: number | null;
-    };
-    isha: {
-      mode: 'absolute' | 'offset';
-      absoluteValue?: string | null;
-      offsetMinutes?: number | null;
-    };
-  };
-  /**
-   * Absolute times for Friday Jummah (e.g. 12:45 PM, 1:30 PM, 2:15 PM). Replaces Zuhr iqamah on Fridays on the public site.
-   */
-  jummahTimes?:
-    | {
-        time: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * One row per date in the range. Auto-filled on save when the range or iqamah rules change. Edit an individual row for per-day overrides; changing the range or rules will overwrite those edits on the next save.
-   */
-  days?:
-    | {
-        date: string;
-        /**
-         * Fajr must be prayed before sunrise. Informational — not shown on the public site by default.
-         */
-        sunrise?: string | null;
-        fajr?: {
-          adhan?: string | null;
-          iqamah?: string | null;
-        };
-        zuhr?: {
-          adhan?: string | null;
-          iqamah?: string | null;
-        };
-        asr?: {
-          adhan?: string | null;
-          iqamah?: string | null;
-        };
-        maghrib?: {
-          adhan?: string | null;
-          iqamah?: string | null;
-        };
-        isha?: {
-          adhan?: string | null;
-          iqamah?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Optional, e.g. "Taraweeh after Isha".
-   */
-  notes?: string | null;
-  tenant?: (number | null) | Tenant;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Short-lived notices shown at the top of the public site (closures, schedule changes, reminders). Use Events for programs; use Announcements for quick updates.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -942,7 +903,7 @@ export interface Donation {
   tenant: number | Tenant;
   fund: number | DonationFund;
   /**
-   * Amount in cents.
+   * Stored in cents; rendered as currency in list and detail views.
    */
   amount: number;
   currency?: string | null;
@@ -954,6 +915,45 @@ export interface Donation {
   stripeAccountId: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant's content.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  /**
+   * First name, used for greetings and displayed in the admin panel
+   */
+  firstName: string;
+  /**
+   * Last name
+   */
+  lastName: string;
+  /**
+   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.
+   */
+  role: 'platformOwner' | 'admin' | 'staff';
+  /**
+   * Which masjid this user belongs to. Required for Admin and Staff; leave blank for Platform Owner (they access every tenant). Only a Platform Owner can change this field.
+   */
+  tenant?: (number | null) | Tenant;
+  /**
+   * Set the first time this user sees the onboarding welcome dialog. Used to suppress re-showing it on subsequent logins.
+   */
+  onboardingWelcomeSeenAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1055,16 +1055,8 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null)
-    | ({
-        relationTo: 'tenants';
-        value: number | Tenant;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'prayer-schedules';
+        value: number | PrayerSchedule;
       } | null)
     | ({
         relationTo: 'events';
@@ -1073,10 +1065,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hero-slides';
         value: number | HeroSlide;
-      } | null)
-    | ({
-        relationTo: 'prayer-schedules';
-        value: number | PrayerSchedule;
       } | null)
     | ({
         relationTo: 'announcements';
@@ -1097,6 +1085,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'donations';
         value: number | Donation;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'tenants';
+        value: number | Tenant;
       } | null)
     | ({
         relationTo: 'payload-jobs';
@@ -1143,6 +1143,313 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prayer-schedules_select".
+ */
+export interface PrayerSchedulesSelect<T extends boolean = true> {
+  name?: T;
+  startDate?: T;
+  endDate?: T;
+  iqamahRules?:
+    | T
+    | {
+        fajr?:
+          | T
+          | {
+              mode?: T;
+              absoluteValue?: T;
+              offsetMinutes?: T;
+            };
+        zuhr?:
+          | T
+          | {
+              mode?: T;
+              absoluteValue?: T;
+              offsetMinutes?: T;
+            };
+        asr?:
+          | T
+          | {
+              mode?: T;
+              absoluteValue?: T;
+              offsetMinutes?: T;
+            };
+        maghrib?:
+          | T
+          | {
+              mode?: T;
+              absoluteValue?: T;
+              offsetMinutes?: T;
+            };
+        isha?:
+          | T
+          | {
+              mode?: T;
+              absoluteValue?: T;
+              offsetMinutes?: T;
+            };
+      };
+  jummahTimes?:
+    | T
+    | {
+        time?: T;
+        id?: T;
+      };
+  days?:
+    | T
+    | {
+        date?: T;
+        sunrise?: T;
+        fajr?:
+          | T
+          | {
+              adhan?: T;
+              iqamah?: T;
+            };
+        zuhr?:
+          | T
+          | {
+              adhan?: T;
+              iqamah?: T;
+            };
+        asr?:
+          | T
+          | {
+              adhan?: T;
+              iqamah?: T;
+            };
+        maghrib?:
+          | T
+          | {
+              adhan?: T;
+              iqamah?: T;
+            };
+        isha?:
+          | T
+          | {
+              adhan?: T;
+              iqamah?: T;
+            };
+        id?: T;
+      };
+  notes?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  shortDescription?: T;
+  description?: T;
+  tag?: T;
+  audience?: T;
+  when?: T;
+  startDate?: T;
+  endDate?: T;
+  location?: T;
+  address?: T;
+  contact?: T;
+  displayMode?: T;
+  flyerImage?: T;
+  templateVariant?: T;
+  featured?: T;
+  heroAccent?: T;
+  slug?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-slides_select".
+ */
+export interface HeroSlidesSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  body?: T;
+  meta?: T;
+  style?: T;
+  accent?: T;
+  splitFields?:
+    | T
+    | {
+        photoLabel?: T;
+        photoTone?: T;
+        customColor?: T;
+        cardTag?: T;
+        cardTitle?: T;
+        image?: T;
+      };
+  photoFields?:
+    | T
+    | {
+        photoLabel?: T;
+        photoTone?: T;
+        customColor?: T;
+        photoPattern?: T;
+        image?: T;
+        ayahArabic?: T;
+        ayahTranslation?: T;
+        ayahCitation?: T;
+      };
+  ctas?:
+    | T
+    | {
+        label?: T;
+        linkType?: T;
+        page?: T;
+        url?: T;
+        icon?: T;
+        primary?: T;
+        id?: T;
+      };
+  sortOrder?: T;
+  active?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements_select".
+ */
+export interface AnnouncementsSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  priority?: T;
+  active?: T;
+  expiresAt?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  icon?: T;
+  sortOrder?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "donation-funds_select".
+ */
+export interface DonationFundsSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  slug?: T;
+  description?: T;
+  zakatEligible?: T;
+  suggestedAmounts?:
+    | T
+    | {
+        amount?: T;
+        id?: T;
+      };
+  sortOrder?: T;
+  active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "donations_select".
+ */
+export interface DonationsSelect<T extends boolean = true> {
+  tenant?: T;
+  fund?: T;
+  amount?: T;
+  currency?: T;
+  frequency?: T;
+  status?: T;
+  stripePaymentIntentId?: T;
+  stripeChargeId?: T;
+  stripeSubscriptionId?: T;
+  stripeAccountId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        favicon?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1246,313 +1553,6 @@ export interface TenantsSelect<T extends boolean = true> {
         donations?: T;
       };
   onboardingCompletedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        favicon?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events_select".
- */
-export interface EventsSelect<T extends boolean = true> {
-  title?: T;
-  shortDescription?: T;
-  description?: T;
-  tag?: T;
-  audience?: T;
-  when?: T;
-  startDate?: T;
-  endDate?: T;
-  location?: T;
-  address?: T;
-  contact?: T;
-  displayMode?: T;
-  flyerImage?: T;
-  templateVariant?: T;
-  featured?: T;
-  heroAccent?: T;
-  slug?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hero-slides_select".
- */
-export interface HeroSlidesSelect<T extends boolean = true> {
-  eyebrow?: T;
-  title?: T;
-  body?: T;
-  meta?: T;
-  style?: T;
-  accent?: T;
-  splitFields?:
-    | T
-    | {
-        photoLabel?: T;
-        photoTone?: T;
-        customColor?: T;
-        cardTag?: T;
-        cardTitle?: T;
-        image?: T;
-      };
-  photoFields?:
-    | T
-    | {
-        photoLabel?: T;
-        photoTone?: T;
-        customColor?: T;
-        photoPattern?: T;
-        image?: T;
-        ayahArabic?: T;
-        ayahTranslation?: T;
-        ayahCitation?: T;
-      };
-  ctas?:
-    | T
-    | {
-        label?: T;
-        linkType?: T;
-        page?: T;
-        url?: T;
-        icon?: T;
-        primary?: T;
-        id?: T;
-      };
-  sortOrder?: T;
-  active?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "prayer-schedules_select".
- */
-export interface PrayerSchedulesSelect<T extends boolean = true> {
-  name?: T;
-  startDate?: T;
-  endDate?: T;
-  iqamahRules?:
-    | T
-    | {
-        fajr?:
-          | T
-          | {
-              mode?: T;
-              absoluteValue?: T;
-              offsetMinutes?: T;
-            };
-        zuhr?:
-          | T
-          | {
-              mode?: T;
-              absoluteValue?: T;
-              offsetMinutes?: T;
-            };
-        asr?:
-          | T
-          | {
-              mode?: T;
-              absoluteValue?: T;
-              offsetMinutes?: T;
-            };
-        maghrib?:
-          | T
-          | {
-              mode?: T;
-              absoluteValue?: T;
-              offsetMinutes?: T;
-            };
-        isha?:
-          | T
-          | {
-              mode?: T;
-              absoluteValue?: T;
-              offsetMinutes?: T;
-            };
-      };
-  jummahTimes?:
-    | T
-    | {
-        time?: T;
-        id?: T;
-      };
-  days?:
-    | T
-    | {
-        date?: T;
-        sunrise?: T;
-        fajr?:
-          | T
-          | {
-              adhan?: T;
-              iqamah?: T;
-            };
-        zuhr?:
-          | T
-          | {
-              adhan?: T;
-              iqamah?: T;
-            };
-        asr?:
-          | T
-          | {
-              adhan?: T;
-              iqamah?: T;
-            };
-        maghrib?:
-          | T
-          | {
-              adhan?: T;
-              iqamah?: T;
-            };
-        isha?:
-          | T
-          | {
-              adhan?: T;
-              iqamah?: T;
-            };
-        id?: T;
-      };
-  notes?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "announcements_select".
- */
-export interface AnnouncementsSelect<T extends boolean = true> {
-  title?: T;
-  body?: T;
-  priority?: T;
-  active?: T;
-  expiresAt?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services_select".
- */
-export interface ServicesSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  icon?: T;
-  sortOrder?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  content?: T;
-  tenant?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "donation-funds_select".
- */
-export interface DonationFundsSelect<T extends boolean = true> {
-  tenant?: T;
-  name?: T;
-  slug?: T;
-  description?: T;
-  zakatEligible?: T;
-  suggestedAmounts?:
-    | T
-    | {
-        amount?: T;
-        id?: T;
-      };
-  sortOrder?: T;
-  active?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "donations_select".
- */
-export interface DonationsSelect<T extends boolean = true> {
-  tenant?: T;
-  fund?: T;
-  amount?: T;
-  currency?: T;
-  frequency?: T;
-  status?: T;
-  stripePaymentIntentId?: T;
-  stripeChargeId?: T;
-  stripeSubscriptionId?: T;
-  stripeAccountId?: T;
   updatedAt?: T;
   createdAt?: T;
 }
