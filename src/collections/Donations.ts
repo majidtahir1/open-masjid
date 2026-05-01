@@ -10,7 +10,10 @@ export const Donations: CollectionConfig = {
   slug: 'donations',
   labels: { singular: 'Donation', plural: 'Donations' },
   admin: {
-    group: 'Donations',
+    // Hidden from the sidebar; reachable via URL or via the "All donations"
+    // link on the Donations Overview page. Overview is the single sidebar
+    // entry for the Donations feature.
+    hidden: true,
     useAsTitle: 'stripePaymentIntentId',
     defaultColumns: ['createdAt', 'fund', 'amount', 'frequency', 'status'],
     description:

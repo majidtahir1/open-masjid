@@ -5,6 +5,7 @@ import type { Aggregates, DonationRow } from '@/lib/donations-aggregates'
 
 type Props = {
   tenantName: string
+  stripeAccountId: string | null
   aggregates: Aggregates
   recent: DonationRow[]
 }
@@ -55,10 +56,18 @@ function StatCard({ eyebrow, value }: { eyebrow: string; value: string }) {
   )
 }
 
-export default function OverviewClient({ tenantName, aggregates, recent }: Props) {
+export default function OverviewClient({
+  tenantName,
+  stripeAccountId,
+  aggregates,
+  recent,
+}: Props) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const visible = recent.slice(0, visibleCount)
   const canShowMore = visibleCount < recent.length
+  const stripeDashboardUrl = stripeAccountId
+    ? `https://dashboard.stripe.com/${stripeAccountId}`
+    : null
 
   return (
     <main className="mx-auto max-w-[1100px] px-6 py-10 md:px-10 md:py-12">
@@ -66,17 +75,49 @@ export default function OverviewClient({ tenantName, aggregates, recent }: Props
         {tenantName} · Donations
       </div>
 
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-display text-[40px] font-medium leading-[1.08] tracking-tight text-fg1 md:text-[48px]">
           Overview
         </h1>
+      </div>
+
+      <nav className="mb-10 flex flex-wrap gap-2">
+        <a
+          href="/admin/collections/donation-funds"
+          className="inline-flex items-center rounded-[var(--r-md)] border border-border bg-white px-4 py-[10px] font-body text-fs-sm font-semibold text-fg2 shadow-sh-sm transition-colors duration-base ease-out hover:bg-bg-alt"
+        >
+          Manage funds
+        </a>
+        <a
+          href="/admin/donations/connect"
+          className="inline-flex items-center rounded-[var(--r-md)] border border-border bg-white px-4 py-[10px] font-body text-fs-sm font-semibold text-fg2 shadow-sh-sm transition-colors duration-base ease-out hover:bg-bg-alt"
+        >
+          Stripe connection
+        </a>
+        <a
+          href="/admin/collections/donations"
+          className="inline-flex items-center rounded-[var(--r-md)] border border-border bg-white px-4 py-[10px] font-body text-fs-sm font-semibold text-fg2 shadow-sh-sm transition-colors duration-base ease-out hover:bg-bg-alt"
+        >
+          All donations
+        </a>
+        {stripeDashboardUrl ? (
+          <a
+            href={stripeDashboardUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 rounded-[var(--r-md)] border border-border bg-white px-4 py-[10px] font-body text-fs-sm font-semibold text-fg2 shadow-sh-sm transition-colors duration-base ease-out hover:bg-bg-alt"
+          >
+            Open Stripe dashboard
+            <span aria-hidden>↗</span>
+          </a>
+        ) : null}
         <a
           href="/api/donations/export.csv"
-          className="inline-flex items-center gap-2 rounded-[var(--r-md)] border border-border bg-white px-5 py-[12px] font-body text-fs-base font-semibold text-fg2 shadow-sh-sm transition-all duration-base ease-out hover:bg-bg-alt"
+          className="inline-flex items-center rounded-[var(--r-md)] border border-border bg-white px-4 py-[10px] font-body text-fs-sm font-semibold text-fg2 shadow-sh-sm transition-colors duration-base ease-out hover:bg-bg-alt"
         >
           Download CSV
         </a>
-      </div>
+      </nav>
 
       <section className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard eyebrow="This month" value={formatDollars(aggregates.thisMonthCents)} />

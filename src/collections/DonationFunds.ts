@@ -12,7 +12,10 @@ export const DonationFunds: CollectionConfig = {
   slug: 'donation-funds',
   labels: { singular: 'Donation Fund', plural: 'Donation Funds' },
   admin: {
-    group: 'Donations',
+    // Hidden from the sidebar; reachable via URL or via the "Manage funds"
+    // link on the Donations Overview page. The Overview page is the single
+    // sidebar entry for the Donations feature.
+    hidden: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'zakatEligible', 'active', 'sortOrder'],
     description:

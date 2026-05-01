@@ -89,7 +89,10 @@ export default async function DonationsOverviewPage() {
       collection: 'tenants',
       id: tenantId,
       overrideAccess: true,
-    })) as unknown as { name?: string | null }
+    })) as unknown as {
+      name?: string | null
+      donationConfig?: { stripeAccountId?: string | null } | null
+    }
 
     const result = (await payload.find({
       collection: 'donations' as never,
@@ -107,6 +110,7 @@ export default async function DonationsOverviewPage() {
     body = (
       <OverviewClient
         tenantName={tenant.name ?? 'Masjid'}
+        stripeAccountId={tenant.donationConfig?.stripeAccountId ?? null}
         aggregates={aggregates}
         recent={recent}
       />
