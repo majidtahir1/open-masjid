@@ -48,6 +48,7 @@ import { default as default_102c9f369a2a51690f6afb9e66bfefd6 } from '../../../..
 import { default as default_6be9fe46a5d0b8701eabd18cf8509bb0 } from '../../../../src/admin/InviteUserPanel'
 import { default as default_b265241eae706a0b7cddb9ba85c0aab9 } from '../../../../src/admin/SiteSettingsIdentityField'
 import { default as default_446124d7ee8ac8871d34efe9e97a216f } from '../../../../src/admin/SiteSettingsBrandingField'
+import { default as default_980fed5703db1f4b51a0b7179e8c7ab9 } from '../../../../src/admin/BillingTabIntro'
 import { default as default_ed26a91d770179c222166a676f958f4e } from '../../../../src/admin/CreateTenantPanel'
 import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
 import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
@@ -115,6 +116,7 @@ export const importMap = {
   "/src/admin/InviteUserPanel#default": default_6be9fe46a5d0b8701eabd18cf8509bb0,
   "/src/admin/SiteSettingsIdentityField#default": default_b265241eae706a0b7cddb9ba85c0aab9,
   "/src/admin/SiteSettingsBrandingField#default": default_446124d7ee8ac8871d34efe9e97a216f,
+  "/src/admin/BillingTabIntro#default": default_980fed5703db1f4b51a0b7179e8c7ab9,
   "/src/admin/CreateTenantPanel#default": default_ed26a91d770179c222166a676f958f4e,
   "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
   "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,

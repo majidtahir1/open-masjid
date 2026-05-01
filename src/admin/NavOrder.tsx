@@ -22,8 +22,6 @@ import React from 'react'
  */
 export default function NavOrder() {
   const css = `
-    .nav { display: flex; flex-direction: column; }
-
     /* Dashboard link is the first nav__link and stays at order 1 */
     .nav .nav__link--dashboard { order: 1; }
 

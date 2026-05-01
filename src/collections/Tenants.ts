@@ -500,8 +500,17 @@ export const Tenants: CollectionConfig = {
         },
         {
           label: 'Billing',
-          description: 'Stripe Billing state. Read-only — Stripe webhooks keep this in sync.',
+          description: 'Subscription, payment method, and invoices.',
           fields: [
+            {
+              name: 'billingTabIntro',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '/src/admin/BillingTabIntro#default',
+                },
+              },
+            },
             {
               name: 'subscriptionPlan',
               type: 'select',
