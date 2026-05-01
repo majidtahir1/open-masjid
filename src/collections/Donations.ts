@@ -44,10 +44,11 @@ export const Donations: CollectionConfig = {
       required: true,
       min: 0,
       admin: {
-        description: 'Amount in cents. List view renders the human-readable currency.',
+        description: 'Stored in cents; rendered as currency in list and detail views.',
         readOnly: true,
         components: {
           Cell: '/src/admin/donations/AmountCell#default',
+          Field: '/src/admin/donations/AmountField#default',
         },
       },
     },
