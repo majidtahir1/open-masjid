@@ -15,14 +15,20 @@ export async function applyDonationAction(
         overrideAccess: true,
       })
       if (existing.docs.length > 0) return
+      // Stripe metadata is always string-typed on the wire, but the Postgres
+      // FK columns are integer. Coerce relationship ids before insert.
+      const tenantId = Number(action.tenantId)
+      const fundId = Number(action.fundId)
+      if (!Number.isFinite(tenantId) || !Number.isFinite(fundId)) {
+        throw new Error(
+          `donations-apply: non-numeric ids in action metadata: tenant=${action.tenantId}, fund=${action.fundId}`,
+        )
+      }
       await payload.create({
         collection: 'donations',
         data: {
-          // Payload's generated types narrow tenant/fund to `number | Tenant`,
-          // but action ids arrive as strings (Stripe metadata) and Payload
-          // accepts string ids in practice — cast just the relation fields.
-          tenant: action.tenantId as unknown as number,
-          fund: action.fundId as unknown as number,
+          tenant: tenantId,
+          fund: fundId,
           amount: action.amountCents,
           currency: action.currency,
           frequency: action.frequency,
