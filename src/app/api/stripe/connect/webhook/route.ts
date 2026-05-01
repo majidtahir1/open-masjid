@@ -22,7 +22,11 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: 'invalid signature' }, { status: 400 })
   }
-  const action = mapStripeEventToDonationAction(event)
+  const action = await mapStripeEventToDonationAction(event, (subId, acctId) =>
+    stripe.subscriptions
+      .retrieve(subId, { stripeAccount: acctId })
+      .then((s) => (s.metadata ?? {}) as Record<string, string>),
+  )
   if (!action) return NextResponse.json({ received: true, ignored: event.type })
   const payload = await getPayload({ config })
   await applyDonationAction(payload, action)
