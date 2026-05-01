@@ -9,17 +9,20 @@ export async function applyDonationAction(
     case 'recordDonation': {
       // Idempotent insert keyed by stripePaymentIntentId.
       const existing = await payload.find({
-        collection: 'donations' as never,
+        collection: 'donations',
         where: { stripePaymentIntentId: { equals: action.stripePaymentIntentId } },
         limit: 1,
         overrideAccess: true,
       })
       if (existing.docs.length > 0) return
       await payload.create({
-        collection: 'donations' as never,
+        collection: 'donations',
         data: {
-          tenant: action.tenantId,
-          fund: action.fundId,
+          // Payload's generated types narrow tenant/fund to `number | Tenant`,
+          // but action ids arrive as strings (Stripe metadata) and Payload
+          // accepts string ids in practice — cast just the relation fields.
+          tenant: action.tenantId as unknown as number,
+          fund: action.fundId as unknown as number,
           amount: action.amountCents,
           currency: action.currency,
           frequency: action.frequency,
@@ -28,7 +31,7 @@ export async function applyDonationAction(
           stripeChargeId: action.stripeChargeId,
           stripeSubscriptionId: action.stripeSubscriptionId,
           stripeAccountId: action.stripeAccountId,
-        } as never,
+        },
         overrideAccess: true,
       })
       return
@@ -36,17 +39,17 @@ export async function applyDonationAction(
 
     case 'refundDonation': {
       const found = await payload.find({
-        collection: 'donations' as never,
+        collection: 'donations',
         where: { stripeChargeId: { equals: action.stripeChargeId } },
         limit: 1,
         overrideAccess: true,
       })
-      const doc = found.docs[0] as { id: string } | undefined
+      const doc = found.docs[0]
       if (!doc) return
       await payload.update({
-        collection: 'donations' as never,
+        collection: 'donations',
         id: doc.id,
-        data: { status: 'refunded' } as never,
+        data: { status: 'refunded' },
         overrideAccess: true,
       })
       return
@@ -54,17 +57,17 @@ export async function applyDonationAction(
 
     case 'syncAccount': {
       const found = await payload.find({
-        collection: 'tenants' as never,
+        collection: 'tenants',
         where: {
           'donationConfig.stripeAccountId': { equals: action.stripeAccountId },
         },
         limit: 1,
         overrideAccess: true,
       })
-      const tenant = found.docs[0] as { id: string } | undefined
+      const tenant = found.docs[0]
       if (!tenant) return
       await payload.update({
-        collection: 'tenants' as never,
+        collection: 'tenants',
         id: tenant.id,
         overrideAccess: true,
         data: {
@@ -73,7 +76,7 @@ export async function applyDonationAction(
             stripePayoutsEnabled: action.payoutsEnabled,
             stripeAccountLastSyncedAt: new Date().toISOString(),
           },
-        } as never,
+        },
       })
       return
     }
