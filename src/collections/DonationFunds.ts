@@ -19,6 +19,9 @@ export const DonationFunds: CollectionConfig = {
       'Categories donors can give toward (Sadaqah, Zakat, Building Fund, etc.).',
     components: {
       beforeListTable: ['/src/admin/donations/FundsListIntro#default'],
+      edit: {
+        SaveButton: '/src/admin/donations/FundsSaveButton#default',
+      },
     },
   },
   access: tenantScopedAccess(),
