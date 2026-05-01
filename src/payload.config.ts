@@ -60,22 +60,26 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
+      // Sidebar order intent (top → bottom):
+      //   beforeNavLinks: Dashboard, Donations Overview
+      //   <native collection groups>: Prayer, Content, (others)
+      //   afterNavLinks: View public site, Re-run setup, Site Settings cluster (Billing)
       beforeNavLinks: [
         '/src/admin/BillingBanner#default',
         '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
-        '/src/admin/SiteSettingsLink#default',
-        '/src/admin/BillingNavLink#default',
         '/src/admin/donations/DonationsNav#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
         '/src/admin/onboarding/RerunMenuItem#default',
+        '/src/admin/SiteSettingsCluster#default',
       ],
       header: [
         '/src/admin/Favicon#default',
         '/src/admin/HideTenantsNav#default',
         '/src/admin/donations/HideDonationsCollections#default',
+        '/src/admin/HideMediaAndPeopleNav#default',
         '/src/admin/TenantThemeStyle#default',
       ],
       graphics: {
@@ -93,18 +97,21 @@ export default buildConfig({
       },
     },
   },
+  // Order matters — Payload renders sidebar groups in the order their first
+  // collection appears here. Desired order: Prayer, Content, Donations,
+  // (Library hidden), (People hidden), (Site hidden via HideTenantsNav).
   collections: [
-    Users,
-    Tenants,
-    Media,
+    PrayerSchedules,
     Events,
     HeroSlides,
-    PrayerSchedules,
     Announcements,
     Services,
     Pages,
     DonationFunds,
     Donations,
+    Media,
+    Users,
+    Tenants,
   ],
   endpoints: [
     generatePrayerTimesEndpoint,
