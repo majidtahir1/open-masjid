@@ -39,9 +39,11 @@ export interface TenantSocialLink {
 }
 
 export interface TenantDonationConfig {
-  mode?: 'external' | 'stripe' | null
+  mode?: 'external' | 'connect' | null
   externalUrl?: string | null
   stripeAccountId?: string | null
+  stripeChargesEnabled?: boolean | null
+  stripePayoutsEnabled?: boolean | null
 }
 
 export interface TenantCustomDomain {

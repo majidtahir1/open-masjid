@@ -26,10 +26,7 @@ export default async function DonatePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const donationConfig = (tenant.donationConfig ?? {}) as Omit<TenantDonationConfig, 'mode'> & {
-    mode?: 'external' | 'connect' | null
-    stripeChargesEnabled?: boolean | null
-  }
+  const donationConfig: TenantDonationConfig = tenant.donationConfig ?? {}
   const mode: 'external' | 'connect' = donationConfig.mode ?? 'external'
   const externalUrl = donationConfig.externalUrl ?? null
   const useExternal = mode === 'external' && !!externalUrl && isExternal(externalUrl)
