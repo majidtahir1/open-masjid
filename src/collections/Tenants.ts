@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { platformOwnerOnly } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
 import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
+import { seedDefaultDonationFunds } from '../hooks/seedDefaultDonationFunds'
 
 /**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
@@ -30,6 +31,7 @@ export const Tenants: CollectionConfig = {
   },
   hooks: {
     beforeChange: [geocodeTenantAddress],
+    afterChange: [seedDefaultDonationFunds],
   },
   access: {
     // Only platform owners can create or delete tenants.
@@ -546,11 +548,11 @@ export const Tenants: CollectionConfig = {
                   label: 'Donation Mode',
                   options: [
                     { label: 'External link (LaunchGood, PayPal, etc.)', value: 'external' },
-                    { label: 'Stripe on-site', value: 'stripe' },
+                    { label: 'Stripe Connect (on-site)', value: 'connect' },
                   ],
                   admin: {
                     description:
-                      'External link is recommended for MVP. Stripe mode will be enabled in a future release.',
+                      'External link is the default. Switch to Stripe Connect after connecting your account.',
                     components: {
                       Field: '/src/fields/SelectField#default',
                     },
@@ -575,14 +577,33 @@ export const Tenants: CollectionConfig = {
                   type: 'text',
                   label: 'Stripe Account ID',
                   admin: {
+                    hidden: true,
+                    readOnly: true,
                     description:
-                      'Shown only when Donation Mode is "Stripe on-site". Connected Stripe account ID (acct_...).',
-                    placeholder: 'acct_1AbCdEfGhIjKlMnO',
-                    condition: (_, siblingData) => siblingData?.mode === 'stripe',
-                    components: {
-                      Field: '/src/fields/TextField#default',
-                    },
+                      'Connected Stripe account ID. Set automatically by the Connect OAuth flow.',
                   },
+                },
+                {
+                  name: 'stripeAccountConnectedAt',
+                  type: 'date',
+                  admin: { hidden: true, readOnly: true },
+                },
+                {
+                  name: 'stripeChargesEnabled',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  admin: { hidden: true, readOnly: true },
+                },
+                {
+                  name: 'stripePayoutsEnabled',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  admin: { hidden: true, readOnly: true },
+                },
+                {
+                  name: 'stripeAccountLastSyncedAt',
+                  type: 'date',
+                  admin: { hidden: true, readOnly: true },
                 },
               ],
             },

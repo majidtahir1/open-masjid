@@ -8,6 +8,8 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Announcements } from './collections/Announcements'
+import { DonationFunds } from './collections/DonationFunds'
+import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
 import { Media } from './collections/Media'
@@ -99,6 +101,8 @@ export default buildConfig({
     Announcements,
     Services,
     Pages,
+    DonationFunds,
+    Donations,
   ],
   endpoints: [
     generatePrayerTimesEndpoint,
