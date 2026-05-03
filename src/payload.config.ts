@@ -8,6 +8,8 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Announcements } from './collections/Announcements'
+import { DonationFunds } from './collections/DonationFunds'
+import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
 import { Media } from './collections/Media'
@@ -58,20 +60,34 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
+      // Sidebar order intent (top → bottom), achieved via CSS `order` in NavOrder:
+      //   1. Dashboard
+      //   2. Prayer group        (native)
+      //   3. Donations           (custom link, slotted between Prayer and Content)
+      //   4. Content group       (native)
+      //   5. Library group       (native — Media)
+      //   6. View public site    (custom)
+      //   7. Site Settings       (custom, margin-top:auto pins it to the bottom)
+      //
+      // Billing has been removed from the sidebar entirely; it lives as a tab
+      // inside the tenant edit page (Site Settings → Billing tab) so masjid
+      // admins don't have to look at it day-to-day.
       beforeNavLinks: [
         '/src/admin/BillingBanner#default',
         '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
-        '/src/admin/SiteSettingsLink#default',
-        '/src/admin/BillingNavLink#default',
+        '/src/admin/donations/DonationsNav#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
-        '/src/admin/onboarding/RerunMenuItem#default',
+        '/src/admin/SiteSettingsCluster#default',
       ],
       header: [
         '/src/admin/Favicon#default',
         '/src/admin/HideTenantsNav#default',
+        '/src/admin/donations/HideDonationsCollections#default',
+        '/src/admin/HideMediaAndPeopleNav#default',
+        '/src/admin/NavOrder#default',
         '/src/admin/TenantThemeStyle#default',
       ],
       graphics: {
@@ -89,16 +105,21 @@ export default buildConfig({
       },
     },
   },
+  // Order matters — Payload renders sidebar groups in the order their first
+  // collection appears here. Desired order: Prayer, Content, Donations,
+  // (Library hidden), (People hidden), (Site hidden via HideTenantsNav).
   collections: [
-    Users,
-    Tenants,
-    Media,
+    PrayerSchedules,
     Events,
     HeroSlides,
-    PrayerSchedules,
     Announcements,
     Services,
     Pages,
+    DonationFunds,
+    Donations,
+    Media,
+    Users,
+    Tenants,
   ],
   endpoints: [
     generatePrayerTimesEndpoint,

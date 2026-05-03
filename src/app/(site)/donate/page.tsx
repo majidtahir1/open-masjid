@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 
 import type { TenantDonationConfig } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
+import DonateForm, { type DonateFund } from '@/components/DonateForm'
 
 export const metadata = {
   title: 'Donate',
@@ -23,10 +26,43 @@ export default async function DonatePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const config = (tenant.donationConfig ?? {}) as TenantDonationConfig
-  const mode = config.mode ?? 'external'
-  const externalUrl = config.externalUrl ?? null
+  const donationConfig: TenantDonationConfig = tenant.donationConfig ?? {}
+  const mode: 'external' | 'connect' = donationConfig.mode ?? 'external'
+  const externalUrl = donationConfig.externalUrl ?? null
   const useExternal = mode === 'external' && !!externalUrl && isExternal(externalUrl)
+  const useConnect = mode === 'connect' && !!donationConfig.stripeChargesEnabled
+
+  let funds: DonateFund[] = []
+  if (useConnect) {
+    try {
+      const payload = await getPayload({ config })
+      const result = await payload.find({
+        collection: 'donation-funds' as never,
+        where: {
+          tenant: { equals: tenant.id },
+          active: { equals: true },
+        },
+        sort: 'sortOrder',
+        limit: 50,
+        depth: 0,
+      })
+      funds = (result.docs as Array<{
+        id: string | number
+        name: string
+        description?: string | null
+        zakatEligible?: boolean | null
+        suggestedAmounts?: Array<{ amount: number }> | null
+      }>).map((d) => ({
+        id: d.id,
+        name: d.name,
+        description: d.description ?? null,
+        zakatEligible: !!d.zakatEligible,
+        suggestedAmounts: d.suggestedAmounts ?? undefined,
+      }))
+    } catch {
+      funds = []
+    }
+  }
 
   return (
     <>
@@ -44,32 +80,12 @@ export default async function DonatePage() {
             helps keep the doors open.
           </p>
 
-          {mode === 'stripe' ? (
+          {useConnect && funds.length > 0 ? (
+            <DonateForm funds={funds} />
+          ) : useConnect ? (
             <div className="mx-auto max-w-[480px] rounded-[var(--r-md)] border border-border bg-white p-8 shadow-sh-sm">
-              <div className="mb-6 font-body text-fs-xs font-semibold uppercase tracking-caps text-fg3">
-                Choose an amount
-              </div>
-              <div className="mb-4 grid grid-cols-3 gap-2">
-                {['$25', '$50', '$100'].map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    disabled
-                    className="rounded-[var(--r-md)] border border-border bg-bg-alt px-4 py-3 font-body text-fs-base font-semibold text-fg3"
-                  >
-                    {amount}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                disabled
-                className="w-full rounded-[var(--r-md)] bg-brand/60 px-6 py-[14px] font-body text-fs-base font-semibold text-white"
-              >
-                Give now
-              </button>
-              <p className="mt-4 text-fs-xs text-fg3">
-                Stripe checkout coming soon.
+              <p className="m-0 font-body text-fs-base text-fg2">
+                No donation funds are configured yet.
               </p>
             </div>
           ) : useExternal ? (

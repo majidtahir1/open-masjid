@@ -77,6 +77,35 @@ const baseBtn: CSSProperties = {
 function PrimaryLink({
   href,
   children,
+  newTab = true,
+}: {
+  href: string
+  children: React.ReactNode
+  newTab?: boolean
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <a
+      href={href}
+      {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...baseBtn,
+        background: hover ? 'var(--brand-hover)' : 'var(--brand)',
+        color: '#fff',
+        boxShadow: hover ? 'var(--sh-md)' : 'none',
+        transform: hover ? 'translateY(-1px)' : 'translateY(0)',
+      }}
+    >
+      {children}
+    </a>
+  )
+}
+
+function SecondaryLink({
+  href,
+  children,
 }: {
   href: string
   children: React.ReactNode
@@ -91,14 +120,39 @@ function PrimaryLink({
       onMouseLeave={() => setHover(false)}
       style={{
         ...baseBtn,
-        background: hover ? 'var(--brand-hover)' : 'var(--brand)',
-        color: '#fff',
-        boxShadow: hover ? 'var(--sh-md)' : 'none',
-        transform: hover ? 'translateY(-1px)' : 'translateY(0)',
+        background: hover ? 'var(--bg-alt)' : 'var(--bg)',
+        color: 'var(--fg1)',
+        borderColor: 'var(--border)',
       }}
     >
       {children}
     </a>
+  )
+}
+
+function TertiaryButton({
+  onClick,
+  children,
+}: {
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...baseBtn,
+        background: 'transparent',
+        color: hover ? 'var(--fg1)' : 'var(--fg3)',
+        borderColor: 'transparent',
+      }}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -167,7 +221,7 @@ export function MilestonePanel({
           </p>
         </div>
 
-        {status === 'complete' && (
+        {status === 'complete' && slug !== 'donations' && (
           <div
             className="inline-flex items-center"
             style={{
@@ -186,12 +240,56 @@ export function MilestonePanel({
           </div>
         )}
 
-        <div className="flex flex-wrap" style={{ gap: 'var(--sp-3)' }}>
-          <PrimaryLink href={meta.primaryHref}>
-            {meta.primaryLabel}
-            <ExternalLink size={16} aria-hidden />
-          </PrimaryLink>
-        </div>
+        {slug === 'donations' && status === 'complete' ? (
+          <div
+            className="inline-flex items-center"
+            style={{
+              gap: 8,
+              alignSelf: 'start',
+              padding: '8px 14px',
+              borderRadius: 'var(--r-md)',
+              background: 'var(--brand-soft)',
+              color: 'var(--brand)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
+              fontWeight: 600,
+            }}
+          >
+            <Check size={16} aria-hidden /> Connected.
+            <a
+              href="/admin/donations/connect"
+              style={{
+                color: 'var(--brand)',
+                fontWeight: 600,
+                textDecoration: 'underline',
+                marginLeft: 'var(--sp-2)',
+              }}
+            >
+              Manage
+            </a>
+          </div>
+        ) : slug === 'donations' ? (
+          <div
+            className="flex flex-wrap items-center"
+            style={{ gap: 'var(--sp-3)' }}
+          >
+            <PrimaryLink href="/api/stripe/connect/authorize" newTab={false}>
+              Connect Stripe
+            </PrimaryLink>
+            <SecondaryLink href="/admin/collections/tenants">
+              Use external link instead
+              <ExternalLink size={16} aria-hidden />
+            </SecondaryLink>
+            <TertiaryButton onClick={onBack}>Skip for now</TertiaryButton>
+          </div>
+        ) : (
+          <div className="flex flex-wrap" style={{ gap: 'var(--sp-3)' }}>
+            <PrimaryLink href={meta.primaryHref}>
+              {meta.primaryLabel}
+              <ExternalLink size={16} aria-hidden />
+            </PrimaryLink>
+          </div>
+        )}
       </div>
 
       <HintRail hints={HINTS[slug]} />

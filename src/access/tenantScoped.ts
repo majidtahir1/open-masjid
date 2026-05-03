@@ -75,3 +75,41 @@ export const platformOwnerOnly: Access = ({ req: { user } }) => {
   if (!user) return false
   return user.role === 'platformOwner'
 }
+
+/**
+ * Convenience bundle: returns the four CRUD access functions wired to the
+ * tenant-scoped helpers above. Use on collections that follow the standard
+ * tenant-scoped pattern (e.g. DonationFunds).
+ */
+export function tenantScopedAccess(): {
+  read: Access
+  create: Access
+  update: Access
+  delete: Access
+} {
+  return {
+    read: tenantScopedRead,
+    create: tenantScopedCreate,
+    update: tenantScopedUpdate,
+    delete: tenantScopedDelete,
+  }
+}
+
+/**
+ * Read-only-by-tenant access function (no create/update/delete). Used for
+ * collections like Donations whose rows are written exclusively via
+ * overrideAccess in webhook handlers.
+ */
+export function tenantScopedReadAccess(): Access {
+  return ({ req: { user } }) => {
+    if (!user) return false
+    if (user.role === 'platformOwner') return true
+    const tenant = (user as { tenant?: unknown }).tenant
+    const tenantId =
+      typeof tenant === 'object' && tenant !== null && 'id' in tenant
+        ? (tenant as { id: string | number }).id
+        : (tenant as string | number | undefined)
+    if (!tenantId) return false
+    return { tenant: { equals: tenantId } }
+  }
+}
