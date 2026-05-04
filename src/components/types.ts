@@ -170,6 +170,17 @@ export interface EventLike {
   status?: 'draft' | 'published' | null
 }
 
+export interface AnnouncementLike {
+  id?: string | number
+  title: string
+  body?: unknown
+  priority?: 'normal' | 'high' | null
+  active?: boolean | null
+  expiresAt?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
 export interface PrayerTimePair {
   adhan?: string | null
   iqamah?: string | null
