@@ -260,6 +260,38 @@ export async function fetchNavPages(tenant: TenantRecord): Promise<NavPage[]> {
 }
 
 /**
+ * Returns active, Stripe-synced membership tiers for the given tenant, ordered
+ * by `sortOrder` asc then `name` asc. Draft-filtering is intentionally skipped
+ * (tiers don't have a publish workflow) and access is bypassed so the public
+ * site can read them without auth.
+ */
+export async function fetchActiveTiers(tenant: TenantRecord) {
+  noStore()
+  const payload = await payloadClient()
+  try {
+    const res = await payload.find({
+      collection: 'membership-tiers' as never,
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          active: { equals: true },
+          stripePriceId: { exists: true },
+        },
+        // Tiers have no _status draft workflow — skip the published gate
+        true,
+      ),
+      sort: ['sortOrder', 'name'],
+      limit: 50,
+      depth: 0,
+      overrideAccess: true,
+    })
+    return res.docs as unknown[]
+  } catch {
+    return []
+  }
+}
+
+/**
  * Returns active, non-expired, published announcements for the given tenant
  * in reverse chronological order (newest first). Expired announcements
  * (`expiresAt` past now) and inactive ones are filtered out at the query
