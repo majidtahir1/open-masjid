@@ -2,7 +2,9 @@ import Hero from '@/components/Hero'
 import EventsList from '@/components/EventsList'
 import ServicesGrid from '@/components/ServicesGrid'
 import DonateCTA from '@/components/DonateCTA'
+import AnnouncementsBanner from '@/components/AnnouncementsBanner'
 import type {
+  AnnouncementLike,
   EventLike,
   HeroSlideLike,
   ServiceLike,
@@ -10,6 +12,7 @@ import type {
 } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import {
+  fetchAnnouncements,
   fetchEvents,
   fetchFeaturedEvents,
   fetchHeroSlides,
@@ -27,16 +30,18 @@ export default async function HomePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const [slides, featuredEvents, events, services, liveData] = await Promise.all([
-    fetchHeroSlides(tenant),
-    fetchFeaturedEvents(tenant),
-    fetchEvents(tenant, { limit: 4, upcomingOnly: true }),
-    fetchServices(tenant),
-    getHeroLiveData(
-      tenant.id,
-      (tenant as { location?: { timezone?: string | null } }).location?.timezone ?? null,
-    ),
-  ])
+  const [slides, featuredEvents, events, services, liveData, announcements] =
+    await Promise.all([
+      fetchHeroSlides(tenant),
+      fetchFeaturedEvents(tenant),
+      fetchEvents(tenant, { limit: 4, upcomingOnly: true }),
+      fetchServices(tenant),
+      getHeroLiveData(
+        tenant.id,
+        (tenant as { location?: { timezone?: string | null } }).location?.timezone ?? null,
+      ),
+      fetchAnnouncements(tenant),
+    ])
 
   // Interleave manually-authored hero slides with featured events so both
   // appear in the homepage carousel — slides first, then events.
@@ -47,6 +52,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <AnnouncementsBanner announcements={announcements as AnnouncementLike[]} />
       <Hero slides={allSlides} liveData={liveData} />
 
       <section className="bg-bg py-24">

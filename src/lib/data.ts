@@ -210,10 +210,17 @@ export async function fetchPageBySlug(
   }
 }
 
+/**
+ * Returns active, non-expired, published announcements for the given tenant
+ * in reverse chronological order (newest first). Expired announcements
+ * (`expiresAt` past now) and inactive ones are filtered out at the query
+ * layer. Drafts are included only when `opts.draft` is true.
+ */
 export async function fetchAnnouncements(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
   const payload = await payloadClient()
   const draft = opts.draft ?? false
+  const nowIso = new Date().toISOString()
   try {
     const res = await payload.find({
       collection: 'announcements',
@@ -221,10 +228,17 @@ export async function fetchAnnouncements(tenant: TenantRecord, opts: ReadOpts = 
         {
           tenant: { equals: tenant.id },
           active: { equals: true },
+          // expiresAt > now OR expiresAt is unset (evergreen)
+          or: [
+            { expiresAt: { greater_than: nowIso } },
+            { expiresAt: { exists: false } },
+          ],
         },
         draft,
       ),
-      sort: '-priority',
+      // Newest first by creation. High-priority items get visual emphasis
+      // via styling rather than sort order so chronological context is kept.
+      sort: '-createdAt',
       limit: 20,
       depth: 0,
       overrideAccess: true,
