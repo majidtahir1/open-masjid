@@ -62,12 +62,46 @@ export const MembershipTiers: CollectionConfig = {
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true, admin: { readOnly: true } },
     { name: 'name', type: 'text', required: true },
     { name: 'description', type: 'richText' },
+    // The persisted column lives in cents (Stripe-canonical), but admins
+    // enter and see the value in dollars via the virtual `amount` field
+    // below. `amountCents` is hidden from the editor and populated by the
+    // beforeValidate hook on `amount`.
     {
       name: 'amountCents',
       type: 'number',
       required: true,
       min: 1,
-      admin: { description: 'Amount in cents. e.g. 2500 = $25.00' },
+      admin: { hidden: true },
+    },
+    {
+      name: 'amount',
+      type: 'number',
+      virtual: true,
+      required: true,
+      min: 1,
+      label: 'Amount',
+      admin: {
+        description: 'Dollars per period. Example: enter 25 for $25 / month.',
+        step: 1,
+      },
+      hooks: {
+        // Read from the persisted amountCents → display dollars
+        afterRead: [
+          ({ siblingData }) => {
+            const cents = (siblingData as { amountCents?: number | null })?.amountCents
+            return typeof cents === 'number' ? cents / 100 : undefined
+          },
+        ],
+        // Write dollars → persisted amountCents (rounds to nearest cent)
+        beforeValidate: [
+          ({ value, siblingData }) => {
+            if (typeof value === 'number' && Number.isFinite(value)) {
+              ;(siblingData as { amountCents?: number }).amountCents = Math.round(value * 100)
+            }
+            return value
+          },
+        ],
+      },
     },
     {
       name: 'cadence',

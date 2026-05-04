@@ -953,10 +953,11 @@ export interface MembershipTier {
     };
     [k: string]: unknown;
   } | null;
-  /**
-   * Amount in cents. e.g. 2500 = $25.00
-   */
   amountCents: number;
+  /**
+   * Dollars per period. Example: enter 25 for $25 / month.
+   */
+  amount: number;
   cadence: 'monthly' | 'yearly';
   /**
    * Uncheck to soft-delete: hides from /membership but keeps existing subscribers billed.
@@ -1507,6 +1508,7 @@ export interface MembershipTiersSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   amountCents?: T;
+  amount?: T;
   cadence?: T;
   active?: T;
   sortOrder?: T;
