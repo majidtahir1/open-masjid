@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
@@ -10,6 +11,7 @@ import { mediaAlt, mediaUrl, type EventLike } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { fetchEventBySlug } from '@/lib/data'
 import { isPreviewMode } from '@/lib/previewMode'
+import { getRequestOrigin } from '@/lib/seo'
 
 interface EventPageProps {
   params: Promise<{ slug: string }>
@@ -22,6 +24,57 @@ export const revalidate = 0
 type EventDoc = EventLike & {
   description?: unknown
   contact?: string | null
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: EventPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const sp = await searchParams
+  const tenant = await getCurrentTenant()
+  if (!tenant) return {}
+  const draft = await isPreviewMode(sp)
+  const event = (await fetchEventBySlug(tenant, slug, { draft })) as EventDoc | null
+  if (!event) return {}
+
+  const { origin } = await getRequestOrigin(tenant)
+  const title = event.title
+  const description =
+    (event.shortDescription && event.shortDescription.trim()) ||
+    (tenant.name ? `${event.title} · ${tenant.name}` : event.title)
+
+  const flyerPath = mediaUrl(event.flyerImage)
+  const tenantLogoPath = mediaUrl(
+    (tenant as { branding?: { logo?: unknown } } | null | undefined)?.branding?.logo,
+  )
+  const imagePath = flyerPath ?? tenantLogoPath
+  const imageUrl = imagePath
+    ? imagePath.startsWith('http')
+      ? imagePath
+      : `${origin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    : null
+
+  const url = `${origin}/events/${slug}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      images: imageUrl ? [{ url: imageUrl, alt: title }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
+  }
 }
 
 export default async function EventDetailPage({ params, searchParams }: EventPageProps) {
