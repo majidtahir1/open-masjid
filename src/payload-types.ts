@@ -76,6 +76,7 @@ export interface Config {
     'donation-funds': DonationFund;
     donations: Donation;
     'membership-tiers': MembershipTier;
+    members: Member;
     media: Media;
     users: User;
     tenants: Tenant;
@@ -95,6 +96,7 @@ export interface Config {
     'donation-funds': DonationFundsSelect<false> | DonationFundsSelect<true>;
     donations: DonationsSelect<false> | DonationsSelect<true>;
     'membership-tiers': MembershipTiersSelect<false> | MembershipTiersSelect<true>;
+    members: MembersSelect<false> | MembersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
@@ -978,6 +980,33 @@ export interface MembershipTier {
   createdAt: string;
 }
 /**
+ * Congregants subscribed to a membership tier.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "members".
+ */
+export interface Member {
+  id: number;
+  tenant: number | Tenant;
+  email: string;
+  name: string;
+  phone?: string | null;
+  tier: number | MembershipTier;
+  status: 'active' | 'grace' | 'inactive';
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripeSubscriptionStatus?: string | null;
+  joinedAt?: string | null;
+  currentPeriodEnd?: string | null;
+  canceledAt?: string | null;
+  /**
+   * Admin-only notes; not visible to the member.
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant's content.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1150,6 +1179,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'membership-tiers';
         value: number | MembershipTier;
+      } | null)
+    | ({
+        relationTo: 'members';
+        value: number | Member;
       } | null)
     | ({
         relationTo: 'media';
@@ -1487,6 +1520,27 @@ export interface MembershipTiersSelect<T extends boolean = true> {
       };
   lastStripeSyncAt?: T;
   lastStripeSyncError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "members_select".
+ */
+export interface MembersSelect<T extends boolean = true> {
+  tenant?: T;
+  email?: T;
+  name?: T;
+  phone?: T;
+  tier?: T;
+  status?: T;
+  stripeCustomerId?: T;
+  stripeSubscriptionId?: T;
+  stripeSubscriptionStatus?: T;
+  joinedAt?: T;
+  currentPeriodEnd?: T;
+  canceledAt?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

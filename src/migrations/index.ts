@@ -10,6 +10,7 @@ import * as migration_20260430_152000_grandfather_existing_tenants from './20260
 import * as migration_20260501_044030_donation_funds_and_donations from './20260501_044030_donation_funds_and_donations';
 import * as migration_20260504_175029_pages_nav_fields from './20260504_175029_pages_nav_fields';
 import * as migration_20260504_185611_membership_tiers_collection from './20260504_185611_membership_tiers_collection';
+import * as migration_20260504_190544_members_collection from './20260504_190544_members_collection';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20260504_185611_membership_tiers_collection.up,
     down: migration_20260504_185611_membership_tiers_collection.down,
-    name: '20260504_185611_membership_tiers_collection'
+    name: '20260504_185611_membership_tiers_collection',
+  },
+  {
+    up: migration_20260504_190544_members_collection.up,
+    down: migration_20260504_190544_members_collection.down,
+    name: '20260504_190544_members_collection'
   },
 ];

@@ -9,6 +9,7 @@ import sharp from 'sharp'
 
 import { Announcements } from './collections/Announcements'
 import { DonationFunds } from './collections/DonationFunds'
+import { Members } from './collections/Members'
 import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
@@ -119,6 +120,7 @@ export default buildConfig({
     DonationFunds,
     Donations,
     MembershipTiers,
+    Members,
     Media,
     Users,
     Tenants,
