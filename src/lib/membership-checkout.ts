@@ -66,10 +66,12 @@ export function buildCheckoutSessionArgs(
   const tierId = String(tier.id)
   const sharedMetadata = { kind: 'membership', tenantId, tierId }
 
+  // Note: in `mode: 'subscription'` Stripe always creates a Customer for the
+  // session — passing `customer_creation` is rejected with
+  // "`customer_creation` can only be used in `payment` mode."
   return {
     mode: 'subscription',
     line_items: [{ price: tier.stripePriceId, quantity: 1 }],
-    customer_creation: 'always',
     success_url: `${origin}/membership/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/membership`,
     metadata: sharedMetadata,

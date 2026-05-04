@@ -28,6 +28,7 @@ const NAV_LINKS: Array<{ href: string; label: string }> = [
   { href: '/', label: 'Home' },
   { href: '/prayer-times', label: 'Prayer Times' },
   { href: '/events', label: 'Events' },
+  { href: '/membership', label: 'Membership' },
   { href: '/about', label: 'About' },
 ]
 

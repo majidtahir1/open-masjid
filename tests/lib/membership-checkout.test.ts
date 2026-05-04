@@ -15,9 +15,9 @@ describe('buildCheckoutSessionArgs', () => {
     expect(args.cancel_url).toContain('/membership')
   })
 
-  it('includes customer_creation: always', () => {
+  it('does not set customer_creation (subscription mode auto-creates customer; Stripe rejects the field)', () => {
     const args = buildCheckoutSessionArgs(tier, tenant, 'https://test.openmasjid.app')
-    expect(args.customer_creation).toBe('always')
+    expect(args.customer_creation).toBeUndefined()
   })
 
   it('metadata includes tenantId and tierId as strings', () => {

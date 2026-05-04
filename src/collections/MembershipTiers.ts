@@ -40,7 +40,7 @@ export const MembershipTiers: CollectionConfig = {
   admin: {
     group: 'Membership',
     useAsTitle: 'name',
-    defaultColumns: ['name', 'amountCents', 'cadence', 'active', 'sortOrder'],
+    defaultColumns: ['name', 'amount', 'cadence', 'active', 'sortOrder'],
     description: 'Paid recurring tiers congregants can subscribe to.',
   },
   access: {
