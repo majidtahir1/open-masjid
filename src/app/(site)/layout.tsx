@@ -22,6 +22,7 @@ import { tenantThemeCss } from '@/lib/tenantTheme'
 import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
 import { fetchNavPages } from '@/lib/data'
 import { resolveTenantFavicon } from '@/lib/tenantFavicon'
+import { getRequestOrigin } from '@/lib/seo'
 import { getTenantBillingState, isPublicSiteOffline, type BillingTenantFields } from '@/lib/billing'
 import OfflineNotice from './_components/OfflineNotice'
 
@@ -30,12 +31,51 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getCurrentTenant()
   const favicon = resolveTenantFavicon(tenant)
+  const { origin } = await getRequestOrigin(tenant)
+
+  const name = tenant?.name ?? 'OpenMasjid'
+  const tagline =
+    typeof tenant?.footerTagline === 'string' && tenant.footerTagline.trim()
+      ? tenant.footerTagline.trim()
+      : tenant?.name
+      ? `${tenant.name} — prayer times, events, and announcements`
+      : 'Multi-tenant masjid website platform'
+
+  // Resolve the tenant logo to an absolute URL for OG previews. Logo lives
+  // on `tenant.branding.logo` as either a populated Media doc or an unpopulated
+  // relationship id. Only emit if we have a usable absolute URL.
+  const logoRel = (tenant as { branding?: { logo?: unknown } } | null | undefined)
+    ?.branding?.logo
+  const logoPath = mediaUrl(logoRel)
+  const ogImage = logoPath
+    ? logoPath.startsWith('http')
+      ? logoPath
+      : `${origin}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`
+    : null
+  const images = ogImage ? [{ url: ogImage, alt: name }] : undefined
+
   return {
-    title: tenant?.name ?? 'OpenMasjid',
-    description: tenant?.name
-      ? `${tenant.name} — prayer times, events, and community`
-      : 'Multi-tenant masjid website platform',
+    metadataBase: new URL(origin),
+    title: tenant?.name
+      ? { default: name, template: `%s | ${name}` }
+      : name,
+    description: tagline,
     icons: [{ rel: 'icon', url: favicon.href, type: favicon.type }],
+    openGraph: {
+      type: 'website',
+      siteName: name,
+      title: name,
+      description: tagline,
+      url: origin,
+      locale: 'en_US',
+      images,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: name,
+      description: tagline,
+      images: ogImage ? [ogImage] : undefined,
+    },
   }
 }
 

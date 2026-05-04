@@ -20,6 +20,9 @@ import {
 } from '@/lib/data'
 import { eventToHeroSlide } from '@/lib/eventToHeroSlide'
 import { getHeroLiveData } from '@/lib/getHeroLiveData'
+import { getActiveSchedule } from '@/lib/prayer-schedule'
+import { getRequestOrigin } from '@/lib/seo'
+import MosqueJsonLd from './_components/MosqueJsonLd'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
@@ -30,7 +33,7 @@ export default async function HomePage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const [slides, featuredEvents, events, services, liveData, announcements] =
+  const [slides, featuredEvents, events, services, liveData, announcements, schedule, requestOrigin] =
     await Promise.all([
       fetchHeroSlides(tenant),
       fetchFeaturedEvents(tenant),
@@ -41,6 +44,8 @@ export default async function HomePage() {
         (tenant as { location?: { timezone?: string | null } }).location?.timezone ?? null,
       ),
       fetchAnnouncements(tenant),
+      getActiveSchedule(tenant.id),
+      getRequestOrigin(tenant),
     ])
 
   // Interleave manually-authored hero slides with featured events so both
@@ -52,6 +57,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <MosqueJsonLd tenant={tenant} origin={requestOrigin.origin} schedule={schedule} />
       <AnnouncementsBanner announcements={announcements as AnnouncementLike[]} />
       <Hero slides={allSlides} liveData={liveData} />
 
