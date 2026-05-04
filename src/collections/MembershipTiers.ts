@@ -1,6 +1,7 @@
 import type { Access, CollectionConfig } from 'payload'
 import { tenantScopedAccess } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { syncTierAfterChange } from './MembershipTiers.hooks'
 
 /**
  * Returns the tenant id from a user object regardless of whether user.tenant
@@ -50,6 +51,12 @@ export const MembershipTiers: CollectionConfig = {
   },
   hooks: {
     beforeChange: [setTenantFromUser],
+    afterChange: [
+      async (args) => {
+        if (args.req.context?.skipMembershipSync) return
+        await syncTierAfterChange(args)
+      },
+    ],
   },
   fields: [
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true, admin: { readOnly: true } },

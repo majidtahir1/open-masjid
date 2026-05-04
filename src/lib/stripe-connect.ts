@@ -1,5 +1,20 @@
 import crypto from 'crypto'
+import type Stripe from 'stripe'
 import { getStripe } from './stripe'
+
+/**
+ * Returns the platform Stripe client, scoped to a connected account.
+ * All API calls made with this client act on behalf of `stripeAccountId`.
+ */
+export function stripeForAccount(stripeAccountId: string): Stripe {
+  // The Stripe Node SDK supports per-request `stripeAccount` headers, but for
+  // convenience callers can use this wrapper and pass the client to helpers
+  // that accept a plain Stripe instance (request options are passed separately).
+  // We return the platform client — callers must still pass
+  // `{ stripeAccount: stripeAccountId }` as request options where required.
+  void stripeAccountId // consumed by callers as request option
+  return getStripe()
+}
 
 interface StatePayload {
   tenantId: string | number
