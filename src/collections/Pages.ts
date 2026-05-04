@@ -104,6 +104,29 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      name: 'showInNav',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Show in navigation',
+      admin: {
+        position: 'sidebar',
+        description:
+          'When enabled, this page appears as a link in the public site header navigation. Only published pages are shown.',
+      },
+    },
+    {
+      name: 'navOrder',
+      type: 'number',
+      label: 'Navigation order',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Lower numbers appear first. Pages with the same order (or no order) are sorted alphabetically by title.',
+        condition: (data) => Boolean(data?.showInNav),
+        step: 1,
+      },
+    },
+    {
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',

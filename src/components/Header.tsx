@@ -7,11 +7,21 @@ import { Heart, Menu, X } from 'lucide-react'
 
 import { mediaUrl, type TenantLike } from './types'
 
+export interface HeaderNavPage {
+  title: string
+  slug: string
+}
+
 export interface HeaderProps {
   /** Tenant record for logo, name, and donation routing. */
   tenant?: TenantLike | null
   /** Current pathname (optional) — used to highlight the active nav link. */
   currentPath?: string
+  /**
+   * Tenant-configured Pages flagged with `showInNav`. Rendered after the
+   * static nav links in tenant-controlled order.
+   */
+  navPages?: HeaderNavPage[]
 }
 
 const NAV_LINKS: Array<{ href: string; label: string }> = [
@@ -27,7 +37,12 @@ function isActive(currentPath: string | undefined, href: string): boolean {
   return currentPath === href || currentPath.startsWith(href + '/')
 }
 
-export default function Header({ tenant, currentPath }: HeaderProps) {
+export default function Header({ tenant, currentPath, navPages = [] }: HeaderProps) {
+  const dynamicLinks = navPages.map((p) => ({
+    href: `/${p.slug}`,
+    label: p.title,
+  }))
+  const allLinks = [...NAV_LINKS, ...dynamicLinks]
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -94,7 +109,7 @@ export default function Header({ tenant, currentPath }: HeaderProps) {
           className="hidden flex-1 justify-center gap-1 md:flex"
           aria-label="Main"
         >
-          {NAV_LINKS.map((link) => {
+          {allLinks.map((link) => {
             const active = isActive(currentPath, link.href)
             return (
               <Link
@@ -161,7 +176,7 @@ export default function Header({ tenant, currentPath }: HeaderProps) {
         aria-hidden={!menuOpen}
       >
         <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">
-          {NAV_LINKS.map((link) => {
+          {allLinks.map((link) => {
             const active = isActive(currentPath, link.href)
             return (
               <Link

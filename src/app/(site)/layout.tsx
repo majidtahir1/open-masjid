@@ -20,6 +20,7 @@ import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant, getTenantContext } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
 import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
+import { fetchNavPages } from '@/lib/data'
 import { resolveTenantFavicon } from '@/lib/tenantFavicon'
 import { getTenantBillingState, isPublicSiteOffline, type BillingTenantFields } from '@/lib/billing'
 import OfflineNotice from './_components/OfflineNotice'
@@ -73,9 +74,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     }
   }
 
-  const [themeCss, schedule] = await Promise.all([
+  const [themeCss, schedule, navPages] = await Promise.all([
     Promise.resolve(tenantThemeCss(tenant)),
     getActiveSchedule(tenant.id),
+    fetchNavPages(tenant),
   ])
 
   // Synthesize a flat PrayerScheduleLike for PrayerStrip from today's day row.
@@ -115,7 +117,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           {themeCss && (
             <style dangerouslySetInnerHTML={{ __html: themeCss }} />
           )}
-          <Header tenant={tenant as unknown as TenantLike} />
+          <Header
+            tenant={tenant as unknown as TenantLike}
+            navPages={navPages.map(({ title, slug }) => ({ title, slug }))}
+          />
           <PrayerStrip schedule={stripSchedule} />
           <main className="min-h-[60vh]">{children}</main>
           <Footer tenant={footerTenant} />

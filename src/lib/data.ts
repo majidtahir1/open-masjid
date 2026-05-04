@@ -210,6 +210,55 @@ export async function fetchPageBySlug(
   }
 }
 
+export interface NavPage {
+  title: string
+  slug: string
+  navOrder: number | null
+}
+
+/**
+ * Published pages flagged for the public-site nav, ordered by `navOrder` asc
+ * (nulls last) then `title` asc. Used by the site header to render
+ * tenant-controlled nav links alongside the static ones.
+ */
+export async function fetchNavPages(tenant: TenantRecord): Promise<NavPage[]> {
+  noStore()
+  const payload = await payloadClient()
+  try {
+    const res = await payload.find({
+      collection: 'pages',
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          showInNav: { equals: true },
+        },
+        false,
+      ),
+      // Primary sort by navOrder asc; Postgres places nulls last on ASC by
+      // default, so unordered pages fall to the end. Title is the tiebreaker.
+      sort: ['navOrder', 'title'],
+      limit: 50,
+      depth: 0,
+      overrideAccess: true,
+    })
+    return res.docs
+      .map((doc) => {
+        const d = doc as { title?: unknown; slug?: unknown; navOrder?: unknown }
+        if (typeof d.title !== 'string' || typeof d.slug !== 'string' || !d.slug) {
+          return null
+        }
+        return {
+          title: d.title,
+          slug: d.slug,
+          navOrder: typeof d.navOrder === 'number' ? d.navOrder : null,
+        }
+      })
+      .filter((p): p is NavPage => p !== null)
+  } catch {
+    return []
+  }
+}
+
 /**
  * Returns active, non-expired, published announcements for the given tenant
  * in reverse chronological order (newest first). Expired announcements

@@ -840,6 +840,14 @@ export interface Page {
     [k: string]: unknown;
   } | null;
   /**
+   * When enabled, this page appears as a link in the public site header navigation. Only published pages are shown.
+   */
+  showInNav?: boolean | null;
+  /**
+   * Lower numbers appear first. Pages with the same order (or no order) are sorted alphabetically by title.
+   */
+  navOrder?: number | null;
+  /**
    * Set automatically from your account. Only a Platform Owner can reassign.
    */
   tenant?: (number | null) | Tenant;
@@ -1354,6 +1362,8 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   content?: T;
+  showInNav?: T;
+  navOrder?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;
