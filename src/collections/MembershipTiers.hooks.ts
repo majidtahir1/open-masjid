@@ -106,12 +106,16 @@ export const syncTierAfterChange: CollectionAfterChangeHook = async ({
     updates = { lastStripeSyncError: msg, lastStripeSyncAt: new Date().toISOString() }
   }
 
-  // Persist sync state without re-firing this hook (guard via context)
+  // Persist sync state without re-firing this hook (guard via context).
+  // Pass `req` so this update runs in the same transaction as the parent
+  // create/update — otherwise it opens a new transaction that can't see the
+  // just-inserted row and Payload returns 404 to the caller.
   await req.payload.update({
     collection: 'membership-tiers',
     id: tier.id,
     data: updates,
     overrideAccess: true,
     context: { skipMembershipSync: true },
+    req,
   })
 }
