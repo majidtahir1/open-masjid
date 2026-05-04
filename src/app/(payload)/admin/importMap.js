@@ -63,6 +63,7 @@ import { default as default_01bbfbfd80ab6abe9b51ff2e0e76733f } from '../../../..
 import { default as default_8cbcecd357807e8c27e7c48ba30ad9a1 } from '../../../../src/admin/onboarding/OnboardingBanner'
 import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
 import { default as default_88163b0148bba3b80a9d3df09283cc03 } from '../../../../src/admin/donations/DonationsNav'
+import { default as default_4ce2b6d430be17aa881be5628d11e397 } from '../../../../src/admin/membership/MembershipNav'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 
 export const importMap = {
@@ -131,5 +132,6 @@ export const importMap = {
   "/src/admin/onboarding/OnboardingBanner#default": default_8cbcecd357807e8c27e7c48ba30ad9a1,
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/donations/DonationsNav#default": default_88163b0148bba3b80a9d3df09283cc03,
+  "/src/admin/membership/MembershipNav#default": default_4ce2b6d430be17aa881be5628d11e397,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }

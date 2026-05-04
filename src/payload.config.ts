@@ -79,6 +79,7 @@ export default buildConfig({
         '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
         '/src/admin/donations/DonationsNav#default',
+        '/src/admin/membership/MembershipNav#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
