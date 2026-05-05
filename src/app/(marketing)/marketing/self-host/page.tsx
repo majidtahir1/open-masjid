@@ -3,9 +3,16 @@ import { MarketingShell } from '../../_components/MarketingShell'
 import { FeatureCTA } from '../../_components/FeatureSection'
 import { Database, Github, Layers, Server, X } from '../../_components/Icons'
 
+const TITLE = 'Self-Host — OpenMasjid'
+const DESCRIPTION =
+  'Run OpenMasjid on your own server, free, forever. Open-source. Same code we host.'
+
 export const metadata = {
-  title: 'Self-Host — OpenMasjid',
-  description: 'Run OpenMasjid on your own server, free, forever. Open-source. Same code we host.',
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/self-host' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/self-host', type: 'website' },
+  twitter: { title: TITLE, description: DESCRIPTION },
 }
 
 export default function SelfHostPage() {

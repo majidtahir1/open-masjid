@@ -1,9 +1,16 @@
 import { MarketingShell } from '../../_components/MarketingShell'
 import { ArrowRight, Calendar, Github, Mail } from '../../_components/Icons'
 
+const TITLE = 'Contact — OpenMasjid'
+const DESCRIPTION =
+  'Talk to a human. Whether you are evaluating, migrating, or applying for a Sadaqah scholarship, we will respond within one business day.'
+
 export const metadata = {
-  title: 'Contact — OpenMasjid',
-  description: 'Talk to a human. Whether you are evaluating, migrating, or applying for a Sadaqah scholarship, we will respond within one business day.',
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/contact' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/contact', type: 'website' },
+  twitter: { title: TITLE, description: DESCRIPTION },
 }
 
 export default function ContactPage() {

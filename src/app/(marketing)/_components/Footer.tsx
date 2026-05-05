@@ -51,6 +51,7 @@ export function MarketingFooter() {
             <ul>
               <li><Link href="/about">About</Link></li>
               <li><Link href="/contact">Contact</Link></li>
+              <li><a href="mailto:hello@openmasjid.app">hello@openmasjid.app</a></li>
             </ul>
           </div>
         </div>

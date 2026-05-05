@@ -1,6 +1,16 @@
 import { PageStub } from '../../_components/PageStub'
 
-export const metadata = { title: 'Docs — OpenMasjid' }
+const TITLE = 'Docs — OpenMasjid'
+const DESCRIPTION =
+  'Setup, admin guide, branding, custom domain, and self-hosting. Living documentation, edited in the open on GitHub.'
+
+export const metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/docs' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/docs', type: 'website' },
+  twitter: { title: TITLE, description: DESCRIPTION },
+}
 
 export default function DocsPage() {
   return (
