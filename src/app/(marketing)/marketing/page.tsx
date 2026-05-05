@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MarketingShell } from '../_components/MarketingShell'
+import OpenMasjidJsonLd from '../_components/OpenMasjidJsonLd'
 import { BrowserFrame, TenantPreview } from '../_components/TenantPreview'
 import {
   ArrowRight,
@@ -19,6 +20,19 @@ export const metadata = {
   title: 'OpenMasjid — A modern website platform built for masajid',
   description:
     "Prayer times, events, donations, and your branding — without the WordPress headaches. Free to self-host. $49/mo hosted.",
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'OpenMasjid — A modern website platform built for masajid',
+    description:
+      "Prayer times, events, donations, and your branding — without the WordPress headaches. Free to self-host. $49/mo hosted.",
+    url: '/',
+    type: 'website',
+  },
+  twitter: {
+    title: 'OpenMasjid — A modern website platform built for masajid',
+    description:
+      "Prayer times, events, donations, and your branding — without the WordPress headaches. Free to self-host. $49/mo hosted.",
+  },
 }
 
 const FEATURES = [
@@ -40,6 +54,7 @@ const STEPS = [
 export default function MarketingHome() {
   return (
     <MarketingShell current="/">
+      <OpenMasjidJsonLd />
       {/* Hero */}
       <section className="om-hero">
         <div className="om-container om-hero-grid">

@@ -1,9 +1,16 @@
 import { MarketingShell } from '../../_components/MarketingShell'
 import { FeatureCTA } from '../../_components/FeatureSection'
 
+const TITLE = 'About — OpenMasjid'
+const DESCRIPTION =
+  'Built for the ummah. Owned by it. OpenMasjid started because one masjid couldn’t find a website it could trust.'
+
 export const metadata = {
-  title: 'About — OpenMasjid',
-  description: 'Built for the ummah. Owned by it. OpenMasjid started because one masjid couldn’t find a website it could trust.',
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/about' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/about', type: 'website' },
+  twitter: { title: TITLE, description: DESCRIPTION },
 }
 
 const CARDS = [

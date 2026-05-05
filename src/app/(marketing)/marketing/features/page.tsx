@@ -10,9 +10,16 @@ import {
   Sunrise,
 } from '../../_components/Icons'
 
+const TITLE = 'Features — OpenMasjid'
+const DESCRIPTION =
+  "Everything a masjid needs. Nothing it doesn't. Prayer times, events, donations, branding, security."
+
 export const metadata = {
-  title: 'Features — OpenMasjid',
-  description: "Everything a masjid needs. Nothing it doesn't. Prayer times, events, donations, branding, security.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/features' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/features', type: 'website' },
+  twitter: { title: TITLE, description: DESCRIPTION },
 }
 
 const FEATURES = [

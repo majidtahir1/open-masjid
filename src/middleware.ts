@@ -27,6 +27,15 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || ''
   const pathname = request.nextUrl.pathname
 
+  // Canonical host: 301 redirect www.openmasjid.app → apex. Keep query string
+  // and pathname intact. Local dev (localhost / *.localhost) and tenant hosts
+  // are unaffected because we only match this exact host.
+  const bareHostForRedirect = host.split(':')[0].toLowerCase()
+  if (bareHostForRedirect === 'www.openmasjid.app') {
+    const search = request.nextUrl.search || ''
+    return NextResponse.redirect(`https://openmasjid.app${pathname}${search}`, 301)
+  }
+
   const context = parseHostContext(host)
 
   // Security: block `/admin` on custom public domains. Admin is only exposed

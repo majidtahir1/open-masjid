@@ -2,9 +2,16 @@ import Link from 'next/link'
 import { MarketingShell } from '../../_components/MarketingShell'
 import { ArrowRight, Globe, Layers, Sparkles } from '../../_components/Icons'
 
+const TITLE = 'Compare — OpenMasjid'
+const DESCRIPTION =
+  'Honest comparisons against the three most common alternatives masajid actually consider.'
+
 export const metadata = {
-  title: 'Compare — OpenMasjid',
-  description: 'Honest comparisons against the three most common alternatives masajid actually consider.',
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/compare' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/compare', type: 'website' },
+  twitter: { title: TITLE, description: DESCRIPTION },
 }
 
 const ITEMS = [
