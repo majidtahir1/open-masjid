@@ -75,6 +75,8 @@ export interface Config {
     pages: Page;
     'donation-funds': DonationFund;
     donations: Donation;
+    'membership-tiers': MembershipTier;
+    members: Member;
     media: Media;
     users: User;
     tenants: Tenant;
@@ -93,6 +95,8 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'donation-funds': DonationFundsSelect<false> | DonationFundsSelect<true>;
     donations: DonationsSelect<false> | DonationsSelect<true>;
+    'membership-tiers': MembershipTiersSelect<false> | MembershipTiersSelect<true>;
+    members: MembersSelect<false> | MembersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
@@ -942,6 +946,85 @@ export interface Donation {
   createdAt: string;
 }
 /**
+ * Paid recurring tiers congregants can subscribe to.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "membership-tiers".
+ */
+export interface MembershipTier {
+  id: number;
+  tenant: number | Tenant;
+  name: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  amountCents: number;
+  /**
+   * Dollars per period. Example: enter 25 for $25 / month. Enter 0 for a free tier (no Stripe billing — congregants sign up with name + email).
+   */
+  amount: number;
+  cadence: 'monthly' | 'yearly';
+  /**
+   * Uncheck to soft-delete: hides from /membership but keeps existing subscribers billed.
+   */
+  active?: boolean | null;
+  /**
+   * Lower numbers appear first on the public page.
+   */
+  sortOrder?: number | null;
+  stripeProductId?: string | null;
+  stripePriceId?: string | null;
+  archivedPriceIds?:
+    | {
+        priceId?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  lastStripeSyncAt?: string | null;
+  lastStripeSyncError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Congregants subscribed to a membership tier.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "members".
+ */
+export interface Member {
+  id: number;
+  tenant: number | Tenant;
+  email: string;
+  name: string;
+  phone?: string | null;
+  tier: number | MembershipTier;
+  status: 'active' | 'grace' | 'inactive';
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripeSubscriptionStatus?: string | null;
+  joinedAt?: string | null;
+  currentPeriodEnd?: string | null;
+  canceledAt?: string | null;
+  /**
+   * Admin-only notes; not visible to the member.
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant's content.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1110,6 +1193,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'donations';
         value: number | Donation;
+      } | null)
+    | ({
+        relationTo: 'membership-tiers';
+        value: number | MembershipTier;
+      } | null)
+    | ({
+        relationTo: 'members';
+        value: number | Member;
       } | null)
     | ({
         relationTo: 'media';
@@ -1429,6 +1520,53 @@ export interface DonationsSelect<T extends boolean = true> {
   stripeChargeId?: T;
   stripeSubscriptionId?: T;
   stripeAccountId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "membership-tiers_select".
+ */
+export interface MembershipTiersSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  description?: T;
+  amountCents?: T;
+  amount?: T;
+  cadence?: T;
+  active?: T;
+  sortOrder?: T;
+  stripeProductId?: T;
+  stripePriceId?: T;
+  archivedPriceIds?:
+    | T
+    | {
+        priceId?: T;
+        id?: T;
+      };
+  lastStripeSyncAt?: T;
+  lastStripeSyncError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "members_select".
+ */
+export interface MembersSelect<T extends boolean = true> {
+  tenant?: T;
+  email?: T;
+  name?: T;
+  phone?: T;
+  tier?: T;
+  status?: T;
+  stripeCustomerId?: T;
+  stripeSubscriptionId?: T;
+  stripeSubscriptionStatus?: T;
+  joinedAt?: T;
+  currentPeriodEnd?: T;
+  canceledAt?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

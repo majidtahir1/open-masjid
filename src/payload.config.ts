@@ -9,6 +9,8 @@ import sharp from 'sharp'
 
 import { Announcements } from './collections/Announcements'
 import { DonationFunds } from './collections/DonationFunds'
+import { Members } from './collections/Members'
+import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
@@ -77,6 +79,7 @@ export default buildConfig({
         '/src/admin/onboarding/OnboardingBanner#default',
         '/src/admin/DashboardLink#default',
         '/src/admin/donations/DonationsNav#default',
+        '/src/admin/membership/MembershipNav#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
@@ -117,6 +120,8 @@ export default buildConfig({
     Pages,
     DonationFunds,
     Donations,
+    MembershipTiers,
+    Members,
     Media,
     Users,
     Tenants,
