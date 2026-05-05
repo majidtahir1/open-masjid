@@ -855,6 +855,23 @@ export interface Page {
    * Set automatically from your account. Only a Platform Owner can reassign.
    */
   tenant?: (number | null) | Tenant;
+  /**
+   * Optional overrides for search engine and social-share previews. Leave blank to use sensible defaults derived from the page.
+   */
+  seo?: {
+    /**
+     * Overrides the page title in the browser tab and social shares. ~60 chars max.
+     */
+    title?: string | null;
+    /**
+     * Used for the meta description and social share previews. ~155 chars max.
+     */
+    description?: string | null;
+    /**
+     * Overrides the default share image (tenant logo). Recommended 1200×630.
+     */
+    ogImage?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -955,7 +972,7 @@ export interface MembershipTier {
   } | null;
   amountCents: number;
   /**
-   * Dollars per period. Example: enter 25 for $25 / month.
+   * Dollars per period. Example: enter 25 for $25 / month. Enter 0 for a free tier (no Stripe billing — congregants sign up with name + email).
    */
   amount: number;
   cadence: 'monthly' | 'yearly';
@@ -1456,6 +1473,13 @@ export interface PagesSelect<T extends boolean = true> {
   showInNav?: T;
   navOrder?: T;
   tenant?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        ogImage?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

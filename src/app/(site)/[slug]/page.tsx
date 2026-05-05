@@ -1,10 +1,13 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import RichText from '@/components/RichText'
 import PreviewBanner from '@/components/PreviewBanner'
+import { mediaUrl } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { fetchPageBySlug } from '@/lib/data'
 import { isPreviewMode } from '@/lib/previewMode'
+import { getRequestOrigin } from '@/lib/seo'
 
 const RESERVED = new Set(['events', 'about', 'donate', 'prayer-times', 'marketing'])
 
@@ -16,6 +19,70 @@ interface PageProps {
   searchParams: Promise<{ draft?: string | string[] }>
 }
 
+interface PageDoc {
+  title?: string | null
+  content?: unknown
+  seo?: {
+    title?: string | null
+    description?: string | null
+    ogImage?: unknown
+  } | null
+}
+
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const sp = await searchParams
+  if (RESERVED.has(slug)) return {}
+
+  const tenant = await getCurrentTenant()
+  if (!tenant) return {}
+
+  const draft = await isPreviewMode(sp)
+  const page = (await fetchPageBySlug(tenant, slug, { draft })) as PageDoc | null
+  if (!page) return {}
+
+  const { origin } = await getRequestOrigin(tenant)
+  const title = page.seo?.title?.trim() || page.title || slug
+  const description =
+    page.seo?.description?.trim() ||
+    (tenant.name
+      ? `${page.title ?? slug} · ${tenant.name}`
+      : (page.title ?? slug))
+
+  // Prefer page-level SEO image; fall back to tenant logo.
+  const seoImagePath = mediaUrl(page.seo?.ogImage)
+  const tenantLogoPath = mediaUrl(
+    (tenant as { branding?: { logo?: unknown } } | null | undefined)?.branding?.logo,
+  )
+  const imagePath = seoImagePath ?? tenantLogoPath
+  const imageUrl = imagePath
+    ? imagePath.startsWith('http')
+      ? imagePath
+      : `${origin}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    : null
+
+  const url = `${origin}/${slug}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      images: imageUrl ? [{ url: imageUrl, alt: title }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
+  }
+}
+
 export default async function DynamicPage({ params, searchParams }: PageProps) {
   const { slug } = await params
   const sp = await searchParams
@@ -25,9 +92,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
   if (!tenant) notFound()
 
   const draft = await isPreviewMode(sp)
-  const page = (await fetchPageBySlug(tenant, slug, { draft })) as
-    | { title?: string; content?: unknown }
-    | null
+  const page = (await fetchPageBySlug(tenant, slug, { draft })) as PageDoc | null
   if (!page) notFound()
 
   return (

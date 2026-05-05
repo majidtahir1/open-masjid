@@ -148,6 +148,48 @@ export const Pages: CollectionConfig = {
         },
       },
     },
+    // SEO overrides — sidebar group, kept in its own block so it merges
+    // cleanly alongside any other parallel field additions to this collection.
+    {
+      name: 'seo',
+      type: 'group',
+      label: 'SEO',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Optional overrides for search engine and social-share previews. Leave blank to use sensible defaults derived from the page.',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          label: 'SEO Title',
+          admin: {
+            description:
+              'Overrides the page title in the browser tab and social shares. ~60 chars max.',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'Meta Description',
+          admin: {
+            description:
+              'Used for the meta description and social share previews. ~155 chars max.',
+          },
+        },
+        {
+          name: 'ogImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Share Image',
+          admin: {
+            description:
+              'Overrides the default share image (tenant logo). Recommended 1200×630.',
+          },
+        },
+      ],
+    },
   ],
 }
 
