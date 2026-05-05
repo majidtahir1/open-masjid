@@ -1056,6 +1056,65 @@
 @media (max-width: 880px) { .om-contact-grid { grid-template-columns: 1fr; } }
 .om-contact-card { display: flex; flex-direction: column; gap: 14px; padding: 32px; }
 
+.om-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 640px;
+  margin: 32px auto 0;
+  background: white;
+  border: 1px solid var(--om-border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+}
+.om-contact-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 600px) {
+  .om-contact-form-row { grid-template-columns: 1fr; }
+  .om-contact-form { padding: 24px; }
+}
+.om-contact-form-field { display: flex; flex-direction: column; gap: 6px; }
+.om-contact-form-field > span {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fg1, #1a1a1a);
+}
+.om-contact-form-field input,
+.om-contact-form-field textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--om-border);
+  border-radius: 8px;
+  background: white;
+  color: inherit;
+  width: 100%;
+  resize: vertical;
+}
+.om-contact-form-field input:focus,
+.om-contact-form-field textarea:focus {
+  outline: 2px solid var(--om-brand, #1B3358);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.om-contact-form-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin: 0;
+}
+.om-contact-form-success {
+  max-width: 640px;
+  margin: 32px auto 0;
+  background: white;
+  border: 1px solid var(--om-border);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
 /* ---------- Get Started form ---------- */
 .om-signup-card {
   background: white;

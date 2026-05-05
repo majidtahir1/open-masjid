@@ -1,5 +1,6 @@
 import { MarketingShell } from '../../_components/MarketingShell'
 import { ArrowRight, Calendar, Github, Mail } from '../../_components/Icons'
+import { ContactForm } from './ContactForm'
 
 const TITLE = 'Contact — OpenMasjid'
 const DESCRIPTION =
@@ -35,11 +36,11 @@ export default function ContactPage() {
               <p className="om-body">Walk through your masjid's setup with us. Migration questions welcome.</p>
               <span className="om-link-arrow">Book on Cal.com <ArrowRight /></span>
             </a>
-            <a href="mailto:hello@openmasjid.app" className="om-card om-card-hover om-contact-card">
+            <a href="#contact-form" className="om-card om-card-hover om-contact-card">
               <span className="om-benefit-icon"><Mail /></span>
-              <h3 className="om-h4">Email us</h3>
-              <p className="om-body">hello@openmasjid.app — for evaluations, migrations, scholarships.</p>
-              <span className="om-link-arrow">Send an email <ArrowRight /></span>
+              <h3 className="om-h4">Send us a message</h3>
+              <p className="om-body">For evaluations, migrations, scholarships. We reply within one business day.</p>
+              <span className="om-link-arrow">Use the form <ArrowRight /></span>
             </a>
             <a
               href="https://github.com/majidtahir1/open-masjid/issues"
@@ -53,6 +54,18 @@ export default function ContactPage() {
               <span className="om-link-arrow">Open an issue <ArrowRight /></span>
             </a>
           </div>
+        </div>
+      </section>
+      <section id="contact-form" className="om-section" style={{ scrollMarginTop: 80 }}>
+        <div className="om-narrow">
+          <div className="om-section-header center">
+            <p className="om-eyebrow">Get in touch</p>
+            <h2 className="om-h2">Send us a message.</h2>
+            <p className="om-lede" style={{ marginTop: 12 }}>
+              Tell us a bit about your masjid and we will get back to you.
+            </p>
+          </div>
+          <ContactForm />
         </div>
       </section>
     </MarketingShell>
