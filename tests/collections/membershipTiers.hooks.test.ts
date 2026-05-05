@@ -25,6 +25,31 @@ function makeReq() {
 }
 
 describe('syncTierAfterChange', () => {
+  it('free tier (amountCents === 0) bypasses Stripe entirely', async () => {
+    stripeMock.products.create.mockClear()
+    stripeMock.prices.create.mockClear()
+    stripeMock.products.update.mockClear()
+    stripeMock.prices.update.mockClear()
+    const req = makeReq()
+    const doc = {
+      id: 1,
+      tenant: 7,
+      name: 'Free',
+      amountCents: 0,
+      cadence: 'monthly',
+      active: true,
+      stripeProductId: null,
+      stripePriceId: null,
+      archivedPriceIds: [],
+    }
+    await syncTierAfterChange({ doc, previousDoc: null, operation: 'create', req } as any)
+    expect(stripeMock.products.create).not.toHaveBeenCalled()
+    expect(stripeMock.prices.create).not.toHaveBeenCalled()
+    // Sync state still gets stamped so admin shows "synced" / no error
+    expect(req._updates[0].data.lastStripeSyncAt).toBeTypeOf('string')
+    expect(req._updates[0].data.lastStripeSyncError).toBeNull()
+  })
+
   it('on create, sets stripeProductId and stripePriceId', async () => {
     stripeMock.products.create.mockClear(); stripeMock.prices.create.mockClear()
     const req = makeReq()

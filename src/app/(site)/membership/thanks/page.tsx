@@ -32,7 +32,7 @@ function getStripeAccountId(tenant: unknown): string | null {
 }
 
 interface Props {
-  searchParams: Promise<{ session_id?: string }>
+  searchParams: Promise<{ session_id?: string; free?: string }>
 }
 
 /** Fallback shown whenever we can't retrieve a personalised session. */
@@ -55,9 +55,31 @@ function FallbackThanks() {
 }
 
 export default async function MembershipThanksPage({ searchParams }: Props) {
-  const { session_id } = await searchParams
+  const { session_id, free } = await searchParams
 
   const tenant = await getCurrentTenant()
+  const tenantName = (tenant as { name?: string } | null)?.name ?? 'our masjid'
+
+  // Free signup path — no Stripe session, no Customer Portal.
+  if (free === '1') {
+    return (
+      <section className="py-20">
+        <div className="mx-auto max-w-[760px] px-6 text-center">
+          <div className="mb-5 font-body text-fs-xs font-semibold uppercase tracking-caps text-brand">
+            Jazak Allahu khairan
+          </div>
+          <h1 className="mb-4 font-display text-[56px] font-medium leading-[1.06] tracking-tight text-fg1">
+            Welcome to the community!
+          </h1>
+          <p className="m-0 mb-10 font-body text-fs-lg leading-relaxed text-fg2">
+            Your membership at {tenantName} is now active. We&apos;ll be in touch
+            with details about programs and events.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   const stripeAccountId = tenant ? getStripeAccountId(tenant) : null
 
   // If we can't look up the session, show a friendly fallback — never 500.
@@ -86,8 +108,6 @@ export default async function MembershipThanksPage({ searchParams }: Props) {
     // Stripe lookup failed (e.g. invalid session_id, network error) — fall back.
     return <FallbackThanks />
   }
-
-  const tenantName = (tenant as { name?: string }).name ?? 'our masjid'
 
   return (
     <section className="py-20">

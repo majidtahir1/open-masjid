@@ -70,7 +70,7 @@ export const MembershipTiers: CollectionConfig = {
       name: 'amountCents',
       type: 'number',
       required: true,
-      min: 1,
+      min: 0,
       admin: { hidden: true },
     },
     {
@@ -78,10 +78,11 @@ export const MembershipTiers: CollectionConfig = {
       type: 'number',
       virtual: true,
       required: true,
-      min: 1,
+      min: 0,
       label: 'Amount',
       admin: {
-        description: 'Dollars per period. Example: enter 25 for $25 / month.',
+        description:
+          'Dollars per period. Example: enter 25 for $25 / month. Enter 0 for a free tier (no Stripe billing — congregants sign up with name + email).',
         step: 1,
       },
       hooks: {

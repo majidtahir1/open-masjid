@@ -26,7 +26,11 @@ export default async function MembershipPage() {
     (tenant as { stripeChargesEnabled?: boolean | null }).stripeChargesEnabled === true ||
     dc?.stripeChargesEnabled === true
 
-  const rawTiers = stripeChargesEnabled ? await fetchActiveTiers(tenant) : []
+  // Free tiers don't require Stripe Connect, so we always fetch — the
+  // public list will include free tiers even if Stripe Connect isn't yet
+  // enabled. The fetch helper itself surfaces both paid (synced) and
+  // free (amountCents === 0) active tiers.
+  const rawTiers = await fetchActiveTiers(tenant)
 
   function parseTier(doc: unknown): MembershipTier | null {
     const d = doc as {
@@ -85,19 +89,13 @@ export default async function MembershipPage() {
                 <MembershipTierCard key={String(tier.id)} tier={tier} />
               ))}
             </div>
-          ) : stripeChargesEnabled ? (
-            /* Stripe Connect is active but no tiers configured yet */
-            <div className="mx-auto max-w-[480px] rounded-[var(--r-md)] border border-border bg-white p-8 text-center shadow-sh-sm">
-              <p className="m-0 font-body text-fs-base text-fg2">
-                No membership tiers are configured yet. Check back soon.
-              </p>
-            </div>
           ) : (
-            /* Stripe Connect not yet enabled for this tenant */
+            /* No active tiers (paid or free) — generic placeholder */
             <div className="mx-auto max-w-[480px] rounded-[var(--r-md)] border border-border bg-white p-8 text-center shadow-sh-sm">
               <p className="m-0 font-body text-fs-base text-fg2">
-                Online membership is not yet available. Please contact the masjid
-                directly to become a member.
+                {stripeChargesEnabled
+                  ? 'No membership tiers are configured yet. Check back soon.'
+                  : 'Online membership is not yet available. Please contact the masjid directly to become a member.'}
               </p>
             </div>
           )}

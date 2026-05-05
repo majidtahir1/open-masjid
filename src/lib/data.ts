@@ -275,7 +275,13 @@ export async function fetchActiveTiers(tenant: TenantRecord) {
         {
           tenant: { equals: tenant.id },
           active: { equals: true },
-          stripePriceId: { exists: true },
+          // Surface either:
+          //   - paid tiers that have synced to Stripe (have a stripePriceId), OR
+          //   - free tiers (amountCents === 0) which never sync to Stripe.
+          or: [
+            { stripePriceId: { exists: true } },
+            { amountCents: { equals: 0 } },
+          ],
         },
         // Tiers have no _status draft workflow — skip the published gate
         true,

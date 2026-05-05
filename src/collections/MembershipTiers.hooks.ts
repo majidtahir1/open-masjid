@@ -48,6 +48,22 @@ export const syncTierAfterChange: CollectionAfterChangeHook = async ({
   const tenantId = typeof tier.tenant === 'object' ? tier.tenant.id : tier.tenant
 
   let updates: Record<string, unknown> = {}
+  // Free tiers (amountCents === 0) bypass Stripe entirely — they don't need a
+  // Product/Price and they should still work for tenants without Connect set up.
+  // Members signing up for a free tier go through /api/membership/signup
+  // instead of Stripe Checkout.
+  if (tier.amountCents === 0) {
+    await req.payload.update({
+      collection: 'membership-tiers',
+      id: tier.id,
+      data: { lastStripeSyncAt: new Date().toISOString(), lastStripeSyncError: null },
+      overrideAccess: true,
+      context: { skipMembershipSync: true },
+      req,
+    })
+    return
+  }
+
   try {
     const tenant = await req.payload.findByID({ collection: 'tenants', id: tenantId })
     const { stripeAccountId, stripeChargesEnabled } = getTenantStripeInfo(tenant)
