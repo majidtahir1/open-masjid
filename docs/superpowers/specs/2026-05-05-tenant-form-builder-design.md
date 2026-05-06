@@ -172,6 +172,26 @@ Each public field needs: label, optional helper text, required indicator, error 
 - Conditional logic UI (deferred)
 - File-upload UI (deferred)
 
+## Design package addendum (2026-05-05)
+
+The UX designer delivered comps in `OpenMasjid_forms_design.zip` (unpacked: `design_handoff_forms_unpacked/design_handoff_forms/`). 13 hi-fi artboards covering admin and public surfaces. **The designer's package supersedes any conflict with the brief above.** Read `design_handoff_forms_unpacked/design_handoff_forms/README.md` for the full handoff.
+
+Notable refinements / additions over the original brief — these are **in v1**:
+
+- **Form-level navigation tabs:** Build / Settings / Submissions (sticky toolbar in the editor).
+- **Properties drawer tabs:** General / Validation / Logic. Logic tab renders but its content is disabled in v1 (placeholder for future conditional logic).
+- **"Show on review step"** toggle in field properties — render but disable in v1 (no review step yet).
+- **Settings sub-nav:** Basics / Submission limits / Notifications / Payment / Confirmation / Webhooks / Embed & share. Webhooks and Embed-share are net-new vs the brief; ship at least the page shells in v1, full functionality can phase per the plan.
+- **Field name (slug)** auto-generates from the label; editable, with a warning when changed (will break existing webhook/CSV consumers).
+- **Submission statuses:** `new` / `reviewed` / `archived` plus payment status. Submissions list has filter + Export CSV; submission detail has Reply / Export / Mark reviewed actions and side cards for Status + Payment.
+- **Payment block reshape:** designer changed "single fixed price" to **suggested-amount tiles + optional custom amount** (mirrors the donation widget). Update the data model: `payment` has `mode: 'fixed' | 'suggested'`, `suggestedAmounts: number[]`, `allowCustomAmount: boolean`, `priceCents` (used when `mode === 'fixed'`).
+- **Stripe pattern locked in:** Hosted Checkout (redirect), **Stripe Connect direct charges** to the tenant's connected account. No Elements, no platform-and-transfer.
+- **Submission states for payments:** `pending_payment` → `paid` (Checkout success) | `expired` (no callback). Source of truth = `checkout.session.completed` webhook; success-URL handler is best-effort UX only.
+- **Public form** uses tenant brand color via CSS var `--pf-brand` (fallback to a teal default). **Admin chrome stays neutral navy** — brand color does NOT propagate into admin.
+- **Success page** renders submitter's first name, optional Stripe receipt strip (amount + last4 + payment_intent), and "Add to calendar" + "Back to {masjidName}" actions.
+
+Tokens, type, spacing, radii, shadows: take from `colors_and_type.css` and `forms.css` in the package. Icons in the package are Lucide-conformant — import from the existing `lucide-react` instead of inlining the JSX.
+
 ## Reference
 
 - Existing tenant theming: every tenant picks logo + 3 colors + 1 font; the system derives the rest of the palette
