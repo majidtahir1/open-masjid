@@ -72,25 +72,24 @@ export default async function ThanksPage({
     (tenant.branding as { primaryColor?: string } | undefined)?.primaryColor ?? undefined
 
   return (
-    <div
-      className="om-pf-shell"
-      style={brandColor ? ({ '--pf-brand': brandColor } as React.CSSProperties) : undefined}
-    >
-      <PublicFormSuccess
-        form={form as any}
-        values={(submission.data as Record<string, unknown>) ?? {}}
-        receipt={
-          submission.paymentStatus === 'paid'
-            ? {
-                id: submission.id,
-                amountCents: submission.amountCents,
-                currency: submission.currency,
-              }
-            : undefined
-        }
-        // slug is available for symmetry / future "back to form" link
-        formSlug={slug}
-      />
-    </div>
+    <section className="om-pf-form-area">
+      <div className="om-pf-form-area__inner">
+        <PublicFormSuccess
+          form={form as any}
+          values={(submission.data as Record<string, unknown>) ?? {}}
+          receipt={
+            submission.paymentStatus === 'paid'
+              ? {
+                  id: submission.id,
+                  amountCents: submission.amountCents,
+                  currency: submission.currency,
+                }
+              : undefined
+          }
+          // slug is available for symmetry / future "back to form" link
+          formSlug={slug}
+        />
+      </div>
+    </section>
   )
 }

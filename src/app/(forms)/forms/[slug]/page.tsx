@@ -14,6 +14,7 @@ import { getCurrentTenant } from '@/lib/tenant-server'
 import { getPayloadClient } from '@/lib/payloadClient'
 import { PublicFormClient } from './PublicFormClient'
 import RichText from '@/components/RichText'
+import { computeBackgroundCss, type Appearance } from '@/lib/form-appearance'
 import '@/styles/public-forms.css'
 
 export const dynamic = 'force-dynamic'
@@ -27,6 +28,7 @@ interface PublicFormRecord {
   settings?: {
     capacity?: number | null
   } | null
+  appearance?: Appearance | null
 }
 
 export default async function FormPage({
@@ -77,28 +79,27 @@ export default async function FormPage({
 
   const closed = form.status === 'closed' || isFull
 
-  // Pull brand color from tenant branding — falls back to CSS default (#146E69)
-  // when absent.
-  const brandColor =
-    (tenant.branding as { primaryColor?: string } | undefined)?.primaryColor ??
-    undefined
+  // Background CSS from form.appearance (gradient overrides solid color)
+  const backgroundCss = computeBackgroundCss(form.appearance ?? undefined)
 
   return (
-    <div
-      className="om-pf-shell"
+    <section
+      className="om-pf-form-area"
       style={
-        brandColor
-          ? ({ '--pf-brand': brandColor } as React.CSSProperties)
+        backgroundCss
+          ? ({ '--pf-bg': backgroundCss } as React.CSSProperties)
           : undefined
       }
     >
-      <header className="om-pf-header">
-        <h1 className="om-pf-title">{form.title}</h1>
-        {form.description ? (
-          <RichText data={form.description as never} className="om-pf-description" />
-        ) : null}
-      </header>
-      <PublicFormClient form={form as any} closed={closed} />
-    </div>
+      <div className="om-pf-form-area__inner">
+        <header className="om-pf-header">
+          <h1 className="om-pf-title">{form.title}</h1>
+          {form.description ? (
+            <RichText data={form.description as never} className="om-pf-description" />
+          ) : null}
+        </header>
+        <PublicFormClient form={form as any} closed={closed} />
+      </div>
+    </section>
   )
 }
