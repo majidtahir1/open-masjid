@@ -50,30 +50,18 @@ export default function FormEditView() {
       ? tenantField.id
       : (tenantField as string | number | null)
 
-  // Document info for form ID
-  let formId: string | number | null = null
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const docInfo = useDocumentInfo()
-    formId = docInfo.id ?? null
-  } catch {
-    // Not inside a document context yet — formId stays null
-  }
+  // Hooks must be called unconditionally at top level (Rules of Hooks).
+  // Inside Payload's edit-view context these are always available.
+  const docInfo = useDocumentInfo() as { id?: string | number | null }
+  const formId: string | number | null = docInfo?.id ?? null
 
-  // useForm — submit + processing state
-  // Payload v3's useForm() context exposes `submit: Submit`
-  let submitFn: (() => Promise<void>) | null = null
-  let isProcessing = false
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const formCtx = useForm()
-    if (typeof formCtx.submit === 'function') {
-      submitFn = () => formCtx.submit()
-      isProcessing = (formCtx as { isProcessing?: boolean }).isProcessing ?? false
-    }
-  } catch {
-    // useForm not available in this context
+  const formCtx = useForm() as {
+    submit?: () => Promise<void> | void
+    isProcessing?: boolean
   }
+  const submitFn: (() => Promise<void> | void) | null =
+    typeof formCtx?.submit === 'function' ? formCtx.submit.bind(formCtx) : null
+  const isProcessing = formCtx?.isProcessing ?? false
 
   // Fetch tenant slug to build absolute public URL when on bare localhost
   const [tenantSlug, setTenantSlug] = useState<string | null>(null)
