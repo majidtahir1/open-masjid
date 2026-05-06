@@ -45,7 +45,7 @@ export default function FormsFeaturePage() {
       <FeatureSection
         alt
         kicker="Field types"
-        title="Twelve types. Covers what masajid actually ask."
+        title="Collect all types of data."
         body="Short text, email, phone, long text, number, date, dropdown, radio, multi-select, checkbox group, single consent checkbox, page break. Required toggles, validation, helper text. No 30-page taxonomy of widgets — just the ones you use."
         side={
           <div className="om-mockup-card">
