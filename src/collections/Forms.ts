@@ -148,17 +148,37 @@ export const Forms: CollectionConfig = {
         {
           name: 'backgroundColor',
           type: 'text',
+          label: 'Background color',
           admin: {
-            description: 'Solid background color for the public form (hex like #FAF9F4). Ignored if a gradient is set below.',
+            description: 'Solid background color shown behind the form card. Ignored if a gradient is set below.',
             placeholder: '#FAF9F4',
+            components: {
+              Field: '/src/admin/forms/fields/ColorField#default',
+            },
           },
         },
         {
           name: 'backgroundGradient',
           type: 'group',
           fields: [
-            { name: 'from', type: 'text', admin: { placeholder: '#1B3358' } },
-            { name: 'to', type: 'text', admin: { placeholder: '#0E1B2C' } },
+            {
+              name: 'from',
+              type: 'text',
+              label: 'Gradient start',
+              admin: {
+                placeholder: '#1B3358',
+                components: { Field: '/src/admin/forms/fields/ColorField#default' },
+              },
+            },
+            {
+              name: 'to',
+              type: 'text',
+              label: 'Gradient end',
+              admin: {
+                placeholder: '#0E1B2C',
+                components: { Field: '/src/admin/forms/fields/ColorField#default' },
+              },
+            },
             {
               name: 'direction',
               type: 'select',
@@ -170,7 +190,7 @@ export const Forms: CollectionConfig = {
               ],
             },
           ],
-          admin: { description: 'Optional gradient. When `from` is set, it overrides the solid color above.' },
+          admin: { description: 'Optional gradient. When the start color is set, the gradient overrides the solid color above.' },
         },
       ],
     },

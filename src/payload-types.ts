@@ -999,11 +999,11 @@ export interface Form {
       [k: string]: unknown;
     } | null;
     /**
-     * Solid background color for the public form (hex like #FAF9F4). Ignored if a gradient is set below.
+     * Solid background color shown behind the form card. Ignored if a gradient is set below.
      */
     backgroundColor?: string | null;
     /**
-     * Optional gradient. When `from` is set, it overrides the solid color above.
+     * Optional gradient. When the start color is set, the gradient overrides the solid color above.
      */
     backgroundGradient?: {
       from?: string | null;
