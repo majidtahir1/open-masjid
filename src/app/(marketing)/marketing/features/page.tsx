@@ -3,6 +3,7 @@ import { MarketingShell } from '../../_components/MarketingShell'
 import {
   ArrowRight,
   Calendar,
+  ClipboardList,
   Code,
   Heart,
   Palette,
@@ -12,7 +13,7 @@ import {
 
 const TITLE = 'Features — OpenMasjid'
 const DESCRIPTION =
-  "Everything a masjid needs. Nothing it doesn't. Prayer times, events, donations, branding, security."
+  "Everything a masjid needs. Nothing it doesn't. Prayer times, events, donations, forms, branding, security."
 
 export const metadata = {
   title: TITLE,
@@ -26,6 +27,7 @@ const FEATURES = [
   { Icon: Sunrise, title: 'Prayer times', body: 'Multiple jummah slots, iqamah overrides, Hijri dates, full-year setup in minutes.', to: '/features/prayer-times' },
   { Icon: Calendar, title: 'Events & flyers', body: 'Three display modes — uploaded, auto-generated, or text-only.', to: '/features/events' },
   { Icon: Heart, title: 'Donations', body: 'Native Stripe with Sadaqah / Zakat / Building Fund tabs.', to: '/features/donations' },
+  { Icon: ClipboardList, title: 'Forms & RSVPs', body: 'RSVPs, registrations, volunteer signups, surveys. Capacity, payments, custom branding.', to: '/features/forms' },
   { Icon: Palette, title: 'Branding', body: 'Logo, three colors, a font. We derive the full palette.', to: '/features/branding' },
   { Icon: Shield, title: 'Security', body: 'No plugin marketplace. No third-party scripts.', to: '/features/security' },
   { Icon: Code, title: 'Open-source', body: 'Self-host or migrate any time.', to: '/self-host' },

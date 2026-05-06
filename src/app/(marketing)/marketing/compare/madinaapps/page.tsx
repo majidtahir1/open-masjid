@@ -32,6 +32,7 @@ export default function CompareMadinaAppsPage() {
               { label: 'Built for masajid', left: 'Yes', right: 'Yes' },
               { label: 'Modern design', left: 'Dated', right: 'Designed-by-default 2026' },
               { label: 'Custom branding', left: 'Limited', right: 'Full skin: logo, 3 colors, font' },
+              { label: 'Forms / RSVPs', left: 'Basic, third-party for richer needs', right: 'Visual builder, capacity, payments' },
               { label: 'Open-source', left: 'No', right: 'MIT' },
               { label: 'Self-host option', left: 'No', right: 'Yes, free' },
               { label: 'Data export', left: 'Limited', right: 'Full Postgres dump anytime' },

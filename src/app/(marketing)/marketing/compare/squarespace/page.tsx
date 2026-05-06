@@ -33,6 +33,7 @@ export default function CompareSquarespacePage() {
               { label: 'Jummah slots', left: 'Manual editing every week', right: 'First-class field' },
               { label: 'Hijri date', left: 'Manual', right: 'Automatic' },
               { label: 'Donations', left: 'Third-party', right: 'Native Stripe' },
+              { label: 'Forms / RSVPs', left: 'Native form (basic) or Jotform/Typeform', right: 'Built-in builder, payments included' },
               { label: 'Cost', left: '$23–$65 + add-ons', right: '$49 flat all-in' },
             ]}
           />

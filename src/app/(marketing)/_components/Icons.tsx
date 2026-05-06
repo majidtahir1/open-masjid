@@ -125,8 +125,18 @@ export const Layers = (p: IconProps) => (
     <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
   </svg>
 )
+export const ClipboardList = (p: IconProps) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" {...base} {...p}>
+    <rect x="8" y="2" width="8" height="4" rx="1" />
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    <path d="M12 11h4" />
+    <path d="M12 16h4" />
+    <path d="M8 11h.01" />
+    <path d="M8 16h.01" />
+  </svg>
+)
 
 export const Icons = {
   Sunrise, Calendar, Heart, Palette, Shield, Code, Github, ArrowRight, Check, X, ChevronDown,
-  MoonStar, Mail, Twitter, Linkedin, Server, Sparkles, Globe, Lock, Database, Layers,
+  MoonStar, Mail, Twitter, Linkedin, Server, Sparkles, Globe, Lock, Database, Layers, ClipboardList,
 }

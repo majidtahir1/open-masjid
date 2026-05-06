@@ -39,6 +39,7 @@ import { default as default_61b04b208665b6f3018adf7337542037 } from '../../../..
 import { default as default_737df59d0032b50354e46d5ff0b71d1c } from '../../../../src/fields/IconPickerField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { FormBuilderFieldClient as FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078 } from '../../../../src/admin/forms/FormBuilderField.client'
+import { default as default_3ac7f872b9b24ddaa58b8ab08cc811ff } from '../../../../src/admin/forms/fields/ColorField'
 import { default as default_0803508a87a40ac89eba101ebb83fff7 } from '../../../../src/admin/forms/cells/StatusCell'
 import { default as default_fb11782db8353d6b3128f638b2c4f9bb } from '../../../../src/admin/forms/cells/PaymentStatusCell'
 import { default as default_3675cf05180d34c2b9887f83fd76cf74 } from '../../../../src/admin/forms/SubmissionsList'
@@ -113,6 +114,7 @@ export const importMap = {
   "/src/fields/IconPickerField#default": default_737df59d0032b50354e46d5ff0b71d1c,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/forms/FormBuilderField.client#FormBuilderFieldClient": FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078,
+  "/src/admin/forms/fields/ColorField#default": default_3ac7f872b9b24ddaa58b8ab08cc811ff,
   "/src/admin/forms/cells/StatusCell#default": default_0803508a87a40ac89eba101ebb83fff7,
   "/src/admin/forms/cells/PaymentStatusCell#default": default_fb11782db8353d6b3128f638b2c4f9bb,
   "/src/admin/forms/SubmissionsList#default": default_3675cf05180d34c2b9887f83fd76cf74,
