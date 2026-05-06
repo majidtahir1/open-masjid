@@ -34,7 +34,7 @@ export const FormSubmissions: CollectionConfig = {
       admin: { readOnly: true } },
     { name: 'form', type: 'relationship', relationTo: 'forms', required: true, index: true,
       admin: { readOnly: true } },
-    { name: 'submitterEmail', type: 'email', required: true, admin: { readOnly: true } },
+    { name: 'submitterEmail', type: 'email', admin: { readOnly: true } },
     { name: 'submitterName', type: 'text', admin: { readOnly: true } },
     { name: 'data', type: 'json', required: true, admin: { readOnly: true } },
     {

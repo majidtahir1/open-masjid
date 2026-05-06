@@ -12,13 +12,35 @@
  * We use Next.js `useSearchParams` + `useRouter` for navigation.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useField, useDocumentInfo } from '@payloadcms/ui'
 import { ExternalLink, Eye } from 'lucide-react'
 import type { SettingsSectionId } from './settings/SettingsNav'
 import SettingsPanel from './settings/SettingsPanel'
 import './toolbar.css'
+
+/**
+ * Build a public-form URL that works regardless of which admin host the user
+ * is on. Relative `/forms/<slug>` works on tenant subdomains (e.g.
+ * `icp.openmasjid.app/admin` or `icp.localhost:3000/admin`). On the bare
+ * platform host (`localhost:3000/admin` or `admin.openmasjid.app/admin`) we
+ * have to inject the tenant subdomain.
+ */
+function buildPublicUrl(formSlug: string, tenantSlug: string | null): string {
+  const path = `/forms/${formSlug}`
+  if (typeof window === 'undefined') return path
+  const host = window.location.host
+  // First label of the host. For `icp.localhost:3000` → `icp`; for
+  // `localhost:3000` → `localhost`.
+  const firstLabel = host.split(':')[0].split('.')[0].toLowerCase()
+  const isBareLocal = firstLabel === 'localhost' || firstLabel === '127' || firstLabel === '0'
+  const isAdminHost = firstLabel === 'admin'
+  if ((isBareLocal || isAdminHost) && tenantSlug) {
+    return `${window.location.protocol}//${tenantSlug}.${host}${path}`
+  }
+  return path
+}
 
 export type ToolbarTab = 'build' | 'settings' | 'submissions'
 
@@ -60,6 +82,27 @@ export default function FormToolbar({ children }: FormToolbarProps) {
   const { value: title } = useField<string>({ path: 'title' })
   const { value: slug } = useField<string>({ path: 'slug' })
   const { value: status } = useField<string>({ path: 'status' })
+  const { value: tenantField } = useField<string | { id: string | number } | null>({
+    path: 'tenant',
+  })
+  const tenantId =
+    tenantField && typeof tenantField === 'object' ? tenantField.id : tenantField
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null)
+  useEffect(() => {
+    if (!tenantId) return
+    let cancelled = false
+    fetch(`/api/tenants/${tenantId}?depth=0`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((doc) => {
+        if (!cancelled && doc?.slug) setTenantSlug(doc.slug)
+      })
+      .catch(() => {
+        /* fall back to relative URL */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [tenantId])
 
   // useDocumentInfo for submission count (may not be available in all contexts)
   let submissionCount: number | undefined
@@ -74,7 +117,7 @@ export default function FormToolbar({ children }: FormToolbarProps) {
 
   const displayTitle = title || 'Untitled form'
   const displaySlug = slug || ''
-  const publicUrl = displaySlug ? `/forms/${displaySlug}` : null
+  const publicUrl = displaySlug ? buildPublicUrl(displaySlug, tenantSlug) : null
 
   const handleTabClick = useCallback(
     (tab: ToolbarTab) => {

@@ -1,17 +1,18 @@
+'use client'
+
 /**
- * FormBuilderField — server-side wrapper
+ * FormBuilderField — Payload 3 mounts this as the custom Field component for
+ * `forms.schema` (see src/collections/Forms.ts: admin.components.Field).
  *
- * Payload 3 mounts this as the custom Field component for `forms.schema`
- * (see src/collections/Forms.ts: admin.components.Field).
+ * Marked 'use client' because Payload passes the full field props — which
+ * include the document-level Lexical editor config containing function refs
+ * (`feature: function`) — that can't cross a server→client boundary. Mirrors
+ * the convention used by src/fields/TextField.tsx.
  *
  * Structure:
  *   <FormToolbar>        ← sticky nav (Build / Settings / Submissions tabs)
  *     <FormBuilderFieldClient />  ← builder canvas (shown under Build tab)
  *   </FormToolbar>
- *
- * Note: FormToolbar is a 'use client' component. To avoid a client-boundary
- * issue in Payload's RSC context we import it directly — Payload v3 handles
- * the 'use client' boundary via its module resolution.
  */
 import { FormBuilderFieldClient } from './FormBuilderField.client'
 import FormToolbar from './FormToolbar'

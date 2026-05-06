@@ -990,7 +990,7 @@ export interface FormSubmission {
   id: number;
   tenant: number | Tenant;
   form: number | Form;
-  submitterEmail: string;
+  submitterEmail?: string | null;
   submitterName?: string | null;
   data:
     | {

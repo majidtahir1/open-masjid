@@ -55,7 +55,7 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
     data: {
       tenant: tenantId,
       form: form.id,
-      submitterEmail: typeof v.data.email === 'string' ? v.data.email : '',
+      submitterEmail: typeof v.data.email === 'string' && v.data.email.length > 0 ? v.data.email : null,
       submitterName: typeof v.data.name === 'string' ? v.data.name : null,
       data: v.data,
       status: 'new',

@@ -1,7 +1,4 @@
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
-import { default as default_submissionslist } from '../../../../src/admin/forms/SubmissionsList'
-import { default as default_statuscell } from '../../../../src/admin/forms/cells/StatusCell'
-import { default as default_paymentstatuscell } from '../../../../src/admin/forms/cells/PaymentStatusCell'
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
 import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
 import { default as default_6e33277718055fbb7815dc8494c4827c } from '../../../../src/admin/DateOnlyCell'
@@ -42,6 +39,10 @@ import { default as default_61b04b208665b6f3018adf7337542037 } from '../../../..
 import { default as default_737df59d0032b50354e46d5ff0b71d1c } from '../../../../src/fields/IconPickerField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_ab4e07029642c2ed73e753c2f64429e6 } from '../../../../src/admin/forms/FormBuilderField'
+import { default as default_0803508a87a40ac89eba101ebb83fff7 } from '../../../../src/admin/forms/cells/StatusCell'
+import { default as default_fb11782db8353d6b3128f638b2c4f9bb } from '../../../../src/admin/forms/cells/PaymentStatusCell'
+import { default as default_3675cf05180d34c2b9887f83fd76cf74 } from '../../../../src/admin/forms/SubmissionsList'
+import { default as default_95706c2bf0737910fec0380d6a38fbfd } from '../../../../src/admin/forms/SubmissionDetail'
 import { default as default_2d600a181d8006b240d8cf056631f58b } from '../../../../src/admin/donations/BackToOverview'
 import { default as default_9afa571e6cc08efa56f642a8dcb8b90b } from '../../../../src/admin/donations/FundsListIntro'
 import { default as default_8efef7e3d5e95d810cb99f758780d954 } from '../../../../src/admin/donations/FundsSaveButton'
@@ -112,6 +113,10 @@ export const importMap = {
   "/src/fields/IconPickerField#default": default_737df59d0032b50354e46d5ff0b71d1c,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/admin/forms/FormBuilderField#default": default_ab4e07029642c2ed73e753c2f64429e6,
+  "/src/admin/forms/cells/StatusCell#default": default_0803508a87a40ac89eba101ebb83fff7,
+  "/src/admin/forms/cells/PaymentStatusCell#default": default_fb11782db8353d6b3128f638b2c4f9bb,
+  "/src/admin/forms/SubmissionsList#default": default_3675cf05180d34c2b9887f83fd76cf74,
+  "/src/admin/forms/SubmissionDetail#default": default_95706c2bf0737910fec0380d6a38fbfd,
   "/src/admin/donations/BackToOverview#default": default_2d600a181d8006b240d8cf056631f58b,
   "/src/admin/donations/FundsListIntro#default": default_9afa571e6cc08efa56f642a8dcb8b90b,
   "/src/admin/donations/FundsSaveButton#default": default_8efef7e3d5e95d810cb99f758780d954,
@@ -138,8 +143,5 @@ export const importMap = {
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/donations/DonationsNav#default": default_88163b0148bba3b80a9d3df09283cc03,
   "/src/admin/membership/MembershipNav#default": default_4ce2b6d430be17aa881be5628d11e397,
-  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
-  "/src/admin/forms/SubmissionsList#default": default_submissionslist,
-  "/src/admin/forms/cells/StatusCell#default": default_statuscell,
-  "/src/admin/forms/cells/PaymentStatusCell#default": default_paymentstatuscell
+  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
 }

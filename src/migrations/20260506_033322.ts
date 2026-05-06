@@ -8,7 +8,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"id" serial PRIMARY KEY NOT NULL,
   	"tenant_id" integer NOT NULL,
   	"form_id" integer NOT NULL,
-  	"submitter_email" varchar NOT NULL,
+  	"submitter_email" varchar,
   	"submitter_name" varchar,
   	"data" jsonb NOT NULL,
   	"status" "enum_form_submissions_status" DEFAULT 'new' NOT NULL,
