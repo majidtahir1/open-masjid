@@ -12,7 +12,6 @@ export const DonationFunds: CollectionConfig = {
   slug: 'donation-funds',
   labels: { singular: 'Fund', plural: 'Funds' },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Donations',
     useAsTitle: 'name',
     defaultColumns: ['name', 'zakatEligible', 'active', 'sortOrder'],

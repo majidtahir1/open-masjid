@@ -6,7 +6,6 @@ export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
   labels: { singular: 'Submission', plural: 'Submissions' },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Forms',
     useAsTitle: 'submitterEmail',
     defaultColumns: ['submittedAt', 'submitterEmail', 'form', 'status', 'paymentStatus'],

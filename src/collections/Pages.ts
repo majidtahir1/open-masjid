@@ -35,7 +35,6 @@ export const Pages: CollectionConfig = {
     plural: 'Pages',
   },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'title',

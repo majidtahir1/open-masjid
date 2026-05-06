@@ -18,7 +18,6 @@ export const HeroSlides: CollectionConfig = {
     plural: 'Hero Slides',
   },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'title',

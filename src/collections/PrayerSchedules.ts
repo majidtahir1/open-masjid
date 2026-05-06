@@ -85,7 +85,6 @@ export const PrayerSchedules: CollectionConfig = {
     plural: 'Prayer schedules',
   },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Prayer',
     hideAPIURL: true,
     useAsTitle: 'name',

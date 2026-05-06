@@ -18,7 +18,6 @@ export const Members: CollectionConfig = {
   slug: 'members',
   labels: { singular: 'Member', plural: 'Members' },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Membership',
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'tier', 'status', 'currentPeriodEnd'],

@@ -17,7 +17,6 @@ export const Announcements: CollectionConfig = {
     plural: 'Announcements',
   },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'title',

@@ -141,7 +141,6 @@ export const Users: CollectionConfig = {
     },
   },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'People',
     useAsTitle: 'email',
     defaultColumns: ['firstName', 'lastName', 'email', 'role', 'tenant'],

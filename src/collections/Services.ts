@@ -17,7 +17,6 @@ export const Services: CollectionConfig = {
     plural: 'Services',
   },
   admin: {
-    enableListViewSelectAPI: true,
     group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'title',
