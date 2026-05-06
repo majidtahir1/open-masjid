@@ -1,4 +1,7 @@
 import { default as default_07d961590be6dea90e3f89bf0ec85650 } from '../../../../src/admin/ActiveScheduleBanner'
+import { default as default_submissionslist } from '../../../../src/admin/forms/SubmissionsList'
+import { default as default_statuscell } from '../../../../src/admin/forms/cells/StatusCell'
+import { default as default_paymentstatuscell } from '../../../../src/admin/forms/cells/PaymentStatusCell'
 import { default as default_dd3aaf7dfdea38a3f5207a0e64556a07 } from '../../../../src/admin/ScheduleNameCell'
 import { default as default_f0552f6c115f158f58da132ed489990d } from '../../../../src/fields/TextField'
 import { default as default_6e33277718055fbb7815dc8494c4827c } from '../../../../src/admin/DateOnlyCell'
@@ -135,5 +138,8 @@ export const importMap = {
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/donations/DonationsNav#default": default_88163b0148bba3b80a9d3df09283cc03,
   "/src/admin/membership/MembershipNav#default": default_4ce2b6d430be17aa881be5628d11e397,
-  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
+  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
+  "/src/admin/forms/SubmissionsList#default": default_submissionslist,
+  "/src/admin/forms/cells/StatusCell#default": default_statuscell,
+  "/src/admin/forms/cells/PaymentStatusCell#default": default_paymentstatuscell
 }

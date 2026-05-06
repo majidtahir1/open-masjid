@@ -10,6 +10,9 @@ export const FormSubmissions: CollectionConfig = {
     useAsTitle: 'submitterEmail',
     defaultColumns: ['submittedAt', 'submitterEmail', 'form', 'status', 'paymentStatus'],
     description: 'Form submissions. Read-only — created by the public submit endpoint.',
+    components: {
+      beforeListTable: ['/src/admin/forms/SubmissionsList#default'],
+    },
   },
   access: {
     create: () => false,
@@ -25,13 +28,25 @@ export const FormSubmissions: CollectionConfig = {
     { name: 'submitterEmail', type: 'email', required: true, admin: { readOnly: true } },
     { name: 'submitterName', type: 'text', admin: { readOnly: true } },
     { name: 'data', type: 'json', required: true, admin: { readOnly: true } },
-    { name: 'status', type: 'select', defaultValue: 'new', required: true,
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'new',
+      required: true,
       options: [
         { label: 'New', value: 'new' },
         { label: 'Reviewed', value: 'reviewed' },
         { label: 'Archived', value: 'archived' },
-      ] },
-    { name: 'paymentStatus', type: 'select',
+      ],
+      admin: {
+        components: {
+          Cell: '/src/admin/forms/cells/StatusCell#default',
+        },
+      },
+    },
+    {
+      name: 'paymentStatus',
+      type: 'select',
       options: [
         { label: 'Not applicable', value: 'na' },
         { label: 'Pending payment', value: 'pending_payment' },
@@ -39,7 +54,13 @@ export const FormSubmissions: CollectionConfig = {
         { label: 'Expired', value: 'expired' },
       ],
       defaultValue: 'na',
-      admin: { readOnly: true } },
+      admin: {
+        readOnly: true,
+        components: {
+          Cell: '/src/admin/forms/cells/PaymentStatusCell#default',
+        },
+      },
+    },
     { name: 'amountCents', type: 'number', admin: { readOnly: true } },
     { name: 'currency', type: 'text', admin: { readOnly: true } },
     { name: 'stripeCheckoutSessionId', type: 'text', index: true, admin: { readOnly: true } },
