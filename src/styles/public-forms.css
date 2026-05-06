@@ -543,6 +543,26 @@
   flex-wrap: wrap;
 }
 
+/* ─── Intro message (one-per-page / always-on) ───────────────────────────── */
+
+.om-pf-intro {
+  margin-bottom: 8px;
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* ─── Enter-to-continue hint (one-per-page) ──────────────────────────────── */
+
+.om-pf-enter-hint {
+  margin-top: -4px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: right;
+  letter-spacing: 0.01em;
+}
+
 /* ─── Mobile adjustments ─────────────────────────────────────────────────── */
 
 @media (max-width: 600px) {

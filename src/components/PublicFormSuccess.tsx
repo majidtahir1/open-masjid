@@ -7,6 +7,8 @@
  * Two action buttons: "Add to calendar" (ghost) and "Back to {masjid}" (primary).
  */
 import type { Form } from '@/payload-types'
+import { resolveSubmissionMessage } from '@/lib/form-appearance'
+import RichText from '@/components/RichText'
 
 interface Receipt {
   id: string | number
@@ -46,9 +48,14 @@ export function PublicFormSuccess({ form, values, receipt }: Props) {
         JazakAllahu khairan{firstName ? `, ${firstName}` : ''}
       </h1>
 
-      <p>
-        {form.settings?.confirmationBody ?? 'We received your submission.'}
-      </p>
+      {(() => {
+        const submissionMsg = resolveSubmissionMessage(form as never)
+        return submissionMsg ? (
+          <RichText data={submissionMsg as never} />
+        ) : (
+          <p>{'We received your submission.'}</p>
+        )
+      })()}
 
       {/* Monospace receipt strip */}
       {receiptLine && (

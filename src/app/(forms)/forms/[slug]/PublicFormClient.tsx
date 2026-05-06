@@ -8,13 +8,19 @@
  *
  * Artboards: 5.1 public-empty, 5.2 public-filled, 5.3 public-multi.
  */
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import { PublicFormFields } from '@/components/PublicFormFields'
 import { PublicFormProgress } from '@/components/PublicFormProgress'
 import { PublicFormSuccess } from '@/components/PublicFormSuccess'
 import { PublicFormPaymentBlock } from '@/components/PublicFormPaymentBlock'
+import RichText from '@/components/RichText'
+import { flattenStepsForOnePerPage } from '@/lib/form-appearance'
 import type { Form } from '@/payload-types'
 import type { FormSchema } from '@/lib/form-schema'
+import type { Appearance } from '@/lib/form-appearance'
+
+/** Augmented Form type that includes the appearance group added in V2. */
+type FormWithAppearance = Form & { appearance?: Appearance | null }
 
 interface Props {
   form: Form
@@ -23,6 +29,12 @@ interface Props {
 
 export function PublicFormClient({ form, closed }: Props) {
   const schema = form.schema as FormSchema
+  const formExt = form as FormWithAppearance
+
+  const displayMode = formExt.appearance?.displayMode ?? 'all-at-once'
+  const effectiveSchema = displayMode === 'one-per-page'
+    ? flattenStepsForOnePerPage(schema)
+    : schema
 
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -51,11 +63,11 @@ export function PublicFormClient({ form, closed }: Props) {
     )
   }
 
-  const totalSteps = schema.steps.length
+  const totalSteps = effectiveSchema.steps.length
   const isLast = step === totalSteps - 1
 
   // Filter page-break pseudo-fields — they only exist to define step boundaries
-  const currentFields = schema.steps[step].fields.filter((f) => f.type !== 'page-break')
+  const currentFields = effectiveSchema.steps[step].fields.filter((f) => f.type !== 'page-break')
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -168,9 +180,24 @@ export function PublicFormClient({ form, closed }: Props) {
     setSuccess({})
   }
 
+  // ─── Enter key auto-advance (one-per-page mode) ──────────────────────────────
+
+  function onKeyDown(e: KeyboardEvent<HTMLFormElement>) {
+    if (displayMode !== 'one-per-page') return
+    if (e.key !== 'Enter') return
+    const target = e.target as HTMLElement
+    if (target.tagName !== 'INPUT') return
+    const inputType = (target as HTMLInputElement).type
+    const textLikeTypes = ['text', 'email', 'tel', 'number', 'date']
+    if (!textLikeTypes.includes(inputType)) return
+    if (isLast) return
+    e.preventDefault()
+    if (validateStep()) setStep(step + 1)
+  }
+
   // ─── Render ─────────────────────────────────────────────────────────────────
 
-  const stepTitle = schema.steps[step].title
+  const stepTitle = effectiveSchema.steps[step].title
 
   // Derive submit button label
   const baseLabel = form.settings?.submitButtonLabel ?? 'Submit'
@@ -185,8 +212,15 @@ export function PublicFormClient({ form, closed }: Props) {
   const suggestedAmountsCents =
     form.payment?.suggestedAmountsCents?.map((row) => row.amount) ?? []
 
+  // Determine if current step is a single-field text-like step (for Enter hint)
+  const showEnterHint =
+    displayMode === 'one-per-page' &&
+    !isLast &&
+    currentFields.length === 1 &&
+    ['text', 'email', 'tel', 'number', 'date'].includes(currentFields[0]?.type ?? '')
+
   return (
-    <form className="om-pf-card" onSubmit={onSubmit} noValidate>
+    <form className="om-pf-card" onSubmit={onSubmit} onKeyDown={onKeyDown} noValidate>
       {totalSteps > 1 && (
         <PublicFormProgress current={step + 1} total={totalSteps} />
       )}
@@ -196,12 +230,22 @@ export function PublicFormClient({ form, closed }: Props) {
         </h2>
       )}
 
+      {step === 0 && formExt.appearance?.introMessage ? (
+        <div className="om-pf-intro">
+          <RichText data={formExt.appearance.introMessage as never} />
+        </div>
+      ) : null}
+
       <PublicFormFields
         fields={currentFields}
         values={values}
         errors={errors}
         onChange={setValue}
       />
+
+      {showEnterHint && (
+        <div className="om-pf-enter-hint" aria-hidden="true">Press Enter ↵ to continue</div>
+      )}
 
       {/* Payment block — rendered on the last step only when payment is enabled */}
       {isLast && form.payment?.enabled && (
