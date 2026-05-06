@@ -12,6 +12,15 @@ export const FormSubmissions: CollectionConfig = {
     description: 'Form submissions. Read-only — created by the public submit endpoint.',
     components: {
       beforeListTable: ['/src/admin/forms/SubmissionsList#default'],
+      views: {
+        edit: {
+          // Replace the default edit view with a bespoke submission-detail layout.
+          // Artboard ref: 4.2 sub-detail
+          default: {
+            Component: '/src/admin/forms/SubmissionDetail#default',
+          },
+        },
+      },
     },
   },
   access: {
