@@ -29,6 +29,13 @@ export const Forms: CollectionConfig = {
     group: 'Forms',
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
+    components: {
+      views: {
+        edit: {
+          default: { Component: '/src/admin/forms/FormEditView#default' },
+        },
+      },
+    },
   },
   access: {
     read: tenantScopedRead,
@@ -76,10 +83,7 @@ export const Forms: CollectionConfig = {
       type: 'json',
       required: true,
       defaultValue: { steps: [{ id: 's1', fields: [] }] },
-      admin: {
-        description: 'The form definition. Use the builder above.',
-        components: { Field: '/src/admin/forms/FormBuilderField#default' },
-      },
+      admin: { description: 'The form definition. Use the builder above.' },
     },
     {
       name: 'settings',
@@ -116,6 +120,59 @@ export const Forms: CollectionConfig = {
           name: 'confirmationBody',
           type: 'textarea',
           admin: { description: 'Plain text body. {{name}} interpolates the submitter name field if present.' },
+        },
+      ],
+    },
+    {
+      name: 'appearance',
+      type: 'group',
+      fields: [
+        {
+          name: 'displayMode',
+          type: 'select',
+          defaultValue: 'all-at-once',
+          options: [
+            { label: 'All questions on one page', value: 'all-at-once' },
+            { label: 'One question per page (Typeform-style)', value: 'one-per-page' },
+          ],
+          admin: { description: 'How visitors progress through the form.' },
+        },
+        {
+          name: 'introMessage',
+          type: 'richText',
+          admin: { description: 'Optional message shown above the first field.' },
+        },
+        {
+          name: 'submissionMessage',
+          type: 'richText',
+          admin: { description: 'Shown after a successful submission. If left blank, falls back to Settings → Confirmation.' },
+        },
+        {
+          name: 'backgroundColor',
+          type: 'text',
+          admin: {
+            description: 'Solid background color for the public form (hex like #FAF9F4). Ignored if a gradient is set below.',
+            placeholder: '#FAF9F4',
+          },
+        },
+        {
+          name: 'backgroundGradient',
+          type: 'group',
+          fields: [
+            { name: 'from', type: 'text', admin: { placeholder: '#1B3358' } },
+            { name: 'to', type: 'text', admin: { placeholder: '#0E1B2C' } },
+            {
+              name: 'direction',
+              type: 'select',
+              defaultValue: 'vertical',
+              options: [
+                { label: 'Top → Bottom', value: 'vertical' },
+                { label: 'Left → Right', value: 'horizontal' },
+                { label: 'Diagonal (TL → BR)', value: 'diagonal' },
+              ],
+            },
+          ],
+          admin: { description: 'Optional gradient. When `from` is set, it overrides the solid color above.' },
         },
       ],
     },
