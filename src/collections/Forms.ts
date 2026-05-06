@@ -29,7 +29,6 @@ export const Forms: CollectionConfig = {
     group: 'Forms',
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
-    description: 'Build forms for RSVPs, registrations, surveys, and more.',
   },
   access: {
     read: tenantScopedRead,

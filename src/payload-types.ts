@@ -881,8 +881,6 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Build forms for RSVPs, registrations, surveys, and more.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */

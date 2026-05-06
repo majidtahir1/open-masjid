@@ -21,10 +21,35 @@
 
   min-height: 100vh;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 48px 16px 64px;
   background: #f7f8fa;
+}
+
+.om-pf-header {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 24px;
+  text-align: center;
+}
+.om-pf-title {
+  margin: 0 0 12px;
+  font-family: var(--font-serif, ui-serif, Georgia, serif);
+  font-size: 2.25rem;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: #0E1B2C;
+}
+.om-pf-description {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #4b5563;
+  max-width: 56ch;
+  margin: 0 auto;
+}
+@media (max-width: 600px) {
+  .om-pf-title { font-size: 1.625rem; }
 }
 
 /* ─── Card ───────────────────────────────────────────────────────────────── */

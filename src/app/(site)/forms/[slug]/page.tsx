@@ -14,6 +14,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { PublicFormClient } from './PublicFormClient'
+import RichText from '@/components/RichText'
 import '@/styles/public-forms.css'
 
 export const dynamic = 'force-dynamic'
@@ -81,6 +82,12 @@ export default async function FormPage({
           : undefined
       }
     >
+      <header className="om-pf-header">
+        <h1 className="om-pf-title">{form.title}</h1>
+        {form.description ? (
+          <RichText data={form.description as never} className="om-pf-description" />
+        ) : null}
+      </header>
       <PublicFormClient form={form as any} closed={closed} />
     </div>
   )

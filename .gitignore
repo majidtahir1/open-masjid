@@ -44,3 +44,6 @@ coverage/
 
 # Design source kits (kept locally for reference, not shipped)
 *Design System*.zip
+
+# Local git worktrees
+.claude/worktrees/
