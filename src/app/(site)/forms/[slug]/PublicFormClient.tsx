@@ -84,6 +84,20 @@ export function PublicFormClient({ form, closed }: Props) {
       }
     }
     setErrors((prev) => ({ ...prev, ...stepErrors }))
+
+    // Move focus to the first errored field so keyboard/SR users land there
+    if (Object.keys(stepErrors).length > 0) {
+      const firstErrorName = Object.keys(stepErrors)[0]
+      const firstField = currentFields.find((f) => f.name === firstErrorName)
+      if (firstField) {
+        // Use setTimeout to allow React to flush state + re-render error markup
+        setTimeout(() => {
+          const el = document.getElementById(`f-${firstField.id}`)
+          el?.focus()
+        }, 0)
+      }
+    }
+
     return Object.keys(stepErrors).length === 0
   }
 
@@ -239,6 +253,7 @@ export function PublicFormClient({ form, closed }: Props) {
           type="submit"
           className="om-pf-btn-primary"
           disabled={submitting}
+          aria-busy={submitting}
         >
           {submitting ? 'Submitting…' : submitLabel}
         </button>

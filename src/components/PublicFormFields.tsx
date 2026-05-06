@@ -12,6 +12,8 @@ interface Props {
   values: Record<string, unknown>
   errors: Record<string, string>
   onChange: (name: string, value: unknown) => void
+  /** When true, each field receives aria-invalid + aria-describedby when in error state. */
+  announceErrors?: boolean
 }
 
 export function PublicFormFields({ fields, values, errors, onChange }: Props) {
@@ -20,12 +22,14 @@ export function PublicFormFields({ fields, values, errors, onChange }: Props) {
       {fields.map((f) => {
         if (f.type === 'page-break') return null
         const err = errors[f.name]
+        const hasError = err !== undefined && err !== ''
         const v = values[f.name]
+        const errorId = `f-${f.id}-error`
         return (
           <div
             key={f.id}
             className="om-pf-field"
-            data-error={err !== undefined && err !== '' ? '' : undefined}
+            data-error={hasError ? '' : undefined}
           >
             {f.type !== 'consent' && (
               <label className="om-pf-label" htmlFor={`f-${f.id}`}>
@@ -36,9 +40,14 @@ export function PublicFormFields({ fields, values, errors, onChange }: Props) {
             {'helpText' in f && f.helpText && (
               <p className="om-pf-help">{f.helpText}</p>
             )}
-            {renderControl(f, v, (val) => onChange(f.name, val))}
-            {err && (
-              <p className="om-pf-field-error" role="alert">
+            {renderControl(f, v, (val) => onChange(f.name, val), hasError, errorId)}
+            {hasError && (
+              <p
+                id={errorId}
+                className="om-pf-field-error"
+                role="alert"
+                aria-live="polite"
+              >
                 {err}
               </p>
             )}
@@ -49,7 +58,17 @@ export function PublicFormFields({ fields, values, errors, onChange }: Props) {
   )
 }
 
-function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
+function renderControl(
+  f: Field,
+  v: unknown,
+  onChange: (v: unknown) => void,
+  hasError: boolean,
+  errorId: string,
+) {
+  const ariaProps = hasError
+    ? { 'aria-invalid': true as const, 'aria-describedby': errorId }
+    : {}
+
   switch (f.type) {
     case 'short-text':
     case 'phone':
@@ -62,6 +81,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
           className={v ? 'is-filled' : ''}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={f.type === 'phone' ? 'tel' : 'off'}
+          {...ariaProps}
         />
       )
 
@@ -76,6 +96,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
           onChange={(e) => onChange(e.target.value)}
           autoComplete="email"
           inputMode="email"
+          {...ariaProps}
         />
       )
 
@@ -88,6 +109,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
           value={String(v ?? '')}
           className={v ? 'is-filled' : ''}
           onChange={(e) => onChange(e.target.value)}
+          {...ariaProps}
         />
       )
 
@@ -105,6 +127,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
             onChange(e.target.value === '' ? undefined : Number(e.target.value))
           }
           inputMode="numeric"
+          {...ariaProps}
         />
       )
 
@@ -116,6 +139,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
           value={String(v ?? '')}
           className={v ? 'is-filled' : ''}
           onChange={(e) => onChange(e.target.value)}
+          {...ariaProps}
         />
       )
 
@@ -125,6 +149,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
           id={`f-${f.id}`}
           value={String(v ?? '')}
           onChange={(e) => onChange(e.target.value)}
+          {...ariaProps}
         >
           <option value="">Choose…</option>
           {f.options.map((o) => (
@@ -137,7 +162,12 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
 
     case 'radio':
       return (
-        <div className="om-pf-radio" role="radiogroup">
+        <div
+          className="om-pf-radio"
+          role="radiogroup"
+          aria-invalid={hasError ? true : undefined}
+          aria-describedby={hasError ? errorId : undefined}
+        >
           {f.options.map((o) => (
             <label key={o.value} className="om-pf-radio-item">
               <input
@@ -157,7 +187,12 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
     case 'checkbox-group': {
       const arr = Array.isArray(v) ? (v as string[]) : []
       return (
-        <div className="om-pf-checks">
+        <div
+          className="om-pf-checks"
+          role="group"
+          aria-invalid={hasError ? true : undefined}
+          aria-describedby={hasError ? errorId : undefined}
+        >
           {f.options.map((o) => (
             <label key={o.value} className="om-pf-check-item">
               <input
@@ -186,6 +221,7 @@ function renderControl(f: Field, v: unknown, onChange: (v: unknown) => void) {
             type="checkbox"
             checked={v === true}
             onChange={(e) => onChange(e.target.checked)}
+            {...ariaProps}
           />
           <span>
             {f.label}

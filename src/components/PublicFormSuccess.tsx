@@ -35,7 +35,7 @@ export function PublicFormSuccess({ form, values, receipt }: Props) {
   }
 
   return (
-    <div className="om-pf-card om-pf-success">
+    <div className="om-pf-card om-pf-success" aria-live="polite" aria-atomic="true">
       {/* 76px brand circle with check mark */}
       <div className="om-pf-success-check" aria-hidden="true">
         ✓
