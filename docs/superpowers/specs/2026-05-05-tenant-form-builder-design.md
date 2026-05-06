@@ -11,7 +11,20 @@
 
 A form builder inside OpenMasjid that lets a masjid admin create a form (RSVP, class registration, volunteer signup, survey) with a visual drag-and-drop interface, publish it at a shareable URL, and collect submissions. Visitors fill out the form on the masjid's public site. Optional fixed-price payment via Stripe Checkout.
 
-Think Jotform / Typeform, but simpler, scoped to what masajid actually need, and styled to fit the OpenMasjid brand and Payload admin chrome it lives inside.
+Think Jotform / Typeform, but simpler, scoped to what masajid actually need, and styled to fit the OpenMasjid admin it lives inside.
+
+## Where this feature lives
+
+**This is not a standalone product.** It's a new section inside the existing **OpenMasjid admin** — the same back-office area where masjid admins already manage their site content (pages, events, prayer times, donations, members, etc.). A new "Forms" item gets added to the admin's left navigation, alongside the existing collections.
+
+A few things follow from that:
+
+- The admin shell — left sidebar nav, top bar with breadcrumbs, user menu, save/publish controls — is **already designed and shipped**. The designer should treat it as fixed and design only the working area inside it. The shell uses Payload CMS (the underlying admin framework) and follows its conventions; the form builder needs to feel native to the rest of the OpenMasjid admin, not like a third-party tool bolted on.
+- The masjid admin reaches the builder by clicking "Forms" in the admin nav, then "Create form" — same pattern as Pages, Events, etc.
+- Submissions live in the same admin too (a sibling list), so the designer should style the submissions list and detail views to match how Events / Donations / Members lists already look.
+- The **public** form (what visitors fill out) lives on the masjid's public site, which has a totally different visual system (the tenant's brand, the public site's header/footer/prayer strip). Two distinct visual contexts to comp: admin (OpenMasjid admin styling) and public (masjid's branded site).
+
+A designer onboarding screenshot pack of the existing OpenMasjid admin and a sample public site is available — request from engineering.
 
 ## Audiences
 
@@ -62,7 +75,7 @@ These are real future requirements. The design should leave room — but **don't
 
 - Reuse the masjid's brand colors and typography (logo, three brand colors, font — already configured per-tenant)
 - The public form lives under the masjid's existing site shell (header, footer, prayer strip)
-- The admin builder lives inside the existing **Payload admin chrome** (left sidebar, top bar). Designer should treat that chrome as fixed; design only the panel inside.
+- The admin builder lives inside the existing **OpenMasjid admin chrome** — left sidebar, top bar, breadcrumbs, save/publish controls. Designer should treat that chrome as fixed; design only the working area inside it. (See "Where this feature lives" above.)
 - Existing OpenMasjid type tokens: Fraunces (display), Inter (body), Amiri (Arabic). Brand neutrals: cream `#FAF9F4`, navy `#1B3358`, night `#0E1B2C`, gold `#C9A45A`.
 
 ## Screen inventory (what to comp)
