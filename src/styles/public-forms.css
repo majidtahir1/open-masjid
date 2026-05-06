@@ -12,7 +12,7 @@
 
 .om-pf-shell {
   --pf-brand: #146E69;
-  --pf-brand-tint: color-mix(in srgb, var(--pf-brand) 12%, #fff);
+  --pf-brand-tint: color-mix(in srgb, var(--pf-brand) 5%, #fff);
   --pf-brand-focus-ring: 0 0 0 4px color-mix(in srgb, var(--pf-brand) 20%, transparent);
   --pf-radius-input: 9px;
   --pf-radius-card: 14px;
@@ -485,7 +485,7 @@
   }
 
   .om-pf-card {
-    padding: 20px 16px;
+    padding: 22px 18px;
     border-radius: 12px;
     gap: 16px;
   }
@@ -497,5 +497,12 @@
 
   .om-pf-actions {
     flex-direction: column-reverse;
+  }
+
+  .om-pf-success-check {
+    width: 60px;
+    height: 60px;
+    font-size: 1.625rem;
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--pf-brand) 15%, transparent);
   }
 }
