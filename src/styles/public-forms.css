@@ -1,0 +1,465 @@
+/*
+ * public-forms.css — OpenMasjid public form rendering
+ *
+ * Uses .om-pf-* class names scoped to the form shell.
+ * Brand color flows through --pf-brand (falls back to #146E69 teal).
+ *
+ * Token reference: design_handoff_forms_unpacked/design_handoff_forms/forms.css
+ * Artboards: 5.1 public-empty, 5.2 public-filled, 5.3 public-multi, 6.1 mobile
+ */
+
+/* ─── Shell ──────────────────────────────────────────────────────────────── */
+
+.om-pf-shell {
+  --pf-brand: #146E69;
+  --pf-brand-tint: color-mix(in srgb, var(--pf-brand) 12%, #fff);
+  --pf-brand-focus-ring: 0 0 0 4px color-mix(in srgb, var(--pf-brand) 20%, transparent);
+  --pf-radius-input: 9px;
+  --pf-radius-card: 14px;
+  --pf-border: 1.5px solid #e2e5ea;
+  --pf-border-focus: 1.5px solid var(--pf-brand);
+
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 64px;
+  background: #f7f8fa;
+}
+
+/* ─── Card ───────────────────────────────────────────────────────────────── */
+
+.om-pf-card {
+  background: #fff;
+  border-radius: var(--pf-radius-card);
+  padding: 28px 30px;
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Closed state ───────────────────────────────────────────────────────── */
+
+.om-pf-closed {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+  padding: 48px 30px;
+}
+
+/* ─── Progress bar ───────────────────────────────────────────────────────── */
+
+.om-pf-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.om-pf-progress-meta {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.01em;
+}
+
+.om-pf-progress-bar {
+  height: 4px;
+  background: #e9eaec;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.om-pf-progress-bar > div {
+  height: 100%;
+  background: var(--pf-brand);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* ─── Fields ─────────────────────────────────────────────────────────────── */
+
+.om-pf-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.om-pf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.om-pf-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.om-pf-req {
+  color: var(--pf-brand);
+  margin-left: 2px;
+}
+
+.om-pf-help {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ─── Input controls ─────────────────────────────────────────────────────── */
+
+.om-pf-card input[type='text'],
+.om-pf-card input[type='email'],
+.om-pf-card input[type='tel'],
+.om-pf-card input[type='number'],
+.om-pf-card input[type='date'],
+.om-pf-card select,
+.om-pf-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: var(--pf-border);
+  border-radius: var(--pf-radius-input);
+  font-size: 0.9375rem;
+  color: #111827;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+  font-family: inherit;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.om-pf-card input[type='text']:focus,
+.om-pf-card input[type='email']:focus,
+.om-pf-card input[type='tel']:focus,
+.om-pf-card input[type='number']:focus,
+.om-pf-card input[type='date']:focus,
+.om-pf-card select:focus,
+.om-pf-card textarea:focus {
+  border: var(--pf-border-focus);
+  box-shadow: var(--pf-brand-focus-ring);
+  background: var(--pf-brand-tint);
+}
+
+/* filled state (is-filled applies cream-gray bg) */
+.om-pf-card input.is-filled,
+.om-pf-card textarea.is-filled {
+  background: #f4f5f7;
+}
+
+.om-pf-card textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.5;
+}
+
+.om-pf-card select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* ─── Radio + Checkbox groups ────────────────────────────────────────────── */
+
+.om-pf-radio,
+.om-pf-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.om-pf-radio-item,
+.om-pf-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.om-pf-radio-item input[type='radio'],
+.om-pf-check-item input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--pf-brand);
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* ─── Consent checkbox ───────────────────────────────────────────────────── */
+
+.om-pf-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.om-pf-consent input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--pf-brand);
+  cursor: pointer;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+
+/* ─── Field error ────────────────────────────────────────────────────────── */
+
+.om-pf-field[data-error] input,
+.om-pf-field[data-error] select,
+.om-pf-field[data-error] textarea {
+  border-color: #ef4444;
+}
+
+.om-pf-field-error {
+  font-size: 0.8125rem;
+  color: #ef4444;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.om-pf-field-error::before {
+  content: '!';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─── Form-level error ───────────────────────────────────────────────────── */
+
+.om-pf-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ─── Actions bar ────────────────────────────────────────────────────────── */
+
+.om-pf-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.om-pf-btn-primary {
+  background: var(--pf-brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--pf-radius-input);
+  padding: 12px 28px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+
+.om-pf-btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--pf-brand) 88%, #000);
+}
+
+.om-pf-btn-primary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--pf-brand) 78%, #000);
+}
+
+.om-pf-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.om-pf-btn-ghost {
+  background: transparent;
+  color: #6b7280;
+  border: 1.5px solid #e2e5ea;
+  border-radius: var(--pf-radius-input);
+  padding: 11px 20px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+.om-pf-btn-ghost:hover {
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+/* ─── Payment block ──────────────────────────────────────────────────────── */
+
+.om-pf-pay {
+  background: #f7f8fa;
+  border: var(--pf-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.om-pf-pay-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .om-pf-pay-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.om-pf-pay-tile {
+  background: #fff;
+  border: var(--pf-border);
+  border-radius: 9px;
+  padding: 14px 8px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.om-pf-pay-tile:hover {
+  border-color: var(--pf-brand);
+  color: var(--pf-brand);
+}
+
+.om-pf-pay-tile.is-selected {
+  border-color: var(--pf-brand);
+  background: var(--pf-brand-tint);
+  color: var(--pf-brand);
+}
+
+.om-pf-pay-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.om-pf-pay-note {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ─── Success card ───────────────────────────────────────────────────────── */
+
+.om-pf-success {
+  align-items: center;
+  text-align: center;
+  padding: 40px 30px 44px;
+}
+
+.om-pf-success-check {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--pf-brand);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 0 0 12px color-mix(in srgb, var(--pf-brand) 15%, transparent);
+}
+
+.om-pf-success h1 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.om-pf-success p {
+  color: #6b7280;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.om-pf-receipt {
+  background: #f4f5f7;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  font-size: 0.8125rem;
+  color: #374151;
+  margin: 12px 0 0;
+  white-space: pre;
+}
+
+/* ─── Mobile adjustments ─────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .om-pf-shell {
+    padding: 24px 8px 48px;
+    align-items: flex-start;
+  }
+
+  .om-pf-card {
+    padding: 20px 16px;
+    border-radius: 12px;
+    gap: 16px;
+  }
+
+  .om-pf-btn-primary,
+  .om-pf-btn-ghost {
+    width: 100%;
+  }
+
+  .om-pf-actions {
+    flex-direction: column-reverse;
+  }
+}
