@@ -12,6 +12,7 @@
  *   - Stripe session retrieval fails for any reason
  */
 import { getCurrentTenant } from '@/lib/tenant-server'
+import { signMembershipPortalToken } from '@/lib/membership-portal-token'
 import { stripeForAccount } from '@/lib/stripe-connect'
 
 export const dynamic = 'force-dynamic'
@@ -89,6 +90,7 @@ export default async function MembershipThanksPage({ searchParams }: Props) {
 
   let customerName = 'friend'
   let customerId = ''
+  let portalToken = ''
 
   try {
     const stripe = stripeForAccount(stripeAccountId)
@@ -102,6 +104,13 @@ export default async function MembershipThanksPage({ searchParams }: Props) {
       typeof session.customer === 'string'
         ? session.customer
         : (session.customer as { id?: string } | null)?.id ?? ''
+
+    if (customerId) {
+      portalToken = signMembershipPortalToken({
+        tenantId: tenant.id,
+        customerId,
+      })
+    }
 
     customerName = session.customer_details?.name ?? 'friend'
   } catch {
@@ -123,9 +132,9 @@ export default async function MembershipThanksPage({ searchParams }: Props) {
           May Allah bless your contribution and sustain this community.
         </p>
 
-        {customerId && (
+        {portalToken && (
           <form action="/api/membership/portal" method="post">
-            <input type="hidden" name="customerId" value={customerId} />
+            <input type="hidden" name="portalToken" value={portalToken} />
             <button
               type="submit"
               className="inline-flex items-center gap-2 rounded-[var(--r-md)] border border-border bg-white px-8 py-[16px] font-body text-fs-base font-semibold text-fg2 shadow-sh-sm transition-all duration-base ease-out hover:-translate-y-px hover:border-border-teal hover:shadow-sh-md"

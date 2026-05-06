@@ -12,6 +12,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { stripeForAccount } from '@/lib/stripe-connect'
+import { verifyMembershipPortalToken } from '@/lib/membership-portal-token'
 
 /** Duck-type helper — resolves stripeAccountId from either the flat shape
  *  (test mocks) or the real Payload Tenant shape where it lives under
@@ -38,9 +39,20 @@ export async function POST(req: Request) {
   }
 
   const form = await req.formData()
-  const customerId = form.get('customerId')
-  if (!customerId || typeof customerId !== 'string' || customerId.trim() === '') {
-    return NextResponse.json({ error: 'Missing customerId' }, { status: 400 })
+  const portalToken = form.get('portalToken')
+  if (!portalToken || typeof portalToken !== 'string' || portalToken.trim() === '') {
+    return NextResponse.json({ error: 'Missing portal token' }, { status: 400 })
+  }
+
+  let decoded: { tenantId: string | number; customerId: string }
+  try {
+    decoded = verifyMembershipPortalToken(portalToken)
+  } catch {
+    return NextResponse.json({ error: 'Invalid portal token' }, { status: 403 })
+  }
+
+  if (String(decoded.tenantId) !== String(tenant.id)) {
+    return NextResponse.json({ error: 'Portal token tenant mismatch' }, { status: 403 })
   }
 
   const origin =
@@ -50,7 +62,7 @@ export async function POST(req: Request) {
   const stripe = stripeForAccount(stripeAccountId)
   const session = await stripe.billingPortal.sessions.create(
     {
-      customer: customerId,
+      customer: decoded.customerId,
       return_url: `${origin}/membership`,
     },
     { stripeAccount: stripeAccountId },

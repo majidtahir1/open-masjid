@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
@@ -28,6 +29,22 @@ export async function GET() {
   }
 
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
+  if (!user) {
+    return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
+  }
+  if (user.role !== 'admin' && user.role !== 'platformOwner') {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+  if (user.role === 'admin') {
+    const userTenantId =
+      typeof user.tenant === 'object' && user.tenant !== null
+        ? (user.tenant as { id: string | number }).id
+        : (user.tenant as string | number | undefined)
+    if (String(userTenantId) !== String(tenant.id)) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+    }
+  }
 
   // Fetch all members for this tenant.
   // Limit is intentionally generous (10 000). For tenants with > 10 000 members
