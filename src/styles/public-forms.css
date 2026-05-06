@@ -22,9 +22,51 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: white;
+}
+
+/* ─── Standalone tenant header (top of public form pages) ─────────────────── */
+.om-pf-tenant-header {
+  display: flex;
   align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  background: white;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+.om-pf-tenant-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.om-pf-tenant-name {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ─── Form-area wrapper (between header and footer) ───────────────────────── */
+.om-pf-form-area {
+  flex: 1;
+  background: var(--pf-bg, #f7f8fa);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   padding: 48px 16px 64px;
-  background: #f7f8fa;
+}
+.om-pf-form-area__inner {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ─── Platform footer ─────────────────────────────────────────────────────── */
+.om-pf-platform-footer {
+  text-align: center;
+  padding: 18px 16px;
+  font-size: 12px;
+  color: #6b7280;
 }
 
 .om-pf-header {
@@ -504,7 +546,7 @@
 /* ─── Mobile adjustments ─────────────────────────────────────────────────── */
 
 @media (max-width: 600px) {
-  .om-pf-shell {
+  .om-pf-form-area {
     padding: 24px 8px 48px;
     align-items: flex-start;
   }
