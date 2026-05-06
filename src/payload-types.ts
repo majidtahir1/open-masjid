@@ -73,6 +73,7 @@ export interface Config {
     announcements: Announcement;
     services: Service;
     pages: Page;
+    forms: Form;
     'donation-funds': DonationFund;
     donations: Donation;
     'membership-tiers': MembershipTier;
@@ -93,6 +94,7 @@ export interface Config {
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    forms: FormsSelect<false> | FormsSelect<true>;
     'donation-funds': DonationFundsSelect<false> | DonationFundsSelect<true>;
     donations: DonationsSelect<false> | DonationsSelect<true>;
     'membership-tiers': MembershipTiersSelect<false> | MembershipTiersSelect<true>;
@@ -877,6 +879,106 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Build forms for RSVPs, registrations, surveys, and more.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: number;
+  title: string;
+  /**
+   * URL slug. /forms/<slug>.
+   */
+  slug?: string | null;
+  status: 'draft' | 'published' | 'closed';
+  /**
+   * Shown above the form on the public page.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * The form definition. Use the builder above.
+   */
+  schema:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  settings?: {
+    submitButtonLabel?: string | null;
+    successMessage?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Max submissions before the form closes. Leave blank for no limit.
+     */
+    capacity?: number | null;
+    closedMessage?: string | null;
+    notificationEmails?:
+      | {
+          email: string;
+          id?: string | null;
+        }[]
+      | null;
+    sendConfirmation?: boolean | null;
+    confirmationSubject?: string | null;
+    /**
+     * Plain text body. {{name}} interpolates the submitter name field if present.
+     */
+    confirmationBody?: string | null;
+  };
+  payment?: {
+    enabled?: boolean | null;
+    mode?: ('fixed' | 'suggested') | null;
+    priceCents?: number | null;
+    suggestedAmountsCents?:
+      | {
+          amount: number;
+          id?: string | null;
+        }[]
+      | null;
+    allowCustomAmount?: boolean | null;
+    currency?: ('usd' | 'cad' | 'gbp') | null;
+    /**
+     * Shown on the Stripe checkout page.
+     */
+    description?: string | null;
+  };
+  tenant: number | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Categories donors can give toward (Sadaqah, Zakat, Building Fund, etc.).
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1187,6 +1289,10 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
+        relationTo: 'forms';
+        value: number | Form;
+      } | null)
+    | ({
         relationTo: 'donation-funds';
         value: number | DonationFund;
       } | null)
@@ -1483,6 +1589,53 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms_select".
+ */
+export interface FormsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  description?: T;
+  schema?: T;
+  settings?:
+    | T
+    | {
+        submitButtonLabel?: T;
+        successMessage?: T;
+        capacity?: T;
+        closedMessage?: T;
+        notificationEmails?:
+          | T
+          | {
+              email?: T;
+              id?: T;
+            };
+        sendConfirmation?: T;
+        confirmationSubject?: T;
+        confirmationBody?: T;
+      };
+  payment?:
+    | T
+    | {
+        enabled?: T;
+        mode?: T;
+        priceCents?: T;
+        suggestedAmountsCents?:
+          | T
+          | {
+              amount?: T;
+              id?: T;
+            };
+        allowCustomAmount?: T;
+        currency?: T;
+        description?: T;
+      };
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

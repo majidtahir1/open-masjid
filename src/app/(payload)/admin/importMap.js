@@ -38,6 +38,7 @@ import { default as default_020349c8fbd548aa796ba56590815903 } from '../../../..
 import { default as default_61b04b208665b6f3018adf7337542037 } from '../../../../src/fields/PhotoToneField'
 import { default as default_737df59d0032b50354e46d5ff0b71d1c } from '../../../../src/fields/IconPickerField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
+import { default as default_ab4e07029642c2ed73e753c2f64429e6 } from '../../../../src/admin/forms/FormBuilderField'
 import { default as default_2d600a181d8006b240d8cf056631f58b } from '../../../../src/admin/donations/BackToOverview'
 import { default as default_9afa571e6cc08efa56f642a8dcb8b90b } from '../../../../src/admin/donations/FundsListIntro'
 import { default as default_8efef7e3d5e95d810cb99f758780d954 } from '../../../../src/admin/donations/FundsSaveButton'
@@ -107,6 +108,7 @@ export const importMap = {
   "/src/fields/PhotoToneField#default": default_61b04b208665b6f3018adf7337542037,
   "/src/fields/IconPickerField#default": default_737df59d0032b50354e46d5ff0b71d1c,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
+  "/src/admin/forms/FormBuilderField#default": default_ab4e07029642c2ed73e753c2f64429e6,
   "/src/admin/donations/BackToOverview#default": default_2d600a181d8006b240d8cf056631f58b,
   "/src/admin/donations/FundsListIntro#default": default_9afa571e6cc08efa56f642a8dcb8b90b,
   "/src/admin/donations/FundsSaveButton#default": default_8efef7e3d5e95d810cb99f758780d954,
