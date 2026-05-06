@@ -88,6 +88,11 @@
   color: var(--theme-elevation-500);
 }
 
+/* Card when being dragged (via @dnd-kit DragOverlay — opacity set inline) */
+.fb-card--dragging {
+  pointer-events: none;
+}
+
 .fb-card-body {
   padding: 14px 16px 14px 12px;
   min-width: 0;
