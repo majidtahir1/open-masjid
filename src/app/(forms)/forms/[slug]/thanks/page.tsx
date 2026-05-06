@@ -5,14 +5,23 @@
  * and renders the full success card (artboard 5.4).
  */
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
+import { getPayloadClient } from '@/lib/payloadClient'
 import { PublicFormSuccess } from '@/components/PublicFormSuccess'
 import '@/styles/public-forms.css'
 import type React from 'react'
 
 export const dynamic = 'force-dynamic'
+
+interface PublicSubmissionRecord {
+  id: string | number
+  tenant?: { id: string | number } | string | number | null
+  form?: { id: string | number } | string | number | null
+  data?: Record<string, unknown> | null
+  paymentStatus?: string | null
+  amountCents?: number | null
+  currency?: string | null
+}
 
 export default async function ThanksPage({
   params,
@@ -30,23 +39,27 @@ export default async function ThanksPage({
   const tenant = await getCurrentTenant()
   if (!tenant) notFound()
 
-  const payload = await getPayload({ config })
+  const payload = await getPayloadClient()
+  if (!payload) notFound()
 
-  const submission = await payload.findByID({
+  const submission = (await payload.findByID({
     collection: 'form-submissions',
     id: s,
     overrideAccess: true,
-  })
+  })) as PublicSubmissionRecord | null
 
   if (!submission) notFound()
 
   // Guard: submission must belong to this tenant
-  const submissionTenantId =
-    typeof submission.tenant === 'object' ? submission.tenant.id : submission.tenant
+  const subTenant = submission.tenant
+  if (!subTenant) notFound()
+  const submissionTenantId = typeof subTenant === 'object' ? subTenant.id : subTenant
   if (String(submissionTenantId) !== String(tenant.id)) notFound()
 
-  const formId =
-    typeof submission.form === 'object' ? submission.form.id : submission.form
+  const subForm = submission.form
+  if (!subForm) notFound()
+  const formId = typeof subForm === 'object' ? subForm.id : subForm
+  if (formId === undefined) notFound()
 
   const form = await payload.findByID({
     collection: 'forms',

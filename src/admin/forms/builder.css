@@ -816,3 +816,24 @@
   max-width: 280px;
   line-height: 1.5;
 }
+
+/* ─── Canvas toolbar (above field list) ──────────────────────────────────── */
+.fb-canvas-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.fb-canvas-toolbar__link {
+  font-size: 13px;
+  color: #1B3358;
+  text-decoration: none;
+  padding: 6px 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 6px;
+  background: white;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.fb-canvas-toolbar__link:hover {
+  background: #f4f5f7;
+  border-color: rgba(15, 23, 42, 0.20);
+}

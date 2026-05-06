@@ -11,14 +11,9 @@
  */
 
 import { unstable_noStore as noStore } from 'next/cache'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 
 import type { TenantRecord } from './tenant-parse'
-
-async function payloadClient() {
-  return getPayload({ config })
-}
+import { getPayloadClient } from './payloadClient'
 
 export interface PrayerDayRow {
   date?: string | null
@@ -44,7 +39,8 @@ export async function getActiveSchedule(
   date: Date = new Date(),
 ): Promise<PrayerScheduleRecord | null> {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return null
   const iso = date.toISOString()
   // endDate is inclusive: a schedule with endDate = Apr 30 00:00 UTC should
   // still be active at any moment on Apr 30 UTC. Compare against the UTC
@@ -94,7 +90,8 @@ export async function getAllSchedules(
   tenant: TenantRecord,
 ): Promise<PrayerScheduleRecord[]> {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   try {
     const res = await payload.find({
       collection: 'prayer-schedules',

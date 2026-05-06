@@ -10,15 +10,24 @@
  */
 import type React from 'react'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
+import { getPayloadClient } from '@/lib/payloadClient'
 import { PublicFormClient } from './PublicFormClient'
 import RichText from '@/components/RichText'
 import '@/styles/public-forms.css'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+interface PublicFormRecord {
+  id: string | number
+  title?: string | null
+  description?: unknown
+  status?: 'published' | 'closed' | string | null
+  settings?: {
+    capacity?: number | null
+  } | null
+}
 
 export default async function FormPage({
   params,
@@ -29,7 +38,8 @@ export default async function FormPage({
   const tenant = await getCurrentTenant()
   if (!tenant) notFound()
 
-  const payload = await getPayload({ config })
+  const payload = await getPayloadClient()
+  if (!payload) notFound()
 
   const found = await payload.find({
     collection: 'forms',
@@ -44,7 +54,7 @@ export default async function FormPage({
     overrideAccess: true,
   })
 
-  const form = found.docs[0]
+  const form = (found.docs[0] as PublicFormRecord | undefined) ?? null
   if (!form) notFound()
 
   // Check capacity — if capacity is defined and the submission count meets or

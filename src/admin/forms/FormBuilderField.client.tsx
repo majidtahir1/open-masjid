@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useField } from '@payloadcms/ui'
 import { Plus, LayoutTemplate } from 'lucide-react'
 import {
@@ -132,6 +132,12 @@ function SortableFieldCard({
     isDragging,
   } = useSortable({ id: field.id })
 
+  // Suppress SSR hydration mismatch from dnd-kit's auto-generated
+  // `aria-describedby="DndDescribedBy-N"` (the counter differs across renders).
+  // Only attach drag attributes after the client has mounted.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -146,7 +152,7 @@ function SortableFieldCard({
         onSelect={onSelect}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
-        dragHandleProps={{ ...attributes, ...listeners }}
+        dragHandleProps={mounted ? { ...attributes, ...listeners } : undefined}
       />
     </div>
   )
@@ -160,6 +166,38 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
   const { value, setValue } = useField<FormSchema>({
     potentiallyStalePath: (props.path as string) ?? 'schema',
   })
+
+  // Sibling fields for the public-URL link
+  const { value: slugValue } = useField<string>({ path: 'slug' })
+  const { value: tenantField } = useField<string | { id: string | number } | null>({
+    path: 'tenant',
+  })
+  const tenantId =
+    tenantField && typeof tenantField === 'object' && 'id' in tenantField
+      ? tenantField.id
+      : (tenantField as string | number | null)
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null)
+  useEffect(() => {
+    if (!tenantId) return
+    let cancelled = false
+    fetch(`/api/tenants/${tenantId}?depth=0`, { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!cancelled && d?.slug) setTenantSlug(d.slug) })
+      .catch(() => { /* fall back */ })
+    return () => { cancelled = true }
+  }, [tenantId])
+  const publicHref = (() => {
+    if (!slugValue) return null
+    if (typeof window === 'undefined') return `/forms/${slugValue}`
+    const host = window.location.host
+    const firstLabel = host.split(':')[0].split('.')[0].toLowerCase()
+    const isBareLocal = firstLabel === 'localhost' || firstLabel === '127' || firstLabel === '0'
+    const isAdminHost = firstLabel === 'admin'
+    if ((isBareLocal || isAdminHost) && tenantSlug) {
+      return `${window.location.protocol}//${tenantSlug}.${host}/forms/${slugValue}`
+    }
+    return `/forms/${slugValue}`
+  })()
 
   // Normalise: Payload may store raw JSON as a string or as null
   const schema: FormSchema = (() => {
@@ -413,6 +451,18 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
   return (
     <div className="fb-layout">
       <div className="fb-layout-canvas">
+        {publicHref && (
+          <div className="fb-canvas-toolbar">
+            <a
+              href={publicHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="fb-canvas-toolbar__link"
+            >
+              View public form ↗
+            </a>
+          </div>
+        )}
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
