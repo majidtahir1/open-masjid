@@ -1,0 +1,205 @@
+/* ============================================================
+   Form Toolbar — admin UI
+   Artboard refs: sticky row on 2.x, 3.1, 4.1 artboards
+   Brand: #1B3358 (neutral navy)
+   ============================================================ */
+
+/* Root wrapper — provides the sticky bar + panel below it */
+.ft-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Sticky bar */
+.ft-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 52px;
+  background: #1B3358;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+/* ---- Left: metadata ---- */
+.ft-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ft-meta__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.ft-meta__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ft-meta__slug {
+  font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+}
+
+.ft-meta__count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+}
+
+/* Status pills */
+.ft-status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.ft-status-pill--published {
+  background: rgba(20, 184, 166, 0.25);
+  color: #5eead4;
+}
+
+.ft-status-pill--draft {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.65);
+}
+
+.ft-status-pill--closed {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+/* ---- Right: tabs + actions ---- */
+.ft-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Tabs */
+.ft-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.ft-tab {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.ft-tab:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.10);
+}
+
+.ft-tab--active {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Action buttons */
+.ft-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ft-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+}
+
+.ft-btn--ghost {
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.ft-btn--ghost:hover {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+}
+
+.ft-btn--primary {
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+}
+
+.ft-btn--primary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.28);
+}
+
+.ft-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---- Panel area (below the bar) ---- */
+.ft-panel {
+  flex: 1;
+}
+
+/* ---- Submissions placeholder ---- */
+.ft-submissions-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.ft-submissions-placeholder__text {
+  font-size: 14px;
+  color: var(--theme-elevation-450);
+  max-width: 420px;
+  line-height: 1.6;
+}
