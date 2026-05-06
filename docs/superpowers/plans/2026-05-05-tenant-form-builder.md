@@ -624,6 +624,8 @@ git commit -m "feat(forms): FormSubmissions collection (webhook-write, tenant-sc
 
 ## Phase B — Public form: rendering and submission (no payment)
 
+> **Design source for the public surface:** artboards `5.1 public-empty`, `5.2 public-filled`, `5.3 public-multi`, `5.4 public-success` (desktop) and `6.1–6.3` (mobile, 390px) in `Forms.html`. `PublicForm.jsx` and the `.pf-*` rules in `forms.css` carry the exact tokens — input padding 12/14, radius 9px, focus ring 4px brand-tint, suggested-amount tile 4-col grid that collapses to 2 on mobile, success-card 76px brand circle with check, monospace receipt strip. Brand color flows through `var(--pf-brand, var(--icp-teal-500))`. The visual must match these artboards.
+
 ### Task B1: rate limiter
 
 **Files:**
@@ -1071,6 +1073,8 @@ git commit -m "feat(forms): POST /api/forms/[slug]/submit endpoint"
 ```
 
 ### Task B5: public form page (no payment yet)
+
+**Design:** `5.1 public-empty` (single-page empty), `5.2 public-filled` (filled inputs use `is-filled` cream-gray background), `5.3 public-multi` (progress bar + step heading + ghost Back / primary Continue), `6.1` mobile.
 
 **Files:**
 - Create: `src/app/(site)/forms/[slug]/page.tsx`
@@ -1559,6 +1563,8 @@ git commit -m "feat(forms): Stripe Checkout success URL handler"
 
 ### Task C4: payment block + thanks page
 
+**Design:** payment block from `5.1`/`5.2` (cream-gray inset card with Heart icon + heading + 4-col `$25/50/100/250` suggested amounts; selected = brand border + tinted background; "You'll be taken to **Stripe**…" sub-note with external-link icon). Submit button reads `Submit — $50` once an amount is selected (per `5.2`). Thanks page = `5.4 public-success` (76px brand circle + check, serif H1 "JazakAllahu khairan, {firstName}", monospace receipt strip, ghost "Add to calendar" + primary "Back to {masjidHost}").
+
 **Files:**
 - Create: `src/components/PublicFormPaymentBlock.tsx`
 - Create: `src/app/(site)/forms/[slug]/thanks/page.tsx`
@@ -1654,7 +1660,11 @@ git commit -m "feat(forms): suggested-amount payment block + thanks page"
 
 ## Phase D — Admin: form builder UI
 
+> **Design source for this phase:** artboards `2.1 builder-default`, `2.2 builder-popover`, `2.3 builder-clean` in `design_handoff_forms_unpacked/design_handoff_forms/Forms.html` (open in a browser to inspect). Read `FormBuilder.jsx` and the `.builder-*` rules in `forms.css` for exact spacing, color tokens (e.g. selected card teal ring + soft glow), border radii (cards 12px, popover shadow), and sizes (canvas 760px max-width centered, properties drawer 360px). **Do not import the JSX** — translate the markup into our component conventions, but the visual must match.
+
 ### Task D1: builder skeleton (canvas + add-field popover, no drag yet)
+
+**Design:** `2.1 builder-default` (selected field state), `2.2 builder-popover` (popover open over canvas), `2.3 builder-clean` (no selection, drawer collapsed).
 
 **Files:**
 - Create: `src/admin/forms/FormBuilderField.tsx`
@@ -1679,6 +1689,8 @@ git commit -m "feat(forms): suggested-amount payment block + thanks page"
 
 ### Task D2: properties drawer (General + Validation; Logic disabled)
 
+**Design:** `2.1 builder-default` — drawer header (icon + type label + field name + close), tabs (General / Validation / Logic), property rows (Label, Field name in mono, Help text, Placeholder OR options list with drag-handle + input + delete per option, Behavior toggles).
+
 **Files:**
 - Create: `src/admin/forms/builder/PropertiesDrawer.tsx`
 
@@ -1690,6 +1702,8 @@ git commit -m "feat(forms): suggested-amount payment block + thanks page"
 
 ### Task D3: drag-and-drop reorder
 
+**Design:** `2.1 builder-default` field card grid (grip handle 22px on left, gray-30% default → gray-50% on hover). Cross-step drag should preserve the visual handoff over page-break dividers as shown in `FormBuilder.jsx`.
+
 **Files:**
 - Modify: `src/admin/forms/FormBuilderField.client.tsx`
 
@@ -1700,6 +1714,8 @@ git commit -m "feat(forms): suggested-amount payment block + thanks page"
 - [ ] **Step 3: Commit.**
 
 ### Task D4: form-level toolbar tabs (Build / Settings / Submissions)
+
+**Design:** sticky toolbar visible across `2.x`, `3.1`, `4.1` artboards: form title + status/slug/submissions metadata on the left; Build / Settings / Submissions tabs + Preview / View live / Save buttons on the right. Match button styling (primary navy, ghost) and metadata typography from `forms.css`.
 
 **Files:**
 - Create: `src/admin/forms/FormToolbar.tsx`
@@ -1715,7 +1731,11 @@ git commit -m "feat(forms): suggested-amount payment block + thanks page"
 
 ## Phase E — Admin: settings sub-nav
 
+> **Design source:** artboard `3.1 form-settings` in `Forms.html`. 220px-wide settings sub-nav on the left, three stacked cards on the right (Form basics 2-col grid, Notifications inline toggles, Payment with master toggle + 2-col grid). Match exactly: card padding 24/28, section gap 16–18px, sub-nav active-row styling from `AdminScreens.jsx`.
+
 ### Task E1: settings layout + sub-nav shell
+
+**Design:** `3.1 form-settings` (Basics shown active). Reproduce the sub-nav (7 items) and the three-card layout. Webhooks + Embed & share are page shells — render the nav row and a "Coming soon" card body matching the empty-state styling used elsewhere in `AdminScreens.jsx`.
 
 **Files:**
 - Create: `src/admin/forms/settings/SettingsNav.tsx`
@@ -1740,6 +1760,8 @@ git commit -m "feat(forms): suggested-amount payment block + thanks page"
 ---
 
 ## Phase F — Admin: submissions list, detail, CSV
+
+> **Design source:** artboards `1.1 forms-list`, `1.2 forms-list-drafts` (forms list with status pills + tabs), `4.1 subs-list` (per-form submissions table), and `4.2 sub-detail` (single submission with side cards) in `Forms.html`. See `AdminScreens.jsx` for column layout, status pill colors (published teal, draft gray, closed red, new/reviewed/archived per `forms.css`), and the side-card composition (Status meta rows + Payment with Stripe icon + last4).
 
 ### Task F1: CSV serializer
 
@@ -1805,6 +1827,8 @@ export function submissionsToCsv(
 
 ### Task F3: submissions list custom view
 
+**Design:** `4.1 subs-list` — 7-column table (checkbox / Submitter name+email / Preview / Payment / Status pill / Submitted / chevron). Filter + Export CSV buttons in the header row. Status-pill colors per `forms.css`.
+
 **Files:**
 - Create: `src/admin/forms/SubmissionsList.tsx`
 - Modify: `src/collections/FormSubmissions.ts` — register the custom list view via `admin.components.beforeList` or a list-view component override per Payload v3 docs.
@@ -1814,6 +1838,8 @@ export function submissionsToCsv(
 - [ ] **Step 2: Commit.**
 
 ### Task F4: submission detail with status workflow
+
+**Design:** `4.2 sub-detail` — page head with back button, submitter name (H1, 22px), full timestamp + ID, action buttons (Reply / Export / Mark reviewed). Two-column body: answers card on left (2-col grid: question label small/uppercase/600 | answer regular) | side cards on right (320px): Status (pill + meta rows for Submitted, IP, User agent, Form version) and Payment (Stripe icon + amount + last4 + payment_intent ID).
 
 **Files:**
 - Create: `src/admin/forms/SubmissionDetail.tsx`
