@@ -11,6 +11,8 @@ interface FieldCardProps {
   onSelect: () => void
   onDuplicate: () => void
   onDelete: () => void
+  /** Attributes + listeners from useSortable — wired to the grip handle in D3 */
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>
 }
 
 function FieldPreview({ field }: { field: Field }) {
@@ -99,6 +101,7 @@ export default function FieldCard({
   onSelect,
   onDuplicate,
   onDelete,
+  dragHandleProps,
 }: FieldCardProps) {
   if (field.type === 'page-break') {
     // Page-break rendered as a divider inline in the canvas
@@ -121,8 +124,12 @@ export default function FieldCard({
         }
       }}
     >
-      {/* Grip handle — visually present, wired in D3 */}
-      <div className="fb-card-grip" onClick={(e) => e.stopPropagation()}>
+      {/* Grip handle — drag handle for DnD (D3) */}
+      <div
+        className="fb-card-grip"
+        onClick={(e) => e.stopPropagation()}
+        {...(dragHandleProps ?? {})}
+      >
         <GripVertical size={14} />
       </div>
 

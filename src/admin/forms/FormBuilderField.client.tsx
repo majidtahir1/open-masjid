@@ -3,10 +3,30 @@
 import { useCallback, useRef, useState } from 'react'
 import { useField } from '@payloadcms/ui'
 import { Plus, LayoutTemplate } from 'lucide-react'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Field, FieldTypeId, FormSchema } from '@/lib/form-schema'
 import { FIELD_TYPES } from '@/lib/form-schema'
 import FieldCard from './builder/FieldCard'
 import AddFieldPopover from './builder/AddFieldPopover'
+import PropertiesDrawer from './builder/PropertiesDrawer'
 import './builder.css'
 
 // ---------------------------------------------------------------------------
@@ -80,10 +100,56 @@ function makeDefaultField(typeId: FieldTypeId, existingNames: Set<string>): Fiel
 // ---------------------------------------------------------------------------
 
 interface PopoverPosition {
-  /** Index of the step containing the insertion point */
   stepIndex: number
-  /** Insert after this field id; null = before all fields in the step */
   afterFieldId: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Sortable FieldCard wrapper (D3)
+// ---------------------------------------------------------------------------
+
+interface SortableFieldCardProps {
+  field: Field
+  selected: boolean
+  onSelect: () => void
+  onDuplicate: () => void
+  onDelete: () => void
+}
+
+function SortableFieldCard({
+  field,
+  selected,
+  onSelect,
+  onDuplicate,
+  onDelete,
+}: SortableFieldCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <FieldCard
+        field={field}
+        selected={selected}
+        onSelect={onSelect}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
+    </div>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -91,7 +157,6 @@ interface PopoverPosition {
 // ---------------------------------------------------------------------------
 
 export function FormBuilderFieldClient(props: Record<string, unknown>) {
-  // Payload v3 uses potentiallyStalePath to avoid re-registering on every render
   const { value, setValue } = useField<FormSchema>({
     potentiallyStalePath: (props.path as string) ?? 'schema',
   })
@@ -111,9 +176,16 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
 
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null)
   const [popoverAt, setPopoverAt] = useState<PopoverPosition | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const popoverAnchorRef = useRef<Map<string, HTMLElement>>(new Map())
 
   const totalSteps = schema.steps.length
+
+  // DnD sensors (pointer + keyboard for accessibility)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   // ------------------------------------------------------------------
   // Mutators
@@ -183,6 +255,108 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
     [schema, updateSchema, selectedFieldId],
   )
 
+  const updateField = useCallback(
+    (updated: Field) => {
+      const nextSteps = schema.steps.map((step) => ({
+        ...step,
+        fields: step.fields.map((f) => (f.id === updated.id ? updated : f)),
+      }))
+      updateSchema({ ...schema, steps: nextSteps })
+    },
+    [schema, updateSchema],
+  )
+
+  // ------------------------------------------------------------------
+  // DnD handlers (D3)
+  // ------------------------------------------------------------------
+
+  // Build a map from fieldId -> stepIndex for quick lookup
+  function buildFieldStepMap(): Map<string, number> {
+    const map = new Map<string, number>()
+    schema.steps.forEach((step, si) => {
+      step.fields.forEach((f) => map.set(f.id, si))
+    })
+    return map
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string)
+    setPopoverAt(null)
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const fieldStepMap = buildFieldStepMap()
+    const srcStepIdx = fieldStepMap.get(active.id as string)
+    const dstStepIdx = fieldStepMap.get(over.id as string)
+
+    if (srcStepIdx === undefined || dstStepIdx === undefined) return
+
+    if (srcStepIdx === dstStepIdx) {
+      // Intra-step reorder
+      const step = schema.steps[srcStepIdx]
+      const oldIdx = step.fields.findIndex((f) => f.id === active.id)
+      const newIdx = step.fields.findIndex((f) => f.id === over.id)
+      if (oldIdx === -1 || newIdx === -1) return
+
+      const newFields = [...step.fields]
+      const [moved] = newFields.splice(oldIdx, 1)
+      newFields.splice(newIdx, 0, moved)
+
+      const nextSteps = schema.steps.map((s, i) =>
+        i === srcStepIdx ? { ...s, fields: newFields } : s,
+      )
+      updateSchema({ ...schema, steps: nextSteps })
+    } else {
+      // Cross-step reorder
+      const srcStep = schema.steps[srcStepIdx]
+      const dstStep = schema.steps[dstStepIdx]
+
+      const srcFields = [...srcStep.fields]
+      const srcIdx = srcFields.findIndex((f) => f.id === active.id)
+      if (srcIdx === -1) return
+      const [movedField] = srcFields.splice(srcIdx, 1)
+
+      const dstFields = [...dstStep.fields]
+      const dstIdx = dstFields.findIndex((f) => f.id === over.id)
+      dstFields.splice(dstIdx >= 0 ? dstIdx : dstFields.length, 0, movedField)
+
+      const nextSteps = schema.steps.map((s, i) => {
+        if (i === srcStepIdx) return { ...s, fields: srcFields }
+        if (i === dstStepIdx) return { ...s, fields: dstFields }
+        return s
+      })
+      updateSchema({ ...schema, steps: nextSteps })
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function handleDragOver(_event: DragOverEvent) {
+    // No-op: we handle everything in dragEnd for simplicity
+  }
+
+  // ------------------------------------------------------------------
+  // Selected field
+  // ------------------------------------------------------------------
+
+  let selectedField: Field | undefined
+  for (const step of schema.steps) {
+    const found = step.fields.find((f) => f.id === selectedFieldId)
+    if (found) { selectedField = found; break }
+  }
+
+  // Active dragging field (for overlay)
+  let activeDragField: Field | undefined
+  if (activeId) {
+    for (const step of schema.steps) {
+      const found = step.fields.find((f) => f.id === activeId)
+      if (found) { activeDragField = found; break }
+    }
+  }
+
   // ------------------------------------------------------------------
   // Render helpers
   // ------------------------------------------------------------------
@@ -233,78 +407,133 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
 
   const isEmpty = schema.steps.every((s) => s.fields.length === 0)
 
+  // Collect all field IDs per step for SortableContext
+  const stepFieldIds = schema.steps.map((step) => step.fields.map((f) => f.id))
+
   return (
-    <div className="fb-canvas">
-      {isEmpty && (
-        <div className="fb-empty">
-          <div className="fb-empty-icon">
-            <LayoutTemplate size={40} />
+    <div className="fb-layout">
+      <div className="fb-layout-canvas">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="fb-canvas">
+            {isEmpty && (
+              <div className="fb-empty">
+                <div className="fb-empty-icon">
+                  <LayoutTemplate size={40} />
+                </div>
+                <div className="fb-empty-title">No fields yet</div>
+                <div className="fb-empty-desc">
+                  Click &ldquo;+ Add field&rdquo; to start building your form.
+                </div>
+              </div>
+            )}
+
+            {schema.steps.map((step, si) => {
+              const elements: React.ReactNode[] = []
+
+              if (totalSteps > 1) {
+                elements.push(
+                  <div key={`step-heading-${step.id}`} className="fb-step-header">
+                    Step {si + 1}
+                  </div>,
+                )
+              }
+
+              elements.push(
+                <AddPill key={`pill-top-${step.id}`} stepIndex={si} afterFieldId={null} />,
+              )
+
+              const sortableIds = stepFieldIds[si]
+
+              elements.push(
+                <SortableContext
+                  key={`sortable-${step.id}`}
+                  items={sortableIds}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {step.fields.map((field, fi) => {
+                    if (field.type === 'page-break') {
+                      const stepsBefore = si
+                      return (
+                        <div key={field.id}>
+                          <SortableFieldCard
+                            field={field}
+                            selected={false}
+                            onSelect={() => {}}
+                            onDuplicate={() => duplicateField(field.id)}
+                            onDelete={() => deleteField(field.id)}
+                          />
+                          <div className="fb-page-break">
+                            <div className="fb-page-break-line" />
+                            <span className="fb-page-break-label">
+                              Step {stepsBefore + 1} of {totalSteps}
+                            </span>
+                            <div className="fb-page-break-line" />
+                          </div>
+                          <AddPill
+                            key={`pill-${step.id}-${fi}`}
+                            stepIndex={si}
+                            afterFieldId={field.id}
+                          />
+                        </div>
+                      )
+                    }
+                    return (
+                      <div key={field.id}>
+                        <SortableFieldCard
+                          field={field}
+                          selected={selectedFieldId === field.id}
+                          onSelect={() =>
+                            setSelectedFieldId(selectedFieldId === field.id ? null : field.id)
+                          }
+                          onDuplicate={() => duplicateField(field.id)}
+                          onDelete={() => deleteField(field.id)}
+                        />
+                        <AddPill
+                          key={`pill-${step.id}-${fi}`}
+                          stepIndex={si}
+                          afterFieldId={field.id}
+                        />
+                      </div>
+                    )
+                  })}
+                </SortableContext>,
+              )
+
+              return <div key={step.id}>{elements}</div>
+            })}
           </div>
-          <div className="fb-empty-title">No fields yet</div>
-          <div className="fb-empty-desc">
-            Click &ldquo;+ Add field&rdquo; to start building your form.
-          </div>
-        </div>
+
+          {/* DragOverlay — keeps the dragged item visible */}
+          <DragOverlay>
+            {activeDragField ? (
+              <div style={{ opacity: 0.85 }}>
+                <FieldCard
+                  field={activeDragField}
+                  selected={false}
+                  onSelect={() => {}}
+                  onDuplicate={() => {}}
+                  onDelete={() => {}}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
+
+      {/* Properties drawer (D2) */}
+      {selectedField && (
+        <PropertiesDrawer
+          field={selectedField}
+          onChange={updateField}
+          onClose={() => setSelectedFieldId(null)}
+        />
       )}
-
-      {schema.steps.map((step, si) => {
-        // Flatten: render a page-break divider inline when encountered
-        const elements: React.ReactNode[] = []
-
-        // Show step heading only for multi-step forms
-        if (totalSteps > 1) {
-          elements.push(
-            <div key={`step-heading-${step.id}`} className="fb-step-header">
-              Step {si + 1}
-            </div>,
-          )
-        }
-
-        // "Add field" pill at the very top of the step
-        elements.push(
-          <AddPill key={`pill-top-${step.id}`} stepIndex={si} afterFieldId={null} />,
-        )
-
-        step.fields.forEach((field, fi) => {
-          if (field.type === 'page-break') {
-            // Count steps up to this point for the label
-            const stepsBefore = si
-            elements.push(
-              <div key={field.id} className="fb-page-break">
-                <div className="fb-page-break-line" />
-                <span className="fb-page-break-label">
-                  Step {stepsBefore + 1} of {totalSteps}
-                </span>
-                <div className="fb-page-break-line" />
-              </div>,
-            )
-          } else {
-            elements.push(
-              <FieldCard
-                key={field.id}
-                field={field}
-                selected={selectedFieldId === field.id}
-                onSelect={() =>
-                  setSelectedFieldId(selectedFieldId === field.id ? null : field.id)
-                }
-                onDuplicate={() => duplicateField(field.id)}
-                onDelete={() => deleteField(field.id)}
-              />,
-            )
-          }
-
-          // "Add field" pill after every field
-          elements.push(
-            <AddPill
-              key={`pill-${step.id}-${fi}`}
-              stepIndex={si}
-              afterFieldId={field.id}
-            />,
-          )
-        })
-
-        return <div key={step.id}>{elements}</div>
-      })}
     </div>
   )
 }
