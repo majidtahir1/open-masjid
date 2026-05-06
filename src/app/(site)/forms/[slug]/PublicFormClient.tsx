@@ -2,7 +2,7 @@
 /**
  * PublicFormClient — multi-step public form rendering.
  *
- * State: values, errors, currentStep, submitting, success.
+ * State: values, errors, currentStep, submitting, success, selectedAmountCents.
  * Handles step-level validation, Back/Continue navigation,
  * and final POST to /api/forms/<slug>/submit.
  *
@@ -12,6 +12,7 @@ import { useState, type FormEvent } from 'react'
 import { PublicFormFields } from '@/components/PublicFormFields'
 import { PublicFormProgress } from '@/components/PublicFormProgress'
 import { PublicFormSuccess } from '@/components/PublicFormSuccess'
+import { PublicFormPaymentBlock } from '@/components/PublicFormPaymentBlock'
 import type { Form } from '@/payload-types'
 import type { FormSchema } from '@/lib/form-schema'
 
@@ -28,6 +29,7 @@ export function PublicFormClient({ form, closed }: Props) {
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<{ receipt?: { id: string | number } } | null>(null)
+  const [selectedAmountCents, setSelectedAmountCents] = useState<number | null>(null)
 
   // ─── Closed state ───────────────────────────────────────────────────────────
   if (closed) {
@@ -104,7 +106,12 @@ export function PublicFormClient({ form, closed }: Props) {
     const hpInput = formEl.querySelector<HTMLInputElement>('input[name="_hp"]')
     const hp = hpInput?.value ?? ''
 
-    const body = { ...values, _hp: hp }
+    const body: Record<string, unknown> = { ...values, _hp: hp }
+
+    // Include selected payment amount when present
+    if (form.payment?.enabled && selectedAmountCents !== null) {
+      body._amount_cents = selectedAmountCents
+    }
 
     let res: Response | null = null
     try {
@@ -151,6 +158,19 @@ export function PublicFormClient({ form, closed }: Props) {
 
   const stepTitle = schema.steps[step].title
 
+  // Derive submit button label
+  const baseLabel = form.settings?.submitButtonLabel ?? 'Submit'
+  const submitLabel =
+    isLast && form.payment?.enabled && selectedAmountCents !== null
+      ? `${baseLabel} — $${(selectedAmountCents / 100).toFixed(2)}`
+      : isLast
+        ? baseLabel
+        : 'Continue →'
+
+  // Suggested amounts: extract the `amount` value from each row
+  const suggestedAmountsCents =
+    form.payment?.suggestedAmountsCents?.map((row) => row.amount) ?? []
+
   return (
     <form className="om-pf-card" onSubmit={onSubmit} noValidate>
       {totalSteps > 1 && (
@@ -168,6 +188,19 @@ export function PublicFormClient({ form, closed }: Props) {
         errors={errors}
         onChange={setValue}
       />
+
+      {/* Payment block — rendered on the last step only when payment is enabled */}
+      {isLast && form.payment?.enabled && (
+        <PublicFormPaymentBlock
+          mode={form.payment.mode ?? 'fixed'}
+          priceCents={form.payment.priceCents ?? undefined}
+          suggestedAmountsCents={suggestedAmountsCents}
+          allowCustomAmount={form.payment.allowCustomAmount ?? false}
+          currency={form.payment.currency ?? undefined}
+          description={form.payment.description ?? undefined}
+          onChange={setSelectedAmountCents}
+        />
+      )}
 
       {/* Honeypot — visually hidden, not reachable by keyboard */}
       <input
@@ -207,11 +240,7 @@ export function PublicFormClient({ form, closed }: Props) {
           className="om-pf-btn-primary"
           disabled={submitting}
         >
-          {submitting
-            ? 'Submitting…'
-            : isLast
-              ? (form.settings?.submitButtonLabel ?? 'Submit')
-              : 'Continue →'}
+          {submitting ? 'Submitting…' : submitLabel}
         </button>
       </div>
     </form>

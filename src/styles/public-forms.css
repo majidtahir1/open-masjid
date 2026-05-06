@@ -392,6 +392,33 @@
   margin: 0;
 }
 
+.om-pf-pay-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.om-pf-pay-heart {
+  color: var(--pf-brand);
+  flex-shrink: 0;
+}
+
+.om-pf-pay-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.om-pf-pay-fixed {
+  font-size: 0.9375rem;
+  color: #374151;
+  margin: 0;
+}
+
+.om-pf-pay-custom input[type='number'] {
+  margin-top: 4px;
+}
+
 /* ─── Success card ───────────────────────────────────────────────────────── */
 
 .om-pf-success {
@@ -438,6 +465,15 @@
   color: #374151;
   margin: 12px 0 0;
   white-space: pre;
+}
+
+.om-pf-success-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 /* ─── Mobile adjustments ─────────────────────────────────────────────────── */
