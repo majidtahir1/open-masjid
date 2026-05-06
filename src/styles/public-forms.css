@@ -26,31 +26,42 @@
 }
 
 /* ─── Standalone tenant header (top of public form pages) ─────────────────── */
+/* Sized to match the tenant's main site header (h-36 = 144px tall, logo 112px). */
 .om-pf-tenant-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 18px 32px;
+  gap: 20px;
+  padding: 16px 24px;
+  height: 144px;
   background: white;
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 .om-pf-tenant-logo {
-  width: 44px;
-  height: 44px;
+  height: 112px;
+  width: auto;
+  max-width: 416px;
   object-fit: contain;
   flex-shrink: 0;
 }
 .om-pf-tenant-name {
-  font-family: var(--font-sans);
-  font-size: 16px;
+  font-family: var(--font-serif, ui-serif, Georgia, serif);
+  font-size: 28px;
   font-weight: 600;
-  color: #111827;
+  color: #0E1B2C;
   letter-spacing: -0.01em;
+  line-height: 1;
+}
+/* When a logo is present, the masjid name is implied — visually de-emphasize it
+   so it doesn't compete with the wordmark logos that already include the name. */
+.om-pf-tenant-header .om-pf-tenant-logo + .om-pf-tenant-name {
+  font-size: 0;
+  width: 0;
+  overflow: hidden;
 }
 @media (max-width: 600px) {
-  .om-pf-tenant-header { padding: 14px 18px; gap: 10px; }
-  .om-pf-tenant-logo { width: 36px; height: 36px; }
-  .om-pf-tenant-name { font-size: 15px; }
+  .om-pf-tenant-header { padding: 12px 16px; gap: 12px; height: 80px; }
+  .om-pf-tenant-logo { height: 56px; max-width: 240px; }
+  .om-pf-tenant-name { font-size: 18px; }
 }
 
 /* ─── Form-area wrapper (between header and footer) ───────────────────────── */
