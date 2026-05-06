@@ -30,14 +30,14 @@ export default function FormsFeaturePage() {
         side={
           <video
             className="om-feature-video"
-            src="/marketing/forms-builder-demo.mp4"
-            poster="/marketing/forms-builder-demo.png"
+            src="/marketing/forms-creation-demo.mp4"
+            poster="/marketing/forms-creation-demo.png"
             autoPlay
             loop
             muted
             playsInline
             preload="metadata"
-            aria-label="Building a form in the OpenMasjid admin"
+            aria-label="Creating a form from scratch in the OpenMasjid admin"
           />
         }
       />
@@ -72,21 +72,17 @@ export default function FormsFeaturePage() {
         title="Typeform-style flow, optional."
         body="Toggle 'one question per page' and the form transforms into a focused, Typeform-style experience — one question on screen, Press Enter ↵ to continue, progress bar at the top. Or keep everything on one page if your community prefers a single scroll. Per-form setting, not platform-wide."
         side={
-          <div className="om-mockup-card" style={{ padding: 0, overflow: 'hidden' }}>
-            <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--om-border)' }}>
-              <div style={{ fontSize: 12, color: 'var(--fg3)', marginBottom: 6 }}>Step 2 of 4</div>
-              <div style={{ height: 4, background: 'var(--om-border)', borderRadius: 999, overflow: 'hidden' }}>
-                <div style={{ width: '50%', height: '100%', background: 'var(--om-brand)' }} />
-              </div>
-            </div>
-            <div style={{ padding: 18 }}>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>What's your email?</div>
-              <div style={{ height: 38, background: 'var(--om-bg-soft)', borderRadius: 8, border: '1px solid var(--om-border)' }} />
-              <div style={{ fontSize: 11, color: 'var(--fg3)', marginTop: 8, textAlign: 'right' }}>
-                Press Enter ↵ to continue
-              </div>
-            </div>
-          </div>
+          <video
+            className="om-feature-video"
+            src="/marketing/forms-builder-demo.mp4"
+            poster="/marketing/forms-builder-demo.png"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            aria-label="Filling a form one question at a time in Typeform-style mode"
+          />
         }
       />
 
