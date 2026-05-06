@@ -28,20 +28,17 @@ export default function FormsFeaturePage() {
         title="Drag, drop, label, save."
         body="A real visual canvas — not a JSON blob, not a wall of dropdowns. Add a field, label it, mark it required, drag it where you want. The properties drawer handles the details (validation, options, placeholder). Page breaks split a long form into steps automatically."
         side={
-          <div className="om-mockup-card">
-            <p className="om-mockup-label">Iftar RSVP — Build</p>
-            <ul className="om-mockup-list" style={{ marginTop: 8 }}>
-              <li>≡ Your name <span style={{ color: 'var(--om-accent-deep)' }}>·  short text</span></li>
-              <li>≡ Email <span style={{ color: 'var(--om-accent-deep)' }}>·  email</span></li>
-              <li>≡ How many attending? <span style={{ color: 'var(--om-accent-deep)' }}>·  number</span></li>
-              <li>— Page break —</li>
-              <li>≡ Dietary restrictions <span style={{ color: 'var(--om-accent-deep)' }}>·  multi-select</span></li>
-              <li>≡ Children's ages <span style={{ color: 'var(--om-accent-deep)' }}>·  long text</span></li>
-            </ul>
-            <p className="om-mockup-foot" style={{ marginTop: 12 }}>
-              + Add field · 12 types
-            </p>
-          </div>
+          <video
+            className="om-feature-video"
+            src="/marketing/forms-builder-demo.mp4"
+            poster="/marketing/forms-builder-demo.png"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            aria-label="Building a form in the OpenMasjid admin"
+          />
         }
       />
 
