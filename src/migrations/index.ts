@@ -13,6 +13,7 @@ import * as migration_20260504_182411_pages_seo_fields from './20260504_182411_p
 import * as migration_20260504_185611_membership_tiers_collection from './20260504_185611_membership_tiers_collection';
 import * as migration_20260504_190544_members_collection from './20260504_190544_members_collection';
 import * as migration_20260506_033040 from './20260506_033040';
+import * as migration_20260506_033322 from './20260506_033322';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20260506_033040.up,
     down: migration_20260506_033040.down,
-    name: '20260506_033040'
+    name: '20260506_033040',
+  },
+  {
+    up: migration_20260506_033322.up,
+    down: migration_20260506_033322.down,
+    name: '20260506_033322'
   },
 ];

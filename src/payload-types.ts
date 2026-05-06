@@ -74,6 +74,7 @@ export interface Config {
     services: Service;
     pages: Page;
     forms: Form;
+    'form-submissions': FormSubmission;
     'donation-funds': DonationFund;
     donations: Donation;
     'membership-tiers': MembershipTier;
@@ -95,6 +96,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
+    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'donation-funds': DonationFundsSelect<false> | DonationFundsSelect<true>;
     donations: DonationsSelect<false> | DonationsSelect<true>;
     'membership-tiers': MembershipTiersSelect<false> | MembershipTiersSelect<true>;
@@ -979,6 +981,40 @@ export interface Form {
   createdAt: string;
 }
 /**
+ * Form submissions. Read-only — created by the public submit endpoint.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-submissions".
+ */
+export interface FormSubmission {
+  id: number;
+  tenant: number | Tenant;
+  form: number | Form;
+  submitterEmail: string;
+  submitterName?: string | null;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  status: 'new' | 'reviewed' | 'archived';
+  paymentStatus?: ('na' | 'pending_payment' | 'paid' | 'expired') | null;
+  amountCents?: number | null;
+  currency?: string | null;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  paidAt?: string | null;
+  submittedAt: string;
+  userAgent?: string | null;
+  ipHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Categories donors can give toward (Sadaqah, Zakat, Building Fund, etc.).
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1291,6 +1327,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'forms';
         value: number | Form;
+      } | null)
+    | ({
+        relationTo: 'form-submissions';
+        value: number | FormSubmission;
       } | null)
     | ({
         relationTo: 'donation-funds';
@@ -1634,6 +1674,29 @@ export interface FormsSelect<T extends boolean = true> {
         description?: T;
       };
   tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-submissions_select".
+ */
+export interface FormSubmissionsSelect<T extends boolean = true> {
+  tenant?: T;
+  form?: T;
+  submitterEmail?: T;
+  submitterName?: T;
+  data?: T;
+  status?: T;
+  paymentStatus?: T;
+  amountCents?: T;
+  currency?: T;
+  stripeCheckoutSessionId?: T;
+  stripePaymentIntentId?: T;
+  paidAt?: T;
+  submittedAt?: T;
+  userAgent?: T;
+  ipHash?: T;
   updatedAt?: T;
   createdAt?: T;
 }
