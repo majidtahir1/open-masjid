@@ -9,6 +9,7 @@ import {
   Mail,
   Webhook,
   Share2,
+  Palette,
 } from 'lucide-react'
 import './settings.css'
 
@@ -18,6 +19,7 @@ export type SettingsSectionId =
   | 'notifications'
   | 'payment'
   | 'confirmation'
+  | 'appearance'
   | 'webhooks'
   | 'embed-share'
 
@@ -33,6 +35,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'notifications', label: 'Notifications', icon: <Bell size={16} /> },
   { id: 'payment', label: 'Payment', icon: <CreditCard size={16} /> },
   { id: 'confirmation', label: 'Confirmation', icon: <Mail size={16} /> },
+  { id: 'appearance', label: 'Appearance', icon: <Palette size={16} /> },
   { id: 'webhooks', label: 'Webhooks', icon: <Webhook size={16} /> },
   { id: 'embed-share', label: 'Embed & share', icon: <Share2 size={16} /> },
 ]

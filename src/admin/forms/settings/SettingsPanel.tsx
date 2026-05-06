@@ -7,6 +7,7 @@ import SubmissionLimits from './sections/SubmissionLimits'
 import Notifications from './sections/Notifications'
 import Payment from './sections/Payment'
 import Confirmation from './sections/Confirmation'
+import Appearance from './sections/Appearance'
 import Webhooks from './sections/Webhooks'
 import EmbedShare from './sections/EmbedShare'
 import './settings.css'
@@ -28,6 +29,8 @@ function SectionContent({ section }: { section: SettingsSectionId }) {
       return <Payment />
     case 'confirmation':
       return <Confirmation />
+    case 'appearance':
+      return <Appearance />
     case 'webhooks':
       return <Webhooks />
     case 'embed-share':
