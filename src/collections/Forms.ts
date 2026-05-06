@@ -26,6 +26,7 @@ export const Forms: CollectionConfig = {
   slug: 'forms',
   labels: { singular: 'Form', plural: 'Forms' },
   admin: {
+    enableListViewSelectAPI: true,
     group: 'Forms',
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
