@@ -1,0 +1,300 @@
+/* src/admin/forms/submission-detail.css
+   Styles for SubmissionDetail — custom edit view for form-submissions.
+   Artboard ref: 4.2 sub-detail
+*/
+
+/* --------------------------------------------------------------------------
+   Page wrapper
+-------------------------------------------------------------------------- */
+.sd-root {
+  padding: 24px;
+  max-width: 1200px;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+-------------------------------------------------------------------------- */
+.sd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--theme-elevation-600);
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+.sd-back:hover {
+  color: var(--theme-elevation-900);
+}
+
+.sd-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sd-header__left h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--theme-elevation-900);
+}
+
+.sd-header__meta {
+  font-size: 13px;
+  color: var(--theme-elevation-500);
+  font-family: var(--font-mono, monospace);
+}
+
+.sd-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sd-btn--ghost {
+  background: transparent;
+  border-color: var(--theme-elevation-200);
+  color: var(--theme-elevation-700);
+}
+.sd-btn--ghost:hover {
+  background: var(--theme-elevation-50);
+}
+
+.sd-btn--primary {
+  background: var(--theme-elevation-900);
+  color: var(--theme-bg);
+}
+.sd-btn--primary:hover {
+  opacity: 0.85;
+}
+
+.sd-btn--success {
+  background: #146E69;
+  color: #fff;
+  border-color: #146E69;
+}
+.sd-btn--success:hover {
+  background: #0e5450;
+}
+
+/* --------------------------------------------------------------------------
+   Body layout
+-------------------------------------------------------------------------- */
+.sd-body {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .sd-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Cards
+-------------------------------------------------------------------------- */
+.sd-card {
+  background: var(--theme-elevation-0, var(--theme-bg));
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sd-card__header {
+  padding: 14px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-500);
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.sd-card__body {
+  padding: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Answers grid
+-------------------------------------------------------------------------- */
+.sd-answers {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0;
+}
+
+.sd-answers__label {
+  padding: 10px 12px 10px 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-500);
+  border-bottom: 1px solid var(--theme-elevation-50);
+}
+
+.sd-answers__value {
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--theme-elevation-900);
+  border-bottom: 1px solid var(--theme-elevation-50);
+  word-break: break-word;
+}
+
+.sd-answers__empty {
+  color: var(--theme-elevation-400);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Side cards stacked
+-------------------------------------------------------------------------- */
+.sd-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Status pill
+-------------------------------------------------------------------------- */
+.sd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-bottom: 12px;
+}
+
+.sd-status-pill--new {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.sd-status-pill--reviewed {
+  background: #d1fae5;
+  color: #065f46;
+}
+.sd-status-pill--archived {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-500);
+}
+
+/* --------------------------------------------------------------------------
+   Meta rows (used in Status + Payment cards)
+-------------------------------------------------------------------------- */
+.sd-meta-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sd-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sd-meta-row__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-500);
+}
+
+.sd-meta-row__value {
+  font-size: 13px;
+  color: var(--theme-elevation-800);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sd-meta-row__value--mono {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Payment card
+-------------------------------------------------------------------------- */
+.sd-payment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sd-amount {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--theme-elevation-900);
+  margin-bottom: 12px;
+}
+
+.sd-stripe-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6366f1;
+  text-decoration: none;
+  margin-top: 8px;
+}
+.sd-stripe-link:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Toast-like feedback for mark-reviewed button
+-------------------------------------------------------------------------- */
+.sd-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  animation: sd-slide-up 0.2s ease;
+}
+
+.sd-toast--success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.sd-toast--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+@keyframes sd-slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

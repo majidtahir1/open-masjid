@@ -8,11 +8,10 @@
  */
 
 import { unstable_noStore as noStore } from 'next/cache'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 
 import type { HeroLiveData } from '@/components/types'
 import { findDayRow, getActiveSchedule } from './prayer-schedule'
+import { getPayloadClient } from './payloadClient'
 
 type PrayerKey = 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha'
 
@@ -203,7 +202,8 @@ export async function getUpcomingEvents(
   now: Date = new Date(),
 ): Promise<UpcomingEventTeaser[]> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadClient()
+    if (!payload) return []
     noStore()
     const res = await payload.find({
       collection: 'events',

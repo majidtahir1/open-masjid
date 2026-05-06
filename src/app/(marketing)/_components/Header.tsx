@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { OMLogo } from './Logo'
-import { ArrowRight, ChevronDown, Sunrise, Calendar, Heart, Palette, Shield } from './Icons'
+import { ArrowRight, ChevronDown, Sunrise, Calendar, ClipboardList, Heart, Palette, Shield } from './Icons'
 
 const HEADER_NAV = [
   { label: 'Features', to: '/features', hasDropdown: true },
@@ -14,6 +14,7 @@ const FEATURE_DROPDOWN = [
   { to: '/features/prayer-times', Icon: Sunrise, title: 'Prayer Times', desc: 'Quick, easy setup for the whole year.' },
   { to: '/features/events', Icon: Calendar, title: 'Events & Flyers', desc: 'Three display modes. Recurring patterns.' },
   { to: '/features/donations', Icon: Heart, title: 'Donations', desc: 'Native Stripe. Sadaqah, Zakat, Building Fund.' },
+  { to: '/features/forms', Icon: ClipboardList, title: 'Forms & RSVPs', desc: 'Visual builder. Capacity. Payments.' },
   { to: '/features/branding', Icon: Palette, title: 'Branding', desc: 'Three colors. Your logo. Your font.' },
   { to: '/features/security', Icon: Shield, title: 'Security', desc: 'No plugins. No attack surface.' },
 ]

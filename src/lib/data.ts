@@ -12,17 +12,12 @@
 
 import type { Where } from 'payload'
 import { unstable_noStore as noStore } from 'next/cache'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 
 import type { TenantRecord } from './tenant-parse'
+import { getPayloadClient } from './payloadClient'
 
 export interface ReadOpts {
   draft?: boolean
-}
-
-async function payloadClient() {
-  return getPayload({ config })
 }
 
 /** Merge an `_status: published` filter into a where-clause unless draft mode is on. */
@@ -33,7 +28,8 @@ function gate(where: Where, draft: boolean): Where {
 
 export async function fetchHeroSlides(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   const draft = opts.draft ?? false
   try {
     const res = await payload.find({
@@ -62,7 +58,8 @@ export async function fetchEvents(
   opts: ReadOpts & { limit?: number; upcomingOnly?: boolean } = {},
 ) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   const draft = opts.draft ?? false
   const upcomingOnly = opts.upcomingOnly ?? false
 
@@ -100,7 +97,8 @@ export async function fetchFeaturedEvents(
   opts: ReadOpts = {},
 ) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   const draft = opts.draft ?? false
   try {
     const res = await payload.find({
@@ -130,7 +128,8 @@ export async function fetchEventBySlug(
   opts: ReadOpts = {},
 ) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return null
   const draft = opts.draft ?? false
   try {
     const res = await payload.find({
@@ -155,7 +154,8 @@ export async function fetchEventBySlug(
 
 export async function fetchServices(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   const draft = opts.draft ?? false
   try {
     const res = await payload.find({
@@ -187,7 +187,8 @@ export async function fetchPageBySlug(
   opts: ReadOpts = {},
 ) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return null
   const draft = opts.draft ?? false
   try {
     const res = await payload.find({
@@ -223,7 +224,8 @@ export interface NavPage {
  */
 export async function fetchNavPages(tenant: TenantRecord): Promise<NavPage[]> {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   try {
     const res = await payload.find({
       collection: 'pages',
@@ -267,7 +269,8 @@ export async function fetchNavPages(tenant: TenantRecord): Promise<NavPage[]> {
  */
 export async function fetchActiveTiers(tenant: TenantRecord) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   try {
     const res = await payload.find({
       collection: 'membership-tiers' as never,
@@ -305,7 +308,8 @@ export async function fetchActiveTiers(tenant: TenantRecord) {
  */
 export async function fetchAnnouncements(tenant: TenantRecord, opts: ReadOpts = {}) {
   noStore()
-  const payload = await payloadClient()
+  const payload = await getPayloadClient()
+  if (!payload) return []
   const draft = opts.draft ?? false
   const nowIso = new Date().toISOString()
   try {

@@ -1,0 +1,271 @@
+/* ============================================================
+   FormEditView — page-level custom admin edit view
+   Brand: #1B3358 (neutral navy)
+   ============================================================ */
+
+/* Root wrapper */
+.fev-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* ---- Top bar ---- */
+.fev-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+  height: 56px;
+  background: #1B3358;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ---- Left: metadata ---- */
+.fev-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.fev-meta__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.fev-meta__slug {
+  font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+}
+
+.fev-meta__count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+}
+
+/* Status pills */
+.fev-status {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.fev-status--published {
+  background: rgba(20, 184, 166, 0.25);
+  color: #5eead4;
+}
+
+.fev-status--draft {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.65);
+}
+
+.fev-status--closed {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+/* ---- Right: actions (tabs + buttons) ---- */
+.fev-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Tabs */
+.fev-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.fev-tab {
+  padding: 5px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.fev-tab:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.10);
+}
+
+.fev-tab--active {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Buttons */
+.fev-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+}
+
+.fev-btn--ghost {
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.fev-btn--ghost:hover {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+}
+
+.fev-btn--primary {
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+}
+
+.fev-btn--primary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.28);
+}
+
+.fev-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---- Panel area (below the bar) ---- */
+.fev-panel {
+  flex: 1;
+  padding: 0;
+}
+
+/* ---- Empty / loading states ---- */
+.fev-tab-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--theme-elevation-450, #6b7280);
+}
+
+.fev-tab-empty p {
+  margin: 0;
+}
+
+/* ---- Submissions table ---- */
+.fev-subs {
+  padding: 24px;
+}
+
+.fev-subs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.fev-subs-table th,
+.fev-subs-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--theme-elevation-100, #e5e7eb);
+}
+
+.fev-subs-table th {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--theme-elevation-450, #6b7280);
+  background: var(--theme-elevation-50, #f9fafb);
+}
+
+.fev-subs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.fev-subs-all {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1B3358;
+  text-decoration: none;
+  gap: 4px;
+}
+
+.fev-subs-all:hover {
+  text-decoration: underline;
+}
+
+/* ---- Mobile: bar wraps gracefully ---- */
+@media (max-width: 640px) {
+  .fev-bar {
+    height: auto;
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  .fev-meta {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fev-meta__title {
+    max-width: 180px;
+  }
+
+  .fev-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fev-tabs {
+    order: -1;
+    width: 100%;
+  }
+}

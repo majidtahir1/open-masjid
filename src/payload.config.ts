@@ -15,6 +15,8 @@ import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
 import { Media } from './collections/Media'
+import { Forms } from './collections/Forms'
+import { FormSubmissions } from './collections/FormSubmissions'
 import { Pages } from './collections/Pages'
 import { PrayerSchedules } from './collections/PrayerSchedules'
 import { Services } from './collections/Services'
@@ -118,6 +120,8 @@ export default buildConfig({
     Announcements,
     Services,
     Pages,
+    Forms,
+    FormSubmissions,
     DonationFunds,
     Donations,
     MembershipTiers,

@@ -5,6 +5,7 @@ import { getStripe } from '@/lib/stripe'
 import { mapStripeEventToDonationAction } from '@/lib/donations-webhook'
 import { applyDonationAction } from '@/lib/donations-apply'
 import { handleMembershipEvent } from '@/lib/membership-webhook'
+import { handleFormSubmissionEvent } from '@/lib/form-submissions-webhook'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
 
   const payload = await getPayload({ config })
 
-  // Dispatch to both handlers; each one filters by metadata.kind internally.
+  // Dispatch to all handlers; each one filters by metadata.kind internally.
   const [action] = await Promise.all([
     mapStripeEventToDonationAction(event, (subId, acctId) =>
       stripe.subscriptions
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
       stripeSubscriptionRetrieve: (id, account) =>
         stripe.subscriptions.retrieve(id, { stripeAccount: account }),
     }),
+    handleFormSubmissionEvent({ event, payload }),
   ])
 
   if (!action) return NextResponse.json({ received: true, ignored: event.type })

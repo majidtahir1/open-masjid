@@ -34,6 +34,7 @@ export default function CompareWordPressPage() {
               { label: 'Prayer times', left: 'Plugin (varies)', right: 'First-class, included' },
               { label: 'Events & flyers', left: 'Events Calendar plugin', right: 'Built-in, three display modes' },
               { label: 'Donations', left: 'GiveWP / WooCommerce', right: 'Native Stripe, included' },
+              { label: 'Forms / RSVPs', left: 'Gravity Forms / Jotform ($30+/mo)', right: 'Built-in builder, included' },
               { label: 'Security', left: 'Plugin attack surface', right: 'No plugins' },
               { label: 'Maintenance', left: 'You + plugin updates', right: 'Zero-touch on hosted' },
               { label: 'Total monthly cost', left: '$40–$80 + freelancer', right: '$49 flat' },

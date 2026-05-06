@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 
 import type { TenantDonationConfig } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
+import { getPayloadClient } from '@/lib/payloadClient'
 import DonateForm, { type DonateFund } from '@/components/DonateForm'
 
 export const metadata = {
@@ -35,7 +34,8 @@ export default async function DonatePage() {
   let funds: DonateFund[] = []
   if (useConnect) {
     try {
-      const payload = await getPayload({ config })
+      const payload = await getPayloadClient()
+      if (!payload) return null
       const result = await payload.find({
         collection: 'donation-funds' as never,
         where: {

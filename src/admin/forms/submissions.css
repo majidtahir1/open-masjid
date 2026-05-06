@@ -1,0 +1,151 @@
+/* ============================================================
+   Submissions List toolbar — admin UI
+   Artboard ref: 4.1 subs-list
+   ============================================================ */
+
+/* Outer wrapper */
+.subs-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0 6px;
+  margin-bottom: 4px;
+}
+
+/* ---- Row 1: form selector ---- */
+.subs-form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+}
+
+.subs-form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--theme-elevation-600);
+  white-space: nowrap;
+}
+
+.subs-form-select {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--theme-elevation-200);
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.subs-form-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--theme-text);
+}
+
+.subs-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--theme-elevation-600);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+.subs-back-link:hover {
+  color: var(--theme-text);
+}
+
+/* ---- Row 2: filters + export ---- */
+.subs-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Status filter pills */
+.subs-status-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subs-filter-pill {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--theme-elevation-200);
+  background: transparent;
+  color: var(--theme-elevation-600);
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.subs-filter-pill:hover {
+  background: var(--theme-elevation-100);
+  color: var(--theme-text);
+}
+
+.subs-filter-pill--active {
+  background: var(--theme-elevation-900);
+  color: var(--theme-bg);
+  border-color: var(--theme-elevation-900);
+}
+
+/* Status-specific active colors */
+.subs-filter-pill--active.subs-filter-pill--new {
+  background: rgba(20, 184, 166, 0.15);
+  color: #0d9488;
+  border-color: rgba(20, 184, 166, 0.35);
+}
+
+.subs-filter-pill--active.subs-filter-pill--reviewed {
+  background: rgba(100, 116, 139, 0.15);
+  color: #475569;
+  border-color: rgba(100, 116, 139, 0.30);
+}
+
+.subs-filter-pill--active.subs-filter-pill--archived {
+  background: rgba(156, 163, 175, 0.15);
+  color: #6b7280;
+  border-color: rgba(156, 163, 175, 0.30);
+}
+
+/* Export CSV button */
+.subs-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--theme-elevation-200);
+  background: transparent;
+  color: var(--theme-elevation-700);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.subs-export-btn:hover:not([aria-disabled='true']) {
+  background: var(--theme-elevation-100);
+  color: var(--theme-text);
+}
+
+.subs-export-btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
