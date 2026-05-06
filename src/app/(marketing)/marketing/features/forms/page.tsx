@@ -69,8 +69,8 @@ export default function FormsFeaturePage() {
 
       <FeatureSection
         kicker="One question per page"
-        title="Typeform-style flow, optional."
-        body="Toggle 'one question per page' and the form transforms into a focused, Typeform-style experience — one question on screen, Press Enter ↵ to continue, progress bar at the top. Or keep everything on one page if your community prefers a single scroll. Per-form setting, not platform-wide."
+        title="A modern, focused experience."
+        body="Toggle 'one question per page' and the form transforms into a focused, modern flow — one question on screen, Press Enter ↵ to continue, progress bar at the top. Forms feel quick and easy to fill, not laborious. Or keep everything on one page if your community prefers a single scroll. Per-form setting, not platform-wide."
         side={
           <video
             className="om-feature-video"
