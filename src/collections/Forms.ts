@@ -29,13 +29,6 @@ export const Forms: CollectionConfig = {
     group: 'Forms',
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
-    components: {
-      views: {
-        edit: {
-          default: { Component: '/src/admin/forms/FormEditView#default' },
-        },
-      },
-    },
   },
   access: {
     read: tenantScopedRead,
@@ -83,7 +76,12 @@ export const Forms: CollectionConfig = {
       type: 'json',
       required: true,
       defaultValue: { steps: [{ id: 's1', fields: [] }] },
-      admin: { description: 'The form definition. Use the builder above.' },
+      admin: {
+        description: 'The form definition. Drag, drop, and edit fields below.',
+        components: {
+          Field: '/src/admin/forms/FormBuilderField.client#FormBuilderFieldClient',
+        },
+      },
     },
     {
       name: 'settings',

@@ -911,7 +911,7 @@ export interface Form {
     [k: string]: unknown;
   } | null;
   /**
-   * The form definition. Use the builder above.
+   * The form definition. Drag, drop, and edit fields below.
    */
   schema:
     | {
@@ -956,6 +956,60 @@ export interface Form {
      * Plain text body. {{name}} interpolates the submitter name field if present.
      */
     confirmationBody?: string | null;
+  };
+  appearance?: {
+    /**
+     * How visitors progress through the form.
+     */
+    displayMode?: ('all-at-once' | 'one-per-page') | null;
+    /**
+     * Optional message shown above the first field.
+     */
+    introMessage?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Shown after a successful submission. If left blank, falls back to Settings → Confirmation.
+     */
+    submissionMessage?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Solid background color for the public form (hex like #FAF9F4). Ignored if a gradient is set below.
+     */
+    backgroundColor?: string | null;
+    /**
+     * Optional gradient. When `from` is set, it overrides the solid color above.
+     */
+    backgroundGradient?: {
+      from?: string | null;
+      to?: string | null;
+      direction?: ('vertical' | 'horizontal' | 'diagonal') | null;
+    };
   };
   payment?: {
     enabled?: boolean | null;
@@ -1654,6 +1708,21 @@ export interface FormsSelect<T extends boolean = true> {
         sendConfirmation?: T;
         confirmationSubject?: T;
         confirmationBody?: T;
+      };
+  appearance?:
+    | T
+    | {
+        displayMode?: T;
+        introMessage?: T;
+        submissionMessage?: T;
+        backgroundColor?: T;
+        backgroundGradient?:
+          | T
+          | {
+              from?: T;
+              to?: T;
+              direction?: T;
+            };
       };
   payment?:
     | T
