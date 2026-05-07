@@ -56,7 +56,7 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
       tenant: tenantId,
       form: form.id,
       submitterEmail: typeof v.data.email === 'string' && v.data.email.length > 0 ? v.data.email : null,
-      submitterName: typeof v.data.name === 'string' ? v.data.name : null,
+      submitterName: extractSubmitterName(v.data),
       data: v.data,
       status: 'new',
       paymentStatus: paymentEnabled ? 'pending_payment' : 'na',
@@ -68,4 +68,24 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
   })
 
   return { ok: true, submissionId: created.id, checkoutPending: paymentEnabled }
+}
+
+function extractSubmitterName(data: Record<string, unknown>): string | null {
+  const str = (k: string): string | null => {
+    const v = data[k]
+    return typeof v === 'string' && v.trim() ? v.trim() : null
+  }
+  // Composite first, last
+  const first = str('firstName') ?? str('first_name') ?? str('first')
+  const last = str('lastName') ?? str('last_name') ?? str('last')
+  if (first) return [first, last].filter(Boolean).join(' ')
+  // Single-field name variants in priority order
+  return (
+    str('fullName') ??
+    str('full_name') ??
+    str('name') ??
+    str('yourName') ??
+    str('your_name') ??
+    null
+  )
 }
