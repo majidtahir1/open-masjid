@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import type { Payload } from 'payload'
 import { validateSubmission, type FormSchema } from './form-schema'
 import { checkRateLimit } from './form-rate-limit'
+import { extractSubmitterName } from './form-submitter-name'
 
 interface SubmitArgs {
   payload: Payload
@@ -68,24 +69,4 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
   })
 
   return { ok: true, submissionId: created.id, checkoutPending: paymentEnabled }
-}
-
-function extractSubmitterName(data: Record<string, unknown>): string | null {
-  const str = (k: string): string | null => {
-    const v = data[k]
-    return typeof v === 'string' && v.trim() ? v.trim() : null
-  }
-  // Composite first, last
-  const first = str('firstName') ?? str('first_name') ?? str('first')
-  const last = str('lastName') ?? str('last_name') ?? str('last')
-  if (first) return [first, last].filter(Boolean).join(' ')
-  // Single-field name variants in priority order
-  return (
-    str('fullName') ??
-    str('full_name') ??
-    str('name') ??
-    str('yourName') ??
-    str('your_name') ??
-    null
-  )
 }

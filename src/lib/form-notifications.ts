@@ -6,7 +6,14 @@ import { getRequestOrigin } from './seo'
 
 const TEMPLATE_RX = /\{\{\s*([\w]+)\s*\}\}/g
 function interpolate(t: string, vars: Record<string, string>): string {
-  return t.replace(TEMPLATE_RX, (_, k) => vars[k] ?? '')
+  const replaced = t.replace(TEMPLATE_RX, (_, k) => vars[k] ?? '')
+  // When a token resolved to '', clean up orphaned whitespace and the
+  // dangling punctuation that often follows a name placeholder
+  // (e.g. "Salam {{name}}." → "Salam .").
+  return replaced
+    .replace(/[ \t]+([,.;:!?])/g, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/^[ \t]+|[ \t]+$/gm, '')
 }
 
 function escapeHtml(s: string): string {
@@ -84,7 +91,7 @@ function buildConfirmationHtml({
   const safeForm = escapeHtml(formTitle)
   const safeAddress = footerAddress ? textToHtml(footerAddress) : null
   const headerInner = logoUrl
-    ? `<img src="${escapeHtml(logoUrl)}" alt="${safeName}" width="56" height="56" style="display:block;border:0;border-radius:8px;background:#ffffff;" />`
+    ? `<img src="${escapeHtml(logoUrl)}" alt="${safeName}" height="80" style="display:block;border:0;height:80px;width:auto;max-width:240px;background:transparent;" />`
     : `<div style="font-family:Georgia,'Times New Roman',serif;color:#ffffff;font-size:20px;font-weight:600;letter-spacing:0.2px;">${safeName}</div>`
 
   return `<!doctype html>

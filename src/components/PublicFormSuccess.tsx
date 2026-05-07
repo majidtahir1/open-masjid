@@ -8,6 +8,7 @@
  */
 import type { Form } from '@/payload-types'
 import { resolveSubmissionMessage } from '@/lib/form-appearance'
+import { extractSubmitterName } from '@/lib/form-submitter-name'
 import RichText from '@/components/RichText'
 
 interface Receipt {
@@ -25,8 +26,8 @@ interface Props {
 }
 
 export function PublicFormSuccess({ form, values, receipt }: Props) {
-  const rawName = (values.name as string) || (values.email as string) || ''
-  const firstName = rawName ? String(rawName).split(' ')[0] : ''
+  const fullName = extractSubmitterName(values)
+  const firstName = fullName ? fullName.split(' ')[0] : ''
 
   // Build receipt strip lines
   let receiptLine = ''
