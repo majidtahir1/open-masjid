@@ -23,7 +23,7 @@ import { parseHostContext } from '@/lib/tenant-parse'
  * Actual tenant record resolution happens later, in server components, via
  * `resolveTenantFromContext` in `@/lib/tenant-server` (Node runtime, Payload).
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get('host') || ''
   const pathname = request.nextUrl.pathname
 
