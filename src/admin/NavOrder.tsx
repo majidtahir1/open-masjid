@@ -10,15 +10,18 @@ import React from 'react'
  *
  *   1. Dashboard link
  *   2. Prayer group        (native)
- *   3. Donations link      (custom — moved up via order)
- *   4. Content group       (native)
- *   5. Library group       (native — Media)
- *   6. View public site    (custom)
- *   7. Site Settings link  (custom — pushed to bottom via margin-top: auto)
+ *   3. Content group       (native)
+ *   4. Forms group         (native)
+ *   5. Membership link     (custom — overview-only; collections are hidden)
+ *   6. Donations link      (custom)
+ *   7. Library group       (native — Media, lives inside Content)
+ *   8. View public site    (custom)
+ *   99. Site Settings      (custom — pinned bottom)
+ *   100. Logout
  *
  * Group identification uses `:has(a[href^="..."])` to find each group by a
- * collection slug it contains. This is stable as long as the group's
- * `admin.group` label or members don't change.
+ * collection slug it contains. Stable as long as the group's `admin.group`
+ * label or members don't change.
  */
 export default function NavOrder() {
   const css = `
@@ -32,12 +35,14 @@ export default function NavOrder() {
 
     .nav .nav__link--dashboard { order: 1; }
     .nav .nav-group:has(a[href^="/admin/collections/prayer-schedules"]) { order: 2; }
-    .nav a[data-donations-nav-link] { order: 3; }
-    .nav .nav-group:has(a[href^="/admin/collections/events"]) { order: 4; }
-    .nav a[data-view-public-site] { order: 7; }
+    .nav .nav-group:has(a[href^="/admin/collections/events"]) { order: 3; }
+    .nav .nav-group:has(a[href^="/admin/collections/forms"]) { order: 4; }
+    .nav a[data-membership-nav-link] { order: 5; }
+    .nav a[data-donations-nav-link] { order: 6; }
+    .nav a[data-view-public-site] { order: 8; }
 
     /* Pin Site Settings just above the logout, with all the empty space
-       above it (between View public site and Site Settings). */
+       above it. */
     .nav a[data-site-settings-link] {
       order: 99;
       margin-top: auto !important;

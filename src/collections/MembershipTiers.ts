@@ -39,6 +39,7 @@ export const MembershipTiers: CollectionConfig = {
   labels: { singular: 'Membership tier', plural: 'Membership tiers' },
   admin: {
     group: 'Membership',
+    hidden: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'amount', 'cadence', 'active', 'sortOrder'],
     description: 'Paid recurring tiers congregants can subscribe to.',

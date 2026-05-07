@@ -71,7 +71,9 @@ import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../..
 import { default as default_88163b0148bba3b80a9d3df09283cc03 } from '../../../../src/admin/donations/DonationsNav'
 import { default as default_4ce2b6d430be17aa881be5628d11e397 } from '../../../../src/admin/membership/MembershipNav'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
+import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "/src/admin/ActiveScheduleBanner#default": default_07d961590be6dea90e3f89bf0ec85650,
   "/src/admin/ScheduleNameCell#default": default_dd3aaf7dfdea38a3f5207a0e64556a07,
@@ -145,5 +147,6 @@ export const importMap = {
   "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
   "/src/admin/donations/DonationsNav#default": default_88163b0148bba3b80a9d3df09283cc03,
   "/src/admin/membership/MembershipNav#default": default_4ce2b6d430be17aa881be5628d11e397,
-  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee
+  "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
