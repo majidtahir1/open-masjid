@@ -35,4 +35,19 @@ describe('sendFormNotifications', () => {
     await sendFormNotifications({ form, submission })
     expect(fetchSpy).toHaveBeenCalledTimes(2)
   })
+
+  it('includes a branded html body on the confirmation email', async () => {
+    process.env.RESEND_API_KEY = 're_test'
+    fetchSpy.mockResolvedValue({ ok: true })
+    await sendFormNotifications({ form, submission })
+    const confirmationCall = fetchSpy.mock.calls.find(([, init]) => {
+      const body = JSON.parse((init as { body: string }).body)
+      return body.to[0] === 's@x.com'
+    })
+    expect(confirmationCall).toBeDefined()
+    const body = JSON.parse((confirmationCall![1] as { body: string }).body)
+    expect(body.html).toContain('<!doctype html>')
+    expect(body.html).toContain('Salam Aisha — see you Friday.')
+    expect(body.text).toBe('Salam Aisha — see you Friday.')
+  })
 })

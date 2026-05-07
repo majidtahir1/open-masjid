@@ -20,6 +20,7 @@ export const Members: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Membership',
+    hidden: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'tier', 'status', 'currentPeriodEnd'],
     description: 'Congregants subscribed to a membership tier.',
