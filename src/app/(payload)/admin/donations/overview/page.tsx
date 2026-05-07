@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
   createLocalReq,
@@ -9,6 +8,7 @@ import {
 } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import { importMap } from '../../importMap'
 import OverviewClient from './OverviewClient'
 import { computeAggregates, type DonationRow } from '@/lib/donations-aggregates'
@@ -51,10 +51,10 @@ function toRow(d: DonationDoc): DonationRow {
 }
 
 export default async function DonationsOverviewPage() {
-  const payload = await getPayload({ config, importMap })
-  const reqHeaders = await headers()
-  const { user, permissions } = await payload.auth({ headers: reqHeaders })
+  const { user, permissions } = await getAdminUser()
   if (!user) redirect('/admin/login')
+
+  const payload = await getPayload({ config, importMap })
 
   const req = await createLocalReq({ user }, payload)
 
@@ -85,11 +85,7 @@ export default async function DonationsOverviewPage() {
       </main>
     )
   } else {
-    const tenant = (await payload.findByID({
-      collection: 'tenants',
-      id: tenantId,
-      overrideAccess: true,
-    })) as unknown as {
+    const tenant = (await getAdminTenant(tenantId)) as unknown as {
       name?: string | null
       donationConfig?: { stripeAccountId?: string | null } | null
     }
