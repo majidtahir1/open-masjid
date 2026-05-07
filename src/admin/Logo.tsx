@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser, getAdminTenantWithRelations } from '@/lib/admin-context'
 import OpenMasjidWordmark from './OpenMasjidWordmark'
 
 type TenantRef =
@@ -22,20 +20,14 @@ function tenantIdOf(t: TenantRef): string | number | null {
 
 async function resolveTenantLogo(): Promise<TenantLogo | null> {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
 
     const u = user as { tenant?: TenantRef; role?: string }
     const tenantId = tenantIdOf(u.tenant)
     if (!tenantId) return null
 
-    const tenant = (await payload.findByID({
-      collection: 'tenants',
-      id: tenantId,
-      depth: 1,
-      overrideAccess: true,
-    })) as unknown as Record<string, unknown>
+    const tenant = (await getAdminTenantWithRelations(tenantId)) as unknown as Record<string, unknown>
 
     const name = (tenant.name as string) ?? 'Tenant'
     const branding = tenant.branding as { logo?: unknown } | undefined

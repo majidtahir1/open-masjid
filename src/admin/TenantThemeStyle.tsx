@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import { darken, lighten } from '@/lib/tenantTheme'
 
 /**
@@ -46,20 +44,16 @@ function pickTextOn(hex: string): string {
 
 async function resolvePrimaryColor(): Promise<string | null> {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
 
     const u = user as { tenant?: TenantRef }
     const tenantId = tenantIdOf(u.tenant)
     if (!tenantId) return null
 
-    const tenant = (await payload.findByID({
-      collection: 'tenants',
-      id: tenantId,
-      depth: 0,
-      overrideAccess: true,
-    })) as unknown as { branding?: { primaryColor?: string | null } } | null
+    const tenant = (await getAdminTenant(tenantId)) as unknown as
+      | { branding?: { primaryColor?: string | null } }
+      | null
 
     const color = tenant?.branding?.primaryColor
     if (!color || typeof color !== 'string') return null

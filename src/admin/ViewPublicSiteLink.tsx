@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import { PLATFORM_DOMAIN } from '@/lib/tenant-parse'
 
 type TenantRef =
@@ -20,8 +18,7 @@ function tenantIdOf(t: TenantRef): string | number | null {
 
 async function resolvePublicUrl(): Promise<string | null> {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
 
     const u = user as { tenant?: TenantRef }
@@ -30,12 +27,10 @@ async function resolvePublicUrl(): Promise<string | null> {
 
     if (process.env.NODE_ENV === 'development') return 'http://localhost:3000'
 
-    const tenant = (await payload.findByID({
-      collection: 'tenants',
-      id: tenantId,
-      depth: 0,
-      overrideAccess: true,
-    })) as { slug?: string; customDomains?: Array<{ domain?: string | null }> }
+    const tenant = (await getAdminTenant(tenantId)) as {
+      slug?: string
+      customDomains?: Array<{ domain?: string | null }>
+    }
 
     const firstCustom = tenant.customDomains?.find((d) => d?.domain)?.domain
     if (firstCustom) return `https://${firstCustom}`
