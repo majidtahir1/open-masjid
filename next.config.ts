@@ -3,9 +3,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  experimental: {
-    reactCompiler: false,
-  },
+  reactCompiler: false,
   // Acknowledge Turbopack so Next stops warning that Webpack is configured
   // (via withPayload) without a Turbopack counterpart. Empty config = use
   // Turbopack defaults; Payload runs fine under them.

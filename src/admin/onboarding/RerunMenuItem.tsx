@@ -1,12 +1,10 @@
 import Link from 'next/link'
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { RefreshCw } from 'lucide-react'
 
+import { getAdminUser } from '@/lib/admin-context'
+
 export default async function RerunMenuItem() {
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers: await getHeaders() })
+  const { user } = await getAdminUser()
   if (!user || user.role !== 'admin') return null
   return (
     <Link

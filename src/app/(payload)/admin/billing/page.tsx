@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
   createLocalReq,
@@ -9,6 +8,7 @@ import {
 } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import { getTenantBillingState, type BillingTenantFields } from '@/lib/billing'
 import { importMap } from '../importMap'
 import BillingClient from './BillingClient'
@@ -17,11 +17,11 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export default async function BillingPage() {
+  const { user, permissions } = await getAdminUser()
+  if (!user) redirect('/admin/login')
+
   // Pass importMap so DefaultTemplate's nested RenderServerComponent calls work.
   const payload = await getPayload({ config, importMap })
-  const reqHeaders = await headers()
-  const { user, permissions } = await payload.auth({ headers: reqHeaders })
-  if (!user) redirect('/admin/login')
 
   // Build a PayloadRequest so DefaultTemplate has i18n / locale.
   const req = await createLocalReq({ user }, payload)
@@ -53,11 +53,7 @@ export default async function BillingPage() {
       </main>
     )
   } else {
-    const tenant = (await payload.findByID({
-      collection: 'tenants',
-      id: tenantId,
-      overrideAccess: true,
-    })) as unknown as BillingTenantFields & {
+    const tenant = (await getAdminTenant(tenantId)) as unknown as BillingTenantFields & {
       name: string
       subscriptionPlan?: string | null
       currentPeriodEnd?: string | null

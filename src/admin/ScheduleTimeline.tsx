@@ -16,11 +16,9 @@
  * getPayload, so the timeline is in the initial HTML.
  */
 
-import { getPayload } from 'payload'
-import { headers as nextHeaders } from 'next/headers'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser } from '@/lib/admin-context'
 
 type Schedule = {
   id: string | number
@@ -108,8 +106,7 @@ function findActiveId(schedules: Schedule[], now = new Date()): string | number 
 
 export default async function ScheduleTimeline() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await nextHeaders() })
+    const { payload, user } = await getAdminUser()
     if (!user) return null
 
     const tenantRef = (user as { tenant?: unknown }).tenant

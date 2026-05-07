@@ -25,9 +25,10 @@
  *   Payload's own chrome depends on).
  */
 
-import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
 import { getPayload } from 'payload'
+
+import { getAdminUser } from '@/lib/admin-context'
 import {
   Building,
   CalendarPlus,
@@ -38,7 +39,6 @@ import {
   Users,
 } from 'lucide-react'
 
-import config from '@payload-config'
 import { OnboardingShell } from './onboarding/OnboardingShell'
 import { computeMilestoneStates } from '@/lib/onboarding'
 import { Badge } from '@/components/ui/badge'
@@ -803,8 +803,7 @@ async function PlatformDashboard({
 /* ------------------------------------------------------------------ */
 
 export default async function Dashboard() {
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers: await getHeaders() })
+  const { payload, user } = await getAdminUser()
 
   // The admin shell already gates unauthenticated users to /admin/login,
   // but be defensive.

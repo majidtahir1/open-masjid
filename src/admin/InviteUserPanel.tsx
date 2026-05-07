@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 
 import InviteUserPanelClient from './InviteUserPanelClient'
 
@@ -23,8 +21,7 @@ function tenantIdOf(t: TenantRef): string | number | null {
  */
 export default async function InviteUserPanel() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { payload, user } = await getAdminUser()
     if (!user) return null
 
     const u = user as { role?: string; tenant?: TenantRef }
@@ -50,12 +47,10 @@ export default async function InviteUserPanel() {
       if (id != null) {
         defaultTenantId = id
         try {
-          const t = (await payload.findByID({
-            collection: 'tenants',
-            id,
-            depth: 0,
-            overrideAccess: true,
-          })) as { id: string | number; name?: string | null }
+          const t = (await getAdminTenant(id)) as {
+            id: string | number
+            name?: string | null
+          }
           tenants = [{ id: t.id, name: t.name }]
         } catch {
           tenants = [{ id, name: null }]

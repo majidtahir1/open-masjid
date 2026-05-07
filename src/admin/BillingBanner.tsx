@@ -1,11 +1,8 @@
-import { headers } from 'next/headers'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import { getTenantBillingState, type BillingTenantFields } from '@/lib/billing'
 
 export default async function BillingBanner() {
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers: await headers() })
+  const { user } = await getAdminUser()
   if (!user || user.role === 'platformOwner') return null
 
   const tenantId =
@@ -14,11 +11,7 @@ export default async function BillingBanner() {
       : (user.tenant as string | number | undefined)
   if (!tenantId) return null
 
-  const tenant = (await payload.findByID({
-    collection: 'tenants',
-    id: tenantId,
-    overrideAccess: true,
-  })) as unknown as BillingTenantFields
+  const tenant = (await getAdminTenant(tenantId)) as unknown as BillingTenantFields
 
   const state = getTenantBillingState(tenant)
   if (state.kind === 'grandfathered' || state.kind === 'active' || state.kind === 'pending') {

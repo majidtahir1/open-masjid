@@ -1,9 +1,7 @@
-import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser } from '@/lib/admin-context'
 
 type TenantRef =
   | string
@@ -25,8 +23,7 @@ function tenantIdOf(t: TenantRef): string | number | null {
  */
 export default async function DonationsNav() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
 
     const u = user as { tenant?: TenantRef; role?: string }

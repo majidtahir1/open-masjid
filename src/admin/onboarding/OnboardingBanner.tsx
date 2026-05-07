@@ -1,7 +1,7 @@
-import { headers as getHeaders } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import Link from 'next/link'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import {
   computeMilestoneStates,
   doneCount,
@@ -15,19 +15,14 @@ function tenantIdOf(t: unknown): string | number | null {
 }
 
 export default async function OnboardingBanner() {
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers: await getHeaders() })
+  const { user } = await getAdminUser()
   if (!user || user.role !== 'admin') return null
   const tenantId = tenantIdOf((user as { tenant?: unknown }).tenant)
   if (!tenantId) return null
 
-  const tenantDoc = (await payload.findByID({
-    collection: 'tenants',
-    id: tenantId,
-    depth: 0,
-    overrideAccess: true,
-  })) as unknown as Record<string, unknown>
+  const tenantDoc = (await getAdminTenant(tenantId)) as unknown as Record<string, unknown>
 
+  const payload = await getPayload({ config })
   const [prayerCount, eventsCount, heroCount] = await Promise.all([
     payload
       .find({

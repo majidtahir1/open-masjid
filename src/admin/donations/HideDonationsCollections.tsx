@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser } from '@/lib/admin-context'
 
 /**
  * Hides the auto-generated "Donations" nav group (Funds + All donations) so
@@ -16,8 +14,7 @@ import config from '@payload-config'
  */
 export default async function HideDonationsCollections() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
 
     // Scope all selectors under the sidebar nav (`.nav` / `.nav-group`) so

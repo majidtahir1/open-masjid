@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser } from '@/lib/admin-context'
 
 /**
  * Hides the "Tenants" nav link (and its "Site" group heading) from the admin
@@ -16,8 +14,7 @@ import config from '@payload-config'
  */
 export default async function HideTenantsNav() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     const u = user as { role?: string } | null | undefined
     if (!u || u.role === 'platformOwner') return null
 

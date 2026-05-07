@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser, getAdminTenantWithRelations } from '@/lib/admin-context'
 
 const FALLBACK_HREF = '/brand/openmasjid-favicon.svg'
 const FALLBACK_MIME = 'image/svg+xml'
@@ -22,20 +20,14 @@ function tenantIdOf(t: TenantRef): string | number | null {
 
 async function resolveFavicon(): Promise<{ href: string; type: string }> {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return { href: FALLBACK_HREF, type: FALLBACK_MIME }
 
     const u = user as { tenant?: TenantRef }
     const tenantId = tenantIdOf(u.tenant)
     if (!tenantId) return { href: FALLBACK_HREF, type: FALLBACK_MIME }
 
-    const tenant = (await payload.findByID({
-      collection: 'tenants',
-      id: tenantId,
-      depth: 1,
-      overrideAccess: true,
-    })) as unknown as Record<string, unknown>
+    const tenant = (await getAdminTenantWithRelations(tenantId)) as unknown as Record<string, unknown>
 
     const branding = tenant.branding as { favicon?: unknown } | undefined
     const favicon = branding?.favicon as
@@ -48,12 +40,10 @@ async function resolveFavicon(): Promise<{ href: string; type: string }> {
 
     if (!favicon?.url) return { href: FALLBACK_HREF, type: FALLBACK_MIME }
 
-    // SVG: serve original — vector scales perfectly and browsers render it natively.
     if (favicon.mimeType === 'image/svg+xml') {
       return { href: favicon.url, type: 'image/svg+xml' }
     }
 
-    // Raster: prefer the 64×64 PNG derivative when available, else original.
     const resized = favicon.sizes?.favicon?.url
     if (resized) return { href: resized, type: 'image/png' }
     return { href: favicon.url, type: favicon.mimeType ?? FALLBACK_MIME }

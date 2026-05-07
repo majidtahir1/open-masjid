@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '@payload-config'
+import { getAdminUser } from '@/lib/admin-context'
 
 import CreateTenantPanelClient from './CreateTenantPanelClient'
 
@@ -15,8 +13,7 @@ import CreateTenantPanelClient from './CreateTenantPanelClient'
  */
 export default async function CreateTenantPanel() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await getHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
     const u = user as { role?: string }
     if (u.role !== 'platformOwner') return null

@@ -16,16 +16,12 @@
  * does not depend on any client-side fetch / hydration path.
  */
 
-import { getPayload } from 'payload'
-import { headers as nextHeaders } from 'next/headers'
-
-import config from '@payload-config'
+import { getAdminUser } from '@/lib/admin-context'
 import { getActiveSchedule } from '@/lib/prayer-schedule'
 
 export default async function ScheduleListBanner() {
   try {
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: await nextHeaders() })
+    const { user } = await getAdminUser()
     if (!user) return null
 
     const tenantRef = (user as { tenant?: unknown }).tenant

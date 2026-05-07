@@ -1,8 +1,6 @@
-import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
 
-import config from '@payload-config'
+import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import IdentityStandalone from '@/admin/onboarding/steps/IdentityStandalone'
 
 // Hits Postgres on every render; never pre-render at build time.
@@ -18,8 +16,7 @@ function tenantIdOf(t: TenantRef): string | number | null {
 }
 
 export default async function IdentityPage() {
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers: await getHeaders() })
+  const { user } = await getAdminUser()
 
   if (!user) {
     redirect('/admin/login')
@@ -36,12 +33,7 @@ export default async function IdentityPage() {
     redirect('/admin')
   }
 
-  const tenantDoc = await payload.findByID({
-    collection: 'tenants',
-    id: tenantId,
-    depth: 0,
-    overrideAccess: true,
-  })
+  const tenantDoc = await getAdminTenant(tenantId)
 
   const t = tenantDoc as {
     name?: string | null
