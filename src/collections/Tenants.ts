@@ -20,6 +20,7 @@ export const Tenants: CollectionConfig = {
     plural: 'Tenants',
   },
   admin: {
+    enableListViewSelectAPI: true,
     group: 'Site',
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'siteType'],

@@ -39,6 +39,7 @@ export const Events: CollectionConfig = {
     plural: 'Events',
   },
   admin: {
+    enableListViewSelectAPI: true,
     group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'title',

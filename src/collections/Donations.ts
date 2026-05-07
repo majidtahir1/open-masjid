@@ -10,6 +10,7 @@ export const Donations: CollectionConfig = {
   slug: 'donations',
   labels: { singular: 'Donation', plural: 'All donations' },
   admin: {
+    enableListViewSelectAPI: true,
     group: 'Donations',
     useAsTitle: 'stripePaymentIntentId',
     defaultColumns: ['createdAt', 'fund', 'amount', 'frequency', 'status'],
