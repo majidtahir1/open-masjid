@@ -19,7 +19,7 @@ export default function FormsFeaturePage() {
       <FeatureHero
         eyebrow="Forms & RSVPs"
         title="RSVPs, signups, surveys —"
-        em="without a separate Jotform subscription."
+        em="all from a single platform."
         sub="A visual form builder, built into your admin. Twelve field types. Multi-step or single-question. Capacity limits. Payments via Stripe. Custom branding per form. CSV export. Submissions land in the same admin you already use."
       />
 
