@@ -17,6 +17,11 @@ export const CarouselSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'startDate', 'endDate'],
     description: 'Slides shown in rotation on the kiosk carousel.',
+    components: {
+      edit: {
+        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
+      },
+    },
   },
   access: {
     read: tenantScopedRead,

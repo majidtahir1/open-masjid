@@ -20,6 +20,11 @@ export const QRCodes: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'targetUrl', 'createdAt'],
     description: 'Reusable QR codes attached to carousel and sponsor slides.',
+    components: {
+      edit: {
+        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
+      },
+    },
   },
   access: {
     read: tenantScopedRead,

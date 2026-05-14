@@ -17,6 +17,11 @@ export const WeeklyEventsSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'active'],
     description: 'Recurring weekly schedule shown on the kiosk.',
+    components: {
+      edit: {
+        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
+      },
+    },
   },
   access: {
     read: tenantScopedRead,

@@ -19,6 +19,11 @@ export const SponsorSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'layoutTemplate'],
     description: 'Advertiser / sponsor slides shown on the kiosk carousel.',
+    components: {
+      edit: {
+        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
+      },
+    },
   },
   access: {
     read: tenantScopedRead,
