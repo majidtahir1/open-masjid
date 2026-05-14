@@ -220,6 +220,15 @@ const config: Config = {
         'fs-3xl':  'var(--fs-3xl)',
         'fs-4xl':  'var(--fs-4xl)',
         'fs-5xl':  'var(--fs-5xl)',
+        // Kiosk/TV sizing — vh-based so a single class scales correctly on
+        // 1080p, 1440p, and 4K displays. Used by ported slide components.
+        'tv-hero': ['12vh', { lineHeight: '1.1' }],
+        'tv-xl':   ['8vh',  { lineHeight: '1.15' }],
+        'tv-lg':   ['5vh',  { lineHeight: '1.2' }],
+        'tv-md':   ['4vh',  { lineHeight: '1.3' }],
+        'tv-base': ['3vh',  { lineHeight: '1.4' }],
+        'tv-sm':   ['2.5vh',{ lineHeight: '1.4' }],
+        'tv-xs':   ['2vh',  { lineHeight: '1.5' }],
       },
 
       // -------- Line height / tracking --------
