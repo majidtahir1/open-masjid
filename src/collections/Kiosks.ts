@@ -21,7 +21,10 @@ export const Kiosks: CollectionConfig = {
       'Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.',
     components: {
       edit: {
-        beforeDocumentControls: ['/src/components/admin/KioskPushButton#default'],
+        beforeDocumentControls: [
+          '/src/components/admin/KioskPushButton#default',
+          '/src/components/admin/KioskResetButton#default',
+        ],
       },
     },
   },
