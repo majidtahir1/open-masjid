@@ -52,8 +52,8 @@ const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         >
           <div className="text-center text-gray-500">
             <QrCode className="w-12 h-12 mx-auto mb-2" />
-            <div className="text-sm">QR Code</div>
-            <div className="text-xs mt-1 opacity-75">Unable to load</div>
+            <div className="text-tv-sm">QR Code</div>
+            <div className="text-tv-xs mt-1 opacity-75">Unable to load</div>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@ const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         <div className={`${qrSize} bg-gray-100 rounded-lg flex items-center justify-center animate-pulse`}>
           <div className="text-center text-gray-400">
             <QrCode className="w-10 h-10 mx-auto mb-2 animate-pulse" />
-            <div className="text-sm">Loading...</div>
+            <div className="text-tv-sm">Loading...</div>
           </div>
         </div>
       )}
