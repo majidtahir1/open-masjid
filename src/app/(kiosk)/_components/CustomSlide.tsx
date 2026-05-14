@@ -137,27 +137,30 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
 
       {/* Main Content Area */}
       <div
-        className="flex-1 flex items-center justify-center overflow-hidden relative"
+        className={`flex-1 flex items-center justify-center overflow-hidden relative ${
+          !hasTheme ? (slide.prayerTimingsEnabled ? 'px-6 pt-12 pb-2' : 'px-6 py-8') : ''
+        }`}
         style={{
-          paddingTop: hasTheme ? theme.safeZones.topMargin : slide.prayerTimingsEnabled ? '3rem' : '2rem',
-          paddingBottom: hasTheme ? theme.safeZones.bottomMargin : slide.prayerTimingsEnabled ? '0.5rem' : '2rem',
-          paddingLeft: hasTheme ? theme.safeZones.sidePadding : '1.5rem',
-          paddingRight: hasTheme ? theme.safeZones.sidePadding : '1.5rem',
+          paddingTop: hasTheme ? theme.safeZones.topMargin : undefined,
+          paddingBottom: hasTheme ? theme.safeZones.bottomMargin : undefined,
+          paddingLeft: hasTheme ? theme.safeZones.sidePadding : undefined,
+          paddingRight: hasTheme ? theme.safeZones.sidePadding : undefined,
           zIndex: 2,
         }}
       >
         <div className="text-center max-w-[85%] w-full">
           {/* Title */}
           <h1
-            className="font-bold leading-tight"
+            className={`font-display font-bold ${
+              slide.prayerTimingsEnabled
+                ? 'text-tv-xl mb-3 leading-tight'
+                : 'text-tv-hero mb-6 leading-tight'
+            }`}
             style={{
               color: hasTheme ? theme.textColor : 'white',
               fontSize: hasTheme
                 ? `clamp(${theme.typography.titleSize.min}px, ${theme.typography.titleSize.preferred}, ${theme.typography.titleSize.max}px)`
-                : slide.prayerTimingsEnabled
-                  ? 'clamp(2rem, 5vw, 6rem)'
-                  : 'clamp(3rem, 8vw, 10rem)',
-              marginBottom: slide.prayerTimingsEnabled ? '0.75rem' : '1.5rem',
+                : undefined,
               textShadow: hasTheme && theme.id === 'full-ambiance' ? '3px 3px 16px rgba(0,0,0,0.8)' : undefined,
             }}
           >
@@ -165,17 +168,17 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
           </h1>
 
           {/* Details */}
-          <div style={{ marginBottom: slide.prayerTimingsEnabled ? '0.75rem' : '2rem' }}>
+          <div className={`space-y-2 ${slide.prayerTimingsEnabled ? 'mb-3' : 'mb-8'}`}>
             {slide.details1 && (
               <p
+                className={`font-sans leading-snug ${
+                  slide.prayerTimingsEnabled ? 'text-tv-md' : 'text-tv-xl'
+                }`}
                 style={{
                   color: hasTheme ? theme.subtitleColor : 'rgba(255,255,255,0.9)',
                   fontSize: hasTheme
                     ? `clamp(${theme.typography.subtitleSize.min}px, ${theme.typography.subtitleSize.preferred}, ${theme.typography.subtitleSize.max}px)`
-                    : slide.prayerTimingsEnabled
-                      ? 'clamp(1rem, 2.5vw, 3rem)'
-                      : 'clamp(1.5rem, 4vw, 5rem)',
-                  lineHeight: 1.3,
+                    : undefined,
                   textShadow: hasTheme && theme.id === 'full-ambiance' ? '2px 2px 12px rgba(0,0,0,0.6)' : undefined,
                 }}
               >
@@ -184,14 +187,14 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
             )}
             {slide.details2 && (
               <p
+                className={`font-sans leading-snug ${
+                  slide.prayerTimingsEnabled ? 'text-tv-base' : 'text-tv-lg'
+                }`}
                 style={{
                   color: hasTheme ? theme.subtitleColor : 'rgba(255,255,255,0.8)',
                   fontSize: hasTheme
                     ? `clamp(${theme.typography.datetimeSize.min}px, ${theme.typography.datetimeSize.preferred}, ${theme.typography.datetimeSize.max}px)`
-                    : slide.prayerTimingsEnabled
-                      ? 'clamp(0.875rem, 2vw, 2.5rem)'
-                      : 'clamp(1.25rem, 3vw, 4rem)',
-                  lineHeight: 1.3,
+                    : undefined,
                   textShadow: hasTheme && theme.id === 'full-ambiance' ? '2px 2px 12px rgba(0,0,0,0.6)' : undefined,
                 }}
               >
@@ -205,9 +208,18 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
             <div className="flex flex-col items-center" style={{ marginTop: hasTheme ? '20px' : undefined }}>
               <div
                 style={{
-                  background: hasTheme ? 'white' : undefined,
+                  background: hasTheme
+                    ? theme.id === 'full-ambiance'
+                      ? 'linear-gradient(135deg, #F4E5C3 0%, #D4AF37 100%)'
+                      : 'white'
+                    : undefined,
                   padding: hasTheme ? '24px' : undefined,
                   borderRadius: hasTheme ? '16px' : undefined,
+                  boxShadow: hasTheme
+                    ? theme.id === 'full-ambiance'
+                      ? '0 12px 48px rgba(0,0,0,0.5)'
+                      : '0 8px 32px rgba(0,0,0,0.2)'
+                    : undefined,
                   border: hasTheme ? `3px solid ${theme.qrBorderColor}` : undefined,
                 }}
               >
@@ -218,7 +230,7 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
                 />
               </div>
               {typeof slide.qrCode === 'object' && slide.qrCode !== null && 'label' in slide.qrCode && slide.qrCode.label && (
-                <p className="text-white/70 mt-2 text-sm">{slide.qrCode.label}</p>
+                <p className="text-tv-sm text-white/70 mt-2">{slide.qrCode.label}</p>
               )}
             </div>
           )}
@@ -227,7 +239,7 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
 
       {/* Prayer Times Section - Only show if enabled */}
       {slide.prayerTimingsEnabled && prayerEntries.length > 0 && (
-        <div className="h-[30%] border-t-4 border-teal-500 relative" style={{ zIndex: 2 }}>
+        <div className="h-[30%] border-t-4 border-secondary relative" style={{ zIndex: 2 }}>
           <div className="h-full flex items-center justify-between px-6">
             <div className="flex-1 flex justify-between items-center gap-3">
               {prayerEntries.map((prayer) => (
@@ -235,21 +247,42 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
                   key={prayer.name}
                   className={`text-center flex-1 px-3 py-3 rounded-xl transition-all ${
                     prayer.isNext
-                      ? 'bg-teal-500/30 text-white border-2 border-teal-500 shadow-lg'
+                      ? 'bg-secondary/30 text-white border-2 border-secondary shadow-lg'
                       : 'text-white bg-black/40 backdrop-blur-sm'
                   }`}
                 >
-                  <div className="font-semibold mb-1" style={{ fontSize: 'clamp(0.75rem, 1.5vw, 1.5rem)' }}>
+                  <div className="text-tv-md font-sans font-semibold mb-1">
                     {prayer.name}
                   </div>
-                  <div className="opacity-75 text-xs mb-1">
+                  <div className="text-tv-sm font-sans opacity-75 mb-1">
                     Adhan: {formatTime(prayer.adhan)}
                   </div>
-                  <div className="font-bold" style={{ fontSize: 'clamp(0.875rem, 1.8vw, 2rem)' }}>
+                  <div className="text-tv-lg font-sans font-bold">
                     {formatTime(prayer.iqamah)}
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Next Prayer Countdown */}
+            <div className="text-center ml-4 bg-black/40 backdrop-blur-sm px-6 py-4 rounded-xl shadow-lg min-w-[200px]">
+              <div className="text-tv-base text-white font-semibold mb-1">Next Prayer In</div>
+              <div className="text-tv-lg font-bold text-white drop-shadow-lg">
+                {(() => {
+                  if (!prayerEntries.length) return '—'
+                  const next = prayerEntries.find((p) => p.isNext)
+                  if (!next?.adhan) return '—'
+                  const m = /(\d{1,2}):(\d{2})/.exec(next.adhan)
+                  if (!m) return '—'
+                  const nowMins = currentTime.getHours() * 60 + currentTime.getMinutes()
+                  const targetMins = Number(m[1]) * 60 + Number(m[2])
+                  const diff = targetMins - nowMins
+                  if (diff <= 0) return '—'
+                  const h = Math.floor(diff / 60)
+                  const min = diff % 60
+                  return h > 0 ? `${h}h ${min}m` : `${min}m`
+                })()}
+              </div>
             </div>
           </div>
         </div>
