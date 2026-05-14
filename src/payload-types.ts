@@ -70,6 +70,9 @@ export interface Config {
     'prayer-schedules': PrayerSchedule;
     events: Event;
     'hero-slides': HeroSlide;
+    'carousel-slides': CarouselSlide;
+    'sponsor-slides': SponsorSlide;
+    'weekly-events-slides': WeeklyEventsSlide;
     kiosks: Kiosk;
     announcements: Announcement;
     services: Service;
@@ -94,6 +97,9 @@ export interface Config {
     'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
+    'carousel-slides': CarouselSlidesSelect<false> | CarouselSlidesSelect<true>;
+    'sponsor-slides': SponsorSlidesSelect<false> | SponsorSlidesSelect<true>;
+    'weekly-events-slides': WeeklyEventsSlidesSelect<false> | WeeklyEventsSlidesSelect<true>;
     kiosks: KiosksSelect<false> | KiosksSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
@@ -742,6 +748,92 @@ export interface HeroSlide {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Slides shown in rotation on the kiosk carousel.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel-slides".
+ */
+export interface CarouselSlide {
+  id: number;
+  title: string;
+  details1?: string | null;
+  details2?: string | null;
+  image?: (number | null) | Media;
+  backgroundTheme?: ('clean' | 'geometric' | 'arabesque' | 'mihrab') | null;
+  prayerTimingsEnabled?: boolean | null;
+  /**
+   * Time on screen in milliseconds (5000–60000).
+   */
+  displayDurationMs?: number | null;
+  priority?: number | null;
+  active?: boolean | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  showInCarousel?: boolean | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Advertiser / sponsor slides shown on the kiosk carousel.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsor-slides".
+ */
+export interface SponsorSlide {
+  id: number;
+  title: string;
+  tagline?: string | null;
+  logo?: (number | null) | Media;
+  brandColorPrimary?: string | null;
+  brandColorSecondary?: string | null;
+  backgroundStyle?: ('gradient' | 'solid' | 'brand-primary' | 'brand-secondary') | null;
+  layoutTemplate: 'logo-left' | 'logo-top-centered' | 'logo-dominant' | 'split-screen';
+  details1?: string | null;
+  details2?: string | null;
+  details3?: string | null;
+  contactPhone?: string | null;
+  contactAddress?: string | null;
+  contactWebsite?: string | null;
+  ctaText?: string | null;
+  displayDurationMs?: number | null;
+  priority?: number | null;
+  active?: boolean | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Recurring weekly schedule shown on the kiosk.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "weekly-events-slides".
+ */
+export interface WeeklyEventsSlide {
+  id: number;
+  title: string;
+  entries?:
+    | {
+        day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+        time: string;
+        name: string;
+        location?: string | null;
+        /**
+         * Optional, e.g. "Sisters", "Youth"
+         */
+        audience?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  displayDurationMs?: number | null;
+  active?: boolean | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -767,6 +859,25 @@ export interface Kiosk {
    * When on, this kiosk shows only the slides selected below.
    */
   overrideEnabled?: boolean | null;
+  /**
+   * Specific slides this kiosk should show (when override is on).
+   */
+  slideOverrides?:
+    | (
+        | {
+            relationTo: 'carousel-slides';
+            value: number | CarouselSlide;
+          }
+        | {
+            relationTo: 'sponsor-slides';
+            value: number | SponsorSlide;
+          }
+        | {
+            relationTo: 'weekly-events-slides';
+            value: number | WeeklyEventsSlide;
+          }
+      )[]
+    | null;
   tenant?: (number | null) | Tenant;
   updatedAt: string;
   createdAt: string;
@@ -1430,6 +1541,18 @@ export interface PayloadLockedDocument {
         value: number | HeroSlide;
       } | null)
     | ({
+        relationTo: 'carousel-slides';
+        value: number | CarouselSlide;
+      } | null)
+    | ({
+        relationTo: 'sponsor-slides';
+        value: number | SponsorSlide;
+      } | null)
+    | ({
+        relationTo: 'weekly-events-slides';
+        value: number | WeeklyEventsSlide;
+      } | null)
+    | ({
         relationTo: 'kiosks';
         value: number | Kiosk;
       } | null)
@@ -1698,6 +1821,77 @@ export interface HeroSlidesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel-slides_select".
+ */
+export interface CarouselSlidesSelect<T extends boolean = true> {
+  title?: T;
+  details1?: T;
+  details2?: T;
+  image?: T;
+  backgroundTheme?: T;
+  prayerTimingsEnabled?: T;
+  displayDurationMs?: T;
+  priority?: T;
+  active?: T;
+  startDate?: T;
+  endDate?: T;
+  showInCarousel?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsor-slides_select".
+ */
+export interface SponsorSlidesSelect<T extends boolean = true> {
+  title?: T;
+  tagline?: T;
+  logo?: T;
+  brandColorPrimary?: T;
+  brandColorSecondary?: T;
+  backgroundStyle?: T;
+  layoutTemplate?: T;
+  details1?: T;
+  details2?: T;
+  details3?: T;
+  contactPhone?: T;
+  contactAddress?: T;
+  contactWebsite?: T;
+  ctaText?: T;
+  displayDurationMs?: T;
+  priority?: T;
+  active?: T;
+  startDate?: T;
+  endDate?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "weekly-events-slides_select".
+ */
+export interface WeeklyEventsSlidesSelect<T extends boolean = true> {
+  title?: T;
+  entries?:
+    | T
+    | {
+        day?: T;
+        time?: T;
+        name?: T;
+        location?: T;
+        audience?: T;
+        id?: T;
+      };
+  displayDurationMs?: T;
+  active?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "kiosks_select".
  */
 export interface KiosksSelect<T extends boolean = true> {
@@ -1713,6 +1907,7 @@ export interface KiosksSelect<T extends boolean = true> {
   userAgent?: T;
   kioskPushAt?: T;
   overrideEnabled?: T;
+  slideOverrides?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;

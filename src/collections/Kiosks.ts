@@ -70,21 +70,16 @@ export const Kiosks: CollectionConfig = {
         description: 'When on, this kiosk shows only the slides selected below.',
       },
     },
-    // TODO(Task 7): Restore slideOverrides once carousel-slides, sponsor-slides,
-    // and weekly-events-slides collections are registered. Payload validates
-    // relationship slugs at config-sanitize time (runtime), so this field cannot
-    // be active until those collections exist — even `as any` bypasses only tsc,
-    // not Payload's own InvalidFieldRelationship guard.
-    // {
-    //   name: 'slideOverrides',
-    //   type: 'relationship',
-    //   relationTo: ['carousel-slides', 'sponsor-slides', 'weekly-events-slides'] as any,
-    //   hasMany: true,
-    //   admin: {
-    //     condition: (data) => Boolean(data?.overrideEnabled),
-    //     description: 'Specific slides this kiosk should show (when override is on).',
-    //   },
-    // },
+    {
+      name: 'slideOverrides',
+      type: 'relationship',
+      relationTo: ['carousel-slides', 'sponsor-slides', 'weekly-events-slides'],
+      hasMany: true,
+      admin: {
+        condition: (data) => Boolean(data?.overrideEnabled),
+        description: 'Specific slides this kiosk should show (when override is on).',
+      },
+    },
     {
       name: 'tenant',
       type: 'relationship',

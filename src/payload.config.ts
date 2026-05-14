@@ -8,6 +8,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Announcements } from './collections/Announcements'
+import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
 import { MembershipTiers } from './collections/MembershipTiers'
@@ -15,6 +16,8 @@ import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
 import { Kiosks } from './collections/Kiosks'
+import { SponsorSlides } from './collections/SponsorSlides'
+import { WeeklyEventsSlides } from './collections/WeeklyEventsSlides'
 import { Media } from './collections/Media'
 import { Forms } from './collections/Forms'
 import { FormSubmissions } from './collections/FormSubmissions'
@@ -118,6 +121,9 @@ export default buildConfig({
     PrayerSchedules,
     Events,
     HeroSlides,
+    CarouselSlides,
+    SponsorSlides,
+    WeeklyEventsSlides,
     Kiosks,
     Announcements,
     Services,
