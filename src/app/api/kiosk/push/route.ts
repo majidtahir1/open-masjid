@@ -15,9 +15,19 @@ export async function POST(req: Request) {
 
   const url = new URL(req.url)
   const deviceId = url.searchParams.get('deviceId')
+  const documentId = url.searchParams.get('documentId')
   const tenantQ = url.searchParams.get('tenant')
 
   const now = new Date().toISOString()
+
+  if (documentId) {
+    await payload.update({
+      collection: 'kiosks',
+      id: documentId,
+      data: { kioskPushAt: now },
+    })
+    return NextResponse.json({ ok: true })
+  }
 
   if (deviceId) {
     const { docs } = await payload.find({
