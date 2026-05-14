@@ -14,6 +14,7 @@ import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
+import { Kiosks } from './collections/Kiosks'
 import { Media } from './collections/Media'
 import { Forms } from './collections/Forms'
 import { FormSubmissions } from './collections/FormSubmissions'
@@ -117,6 +118,7 @@ export default buildConfig({
     PrayerSchedules,
     Events,
     HeroSlides,
+    Kiosks,
     Announcements,
     Services,
     Pages,

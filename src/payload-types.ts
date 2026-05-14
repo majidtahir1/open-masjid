@@ -70,6 +70,7 @@ export interface Config {
     'prayer-schedules': PrayerSchedule;
     events: Event;
     'hero-slides': HeroSlide;
+    kiosks: Kiosk;
     announcements: Announcement;
     services: Service;
     pages: Page;
@@ -93,6 +94,7 @@ export interface Config {
     'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
+    kiosks: KiosksSelect<false> | KiosksSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -446,6 +448,10 @@ export interface Tenant {
    * Set when the user dismisses the celebratory screen.
    */
   onboardingCompletedAt?: string | null;
+  /**
+   * Internal — bumped when admin clicks "Push update to all kiosks".
+   */
+  kioskBroadcastAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -734,6 +740,36 @@ export interface HeroSlide {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kiosks".
+ */
+export interface Kiosk {
+  id: number;
+  name: string;
+  location?: string | null;
+  status?: ('UNPAIRED' | 'ONLINE' | 'OFFLINE' | 'MAINTENANCE') | null;
+  /**
+   * Type the 6-character code shown on the kiosk screen here, then save. Format: ABC-123.
+   */
+  pairingCode?: string | null;
+  deviceId?: string | null;
+  secretHash?: string | null;
+  pairingCodeExpiresAt?: string | null;
+  lastSeenAt?: string | null;
+  lastSeenIp?: string | null;
+  userAgent?: string | null;
+  kioskPushAt?: string | null;
+  /**
+   * When on, this kiosk shows only the slides selected below.
+   */
+  overrideEnabled?: boolean | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Short-lived notices shown at the top of the public site (closures, schedule changes, reminders). Use Events for programs; use Announcements for quick updates.
@@ -1235,9 +1271,9 @@ export interface User {
    */
   lastName: string;
   /**
-   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.
+   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content.
    */
-  role: 'platformOwner' | 'admin' | 'staff';
+  role: 'platformOwner' | 'admin' | 'staff' | 'kioskManager';
   /**
    * Which masjid this user belongs to. Required for Admin and Staff; leave blank for Platform Owner (they access every tenant). Only a Platform Owner can change this field.
    */
@@ -1392,6 +1428,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hero-slides';
         value: number | HeroSlide;
+      } | null)
+    | ({
+        relationTo: 'kiosks';
+        value: number | Kiosk;
       } | null)
     | ({
         relationTo: 'announcements';
@@ -1655,6 +1695,27 @@ export interface HeroSlidesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kiosks_select".
+ */
+export interface KiosksSelect<T extends boolean = true> {
+  name?: T;
+  location?: T;
+  status?: T;
+  pairingCode?: T;
+  deviceId?: T;
+  secretHash?: T;
+  pairingCodeExpiresAt?: T;
+  lastSeenAt?: T;
+  lastSeenIp?: T;
+  userAgent?: T;
+  kioskPushAt?: T;
+  overrideEnabled?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2040,6 +2101,7 @@ export interface TenantsSelect<T extends boolean = true> {
         donations?: T;
       };
   onboardingCompletedAt?: T;
+  kioskBroadcastAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
