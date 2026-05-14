@@ -49,6 +49,7 @@ export const generateQrPng: CollectionAfterChangeHook = async ({
           size: buffer.length,
         },
         overrideAccess: true,
+        req,
       })
       return doc
     }
@@ -63,6 +64,7 @@ export const generateQrPng: CollectionAfterChangeHook = async ({
         size: buffer.length,
       },
       overrideAccess: true,
+      req,
     })
 
     await req.payload.update({
@@ -70,6 +72,7 @@ export const generateQrPng: CollectionAfterChangeHook = async ({
       id: doc.id,
       data: { generatedImage: media.id },
       overrideAccess: true,
+      req,
     })
 
     return { ...doc, generatedImage: media.id }
