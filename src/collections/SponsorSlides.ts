@@ -72,8 +72,7 @@ export const SponsorSlides: CollectionConfig = {
     { name: 'contactPhone', type: 'text', maxLength: 50 },
     { name: 'contactAddress', type: 'text', maxLength: 300 },
     { name: 'contactWebsite', type: 'text', maxLength: 200 },
-    // TODO(Task 8): Restore qrCode field once the qr-codes collection exists.
-    // { name: 'qrCode', type: 'relationship', relationTo: 'qr-codes' },
+    { name: 'qrCode', type: 'relationship', relationTo: 'qr-codes' },
     { name: 'ctaText', type: 'text', maxLength: 100 },
     { name: 'displayDurationMs', type: 'number', defaultValue: 10000, min: 5000, max: 60000 },
     { name: 'priority', type: 'number', defaultValue: 5, min: 0, max: 10 },

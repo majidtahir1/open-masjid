@@ -30,8 +30,7 @@ export const CarouselSlides: CollectionConfig = {
     { name: 'details1', type: 'textarea' },
     { name: 'details2', type: 'textarea' },
     { name: 'image', type: 'upload', relationTo: 'media' },
-    // TODO(Task 8): Restore qrCode field once the qr-codes collection exists.
-    // { name: 'qrCode', type: 'relationship', relationTo: 'qr-codes' },
+    { name: 'qrCode', type: 'relationship', relationTo: 'qr-codes' },
     {
       name: 'backgroundTheme',
       type: 'select',

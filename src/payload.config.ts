@@ -23,6 +23,7 @@ import { Forms } from './collections/Forms'
 import { FormSubmissions } from './collections/FormSubmissions'
 import { Pages } from './collections/Pages'
 import { PrayerSchedules } from './collections/PrayerSchedules'
+import { QRCodes } from './collections/QRCodes'
 import { Services } from './collections/Services'
 import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
@@ -125,6 +126,7 @@ export default buildConfig({
     SponsorSlides,
     WeeklyEventsSlides,
     Kiosks,
+    QRCodes,
     Announcements,
     Services,
     Pages,

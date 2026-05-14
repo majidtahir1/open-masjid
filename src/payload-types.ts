@@ -74,6 +74,7 @@ export interface Config {
     'sponsor-slides': SponsorSlide;
     'weekly-events-slides': WeeklyEventsSlide;
     kiosks: Kiosk;
+    'qr-codes': QrCode;
     announcements: Announcement;
     services: Service;
     pages: Page;
@@ -101,6 +102,7 @@ export interface Config {
     'sponsor-slides': SponsorSlidesSelect<false> | SponsorSlidesSelect<true>;
     'weekly-events-slides': WeeklyEventsSlidesSelect<false> | WeeklyEventsSlidesSelect<true>;
     kiosks: KiosksSelect<false> | KiosksSelect<true>;
+    'qr-codes': QrCodesSelect<false> | QrCodesSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -759,6 +761,7 @@ export interface CarouselSlide {
   details1?: string | null;
   details2?: string | null;
   image?: (number | null) | Media;
+  qrCode?: (number | null) | QrCode;
   backgroundTheme?: ('clean' | 'geometric' | 'arabesque' | 'mihrab') | null;
   prayerTimingsEnabled?: boolean | null;
   /**
@@ -770,6 +773,23 @@ export interface CarouselSlide {
   startDate?: string | null;
   endDate?: string | null;
   showInCarousel?: boolean | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Reusable QR codes attached to carousel and sponsor slides.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qr-codes".
+ */
+export interface QrCode {
+  id: number;
+  label: string;
+  targetUrl: string;
+  fgColor?: string | null;
+  bgColor?: string | null;
+  generatedImage?: (number | null) | Media;
   tenant?: (number | null) | Tenant;
   updatedAt: string;
   createdAt: string;
@@ -795,6 +815,7 @@ export interface SponsorSlide {
   contactPhone?: string | null;
   contactAddress?: string | null;
   contactWebsite?: string | null;
+  qrCode?: (number | null) | QrCode;
   ctaText?: string | null;
   displayDurationMs?: number | null;
   priority?: number | null;
@@ -1557,6 +1578,10 @@ export interface PayloadLockedDocument {
         value: number | Kiosk;
       } | null)
     | ({
+        relationTo: 'qr-codes';
+        value: number | QrCode;
+      } | null)
+    | ({
         relationTo: 'announcements';
         value: number | Announcement;
       } | null)
@@ -1828,6 +1853,7 @@ export interface CarouselSlidesSelect<T extends boolean = true> {
   details1?: T;
   details2?: T;
   image?: T;
+  qrCode?: T;
   backgroundTheme?: T;
   prayerTimingsEnabled?: T;
   displayDurationMs?: T;
@@ -1858,6 +1884,7 @@ export interface SponsorSlidesSelect<T extends boolean = true> {
   contactPhone?: T;
   contactAddress?: T;
   contactWebsite?: T;
+  qrCode?: T;
   ctaText?: T;
   displayDurationMs?: T;
   priority?: T;
@@ -1908,6 +1935,20 @@ export interface KiosksSelect<T extends boolean = true> {
   kioskPushAt?: T;
   overrideEnabled?: T;
   slideOverrides?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qr-codes_select".
+ */
+export interface QrCodesSelect<T extends boolean = true> {
+  label?: T;
+  targetUrl?: T;
+  fgColor?: T;
+  bgColor?: T;
+  generatedImage?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;
