@@ -6,6 +6,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
+import { allowKioskManagerRead, denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 /**
@@ -27,10 +28,10 @@ export const Media: CollectionConfig = {
       'Uploaded images and PDFs (event flyers, logos, hero photos). Files live in this tenant\'s library only — other masajid cannot see them.',
   },
   access: {
-    read: () => true,
-    create: withBillingLock(tenantScopedCreate),
-    update: withBillingLock(tenantScopedUpdate),
-    delete: withBillingLock(tenantScopedDelete),
+    read: allowKioskManagerRead(() => true),
+    create: denyKioskManager(withBillingLock(tenantScopedCreate)),
+    update: denyKioskManager(withBillingLock(tenantScopedUpdate)),
+    delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
     beforeChange: [setTenantFromUser],

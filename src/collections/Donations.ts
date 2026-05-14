@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScopedReadAccess } from '../access/tenantScoped'
+import { denyKioskManager } from '../access/kioskRoles'
 
 /**
  * Donations — aggregate-only donation records written by the Stripe Connect
@@ -24,10 +25,10 @@ export const Donations: CollectionConfig = {
     },
   },
   access: {
-    create: () => false,
-    update: () => false,
-    delete: () => false,
-    read: tenantScopedReadAccess(),
+    create: denyKioskManager(() => false),
+    update: denyKioskManager(() => false),
+    delete: denyKioskManager(() => false),
+    read: denyKioskManager(tenantScopedReadAccess()),
   },
   fields: [
     {

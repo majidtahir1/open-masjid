@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
+import { denyKioskManager } from '../access/kioskRoles'
 import { applyHeroStyleDefaults } from '../hooks/applyHeroStyleDefaults'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateLucideIcon } from '../lib/validateLucideIcon'
@@ -27,10 +28,10 @@ export const HeroSlides: CollectionConfig = {
       'Slides for the homepage hero slider. Use these for mission statements, donation pushes, or general announcements. Featured events from the Events collection are auto-added at render time.',
   },
   access: {
-    read: tenantScopedRead,
-    create: withBillingLock(tenantScopedCreate),
-    update: withBillingLock(tenantScopedUpdate),
-    delete: withBillingLock(tenantScopedDelete),
+    read: denyKioskManager(tenantScopedRead),
+    create: denyKioskManager(withBillingLock(tenantScopedCreate)),
+    update: denyKioskManager(withBillingLock(tenantScopedUpdate)),
+    delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
     beforeChange: [setTenantFromUser, applyHeroStyleDefaults],

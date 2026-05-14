@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { denyKioskManager } from '../access/kioskRoles'
 
 /**
  * Members — congregants who have or have had a paid membership subscription
@@ -26,7 +27,7 @@ export const Members: CollectionConfig = {
     description: 'Congregants subscribed to a membership tier.',
   },
   access: {
-    read: ({ req: { user } }) => {
+    read: denyKioskManager(({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'platformOwner') return true
       if (user.role === 'admin') {
@@ -34,9 +35,9 @@ export const Members: CollectionConfig = {
         return { tenant: { equals: tenant } }
       }
       return false // staff blocked — members hold PII + payment IDs
-    },
-    create: () => false,
-    update: ({ req: { user } }) => {
+    }),
+    create: denyKioskManager(() => false),
+    update: denyKioskManager(({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'platformOwner') return true
       if (user.role === 'admin') {
@@ -44,8 +45,8 @@ export const Members: CollectionConfig = {
         return { tenant: { equals: tenant } }
       }
       return false
-    },
-    delete: () => false,
+    }),
+    delete: denyKioskManager(() => false),
   },
   fields: [
     {

@@ -1,6 +1,7 @@
 // src/collections/FormSubmissions.ts
 import type { CollectionConfig } from 'payload'
 import { tenantScopedRead } from '../access/tenantScoped'
+import { denyKioskManager } from '../access/kioskRoles'
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
@@ -25,10 +26,10 @@ export const FormSubmissions: CollectionConfig = {
     },
   },
   access: {
-    create: () => false,
-    update: () => false,
-    delete: () => false,
-    read: tenantScopedRead,
+    create: denyKioskManager(() => false),
+    update: denyKioskManager(() => false),
+    delete: denyKioskManager(() => false),
+    read: denyKioskManager(tenantScopedRead),
   },
   fields: [
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true,

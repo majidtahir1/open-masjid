@@ -1,5 +1,6 @@
 import type { Access, CollectionConfig } from 'payload'
 import { tenantScopedAccess } from '../access/tenantScoped'
+import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { syncTierAfterChange } from './MembershipTiers.hooks'
 
@@ -45,10 +46,10 @@ export const MembershipTiers: CollectionConfig = {
     description: 'Paid recurring tiers congregants can subscribe to.',
   },
   access: {
-    read: tenantScopedAccess().read,
-    create: adminOrPlatformOwnerOnly,
-    update: adminOrPlatformOwnerOnly,
-    delete: () => false,
+    read: denyKioskManager(tenantScopedAccess().read),
+    create: denyKioskManager(adminOrPlatformOwnerOnly),
+    update: denyKioskManager(adminOrPlatformOwnerOnly),
+    delete: denyKioskManager(() => false),
   },
   hooks: {
     beforeChange: [setTenantFromUser],
