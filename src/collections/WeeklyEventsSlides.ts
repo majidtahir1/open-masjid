@@ -6,6 +6,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 
 export const WeeklyEventsSlides: CollectionConfig = {
   slug: 'weekly-events-slides',
@@ -16,12 +17,7 @@ export const WeeklyEventsSlides: CollectionConfig = {
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'active'],
-    description: 'Recurring weekly schedule shown on the kiosk.',
-    components: {
-      edit: {
-        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
-      },
-    },
+    description: 'Recurring weekly schedule shown on the kiosk. Changes auto-broadcast to all kiosks on save.',
   },
   access: {
     read: tenantScopedRead,
@@ -29,7 +25,10 @@ export const WeeklyEventsSlides: CollectionConfig = {
     update: tenantScopedUpdate,
     delete: tenantScopedDelete,
   },
-  hooks: { beforeChange: [setTenantFromUser] },
+  hooks: {
+    beforeChange: [setTenantFromUser],
+    afterChange: [bumpKioskBroadcast],
+  },
   fields: [
     { name: 'title', type: 'text', required: true, defaultValue: 'Weekly Schedule' },
     {

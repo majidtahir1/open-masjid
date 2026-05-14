@@ -7,6 +7,7 @@ import {
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { generateQrPng } from '../hooks/generateQrPng'
+import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/
 
@@ -19,12 +20,7 @@ export const QRCodes: CollectionConfig = {
     hideAPIURL: true,
     useAsTitle: 'label',
     defaultColumns: ['label', 'targetUrl', 'createdAt'],
-    description: 'Reusable QR codes attached to carousel and sponsor slides.',
-    components: {
-      edit: {
-        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
-      },
-    },
+    description: 'Reusable QR codes attached to carousel and sponsor slides. Changes auto-broadcast to all kiosks on save.',
   },
   access: {
     read: tenantScopedRead,
@@ -34,7 +30,7 @@ export const QRCodes: CollectionConfig = {
   },
   hooks: {
     beforeChange: [setTenantFromUser],
-    afterChange: [generateQrPng],
+    afterChange: [generateQrPng, bumpKioskBroadcast],
   },
   fields: [
     { name: 'label', type: 'text', required: true, label: 'Internal Label' },

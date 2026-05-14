@@ -6,6 +6,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 
 export const CarouselSlides: CollectionConfig = {
   slug: 'carousel-slides',
@@ -16,12 +17,7 @@ export const CarouselSlides: CollectionConfig = {
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'startDate', 'endDate'],
-    description: 'Slides shown in rotation on the kiosk carousel.',
-    components: {
-      edit: {
-        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
-      },
-    },
+    description: 'Slides shown in rotation on the kiosk carousel. Changes auto-broadcast to all kiosks on save.',
   },
   access: {
     read: tenantScopedRead,
@@ -29,7 +25,10 @@ export const CarouselSlides: CollectionConfig = {
     update: tenantScopedUpdate,
     delete: tenantScopedDelete,
   },
-  hooks: { beforeChange: [setTenantFromUser] },
+  hooks: {
+    beforeChange: [setTenantFromUser],
+    afterChange: [bumpKioskBroadcast],
+  },
   fields: [
     { name: 'title', type: 'text', required: true, maxLength: 200 },
     { name: 'details1', type: 'textarea' },

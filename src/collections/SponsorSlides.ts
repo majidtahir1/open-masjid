@@ -6,6 +6,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/
 
@@ -18,12 +19,7 @@ export const SponsorSlides: CollectionConfig = {
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'layoutTemplate'],
-    description: 'Advertiser / sponsor slides shown on the kiosk carousel.',
-    components: {
-      edit: {
-        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
-      },
-    },
+    description: 'Advertiser / sponsor slides shown on the kiosk carousel. Changes auto-broadcast to all kiosks on save.',
   },
   access: {
     read: tenantScopedRead,
@@ -31,7 +27,10 @@ export const SponsorSlides: CollectionConfig = {
     update: tenantScopedUpdate,
     delete: tenantScopedDelete,
   },
-  hooks: { beforeChange: [setTenantFromUser] },
+  hooks: {
+    beforeChange: [setTenantFromUser],
+    afterChange: [bumpKioskBroadcast],
+  },
   fields: [
     { name: 'title', type: 'text', required: true, maxLength: 200, label: 'Sponsor / Company Name' },
     { name: 'tagline', type: 'text', maxLength: 300 },

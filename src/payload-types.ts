@@ -750,7 +750,7 @@ export interface HeroSlide {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Slides shown in rotation on the kiosk carousel.
+ * Slides shown in rotation on the kiosk carousel. Changes auto-broadcast to all kiosks on save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carousel-slides".
@@ -781,7 +781,7 @@ export interface CarouselSlide {
   createdAt: string;
 }
 /**
- * Reusable QR codes attached to carousel and sponsor slides.
+ * Reusable QR codes attached to carousel and sponsor slides. Changes auto-broadcast to all kiosks on save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "qr-codes".
@@ -798,7 +798,7 @@ export interface QrCode {
   createdAt: string;
 }
 /**
- * Advertiser / sponsor slides shown on the kiosk carousel.
+ * Advertiser / sponsor slides shown on the kiosk carousel. Changes auto-broadcast to all kiosks on save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sponsor-slides".
@@ -830,7 +830,7 @@ export interface SponsorSlide {
   createdAt: string;
 }
 /**
- * Recurring weekly schedule shown on the kiosk.
+ * Recurring weekly schedule shown on the kiosk. Changes auto-broadcast to all kiosks on save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "weekly-events-slides".

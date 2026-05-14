@@ -9,6 +9,7 @@ import {
 import { withBillingLock } from '../access/billingLocked'
 import { allowKioskManagerRead, denyKioskManager } from '../access/kioskRoles'
 import { autoRegeneratePrayerDays } from '../hooks/autoRegeneratePrayerDays'
+import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { trimDaysToRange } from '../hooks/trimDaysToRange'
 
@@ -98,9 +99,6 @@ export const PrayerSchedules: CollectionConfig = {
         '/src/admin/ScheduleListBanner#default',
         '/src/admin/ScheduleTimeline#default',
       ],
-      edit: {
-        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
-      },
     },
   },
   defaultSort: '-startDate',
@@ -112,6 +110,7 @@ export const PrayerSchedules: CollectionConfig = {
   },
   hooks: {
     beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays],
+    afterChange: [bumpKioskBroadcast],
   },
   fields: [
     {
