@@ -71,6 +71,7 @@ export function proxy(request: NextRequest) {
     !pathname.startsWith('/marketing') &&
     !pathname.startsWith('/admin') &&
     !pathname.startsWith('/api') &&
+    !pathname.startsWith('/kiosk') &&
     !pathname.startsWith('/_next')
   ) {
     const url = request.nextUrl.clone()
