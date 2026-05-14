@@ -1,138 +1,74 @@
 'use client'
+import React from 'react'
 
-import React, { useMemo } from 'react'
-import QRCodeDisplay from './QRCodeDisplay'
-import { getRandomGradient } from '../_lib/constants/gradients'
-
-// Payload collection shape for WeeklyEventsSlide
-export type RegularEvent = {
-  name: string
+type Entry = {
+  day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
   time: string
+  name: string
+  location?: string | null
+  audience?: string | null
 }
 
-export type WeeklyEventsSlideData = {
+type WeeklyEventsSlideData = {
   id: string
-  featuredEventTitle: string
-  featuredEventSubtitle?: string | null
-  featuredEventDatetime: string
-  regularEvents?: RegularEvent[] | null
-  qrCode?:
-    | {
-        generatedImage?: { url?: string } | string | null
-        targetUrl?: string | null
-        label?: string | null
-      }
-    | string
-    | null
+  title?: string | null
+  entries?: Entry[] | null
 }
 
-interface WeeklyEventsSlideProps {
-  slide: WeeklyEventsSlideData
-  gradientKey?: number
+interface Props { slide: WeeklyEventsSlideData }
+
+const DAY_LABEL: Record<Entry['day'], string> = {
+  mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday',
+  thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday',
 }
+const DAY_ORDER: Entry['day'][] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-const WeeklyEventsSlide: React.FC<WeeklyEventsSlideProps> = ({ slide, gradientKey = 0 }) => {
-  // Generate a fresh random gradient whenever gradientKey changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const currentGradient = useMemo(() => getRandomGradient(), [gradientKey])
-
-  const gradientStyle: React.CSSProperties = {
-    background: currentGradient.css,
-    transition: 'background 2s ease-in-out',
-  }
-
-  // Resolve QR code URL from Payload media relationship
-  const qrCodeUrl = useMemo(() => {
-    if (!slide.qrCode || typeof slide.qrCode === 'string') return null
-    const gi = slide.qrCode.generatedImage
-    if (!gi) return null
-    if (typeof gi === 'string') return gi
-    return gi.url ?? null
-  }, [slide.qrCode])
-
-  const regularEvents = slide.regularEvents ?? []
+export default function WeeklyEventsSlide({ slide }: Props) {
+  const entries = Array.isArray(slide.entries) ? slide.entries : []
+  const byDay = DAY_ORDER
+    .map(day => ({ day, items: entries.filter(e => e.day === day) }))
+    .filter(group => group.items.length > 0)
 
   return (
-    <div className="w-full h-full flex flex-col relative" style={gradientStyle}>
-      {/* QR Code - Positioned in featured event section */}
-      {qrCodeUrl && (
-        <div className="absolute top-[22%] right-12 flex flex-col items-center z-10">
-          <div className="bg-white p-2 rounded-lg shadow-2xl">
-            <QRCodeDisplay url={qrCodeUrl} size="xsmall" />
-          </div>
-          <p className="font-medium text-white mt-1 drop-shadow-md" style={{ fontSize: 'clamp(0.75rem, 1.8vw, 1.5rem)' }}>
-            Register
-          </p>
-        </div>
-      )}
-
-      {/* Main Content Area - Full Height */}
-      <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
-        {/* Featured Event Section */}
-        <div className="text-center mb-8 max-w-[85%]">
-          <h1
-            className="font-bold text-white leading-[1.1] mb-4 drop-shadow-lg"
-            style={{ fontSize: 'clamp(3rem, 10vw, 12rem)' }}
-          >
-            {slide.featuredEventTitle}
-          </h1>
-
-          {slide.featuredEventSubtitle && (
-            <p
-              className="text-white/90 leading-snug mb-4 drop-shadow-md"
-              style={{ fontSize: 'clamp(1rem, 2.5vw, 3.5rem)' }}
+    <div className="w-full h-full bg-slate-900 text-white p-12 flex flex-col">
+      <h1
+        style={{ fontSize: 'clamp(2.5rem, 5vw, 5rem)' }}
+        className="font-bold mb-8 text-center"
+      >
+        {slide.title || 'This Week at the Masjid'}
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 overflow-hidden">
+        {byDay.map(({ day, items }) => (
+          <div key={day} className="bg-slate-800/60 rounded-lg p-6">
+            <div
+              style={{ fontSize: 'clamp(1.25rem, 2vw, 1.75rem)' }}
+              className="font-semibold text-emerald-300 mb-3"
             >
-              {slide.featuredEventSubtitle}
-            </p>
-          )}
-
-          <p
-            className="text-white/95 font-semibold leading-snug drop-shadow-md"
-            style={{ fontSize: 'clamp(1.5rem, 6vw, 7rem)' }}
-          >
-            {slide.featuredEventDatetime}
-          </p>
-        </div>
-
-        {/* Divider */}
-        {regularEvents.length > 0 && <div className="w-[60%] h-[2px] bg-white/30 my-6" />}
-
-        {/* Regular Events Section */}
-        {regularEvents.length > 0 && (
-          <>
-            <h2
-              className="font-semibold text-white/90 uppercase tracking-wider mb-6 drop-shadow-md"
-              style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}
-            >
-              Weekly Regular Events
-            </h2>
-
-            <div className="grid grid-cols-2 gap-x-12 gap-y-4 max-w-[85%]">
-              {regularEvents.map((event, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <div className="w-[2vh] h-[2vh] rounded-full bg-teal-500 flex-shrink-0 mt-2 shadow-lg" />
-                  <div className="flex-1">
-                    <div
-                      className="font-semibold text-white leading-tight mb-1 drop-shadow-md"
-                      style={{ fontSize: 'clamp(0.875rem, 3.2vw, 3rem)' }}
-                    >
-                      {event.name}
-                    </div>
-                    <div
-                      className="text-white/80 leading-tight drop-shadow-sm"
-                      style={{ fontSize: 'clamp(0.75rem, 2.8vw, 2.75rem)' }}
-                    >
-                      {event.time}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {DAY_LABEL[day]}
             </div>
-          </>
-        )}
+            <ul className="space-y-2">
+              {items.map((item, i) => (
+                <li key={i} className="flex justify-between items-baseline gap-4">
+                  <div className="flex-1">
+                    <div style={{ fontSize: 'clamp(1.1rem, 1.6vw, 1.5rem)' }}>{item.name}</div>
+                    {(item.location || item.audience) && (
+                      <div className="opacity-70 text-sm">
+                        {[item.location, item.audience].filter(Boolean).join(' • ')}
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    style={{ fontSize: 'clamp(1rem, 1.4vw, 1.4rem)' }}
+                    className="opacity-80 whitespace-nowrap"
+                  >
+                    {item.time}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
-
-export default WeeklyEventsSlide
