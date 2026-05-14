@@ -19,6 +19,7 @@ import * as migration_20260507_042454 from './20260507_042454';
 import * as migration_20260514_181910_kiosks_collection from './20260514_181910_kiosks_collection';
 import * as migration_20260514_182235_slide_collections from './20260514_182235_slide_collections';
 import * as migration_20260514_182517_qr_codes_collection from './20260514_182517_qr_codes_collection';
+import * as migration_20260514_204832_expand_background_theme_enum from './20260514_204832_expand_background_theme_enum';
 
 export const migrations = [
   {
@@ -124,6 +125,11 @@ export const migrations = [
   {
     up: migration_20260514_182517_qr_codes_collection.up,
     down: migration_20260514_182517_qr_codes_collection.down,
-    name: '20260514_182517_qr_codes_collection'
+    name: '20260514_182517_qr_codes_collection',
+  },
+  {
+    up: migration_20260514_204832_expand_background_theme_enum.up,
+    down: migration_20260514_204832_expand_background_theme_enum.down,
+    name: '20260514_204832_expand_background_theme_enum'
   },
 ];
