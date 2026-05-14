@@ -103,23 +103,32 @@ export async function GET(req: Request) {
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
 
-  await payload.update({
-    collection: 'kiosks',
-    id: kiosk.id,
-    overrideAccess: true,
-    data: {
-      lastSeenAt: now.toISOString(),
-      lastSeenIp: ip,
-      userAgent: req.headers.get('user-agent') ?? null,
-      status: 'ONLINE',
-    },
-  })
+  // Throttle heartbeat writes — kiosks poll every 5s but we only need a fresh
+  // lastSeenAt every ~30s for the OFFLINE-flip cron (3-min stale threshold).
+  const lastSeen = (kiosk as any).lastSeenAt
+    ? new Date((kiosk as any).lastSeenAt).getTime()
+    : 0
+  const staleHeartbeat = now.getTime() - lastSeen > 30_000
+  const wasOffline = (kiosk as any).status !== 'ONLINE'
+  if (staleHeartbeat || wasOffline) {
+    await payload.update({
+      collection: 'kiosks',
+      id: kiosk.id,
+      overrideAccess: true,
+      data: {
+        lastSeenAt: now.toISOString(),
+        lastSeenIp: ip,
+        userAgent: req.headers.get('user-agent') ?? null,
+        status: 'ONLINE',
+      },
+    })
+  }
 
   return NextResponse.json({
     tenant,
     prayerTimes,
     slides,
     version,
-    pollIntervalMs: 60_000,
+    pollIntervalMs: 5_000,
   })
 }

@@ -21,7 +21,7 @@ export default function KioskPushButton() {
       method: 'POST',
     })
     setBusy(false)
-    setMsg(res.ok ? 'Pushed — kiosk will update within 60s' : `Error: ${res.status}`)
+    setMsg(res.ok ? 'Pushed — kiosk will update within seconds' : `Error: ${res.status}`)
   }
 
   if (isNewDoc) return null

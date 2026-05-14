@@ -20,7 +20,7 @@ export default function TenantPushButton() {
     setMsg(null)
     const res = await fetch('/api/kiosk/push', { method: 'POST' })
     setBusy(false)
-    setMsg(res.ok ? 'Pushed — kiosks will update within 60s' : `Error: ${res.status}`)
+    setMsg(res.ok ? 'Pushed — kiosks will update within seconds' : `Error: ${res.status}`)
   }
 
   if (isNewDoc) return null
