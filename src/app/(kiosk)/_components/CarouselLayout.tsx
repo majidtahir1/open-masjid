@@ -93,7 +93,7 @@ const CarouselLayout: React.FC<CarouselLayoutProps> = ({ slides, renderSlide, on
         <div className="absolute inset-0">
           {slides.map((slide, index) => (
             <div
-              key={slide.id}
+              key={`${slide.type}:${slide.id}`}
               className="absolute inset-0 transition-opacity ease-in-out"
               style={{
                 opacity: index === currentSlideIndex ? 1 : 0,
