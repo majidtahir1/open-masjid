@@ -19,6 +19,11 @@ export const Kiosks: CollectionConfig = {
     defaultColumns: ['name', 'location', 'status', 'lastSeenAt'],
     description:
       'Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.',
+    components: {
+      edit: {
+        beforeDocumentControls: ['/src/components/admin/KioskPushButton#default'],
+      },
+    },
   },
   access: {
     read: tenantScopedRead,
