@@ -30,7 +30,6 @@ export default function KioskDisplayPage({
 }) {
   const [deviceId, setDeviceId] = useState<string | null>(null)
   const [state, setState] = useState<State | null>(null)
-  const [pendingState, setPendingState] = useState<State | null>(null)
   const [error, setError] = useState<string | null>(null)
   const backoffRef = useRef(5000)
 
@@ -76,8 +75,7 @@ export default function KioskDisplayPage({
         setState((prev) => {
           if (!prev) return json
           if (prev.version === json.version) return prev
-          setPendingState(json)
-          return prev
+          return json
         })
         timer = setTimeout(tick, json.pollIntervalMs || 60_000)
       } catch (e) {
@@ -124,13 +122,6 @@ export default function KioskDisplayPage({
     ...state.slides,
   ]
 
-  const swapAtBoundary = () => {
-    if (pendingState) {
-      setState(pendingState)
-      setPendingState(null)
-    }
-  }
-
   return (
     <main
       style={{
@@ -141,11 +132,7 @@ export default function KioskDisplayPage({
       }}
     >
       <CarouselErrorBoundary>
-        <CarouselLayout
-          slides={slidesWithPrayer}
-          renderSlide={renderSlide}
-          onSlideAdvance={swapAtBoundary}
-        />
+        <CarouselLayout slides={slidesWithPrayer} renderSlide={renderSlide} />
       </CarouselErrorBoundary>
       {error && (
         <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0.6 }}>● offline</div>
