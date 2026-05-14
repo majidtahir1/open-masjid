@@ -6,7 +6,6 @@ import CustomSlide from '../../_components/CustomSlide'
 import AdvertiserSlide from '../../_components/AdvertiserSlide'
 import WeeklyEventsSlide from '../../_components/WeeklyEventsSlide'
 import PrayerTimesSlide from '../../_components/PrayerTimesSlide'
-import { PrayerTimesStrip } from '../../_components/PrayerTimesStrip'
 import CarouselErrorBoundary from '../../_components/CarouselErrorBoundary'
 
 type Slide = {
@@ -148,7 +147,6 @@ export default function KioskDisplayPage({
           onSlideAdvance={swapAtBoundary}
         />
       </CarouselErrorBoundary>
-      <PrayerTimesStrip prayerTimes={state.prayerTimes} tenantName={state.tenant.name} />
       {error && (
         <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0.6 }}>● offline</div>
       )}
