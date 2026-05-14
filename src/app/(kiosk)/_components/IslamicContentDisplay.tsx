@@ -29,7 +29,7 @@ const IslamicContentDisplay: React.FC = () => {
   if (!currentContent) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-secondary" />
       </div>
     )
   }
@@ -41,12 +41,10 @@ const IslamicContentDisplay: React.FC = () => {
       {/* Arabic Text */}
       <div className="mb-8 w-full max-w-[90%]">
         <p
-          className="leading-relaxed text-teal-400"
-          style={{
-            fontFamily: 'serif',
-            fontSize: currentContent.type === 'ayah' ? 'clamp(2rem, 4vw, 5rem)' : 'clamp(1.5rem, 3vw, 4rem)',
-            direction: 'rtl',
-          }}
+          dir="rtl"
+          className={`font-arabic leading-relaxed text-secondary ${
+            currentContent.type === 'ayah' ? 'text-tv-xl' : 'text-tv-lg'
+          }`}
         >
           {currentContent.arabic}
         </p>
@@ -55,10 +53,9 @@ const IslamicContentDisplay: React.FC = () => {
       {/* English Translation */}
       <div className="mb-6 w-full max-w-[90%]">
         <p
-          className="leading-relaxed text-white"
-          style={{
-            fontSize: currentContent.type === 'ayah' ? 'clamp(1rem, 2vw, 2.5rem)' : 'clamp(0.875rem, 1.8vw, 2rem)',
-          }}
+          className={`font-sans leading-relaxed text-white ${
+            currentContent.type === 'ayah' ? 'text-tv-md' : 'text-tv-base'
+          }`}
         >
           &ldquo;{currentContent.english}&rdquo;
         </p>
@@ -66,7 +63,7 @@ const IslamicContentDisplay: React.FC = () => {
 
       {/* Reference/Source */}
       <div className="flex flex-col items-center space-y-4">
-        <p className="font-semibold text-teal-400" style={{ fontSize: 'clamp(0.875rem, 1.5vw, 1.75rem)' }}>
+        <p className="text-tv-base font-sans font-semibold text-secondary">
           {currentContent.type === 'ayah' ? currentContent.reference : `— ${currentContent.source}`}
         </p>
       </div>
