@@ -84,8 +84,8 @@ const PrayerTimesSlide: React.FC<PrayerTimesSlideProps> = ({ prayerTimes, tenant
     return (
       <div className="w-full h-full bg-slate-900 flex items-center justify-center">
         <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal-500 mx-auto mb-4" />
-          <p className="text-2xl">Loading Prayer Times...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-secondary mx-auto mb-4" />
+          <p className="text-tv-base">Loading Prayer Times...</p>
         </div>
       </div>
     )
@@ -98,8 +98,8 @@ const PrayerTimesSlide: React.FC<PrayerTimesSlideProps> = ({ prayerTimes, tenant
         <IslamicContentDisplay />
       </div>
 
-      {/* Bottom 30% - Prayer Times */}
-      <div className="h-[30%] bg-slate-800 border-t-4 border-teal-500">
+      {/* Bottom 30% - Large Prayer Times */}
+      <div className="h-[30%] bg-slate-800 border-t-4 border-secondary">
         <div className="h-full flex items-center justify-between px-6">
           {/* Prayer Times Grid */}
           <div className="flex-1 flex justify-between items-center gap-3">
@@ -110,29 +110,32 @@ const PrayerTimesSlide: React.FC<PrayerTimesSlideProps> = ({ prayerTimes, tenant
                   key={prayer.name}
                   className={`text-center flex-1 px-3 py-3 rounded-xl transition-all ${
                     isNext
-                      ? 'bg-teal-500/20 text-teal-400 border-2 border-teal-500'
+                      ? 'bg-secondary/20 text-secondary border-2 border-secondary'
                       : 'text-white bg-slate-700'
                   }`}
                 >
-                  <div className="font-semibold mb-1" style={{ fontSize: 'clamp(0.75rem, 1.5vw, 1.5rem)' }}>
+                  <div className="text-tv-md font-sans font-semibold mb-1">
                     {prayer.name}
                   </div>
-                  <div className="font-bold" style={{ fontSize: 'clamp(0.875rem, 1.8vw, 2rem)' }}>
+                  {prayer.adhan && (
+                    <div className="text-tv-xs font-sans opacity-75 mb-0.5">
+                      Adhan: {formatTime(prayer.adhan)}
+                    </div>
+                  )}
+                  <div className="text-tv-lg font-sans font-bold">
                     {formatTime(prayer.iqamah ?? prayer.adhan)}
                   </div>
-                  {prayer.iqamah && (
-                    <div className="opacity-60 text-xs mt-0.5">{formatTime(prayer.adhan)}</div>
-                  )}
                 </div>
               )
             })}
           </div>
 
-          {/* Tenant Name */}
+          {/* Next Prayer Countdown / Tenant Name */}
           {tenantName && (
             <div className="text-center ml-4 bg-black/40 backdrop-blur-sm px-6 py-4 rounded-xl shadow-lg min-w-[160px]">
-              <div className="text-teal-400 font-bold" style={{ fontSize: 'clamp(0.75rem, 1.5vw, 1.5rem)' }}>
-                {tenantName}
+              <div className="text-tv-base text-white font-semibold mb-1">Next Prayer</div>
+              <div className="text-tv-lg font-bold text-secondary drop-shadow-lg">
+                {nextPrayer ?? '—'}
               </div>
             </div>
           )}
