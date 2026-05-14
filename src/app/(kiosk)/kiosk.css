@@ -1,1 +1,24 @@
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  --kiosk-width: 1920px;
+  --kiosk-height: 1080px;
+}
+
+html, body, main {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #000;
+  color: #fff;
+}
+
+/* Hide cursor on actual kiosk hardware */
+.kiosk-fullscreen {
+  cursor: none;
+}

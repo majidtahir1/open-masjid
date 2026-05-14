@@ -366,6 +366,19 @@ src/
 
 The DB schema is defined by the Payload collections in `src/collections/`. On a fresh clone, starting the dev server creates all tables. When you change a collection, Payload auto-syncs the schema in dev. For production, consider switching to explicit migration files via `npx payload migrate:create`.
 
+## Kiosk
+
+OpenMasjid includes a tenant-scoped kiosk / display-monitor system. Each tenant can:
+
+- Author **Carousel Slides**, **Sponsor Slides**, **Weekly Events Slides**, and a **QR-code library** in admin.
+- Register physical **Kiosks**, pair them via a typed 6-character code, and optionally override the slide playlist per kiosk.
+- Push immediate updates to a kiosk from the admin edit view; otherwise kiosks poll every 60 seconds.
+
+Display URL: `https://<tenant>.openmasjid.app/kiosk`
+
+Spec: `docs/superpowers/specs/2026-05-14-kiosk-integration-design.md`
+Plan: `docs/superpowers/plans/2026-05-14-kiosk-integration.md`
+
 ## Troubleshooting
 
 - **`ECONNREFUSED` on port 5432** — the `.env` `DATABASE_URI` must use port **5433** (the host-mapped port in `docker-compose.yml`).
