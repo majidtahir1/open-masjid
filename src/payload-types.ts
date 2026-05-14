@@ -762,7 +762,23 @@ export interface CarouselSlide {
   details2?: string | null;
   image?: (number | null) | Media;
   qrCode?: (number | null) | QrCode;
-  backgroundTheme?: ('clean' | 'geometric' | 'arabesque' | 'mihrab') | null;
+  backgroundTheme?:
+    | (
+        | 'clean'
+        | 'subtle-texture'
+        | 'teal-corners'
+        | 'navy-accents'
+        | 'full-ambiance'
+        | 'ornate-frame'
+        | 'desert-oasis'
+        | 'islamic_pattern'
+        | 'pink-tech'
+        | 'blue-tech'
+        | 'chess-theme'
+        | 'quran-theme'
+        | 'ramadan'
+      )
+    | null;
   prayerTimingsEnabled?: boolean | null;
   /**
    * Time on screen in milliseconds (5000–60000).
