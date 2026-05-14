@@ -418,6 +418,78 @@ async function seed() {
   }
   console.log(`✓ Created ${schedules.length} prayer schedules`)
 
+  // 8. Kiosk content — delete all, recreate
+  await deleteAll(payload, 'qr-codes', tenantId)
+  await deleteAll(payload, 'carousel-slides', tenantId)
+  await deleteAll(payload, 'sponsor-slides', tenantId)
+  await deleteAll(payload, 'weekly-events-slides', tenantId)
+  await deleteAll(payload, 'kiosks', tenantId)
+
+  await payload.create({
+    collection: 'qr-codes',
+    data: {
+      label: 'Donate',
+      targetUrl: 'https://example.com/donate',
+      tenant: tenantId,
+    },
+    overrideAccess: true,
+    req: seedReq,
+  })
+
+  await payload.create({
+    collection: 'carousel-slides',
+    data: {
+      title: 'Welcome to the Masjid',
+      details1: 'Daily prayers and weekly classes',
+      details2: 'Open to all',
+      backgroundTheme: 'clean' as const,
+      priority: 5,
+      active: true,
+      tenant: tenantId,
+    },
+    overrideAccess: true,
+    req: seedReq,
+  })
+
+  await payload.create({
+    collection: 'sponsor-slides',
+    data: {
+      title: 'Local Halal Market',
+      tagline: 'Family-owned since 2008',
+      layoutTemplate: 'logo-left' as const,
+      brandColorPrimary: '#1f6f43',
+      priority: 4,
+      active: true,
+      tenant: tenantId,
+    },
+    overrideAccess: true,
+    req: seedReq,
+  })
+
+  await payload.create({
+    collection: 'weekly-events-slides',
+    data: {
+      title: 'Weekly Schedule',
+      entries: [
+        { day: 'mon' as const, time: '7:00 PM', name: 'Quran Class', location: 'Hall A' },
+        { day: 'fri' as const, time: '1:30 PM', name: 'Jumuah Khutbah', location: 'Main Hall' },
+      ],
+      active: true,
+      tenant: tenantId,
+    },
+    overrideAccess: true,
+    req: seedReq,
+  })
+
+  await payload.create({
+    collection: 'kiosks',
+    data: { name: 'Lobby Display', location: 'Lobby', tenant: tenantId },
+    overrideAccess: true,
+    req: seedReq,
+  })
+
+  console.log('✓ Created kiosk sample content')
+
   console.log('✓ Seed complete')
   process.exit(0)
 }
