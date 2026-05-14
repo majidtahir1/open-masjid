@@ -98,6 +98,9 @@ export const PrayerSchedules: CollectionConfig = {
         '/src/admin/ScheduleListBanner#default',
         '/src/admin/ScheduleTimeline#default',
       ],
+      edit: {
+        beforeDocumentControls: ['/src/components/admin/TenantPushButton#default'],
+      },
     },
   },
   defaultSort: '-startDate',

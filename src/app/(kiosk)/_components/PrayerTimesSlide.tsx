@@ -57,23 +57,43 @@ const PrayerTimesSlide: React.FC<PrayerTimesSlideProps> = ({ prayerTimes, tenant
 
   const formatTime = (raw: string | undefined): string => {
     if (!raw) return '—'
-    const m = /(\d{1,2}):(\d{2})/.exec(raw)
+    const m = /(\d{1,2}):(\d{2})\s*([ap]m)?/i.exec(raw)
     if (!m) return raw
     let h = Number(m[1])
-    const ampm = h >= 12 ? 'pm' : 'am'
-    h = h % 12 || 12
-    return `${h}:${m[2]} ${ampm}`
+    const minutes = m[2]
+    const explicit = m[3]?.toLowerCase() // 'am' | 'pm' | undefined
+    let ampm: 'am' | 'pm'
+    if (explicit) {
+      ampm = explicit as 'am' | 'pm'
+      if (ampm === 'pm' && h < 12) h += 0 // keep displayed hour as-is
+      if (ampm === 'am' && h === 12) h = 12
+    } else {
+      // 24-hour input
+      ampm = h >= 12 ? 'pm' : 'am'
+      h = h % 12 || 12
+    }
+    return `${h}:${minutes} ${ampm}`
   }
 
   // Find next prayer
+  const toMinutes = (raw: string | undefined): number | null => {
+    if (!raw) return null
+    const m = /(\d{1,2}):(\d{2})\s*([ap]m)?/i.exec(raw)
+    if (!m) return null
+    let h = Number(m[1])
+    const minutes = Number(m[2])
+    const ampm = m[3]?.toLowerCase()
+    if (ampm === 'pm' && h !== 12) h += 12
+    if (ampm === 'am' && h === 12) h = 0
+    return h * 60 + minutes
+  }
+
   const nextPrayer = useMemo(() => {
     if (!prayerEntries.length) return null
     const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes()
     for (const entry of prayerEntries) {
-      if (!entry.adhan) continue
-      const m = /(\d{1,2}):(\d{2})/.exec(entry.adhan)
-      if (!m) continue
-      const entryMinutes = Number(m[1]) * 60 + Number(m[2])
+      const entryMinutes = toMinutes(entry.adhan)
+      if (entryMinutes === null) continue
       if (entryMinutes > nowMinutes) return entry.name
     }
     return prayerEntries[0]?.name ?? null

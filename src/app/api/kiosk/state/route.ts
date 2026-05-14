@@ -91,9 +91,10 @@ export async function GET(req: Request) {
   const prayerTimes = schedules.docs[0] ?? null
 
   const dayKey = now.toISOString().slice(0, 10)
+  const scheduleUpdatedAt = (prayerTimes as any)?.updatedAt ?? ''
   const version = versionHash({
-    slideIds: slides.map((s) => `${s.type}:${s.id}`),
-    slideUpdatedAts: slides.map((s) => s.updatedAt),
+    slideIds: [...slides.map((s) => `${s.type}:${s.id}`), 'prayer-schedule'],
+    slideUpdatedAts: [...slides.map((s) => s.updatedAt), scheduleUpdatedAt],
     day: dayKey,
     broadcastAt,
     pushAt,
