@@ -66,9 +66,22 @@ export async function GET(req: Request) {
     pushAt,
   })
 
+  // Pick the schedule whose date range covers today, not just the latest one.
+  const todayIso = now.toISOString()
   const schedules = await payload.find({
     collection: 'prayer-schedules',
-    where: { tenant: { equals: tenantId } },
+    where: {
+      and: [
+        { tenant: { equals: tenantId } },
+        { startDate: { less_than_equal: todayIso } },
+        {
+          or: [
+            { endDate: { greater_than_equal: todayIso } },
+            { endDate: { exists: false } },
+          ],
+        },
+      ],
+    },
     sort: '-startDate',
     limit: 1,
     overrideAccess: true,

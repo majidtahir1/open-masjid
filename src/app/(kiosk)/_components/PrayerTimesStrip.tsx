@@ -21,12 +21,12 @@ export function PrayerTimesStrip({ prayerTimes, tenantName }: Props) {
   const today = (prayerTimes.days ?? []).find((d: any) => sameDay(new Date(d.date), now))
   if (!today) return <footer style={stripStyle}>{tenantName}</footer>
 
-  const items: Array<[string, string, string | undefined]> = [
-    ['Fajr', today.fajr, today.iqamah?.fajr],
-    ['Dhuhr', today.dhuhr, today.iqamah?.dhuhr],
-    ['Asr', today.asr, today.iqamah?.asr],
-    ['Maghrib', today.maghrib, today.iqamah?.maghrib],
-    ['Isha', today.isha, today.iqamah?.isha],
+  const items: Array<[string, string | undefined, string | undefined]> = [
+    ['Fajr',    today.fajr?.adhan,    today.fajr?.iqamah],
+    ['Dhuhr',   today.zuhr?.adhan,    today.zuhr?.iqamah],
+    ['Asr',     today.asr?.adhan,     today.asr?.iqamah],
+    ['Maghrib', today.maghrib?.adhan, today.maghrib?.iqamah],
+    ['Isha',    today.isha?.adhan,    today.isha?.iqamah],
   ]
 
   return (

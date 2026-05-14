@@ -42,12 +42,16 @@ const PrayerTimesSlide: React.FC<PrayerTimesSlideProps> = ({ prayerTimes, tenant
 
   const prayerEntries: PrayerEntry[] = useMemo(() => {
     if (!todayData) return []
+    const cell = (k: 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha') => ({
+      adhan: todayData[k]?.adhan,
+      iqamah: todayData[k]?.iqamah,
+    })
     return [
-      { name: 'Fajr', adhan: todayData.fajr, iqamah: todayData.iqamah?.fajr },
-      { name: 'Dhuhr', adhan: todayData.dhuhr, iqamah: todayData.iqamah?.dhuhr },
-      { name: 'Asr', adhan: todayData.asr, iqamah: todayData.iqamah?.asr },
-      { name: 'Maghrib', adhan: todayData.maghrib, iqamah: todayData.iqamah?.maghrib },
-      { name: 'Isha', adhan: todayData.isha, iqamah: todayData.iqamah?.isha },
+      { name: 'Fajr',    ...cell('fajr') },
+      { name: 'Dhuhr',   ...cell('zuhr') },
+      { name: 'Asr',     ...cell('asr') },
+      { name: 'Maghrib', ...cell('maghrib') },
+      { name: 'Isha',    ...cell('isha') },
     ]
   }, [todayData])
 
@@ -75,7 +79,8 @@ const PrayerTimesSlide: React.FC<PrayerTimesSlideProps> = ({ prayerTimes, tenant
     return prayerEntries[0]?.name ?? null
   }, [prayerEntries, currentTime])
 
-  if (!prayerTimes || prayerEntries.length === 0) {
+  const hasAnyTime = prayerEntries.some((p) => p.adhan || p.iqamah)
+  if (!prayerTimes || !hasAnyTime) {
     return (
       <div className="w-full h-full bg-slate-900 flex items-center justify-center">
         <div className="text-center text-white">
