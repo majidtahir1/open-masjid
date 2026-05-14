@@ -14,6 +14,17 @@ export async function POST(req: Request) {
   const kioskId = typeof body?.kioskId === 'string' ? body.kioskId : null
   if (!kioskId) return NextResponse.json({ error: 'kioskId-required' }, { status: 400 })
 
+  try {
+    await payload.findByID({
+      collection: 'kiosks',
+      id: kioskId,
+      user: auth.user,
+      overrideAccess: false,
+    })
+  } catch {
+    return NextResponse.json({ error: 'not-found' }, { status: 404 })
+  }
+
   await payload.update({
     collection: 'kiosks',
     id: kioskId,
@@ -25,6 +36,8 @@ export async function POST(req: Request) {
       status: 'UNPAIRED',
       lastSeenAt: null,
     },
+    user: auth.user,
+    overrideAccess: false,
   })
 
   return NextResponse.json({ ok: true })
