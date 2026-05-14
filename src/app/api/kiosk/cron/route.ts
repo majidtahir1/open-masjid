@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadClient } from '@/lib/payloadClient'
 
 export const runtime = 'nodejs'
 
@@ -13,7 +12,10 @@ export async function GET(req: Request) {
     }
   }
 
-  const payload = await getPayload({ config })
+  const payload = await getPayloadClient()
+  if (!payload) {
+    return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+  }
   const threshold = new Date(Date.now() - 3 * 60 * 1000).toISOString()
 
   const { docs } = await payload.find({

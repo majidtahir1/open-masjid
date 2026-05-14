@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadClient } from '@/lib/payloadClient'
 import { isValidPairingCode, normalizePairingCode } from '@/lib/kiosk/pairingCode'
 import { generateDeviceSecret, hashSecret } from '@/lib/kiosk/auth'
 
@@ -15,7 +14,10 @@ export async function POST(req: Request) {
   }
 
   const normalized = normalizePairingCode(code)
-  const payload = await getPayload({ config })
+  const payload = await getPayloadClient()
+  if (!payload) {
+    return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+  }
 
   const { docs } = await payload.find({
     collection: 'kiosks',

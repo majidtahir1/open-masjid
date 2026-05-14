@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadClient } from '@/lib/payloadClient'
 import { headers } from 'next/headers'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
-  const payload = await getPayload({ config })
+  const payload = await getPayloadClient()
+  if (!payload) {
+    return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+  }
   const auth = await payload.auth({ headers: await headers() })
   if (!auth.user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 

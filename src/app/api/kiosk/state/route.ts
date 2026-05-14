@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadClient } from '@/lib/payloadClient'
 import { verifySecret } from '@/lib/kiosk/auth'
 import { composeKioskState } from '@/lib/kiosk/composeState'
 import { versionHash } from '@/lib/kiosk/versionHash'
@@ -14,7 +13,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'missing-credentials' }, { status: 401 })
   }
 
-  const payload = await getPayload({ config })
+  const payload = await getPayloadClient()
+  if (!payload) {
+    return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+  }
   const { docs } = await payload.find({
     collection: 'kiosks',
     where: { deviceId: { equals: deviceId } },
@@ -58,7 +60,7 @@ export async function GET(req: Request) {
   const pushAt = (kiosk as any).kioskPushAt ?? null
 
   const { slides, tenant } = await composeKioskState({
-    payload,
+    payload: payload as any,
     tenantId: String(tenantId),
     now,
     overrideIds,
