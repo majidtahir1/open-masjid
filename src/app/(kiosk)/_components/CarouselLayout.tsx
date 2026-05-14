@@ -31,11 +31,8 @@ const CarouselLayout: React.FC<CarouselLayoutProps> = ({ slides, renderSlide, on
     if (!currentSlide) return
 
     const timer = setTimeout(() => {
-      setCurrentSlideIndex((prev) => {
-        const newIndex = (prev + 1) % slides.length
-        onSlideAdvance?.()
-        return newIndex
-      })
+      setCurrentSlideIndex((prev) => (prev + 1) % slides.length)
+      onSlideAdvance?.()
     }, currentSlide.durationMs)
 
     return () => clearTimeout(timer)
