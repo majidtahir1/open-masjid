@@ -106,6 +106,8 @@ export default function KioskDisplayPage({
 
   const renderSlide = (slide: CarouselSlide) => {
     switch (slide.type) {
+      case 'prayer-times':
+        return <PrayerTimesSlide prayerTimes={state.prayerTimes} tenantName={state.tenant.name} />
       case 'carousel':
         return <CustomSlide slide={slide.payload} prayerTimes={state.prayerTimes} />
       case 'sponsor':
@@ -116,6 +118,12 @@ export default function KioskDisplayPage({
         return null
     }
   }
+
+  // Always lead the rotation with prayer times — even if no other slides exist.
+  const slidesWithPrayer: CarouselSlide[] = [
+    { id: 'prayer-times', type: 'prayer-times', durationMs: 15000, payload: {} },
+    ...state.slides,
+  ]
 
   const swapAtBoundary = () => {
     if (pendingState) {
@@ -134,9 +142,11 @@ export default function KioskDisplayPage({
       }}
     >
       <CarouselErrorBoundary>
-        <CarouselLayout slides={state.slides} renderSlide={renderSlide} onSlideAdvance={swapAtBoundary}>
-          <PrayerTimesSlide prayerTimes={state.prayerTimes} tenantName={state.tenant.name} />
-        </CarouselLayout>
+        <CarouselLayout
+          slides={slidesWithPrayer}
+          renderSlide={renderSlide}
+          onSlideAdvance={swapAtBoundary}
+        />
       </CarouselErrorBoundary>
       <PrayerTimesStrip prayerTimes={state.prayerTimes} tenantName={state.tenant.name} />
       {error && (
