@@ -1,3 +1,4 @@
+import '../globals.css'
 import './kiosk.css'
 
 export default function KioskLayout({ children }: { children: React.ReactNode }) {
