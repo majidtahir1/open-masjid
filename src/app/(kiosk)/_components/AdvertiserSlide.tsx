@@ -14,9 +14,9 @@ export type AdvertiserSlideData = {
   brandColorSecondary?: string | null
   backgroundStyle?: 'gradient' | 'solid' | 'brand-primary' | 'brand-secondary' | null
   layoutTemplate?: 'logo-left' | 'logo-top-centered' | 'logo-dominant' | 'split-screen' | null
-  detailsLine1?: string | null
-  detailsLine2?: string | null
-  detailsLine3?: string | null
+  details1?: string | null
+  details2?: string | null
+  details3?: string | null
   contactPhone?: string | null
   contactAddress?: string | null
   contactWebsite?: string | null
@@ -132,9 +132,9 @@ const LogoLeftLayout: React.FC<LayoutProps> = ({ slide, logoUrl, backgroundStyle
           </p>
         )}
         <div className="space-y-3">
-          {slide.detailsLine1 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.detailsLine1}</p>}
-          {slide.detailsLine2 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.detailsLine2}</p>}
-          {slide.detailsLine3 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.detailsLine3}</p>}
+          {slide.details1 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.details1}</p>}
+          {slide.details2 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.details2}</p>}
+          {slide.details3 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.details3}</p>}
         </div>
         {(slide.contactPhone || slide.contactAddress || slide.contactWebsite) && (
           <div className={`space-y-2 pt-4 border-t-2 border-current border-opacity-20`}>
@@ -176,12 +176,12 @@ const LogoTopCenteredLayout: React.FC<LayoutProps> = ({ slide, logoUrl, backgrou
         </div>
       </div>
       <div className="flex-1 py-8">
-        {(slide.detailsLine1 || slide.detailsLine2 || slide.detailsLine3) ? (
+        {(slide.details1 || slide.details2 || slide.details3) ? (
           <div className="grid grid-cols-2 gap-12 h-full">
             <div className="space-y-4 flex flex-col justify-center">
-              {slide.detailsLine1 && <p className={`${textColor} ${textOpacity} leading-relaxed`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>• {slide.detailsLine1}</p>}
-              {slide.detailsLine2 && <p className={`${textColor} ${textOpacity} leading-relaxed`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>• {slide.detailsLine2}</p>}
-              {slide.detailsLine3 && <p className={`${textColor} ${textOpacity} leading-relaxed`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>• {slide.detailsLine3}</p>}
+              {slide.details1 && <p className={`${textColor} ${textOpacity} leading-relaxed`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>• {slide.details1}</p>}
+              {slide.details2 && <p className={`${textColor} ${textOpacity} leading-relaxed`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>• {slide.details2}</p>}
+              {slide.details3 && <p className={`${textColor} ${textOpacity} leading-relaxed`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>• {slide.details3}</p>}
             </div>
             <div className="space-y-4 flex flex-col justify-center">
               {slide.contactPhone && <p className={`${textColor} font-semibold`} style={{ fontSize: 'clamp(0.875rem, 1.8vw, 2rem)' }}>📞 {slide.contactPhone}</p>}
@@ -255,9 +255,9 @@ const SplitScreenLayout: React.FC<LayoutProps> = ({ slide, logoUrl, backgroundSt
       <h1 className={`font-bold ${textColor} leading-tight`} style={{ fontSize: 'clamp(1.5rem, 4vw, 5rem)' }}>{slide.title}</h1>
       {slide.tagline && <p className={`${textColor}`} style={{ fontSize: 'clamp(1rem, 2.5vw, 3.5rem)' }}>{slide.tagline}</p>}
       <div className="space-y-3">
-        {slide.detailsLine1 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.detailsLine1}</p>}
-        {slide.detailsLine2 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.detailsLine2}</p>}
-        {slide.detailsLine3 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.detailsLine3}</p>}
+        {slide.details1 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.details1}</p>}
+        {slide.details2 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.details2}</p>}
+        {slide.details3 && <p className={`${textColor} ${textOpacity}`} style={{ fontSize: 'clamp(0.875rem, 2vw, 2.5rem)' }}>{slide.details3}</p>}
       </div>
       <div className="space-y-2 pt-6 border-t-2 border-current border-opacity-20">
         {slide.contactPhone && <p className={`${textColor} font-semibold`} style={{ fontSize: 'clamp(0.875rem, 1.8vw, 2rem)' }}>📞 {slide.contactPhone}</p>}
