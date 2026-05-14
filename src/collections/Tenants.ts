@@ -666,6 +666,15 @@ export const Tenants: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'kioskBroadcastAt',
+      type: 'date',
+      label: 'Kiosk Broadcast Timestamp',
+      admin: {
+        hidden: true,
+        description: 'Internal — bumped when admin clicks "Push update to all kiosks".',
+      },
+    },
   ],
 }
 
