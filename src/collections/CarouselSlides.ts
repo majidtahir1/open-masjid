@@ -33,23 +33,16 @@ export const CarouselSlides: CollectionConfig = {
     { name: 'qrCode', type: 'relationship', relationTo: 'qr-codes' },
     {
       name: 'backgroundTheme',
-      type: 'select',
+      type: 'text',
       defaultValue: 'clean',
-      options: [
-        { label: 'Classic Clean', value: 'clean' },
-        { label: 'Subtle Heritage', value: 'subtle-texture' },
-        { label: 'Teal Corners', value: 'teal-corners' },
-        { label: 'Navy Accents', value: 'navy-accents' },
-        { label: 'Full Ambiance', value: 'full-ambiance' },
-        { label: 'Ornate Frame', value: 'ornate-frame' },
-        { label: 'Desert Oasis', value: 'desert-oasis' },
-        { label: 'Islamic Pattern', value: 'islamic_pattern' },
-        { label: 'Pink Tech', value: 'pink-tech' },
-        { label: 'Blue Tech', value: 'blue-tech' },
-        { label: 'Chess Theme', value: 'chess-theme' },
-        { label: 'Quran Theme', value: 'quran-theme' },
-        { label: 'Ramadan', value: 'ramadan' },
-      ],
+      label: 'Background Theme',
+      admin: {
+        description:
+          'Visual background theme. Sourced from islamicThemes.ts — add new themes there without a schema migration.',
+        components: {
+          Field: '/src/fields/BackgroundThemeField#default',
+        },
+      },
     },
     { name: 'prayerTimingsEnabled', type: 'checkbox', defaultValue: false },
     {

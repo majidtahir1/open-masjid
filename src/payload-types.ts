@@ -762,23 +762,10 @@ export interface CarouselSlide {
   details2?: string | null;
   image?: (number | null) | Media;
   qrCode?: (number | null) | QrCode;
-  backgroundTheme?:
-    | (
-        | 'clean'
-        | 'subtle-texture'
-        | 'teal-corners'
-        | 'navy-accents'
-        | 'full-ambiance'
-        | 'ornate-frame'
-        | 'desert-oasis'
-        | 'islamic_pattern'
-        | 'pink-tech'
-        | 'blue-tech'
-        | 'chess-theme'
-        | 'quran-theme'
-        | 'ramadan'
-      )
-    | null;
+  /**
+   * Visual background theme. Sourced from islamicThemes.ts — add new themes there without a schema migration.
+   */
+  backgroundTheme?: string | null;
   prayerTimingsEnabled?: boolean | null;
   /**
    * Time on screen in milliseconds (5000–60000).
