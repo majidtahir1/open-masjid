@@ -32,41 +32,52 @@ export const generateQrPng: CollectionAfterChangeHook = async ({
       ? (doc.tenant as { id: string | number }).id
       : doc.tenant
 
-  if (doc.generatedImage) {
-    const mediaId =
-      typeof doc.generatedImage === 'object' && doc.generatedImage !== null && 'id' in doc.generatedImage
-        ? (doc.generatedImage as { id: string | number }).id
-        : doc.generatedImage
-    await req.payload.update({
+  try {
+    if (doc.generatedImage) {
+      const mediaId =
+        typeof doc.generatedImage === 'object' && doc.generatedImage !== null && 'id' in doc.generatedImage
+          ? (doc.generatedImage as { id: string | number }).id
+          : doc.generatedImage
+      await req.payload.update({
+        collection: 'media',
+        id: mediaId as string | number,
+        data: { alt: doc.label || filename },
+        file: {
+          data: buffer,
+          mimetype: 'image/png',
+          name: filename,
+          size: buffer.length,
+        },
+        overrideAccess: true,
+      })
+      return doc
+    }
+
+    const media = await req.payload.create({
       collection: 'media',
-      id: mediaId as string | number,
-      data: { alt: doc.label || filename },
+      data: { alt: doc.label || filename, tenant: tenantId },
       file: {
         data: buffer,
         mimetype: 'image/png',
         name: filename,
         size: buffer.length,
       },
+      overrideAccess: true,
     })
+
+    await req.payload.update({
+      collection: 'qr-codes',
+      id: doc.id,
+      data: { generatedImage: media.id },
+      overrideAccess: true,
+    })
+
+    return { ...doc, generatedImage: media.id }
+  } catch (err) {
+    req.payload.logger.error(
+      { err, qrCodeId: doc.id },
+      'generateQrPng: failed to generate or attach QR PNG; doc saved without image',
+    )
     return doc
   }
-
-  const media = await req.payload.create({
-    collection: 'media',
-    data: { alt: doc.label || filename, tenant: tenantId },
-    file: {
-      data: buffer,
-      mimetype: 'image/png',
-      name: filename,
-      size: buffer.length,
-    },
-  })
-
-  await req.payload.update({
-    collection: 'qr-codes',
-    id: doc.id,
-    data: { generatedImage: media.id },
-  })
-
-  return { ...doc, generatedImage: media.id }
 }
