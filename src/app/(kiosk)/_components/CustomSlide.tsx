@@ -112,6 +112,12 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
     return gi.url ?? null
   }, [slide.qrCode])
 
+  // Resolve slide image URL (attached via the Media library)
+  const slideImageUrl = useMemo(() => {
+    if (!slide.image || typeof slide.image === 'string') return null
+    return slide.image.url ?? null
+  }, [slide.image])
+
   return (
     <div
       className="w-full h-full flex flex-col relative"
@@ -120,8 +126,28 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
         transition: 'background 2s ease-in-out',
       }}
     >
-      {/* Islamic Pattern Background Overlay (only if theme is set and has pattern) */}
-      {hasTheme && theme.backgroundImage !== 'none' && (
+      {/* Slide image background (highest priority — overrides theme & gradient) */}
+      {slideImageUrl && (
+        <>
+          <div
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{
+              backgroundImage: `url('${slideImageUrl}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              zIndex: 0,
+            }}
+          />
+          <div
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ background: 'rgba(0,0,0,0.35)', zIndex: 1 }}
+          />
+        </>
+      )}
+
+      {/* Islamic Pattern Background Overlay (theme bg pattern — skipped when slide image is set) */}
+      {!slideImageUrl && hasTheme && theme.backgroundImage !== 'none' && (
         <div
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
