@@ -757,25 +757,58 @@ export interface HeroSlide {
  */
 export interface CarouselSlide {
   id: number;
+  /**
+   * Hidden on the kiosk when an image is attached below.
+   */
   title: string;
+  /**
+   * Optional supporting line shown under the title.
+   */
   details1?: string | null;
+  /**
+   * Optional second supporting line.
+   */
   details2?: string | null;
+  /**
+   * Optional. Pick from the Media library or upload. When set, this image renders full-screen and the title is hidden.
+   */
   image?: (number | null) | Media;
+  /**
+   * Optional. Pick from the QR Code library — congregants can scan.
+   */
   qrCode?: (number | null) | QrCode;
   /**
-   * Visual background theme. Sourced from islamicThemes.ts — add new themes there without a schema migration.
+   * Visual treatment when no image is attached. Themes are defined in islamicThemes.ts — adding one there does not require a migration.
    */
   backgroundTheme?: string | null;
+  /**
+   * Tucks a small next-prayer countdown into the corner of the slide.
+   */
   prayerTimingsEnabled?: boolean | null;
   /**
-   * Time on screen in milliseconds (5000–60000).
+   * Time on screen in milliseconds (5000–60000). 10000 = 10 seconds.
    */
   displayDurationMs?: number | null;
-  priority?: number | null;
+  /**
+   * Off → slide is removed from rotation immediately on save.
+   */
   active?: boolean | null;
-  startDate?: string | null;
-  endDate?: string | null;
+  /**
+   * Off → keep the record but hide it from kiosks.
+   */
   showInCarousel?: boolean | null;
+  /**
+   * Higher numbers appear earlier in the rotation (0–10).
+   */
+  priority?: number | null;
+  /**
+   * Optional. Slide stays hidden until this date.
+   */
+  startDate?: string | null;
+  /**
+   * Optional. Slide auto-hides after this date.
+   */
+  endDate?: string | null;
   tenant?: (number | null) | Tenant;
   updatedAt: string;
   createdAt: string;
@@ -788,11 +821,26 @@ export interface CarouselSlide {
  */
 export interface QrCode {
   id: number;
+  /**
+   * How you find this QR later. Not shown to congregants.
+   */
   label: string;
+  /**
+   * Where congregants land when they scan.
+   */
   targetUrl: string;
-  fgColor?: string | null;
-  bgColor?: string | null;
+  /**
+   * Auto-generated. Refresh after save to see the PNG.
+   */
   generatedImage?: (number | null) | Media;
+  /**
+   * Hex format: #RRGGBB
+   */
+  fgColor?: string | null;
+  /**
+   * Hex format: #RRGGBB
+   */
+  bgColor?: string | null;
   tenant?: (number | null) | Tenant;
   updatedAt: string;
   createdAt: string;
@@ -806,24 +854,60 @@ export interface QrCode {
 export interface SponsorSlide {
   id: number;
   title: string;
+  /**
+   * Short subtitle shown below the company name.
+   */
   tagline?: string | null;
+  /**
+   * Sponsor logo. Transparent PNG recommended.
+   */
   logo?: (number | null) | Media;
-  brandColorPrimary?: string | null;
-  brandColorSecondary?: string | null;
-  backgroundStyle?: ('gradient' | 'solid' | 'brand-primary' | 'brand-secondary') | null;
-  layoutTemplate: 'logo-left' | 'logo-top-centered' | 'logo-dominant' | 'split-screen';
   details1?: string | null;
   details2?: string | null;
   details3?: string | null;
   contactPhone?: string | null;
   contactAddress?: string | null;
   contactWebsite?: string | null;
-  qrCode?: (number | null) | QrCode;
+  /**
+   * Short button-like text, e.g. "Visit us" or "Order online".
+   */
   ctaText?: string | null;
-  displayDurationMs?: number | null;
-  priority?: number | null;
+  /**
+   * Optional. Pick from the QR Code library.
+   */
+  qrCode?: (number | null) | QrCode;
+  /**
+   * Layout for the slide. Each renders the same fields differently.
+   */
+  layoutTemplate: 'logo-left' | 'logo-top-centered' | 'logo-dominant' | 'split-screen';
+  /**
+   * How the slide background is filled.
+   */
+  backgroundStyle?: ('gradient' | 'solid' | 'brand-primary' | 'brand-secondary') | null;
+  /**
+   * Hex format: #RRGGBB
+   */
+  brandColorPrimary?: string | null;
+  /**
+   * Hex format: #RRGGBB
+   */
+  brandColorSecondary?: string | null;
   active?: boolean | null;
+  /**
+   * Higher numbers appear earlier in the rotation (0–10).
+   */
+  priority?: number | null;
+  /**
+   * Time on screen in milliseconds (5000–60000).
+   */
+  displayDurationMs?: number | null;
+  /**
+   * Optional.
+   */
   startDate?: string | null;
+  /**
+   * Optional.
+   */
   endDate?: string | null;
   tenant?: (number | null) | Tenant;
   updatedAt: string;
@@ -837,22 +921,34 @@ export interface SponsorSlide {
  */
 export interface WeeklyEventsSlide {
   id: number;
+  /**
+   * Heading shown on the slide.
+   */
   title: string;
   entries?:
     | {
         day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
         time: string;
+        /**
+         * e.g. "Quran Class with Sh. Ahmad"
+         */
         name: string;
+        /**
+         * Optional. e.g. "Hall A"
+         */
         location?: string | null;
         /**
-         * Optional, e.g. "Sisters", "Youth"
+         * Optional. e.g. "Sisters" or "Youth"
          */
         audience?: string | null;
         id?: string | null;
       }[]
     | null;
-  displayDurationMs?: number | null;
   active?: boolean | null;
+  /**
+   * Time on screen in milliseconds. Default 15000 (15s).
+   */
+  displayDurationMs?: number | null;
   tenant?: (number | null) | Tenant;
   updatedAt: string;
   createdAt: string;
@@ -1871,11 +1967,11 @@ export interface CarouselSlidesSelect<T extends boolean = true> {
   backgroundTheme?: T;
   prayerTimingsEnabled?: T;
   displayDurationMs?: T;
-  priority?: T;
   active?: T;
+  showInCarousel?: T;
+  priority?: T;
   startDate?: T;
   endDate?: T;
-  showInCarousel?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1888,21 +1984,21 @@ export interface SponsorSlidesSelect<T extends boolean = true> {
   title?: T;
   tagline?: T;
   logo?: T;
-  brandColorPrimary?: T;
-  brandColorSecondary?: T;
-  backgroundStyle?: T;
-  layoutTemplate?: T;
   details1?: T;
   details2?: T;
   details3?: T;
   contactPhone?: T;
   contactAddress?: T;
   contactWebsite?: T;
-  qrCode?: T;
   ctaText?: T;
-  displayDurationMs?: T;
-  priority?: T;
+  qrCode?: T;
+  layoutTemplate?: T;
+  backgroundStyle?: T;
+  brandColorPrimary?: T;
+  brandColorSecondary?: T;
   active?: T;
+  priority?: T;
+  displayDurationMs?: T;
   startDate?: T;
   endDate?: T;
   tenant?: T;
@@ -1925,8 +2021,8 @@ export interface WeeklyEventsSlidesSelect<T extends boolean = true> {
         audience?: T;
         id?: T;
       };
-  displayDurationMs?: T;
   active?: T;
+  displayDurationMs?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1970,9 +2066,9 @@ export interface KiosksSelect<T extends boolean = true> {
 export interface QrCodesSelect<T extends boolean = true> {
   label?: T;
   targetUrl?: T;
+  generatedImage?: T;
   fgColor?: T;
   bgColor?: T;
-  generatedImage?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;

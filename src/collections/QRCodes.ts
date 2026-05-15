@@ -20,7 +20,8 @@ export const QRCodes: CollectionConfig = {
     hideAPIURL: true,
     useAsTitle: 'label',
     defaultColumns: ['label', 'targetUrl', 'createdAt'],
-    description: 'Reusable QR codes attached to carousel and sponsor slides. Changes auto-broadcast to all kiosks on save.',
+    description:
+      'Reusable QR codes attached to carousel and sponsor slides. Changes auto-broadcast to all kiosks on save.',
     components: {
       beforeListTable: ['/src/admin/KioskContentBanner#QRCodesBanner'],
     },
@@ -36,29 +37,66 @@ export const QRCodes: CollectionConfig = {
     afterChange: [generateQrPng, bumpKioskBroadcast],
   },
   fields: [
-    { name: 'label', type: 'text', required: true, label: 'Internal Label' },
-    { name: 'targetUrl', type: 'text', required: true, label: 'Target URL' },
     {
-      name: 'fgColor',
-      type: 'text',
-      defaultValue: '#000000',
-      label: 'Foreground Color',
-      validate: (v: unknown) =>
-        !v || (typeof v === 'string' && HEX_COLOR.test(v)) || 'Must be #RRGGBB',
-    },
-    {
-      name: 'bgColor',
-      type: 'text',
-      defaultValue: '#FFFFFF',
-      label: 'Background Color',
-      validate: (v: unknown) =>
-        !v || (typeof v === 'string' && HEX_COLOR.test(v)) || 'Must be #RRGGBB',
-    },
-    {
-      name: 'generatedImage',
-      type: 'upload',
-      relationTo: 'media',
-      admin: { readOnly: true },
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Code',
+          description:
+            'The destination URL and a label for finding it later. The PNG image is generated automatically on save.',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              required: true,
+              label: 'Internal Label',
+              admin: { description: 'How you find this QR later. Not shown to congregants.' },
+            },
+            {
+              name: 'targetUrl',
+              type: 'text',
+              required: true,
+              label: 'Target URL',
+              admin: { description: 'Where congregants land when they scan.' },
+            },
+            {
+              name: 'generatedImage',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { readOnly: true, description: 'Auto-generated. Refresh after save to see the PNG.' },
+            },
+          ],
+        },
+        {
+          label: 'Colors',
+          description: 'Customize the QR colors. Most masajid leave defaults; adjust to match a slide theme.',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'fgColor',
+                  type: 'text',
+                  defaultValue: '#000000',
+                  label: 'Foreground',
+                  admin: { description: 'Hex format: #RRGGBB', width: '50%' },
+                  validate: (v: unknown) =>
+                    !v || (typeof v === 'string' && HEX_COLOR.test(v)) || 'Must be #RRGGBB',
+                },
+                {
+                  name: 'bgColor',
+                  type: 'text',
+                  defaultValue: '#FFFFFF',
+                  label: 'Background',
+                  admin: { description: 'Hex format: #RRGGBB', width: '50%' },
+                  validate: (v: unknown) =>
+                    !v || (typeof v === 'string' && HEX_COLOR.test(v)) || 'Must be #RRGGBB',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'tenant',
