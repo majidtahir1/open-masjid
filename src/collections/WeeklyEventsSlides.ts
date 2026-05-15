@@ -18,6 +18,9 @@ export const WeeklyEventsSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'active'],
     description: 'Recurring weekly schedule shown on the kiosk. Changes auto-broadcast to all kiosks on save.',
+    components: {
+      beforeListTable: ['/src/admin/KioskContentBanner#WeeklyEventsSlidesBanner'],
+    },
   },
   access: {
     read: tenantScopedRead,

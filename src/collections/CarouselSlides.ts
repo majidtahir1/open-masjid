@@ -18,6 +18,9 @@ export const CarouselSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'startDate', 'endDate'],
     description: 'Slides shown in rotation on the kiosk carousel. Changes auto-broadcast to all kiosks on save.',
+    components: {
+      beforeListTable: ['/src/admin/KioskContentBanner#CarouselSlidesBanner'],
+    },
   },
   access: {
     read: tenantScopedRead,

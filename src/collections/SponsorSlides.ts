@@ -20,6 +20,9 @@ export const SponsorSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'layoutTemplate'],
     description: 'Advertiser / sponsor slides shown on the kiosk carousel. Changes auto-broadcast to all kiosks on save.',
+    components: {
+      beforeListTable: ['/src/admin/KioskContentBanner#SponsorSlidesBanner'],
+    },
   },
   access: {
     read: tenantScopedRead,

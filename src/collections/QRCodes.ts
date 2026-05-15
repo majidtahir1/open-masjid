@@ -21,6 +21,9 @@ export const QRCodes: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'targetUrl', 'createdAt'],
     description: 'Reusable QR codes attached to carousel and sponsor slides. Changes auto-broadcast to all kiosks on save.',
+    components: {
+      beforeListTable: ['/src/admin/KioskContentBanner#QRCodesBanner'],
+    },
   },
   access: {
     read: tenantScopedRead,

@@ -3,14 +3,19 @@
 /**
  * Live monitor card on the Kiosks edit view.
  *
- * Polls /api/kiosks/<id> via Payload's REST API every 3s when the tab is
+ * Polls /api/kiosks/<id> via Payload's REST API every 3s while the tab is
  * visible (and pauses when hidden) to surface the kiosk's most-recent
- * reported slide. Shows status, last-seen, slide title, type, "slide N of M",
- * and a progress bar based on durationMs + startedAt.
+ * reported slide. Shows status pill, last-seen, slide title/type, slide N
+ * of M counter, and a progress bar based on durationMs + startedAt.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { Monitor, Wifi, WifiOff, Wrench, KeySquare } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 type CurrentSlide = {
   title?: string | null
@@ -21,20 +26,45 @@ type CurrentSlide = {
   startedAt?: string | null
 }
 
+type Status = 'ONLINE' | 'OFFLINE' | 'UNPAIRED' | 'MAINTENANCE'
+
 type KioskDoc = {
   id: string | number
   name?: string
-  status?: 'ONLINE' | 'OFFLINE' | 'UNPAIRED' | 'MAINTENANCE'
+  status?: Status
   lastSeenAt?: string | null
   currentSlide?: CurrentSlide | null
 }
 
-const STATUS_META = {
-  ONLINE:      { label: 'Online',      dot: '#16a34a', bg: '#dcfce7', fg: '#14532d' },
-  OFFLINE:     { label: 'Offline',     dot: '#dc2626', bg: '#fee2e2', fg: '#7f1d1d' },
-  UNPAIRED:    { label: 'Unpaired',    dot: '#6b7280', bg: '#f3f4f6', fg: '#374151' },
-  MAINTENANCE: { label: 'Maintenance', dot: '#d97706', bg: '#fef3c7', fg: '#78350f' },
-} as const
+const STATUS_META: Record<
+  Status,
+  {
+    label: string
+    Icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
+    pill: string
+  }
+> = {
+  ONLINE: {
+    label: 'Online',
+    Icon: Wifi,
+    pill: 'bg-emerald-100 text-emerald-700',
+  },
+  OFFLINE: {
+    label: 'Offline',
+    Icon: WifiOff,
+    pill: 'bg-rose-100 text-rose-700',
+  },
+  UNPAIRED: {
+    label: 'Unpaired',
+    Icon: KeySquare,
+    pill: 'bg-muted text-muted-foreground',
+  },
+  MAINTENANCE: {
+    label: 'Maintenance',
+    Icon: Wrench,
+    pill: 'bg-amber-100 text-amber-700',
+  },
+}
 
 function timeAgo(iso: string | null | undefined): string {
   if (!iso) return '—'
@@ -51,6 +81,15 @@ function timeAgo(iso: string | null | undefined): string {
   return `${d}d ago`
 }
 
+function prettyType(t: string | null | undefined): string {
+  if (!t) return 'Slide'
+  if (t === 'prayer-times') return 'Prayer Times'
+  if (t === 'sponsor') return 'Sponsor'
+  if (t === 'carousel') return 'Carousel'
+  if (t === 'weekly-events') return 'Weekly Events'
+  return t
+}
+
 export default function KioskCurrentlyShowingPanel() {
   const pathname = usePathname() ?? ''
   const segments = pathname.split('/')
@@ -63,7 +102,6 @@ export default function KioskCurrentlyShowingPanel() {
   const [now, setNow] = useState(() => Date.now())
   const visibleRef = useRef(true)
 
-  // Tick once a second for the progress bar + "X seconds ago" labels.
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)
@@ -104,194 +142,91 @@ export default function KioskCurrentlyShowingPanel() {
 
   if (isNewDoc) return null
 
-  const status = doc?.status ?? 'UNPAIRED'
+  const status: Status = doc?.status ?? 'UNPAIRED'
   const meta = STATUS_META[status]
+  const StatusIcon = meta.Icon
   const slide = doc?.currentSlide ?? null
-  const slideStartedAt = slide?.startedAt ? new Date(slide.startedAt).getTime() : null
-  const elapsedMs = slideStartedAt ? Math.max(0, now - slideStartedAt) : 0
+  const startedAtMs = slide?.startedAt ? new Date(slide.startedAt).getTime() : null
+  const elapsedMs = startedAtMs ? Math.max(0, now - startedAtMs) : 0
   const durationMs = slide?.durationMs ?? 0
   const progress = durationMs > 0 ? Math.min(100, (elapsedMs / durationMs) * 100) : 0
   const remainingMs = Math.max(0, durationMs - elapsedMs)
 
   return (
-    <section style={styles.card}>
-      <header style={styles.header}>
-        <div style={styles.titleWrap}>
-          <span style={styles.kicker}>Monitor</span>
-          <h3 style={styles.title}>Currently Showing</h3>
+    <Card className="mb-6">
+      <CardHeader className="flex flex-row items-start justify-between gap-4 p-6 md:p-8">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Monitor
+          </p>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Monitor className="size-5 text-secondary" aria-hidden />
+            Currently Showing
+          </CardTitle>
         </div>
-        <div
-          style={{ ...styles.statusPill, background: meta.bg, color: meta.fg }}
-          title={`Last seen ${timeAgo(doc?.lastSeenAt)}`}
+        <Badge
+          variant="secondary"
+          className={cn('gap-1.5 px-3 py-1.5 text-xs font-semibold', meta.pill)}
         >
-          <span style={{ ...styles.statusDot, background: meta.dot }} aria-hidden />
+          <StatusIcon className="size-3.5" aria-hidden />
           {meta.label}
           {doc?.lastSeenAt && (
-            <span style={styles.statusSub}>· last seen {timeAgo(doc.lastSeenAt)}</span>
+            <span className="ml-1 font-normal opacity-75">· {timeAgo(doc.lastSeenAt)}</span>
           )}
-        </div>
-      </header>
+        </Badge>
+      </CardHeader>
 
-      {!slide?.title ? (
-        <div style={styles.empty}>
-          {status === 'ONLINE'
-            ? 'Waiting for the first slide report — should appear within seconds.'
-            : 'No slide has been reported by this kiosk yet.'}
-        </div>
-      ) : (
-        <>
-          <div style={styles.slideRow}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={styles.slideType}>{slide.type ?? 'Slide'}</div>
-              <div style={styles.slideTitle} title={slide.title}>
-                {slide.title}
+      <CardContent className="space-y-4 p-6 pt-0 md:p-8 md:pt-0">
+        {!slide?.title ? (
+          <p className="italic text-base text-muted-foreground">
+            {status === 'ONLINE'
+              ? 'Waiting for the first slide report — should appear within seconds.'
+              : 'No slide has been reported by this kiosk yet.'}
+          </p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {prettyType(slide.type)}
+                </p>
+                <p
+                  className="truncate text-2xl font-semibold text-foreground"
+                  title={slide.title}
+                >
+                  {slide.title}
+                </p>
               </div>
+              {typeof slide.index === 'number' && typeof slide.total === 'number' && (
+                <div className="flex items-baseline gap-1 text-foreground">
+                  <span className="text-4xl font-bold leading-none">{slide.index + 1}</span>
+                  <span className="text-base text-muted-foreground">/ {slide.total}</span>
+                </div>
+              )}
             </div>
-            {typeof slide.index === 'number' && typeof slide.total === 'number' && (
-              <div style={styles.counter}>
-                <span style={styles.counterBig}>{slide.index + 1}</span>
-                <span style={styles.counterSmall}>/ {slide.total}</span>
+
+            {durationMs > 0 && (
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full bg-primary transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             )}
-          </div>
 
-          {durationMs > 0 && (
-            <div style={styles.progressWrap}>
-              <div style={{ ...styles.progressFill, width: `${progress}%` }} />
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>{durationMs > 0 ? `${Math.round(remainingMs / 1000)}s remaining` : ''}</span>
+              <span className="opacity-75">Updated {timeAgo(slide.startedAt)}</span>
             </div>
-          )}
+          </>
+        )}
 
-          <div style={styles.footRow}>
-            <span>{durationMs > 0 ? `${Math.round(remainingMs / 1000)}s remaining` : ''}</span>
-            <span style={{ opacity: 0.7 }}>Updated {timeAgo(slide.startedAt)}</span>
-          </div>
-        </>
-      )}
-
-      {error && (
-        <div style={styles.errorRow}>Lost connection to admin API ({error}) — retrying…</div>
-      )}
-    </section>
+        {error && (
+          <p className="text-xs text-destructive">
+            Lost connection to admin API ({error}) — retrying…
+          </p>
+        )}
+      </CardContent>
+    </Card>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  card: {
-    margin: '0 0 24px 0',
-    padding: '18px 20px',
-    borderRadius: 12,
-    background: 'var(--bg, #fff)',
-    border: '1px solid var(--om-border, #e5e7eb)',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 16,
-  },
-  titleWrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-  },
-  kicker: {
-    fontSize: 11,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    color: 'var(--fg3, #6b7280)',
-    fontWeight: 600,
-  },
-  title: {
-    margin: 0,
-    fontSize: 18,
-    color: 'var(--fg1, #111827)',
-    fontWeight: 600,
-  },
-  statusPill: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '6px 12px',
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 600,
-    whiteSpace: 'nowrap',
-  },
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: '50%',
-  },
-  statusSub: {
-    opacity: 0.7,
-    fontWeight: 500,
-    marginLeft: 4,
-  },
-  empty: {
-    padding: '20px 0',
-    color: 'var(--fg3, #6b7280)',
-    fontSize: 14,
-  },
-  slideRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 12,
-  },
-  slideType: {
-    fontSize: 11,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
-    color: 'var(--fg3, #6b7280)',
-    fontWeight: 600,
-    marginBottom: 4,
-  },
-  slideTitle: {
-    fontSize: 18,
-    color: 'var(--fg1, #111827)',
-    fontWeight: 600,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  counter: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: 4,
-    color: 'var(--fg2, #374151)',
-  },
-  counterBig: {
-    fontSize: 28,
-    fontWeight: 700,
-    lineHeight: 1,
-  },
-  counterSmall: {
-    fontSize: 14,
-    opacity: 0.6,
-  },
-  progressWrap: {
-    height: 6,
-    borderRadius: 999,
-    background: 'var(--om-border, #e5e7eb)',
-    overflow: 'hidden',
-    marginBottom: 10,
-  },
-  progressFill: {
-    height: '100%',
-    background: 'var(--brand, #1f3a8a)',
-    transition: 'width 1s linear',
-  },
-  footRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: 12,
-    color: 'var(--fg3, #6b7280)',
-  },
-  errorRow: {
-    marginTop: 12,
-    fontSize: 12,
-    color: '#7f1d1d',
-  },
 }

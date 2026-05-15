@@ -1,28 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { RotateCcw } from 'lucide-react'
 
-const styles = {
-  btn: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 14px',
-    borderRadius: 999,
-    border: '1px solid var(--om-border, #e5e7eb)',
-    background: 'transparent',
-    color: 'var(--fg2, #374151)',
-    fontSize: 13,
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'background 120ms ease',
-  } as React.CSSProperties,
-  msg: {
-    fontSize: 12,
-    color: 'var(--fg3, #6b7280)',
-    marginLeft: 12,
-  } as React.CSSProperties,
-}
+import { Button } from '@/components/ui/button'
 
 export default function KioskResetButton() {
   const [busy, setBusy] = useState(false)
@@ -50,11 +31,12 @@ export default function KioskResetButton() {
   if (isNewDoc) return null
 
   return (
-    <span>
-      <button onClick={click} disabled={busy} style={{ ...styles.btn, opacity: busy ? 0.6 : 1 }}>
+    <span className="inline-flex items-center gap-3">
+      <Button variant="outline" size="sm" onClick={click} disabled={busy}>
+        <RotateCcw aria-hidden />
         {busy ? 'Resetting…' : 'Reset pairing'}
-      </button>
-      {msg && <span style={styles.msg}>{msg}</span>}
+      </Button>
+      {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
     </span>
   )
 }
