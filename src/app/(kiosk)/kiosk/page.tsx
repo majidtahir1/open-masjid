@@ -18,6 +18,13 @@ export default function PairingPage() {
   const [status, setStatus] = useState<string>('waiting')
 
   useEffect(() => {
+    // If this device is already paired, skip the pairing screen entirely.
+    const existingDeviceId = localStorage.getItem('kiosk:deviceId')
+    const existingSecret = localStorage.getItem('kiosk:secret')
+    if (existingDeviceId && existingSecret) {
+      window.location.replace(`/kiosk/${existingDeviceId}`)
+      return
+    }
     const saved = localStorage.getItem('kiosk:pairingCode')
     const initial = saved || makeLocalCode()
     if (!saved) localStorage.setItem('kiosk:pairingCode', initial)
