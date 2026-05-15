@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import CarouselErrorBoundary from './CarouselErrorBoundary'
 
 export interface CarouselSlide {
@@ -30,11 +30,18 @@ const CarouselLayout: React.FC<CarouselLayoutProps> = ({
   const [isDevMode, setIsDevMode] = useState(false)
   const transitionDuration = 1000
 
-  // Fire onSlideChange whenever the active slide changes (incl. initial mount).
+  // Fire onSlideChange ONLY when the active slide identity actually changes.
+  // The slides array reference changes every poll (5s) because the parent
+  // recreates it; without a stable key check we'd report on every poll.
+  const lastReportedKeyRef = useRef<string | null>(null)
   useEffect(() => {
     if (slides.length === 0) return
     const slide = slides[currentSlideIndex]
-    if (slide) onSlideChange?.(slide, currentSlideIndex)
+    if (!slide) return
+    const key = `${slide.type}:${slide.id}:${currentSlideIndex}`
+    if (lastReportedKeyRef.current === key) return
+    lastReportedKeyRef.current = key
+    onSlideChange?.(slide, currentSlideIndex)
   }, [currentSlideIndex, slides, onSlideChange])
 
   // Auto-progression logic

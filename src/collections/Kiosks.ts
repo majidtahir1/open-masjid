@@ -20,6 +20,7 @@ export const Kiosks: CollectionConfig = {
     description:
       'Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.',
     components: {
+      beforeListTable: ['/src/admin/KiosksListBanner#default'],
       edit: {
         beforeDocumentControls: [
           '/src/components/admin/KioskPushButton#default',
@@ -38,6 +39,15 @@ export const Kiosks: CollectionConfig = {
     beforeChange: [setTenantFromUser, pairKioskOnSave],
   },
   fields: [
+    {
+      name: 'currentlyShowingPanel',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/src/components/admin/KioskCurrentlyShowingPanel#default',
+        },
+      },
+    },
     { name: 'name', type: 'text', required: true, label: 'Display Name' },
     { name: 'location', type: 'text', label: 'Location (e.g. Lobby, Hall)' },
     {

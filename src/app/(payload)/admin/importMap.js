@@ -39,6 +39,8 @@ import { default as default_61b04b208665b6f3018adf7337542037 } from '../../../..
 import { default as default_737df59d0032b50354e46d5ff0b71d1c } from '../../../../src/fields/IconPickerField'
 import { default as default_484fdc9997b4942b61f991c78d646aaa } from '../../../../src/fields/NumberField'
 import { default as default_efd018db098a9a86807734ea33d73797 } from '../../../../src/fields/BackgroundThemeField'
+import { default as default_c9a56b800e0b79f16395db06cfb7372e } from '../../../../src/components/admin/KioskCurrentlyShowingPanel'
+import { default as default_ec1289ba7508ffa2f2c7670aad4838a4 } from '../../../../src/admin/KiosksListBanner'
 import { default as default_38727da74a0dfb27644db6f8ebfa8887 } from '../../../../src/components/admin/KioskPushButton'
 import { default as default_9ba6ace7b1855b96dfbda624ec3857fe } from '../../../../src/components/admin/KioskResetButton'
 import { FormBuilderFieldClient as FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078 } from '../../../../src/admin/forms/FormBuilderField.client'
@@ -119,6 +121,8 @@ export const importMap = {
   "/src/fields/IconPickerField#default": default_737df59d0032b50354e46d5ff0b71d1c,
   "/src/fields/NumberField#default": default_484fdc9997b4942b61f991c78d646aaa,
   "/src/fields/BackgroundThemeField#default": default_efd018db098a9a86807734ea33d73797,
+  "/src/components/admin/KioskCurrentlyShowingPanel#default": default_c9a56b800e0b79f16395db06cfb7372e,
+  "/src/admin/KiosksListBanner#default": default_ec1289ba7508ffa2f2c7670aad4838a4,
   "/src/components/admin/KioskPushButton#default": default_38727da74a0dfb27644db6f8ebfa8887,
   "/src/components/admin/KioskResetButton#default": default_9ba6ace7b1855b96dfbda624ec3857fe,
   "/src/admin/forms/FormBuilderField.client#FormBuilderFieldClient": FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078,

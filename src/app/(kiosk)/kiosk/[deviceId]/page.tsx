@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CarouselLayout, { type CarouselSlide } from '../../_components/CarouselLayout'
 import CustomSlide from '../../_components/CustomSlide'
 import AdvertiserSlide from '../../_components/AdvertiserSlide'
@@ -147,6 +147,50 @@ export default function KioskDisplayPage({
     }
   }, [credentials])
 
+  // Always lead the rotation with prayer times — even if no other slides exist.
+  // Memoize so the array reference stays stable across state polls when the
+  // underlying slide ids haven't changed; otherwise CarouselLayout's
+  // onSlideChange effect re-fires every 5s.
+  const slidesKey = state ? state.slides.map((s) => `${s.type}:${s.id}`).join(',') : ''
+  const slidesWithPrayer = useMemo<CarouselSlide[]>(
+    () => [
+      { id: 'prayer-times', type: 'prayer-times', durationMs: 15000, payload: {} },
+      ...(state?.slides ?? []),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [slidesKey, state?.slides.length],
+  )
+
+  // Report current slide to the server so admins can monitor what's on screen.
+  const reportCurrentSlide = useCallback(
+    (slide: CarouselSlide, index: number) => {
+      if (!credentials?.secret) return
+      const title =
+        slide.type === 'prayer-times'
+          ? 'Prayer Times'
+          : (slide.payload as any)?.title ?? `${slide.type} slide`
+      fetch('/api/kiosk/slide-report', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-kiosk-device-id': credentials.deviceId,
+          'x-kiosk-secret': credentials.secret,
+        },
+        body: JSON.stringify({
+          title,
+          type: slide.type,
+          index,
+          total: slidesWithPrayer.length,
+          durationMs: slide.durationMs,
+          startedAt: new Date().toISOString(),
+        }),
+      }).catch(() => {
+        /* monitor reports are best-effort */
+      })
+    },
+    [credentials, slidesWithPrayer.length],
+  )
+
   if (!state) {
     return (
       <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
@@ -168,39 +212,6 @@ export default function KioskDisplayPage({
       default:
         return null
     }
-  }
-
-  // Always lead the rotation with prayer times — even if no other slides exist.
-  const slidesWithPrayer: CarouselSlide[] = [
-    { id: 'prayer-times', type: 'prayer-times', durationMs: 15000, payload: {} },
-    ...state.slides,
-  ]
-
-  // Report current slide to the server so admins can monitor what's on screen.
-  const reportCurrentSlide = (slide: CarouselSlide, index: number) => {
-    if (!credentials?.secret) return
-    const title =
-      slide.type === 'prayer-times'
-        ? 'Prayer Times'
-        : (slide.payload as any)?.title ?? `${slide.type} slide`
-    fetch('/api/kiosk/slide-report', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-kiosk-device-id': credentials.deviceId,
-        'x-kiosk-secret': credentials.secret,
-      },
-      body: JSON.stringify({
-        title,
-        type: slide.type,
-        index,
-        total: slidesWithPrayer.length,
-        durationMs: slide.durationMs,
-        startedAt: new Date().toISOString(),
-      }),
-    }).catch(() => {
-      /* monitor reports are best-effort */
-    })
   }
 
   return (
