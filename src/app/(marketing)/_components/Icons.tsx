@@ -136,7 +136,16 @@ export const ClipboardList = (p: IconProps) => (
   </svg>
 )
 
+export const Monitor = (p: IconProps) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" {...base} {...p}>
+    <rect width="20" height="14" x="2" y="3" rx="2" />
+    <path d="M8 21h8" />
+    <path d="M12 17v4" />
+  </svg>
+)
+
 export const Icons = {
   Sunrise, Calendar, Heart, Palette, Shield, Code, Github, ArrowRight, Check, X, ChevronDown,
   MoonStar, Mail, Twitter, Linkedin, Server, Sparkles, Globe, Lock, Database, Layers, ClipboardList,
+  Monitor,
 }
