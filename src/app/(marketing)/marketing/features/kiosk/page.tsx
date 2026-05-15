@@ -79,12 +79,12 @@ export default function KioskFeaturePage() {
         side={
           <div className="om-mockup-card">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
-              <div>🕌 Prayer times</div>
-              <div>📰 Carousel slides</div>
-              <div>🏷️ Sponsor slides</div>
-              <div>🗓️ Weekly events</div>
-              <div>📱 QR code library</div>
-              <div>🖼️ 13 themes</div>
+              <div>Prayer times</div>
+              <div>Carousel slides</div>
+              <div>Sponsor slides</div>
+              <div>Weekly events</div>
+              <div>QR code library</div>
+              <div>13 themes</div>
             </div>
           </div>
         }
@@ -130,11 +130,11 @@ export default function KioskFeaturePage() {
           <div className="om-mockup-card">
             <p className="om-mockup-label">Tested on</p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0', fontSize: 13 }}>
-              <li style={{ padding: '4px 0' }}>📺 Smart TV browsers</li>
-              <li style={{ padding: '4px 0' }}>🔥 Amazon Fire Stick (Silk)</li>
-              <li style={{ padding: '4px 0' }}>🍓 Raspberry Pi (Chromium)</li>
-              <li style={{ padding: '4px 0' }}>💻 Any spare laptop</li>
-              <li style={{ padding: '4px 0' }}>📱 iPad on a wall mount</li>
+              <li style={{ padding: '4px 0' }}>Smart TV browsers</li>
+              <li style={{ padding: '4px 0' }}>Amazon Fire Stick (Silk)</li>
+              <li style={{ padding: '4px 0' }}>Raspberry Pi (Chromium)</li>
+              <li style={{ padding: '4px 0' }}>Any spare laptop</li>
+              <li style={{ padding: '4px 0' }}>iPad on a wall mount</li>
             </ul>
           </div>
         }
