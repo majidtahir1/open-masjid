@@ -19,7 +19,7 @@ export default function KioskFeaturePage() {
       <FeatureHero
         eyebrow="Kiosk Displays"
         title="Every TV in the masjid,"
-        em="running off your admin."
+        em="running OpenMasjid seamlessly."
         sub="Prayer times, announcements, sponsor slides, and the weekly schedule — on every lobby and prayer-hall screen. Pair a TV in 30 seconds with a 6-character code. Edit a slide, save, and every kiosk updates in under 5 seconds. No proprietary hardware. No standalone CMS to learn."
       />
 
