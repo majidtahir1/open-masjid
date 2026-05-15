@@ -26,7 +26,7 @@ export default function KioskFeaturePage() {
       <FeatureSection
         kicker="Pairing"
         title="Type a code. That's it."
-        body="Open a URL on any TV — Fire Stick, Raspberry Pi, Chromebox, an old laptop, anything with a browser. The screen shows a 6-character code. Type it into your admin, save, done. The TV is now bound to your masjid. No QR scanners, no factory reset rituals, no per-device licenses. Reset pairing from admin if you ever move the display."
+        body="Open your dedicated kiosk URL on any TV — Fire Stick, Raspberry Pi, Chromebox, an old laptop, anything with a browser. The screen shows a 6-character code. Type it into your admin, save, done. The TV is now bound to your masjid. No QR scanners, no factory reset rituals, no per-device licenses. Reset pairing from admin if you ever move the display."
         side={
           <div className="om-mockup-card" style={{ background: '#000', color: '#fff', padding: 40, textAlign: 'center' }}>
             <p style={{ opacity: 0.5, fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', margin: 0 }}>
