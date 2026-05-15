@@ -33,9 +33,63 @@ export default function KioskDisplayPage({
   const [error, setError] = useState<string | null>(null)
   const backoffRef = useRef(5000)
 
+  const [showFullscreenHint, setShowFullscreenHint] = useState(true)
+
   useEffect(() => {
     Promise.resolve(params).then((p) => setDeviceId(p.deviceId))
   }, [params])
+
+  // Tag the body so kiosk CSS (no cursor, no select, no callout) takes effect
+  // on the display page but not on the pairing screen / admin.
+  useEffect(() => {
+    document.body.classList.add('kiosk-display')
+    return () => {
+      document.body.classList.remove('kiosk-display')
+    }
+  }, [])
+
+  // Browsers require a user gesture to enter fullscreen — we can't auto-enter
+  // on load. Listen for the first click/key/touch and promote the document.
+  // Also suppress the context menu so right-click doesn't pop up on the TV.
+  useEffect(() => {
+    const enterFullscreen = async () => {
+      try {
+        const el = document.documentElement as HTMLElement & {
+          webkitRequestFullscreen?: () => Promise<void>
+        }
+        if (document.fullscreenElement) return
+        if (el.requestFullscreen) await el.requestFullscreen()
+        else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen()
+      } catch {
+        // Some browsers/embedded webviews refuse fullscreen — ignore.
+      } finally {
+        setShowFullscreenHint(false)
+      }
+    }
+    const onGesture = () => {
+      void enterFullscreen()
+      window.removeEventListener('click', onGesture)
+      window.removeEventListener('keydown', onGesture)
+      window.removeEventListener('touchstart', onGesture)
+    }
+    window.addEventListener('click', onGesture)
+    window.addEventListener('keydown', onGesture)
+    window.addEventListener('touchstart', onGesture, { passive: true })
+
+    const suppressContextMenu = (e: MouseEvent) => e.preventDefault()
+    window.addEventListener('contextmenu', suppressContextMenu)
+
+    // Auto-hide the hint after 8s even if the user never taps.
+    const hideTimer = setTimeout(() => setShowFullscreenHint(false), 8000)
+
+    return () => {
+      window.removeEventListener('click', onGesture)
+      window.removeEventListener('keydown', onGesture)
+      window.removeEventListener('touchstart', onGesture)
+      window.removeEventListener('contextmenu', suppressContextMenu)
+      clearTimeout(hideTimer)
+    }
+  }, [])
 
   const credentials = useMemo(() => {
     if (!deviceId) return null
@@ -137,6 +191,9 @@ export default function KioskDisplayPage({
       {error && (
         <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0.6 }}>● offline</div>
       )}
+      <div className={`kiosk-fullscreen-hint${showFullscreenHint ? '' : ' is-hidden'}`}>
+        Tap or press any key to enter fullscreen
+      </div>
     </main>
   )
 }

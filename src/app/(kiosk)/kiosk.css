@@ -18,7 +18,39 @@ body {
   color: #fff;
 }
 
-/* Hide cursor on actual kiosk hardware */
-.kiosk-fullscreen {
+/* Kiosk display chrome — applied via <body class="kiosk-display"> on the
+   display page. The pairing page keeps a normal cursor so admins can interact. */
+body.kiosk-display {
   cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.kiosk-display * {
+  user-select: none;
+}
+
+/* Floating "Enter Fullscreen" hint, shown briefly until the user taps. */
+.kiosk-fullscreen-hint {
+  position: fixed;
+  inset: auto 0 24px 0;
+  margin: 0 auto;
+  width: max-content;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 0.9;
+  transition: opacity 600ms ease;
+  z-index: 50;
+}
+
+.kiosk-fullscreen-hint.is-hidden {
+  opacity: 0;
 }
