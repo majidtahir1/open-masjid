@@ -128,22 +128,17 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
     >
       {/* Slide image background (highest priority — overrides theme & gradient) */}
       {slideImageUrl && (
-        <>
-          <div
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-              backgroundImage: `url('${slideImageUrl}')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              zIndex: 0,
-            }}
-          />
-          <div
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{ background: 'rgba(0,0,0,0.35)', zIndex: 1 }}
-          />
-        </>
+        <div
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{
+            backgroundImage: `url('${slideImageUrl}')`,
+            backgroundSize: 'contain',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#000',
+            zIndex: 0,
+          }}
+        />
       )}
 
       {/* Islamic Pattern Background Overlay (theme bg pattern — skipped when slide image is set) */}
