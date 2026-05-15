@@ -14,14 +14,28 @@ interface CarouselLayoutProps {
   slides: CarouselSlide[]
   renderSlide: (slide: CarouselSlide) => React.ReactNode
   onSlideAdvance?: () => void
+  onSlideChange?: (slide: CarouselSlide, index: number) => void
   children?: React.ReactNode
 }
 
-const CarouselLayout: React.FC<CarouselLayoutProps> = ({ slides, renderSlide, onSlideAdvance, children }) => {
+const CarouselLayout: React.FC<CarouselLayoutProps> = ({
+  slides,
+  renderSlide,
+  onSlideAdvance,
+  onSlideChange,
+  children,
+}) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
   const [isPlaying] = useState(true)
   const [isDevMode, setIsDevMode] = useState(false)
   const transitionDuration = 1000
+
+  // Fire onSlideChange whenever the active slide changes (incl. initial mount).
+  useEffect(() => {
+    if (slides.length === 0) return
+    const slide = slides[currentSlideIndex]
+    if (slide) onSlideChange?.(slide, currentSlideIndex)
+  }, [currentSlideIndex, slides, onSlideChange])
 
   // Auto-progression logic
   useEffect(() => {

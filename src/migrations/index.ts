@@ -21,6 +21,7 @@ import * as migration_20260514_182235_slide_collections from './20260514_182235_
 import * as migration_20260514_182517_qr_codes_collection from './20260514_182517_qr_codes_collection';
 import * as migration_20260514_204832_expand_background_theme_enum from './20260514_204832_expand_background_theme_enum';
 import * as migration_20260514_205028_background_theme_to_text from './20260514_205028_background_theme_to_text';
+import * as migration_20260515_042807_kiosk_current_slide from './20260515_042807_kiosk_current_slide';
 
 export const migrations = [
   {
@@ -136,6 +137,11 @@ export const migrations = [
   {
     up: migration_20260514_205028_background_theme_to_text.up,
     down: migration_20260514_205028_background_theme_to_text.down,
-    name: '20260514_205028_background_theme_to_text'
+    name: '20260514_205028_background_theme_to_text',
+  },
+  {
+    up: migration_20260515_042807_kiosk_current_slide.up,
+    down: migration_20260515_042807_kiosk_current_slide.down,
+    name: '20260515_042807_kiosk_current_slide'
   },
 ];

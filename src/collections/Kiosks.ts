@@ -16,7 +16,7 @@ export const Kiosks: CollectionConfig = {
     group: 'Kiosk',
     hideAPIURL: true,
     useAsTitle: 'name',
-    defaultColumns: ['name', 'location', 'status', 'lastSeenAt'],
+    defaultColumns: ['name', 'location', 'status', 'currentSlide', 'lastSeenAt'],
     description:
       'Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.',
     components: {
@@ -69,6 +69,23 @@ export const Kiosks: CollectionConfig = {
     { name: 'lastSeenIp', type: 'text', admin: { readOnly: true, hidden: true } },
     { name: 'userAgent', type: 'text', admin: { readOnly: true, hidden: true } },
     { name: 'kioskPushAt', type: 'date', admin: { readOnly: true, hidden: true } },
+    {
+      name: 'currentSlide',
+      type: 'group',
+      label: 'Currently Showing',
+      admin: {
+        readOnly: true,
+        description: 'Last slide reported by this kiosk. Updates every time the kiosk advances.',
+      },
+      fields: [
+        { name: 'title', type: 'text', admin: { readOnly: true } },
+        { name: 'type', type: 'text', admin: { readOnly: true } },
+        { name: 'index', type: 'number', admin: { readOnly: true } },
+        { name: 'total', type: 'number', admin: { readOnly: true } },
+        { name: 'durationMs', type: 'number', admin: { readOnly: true } },
+        { name: 'startedAt', type: 'date', admin: { readOnly: true } },
+      ],
+    },
     {
       name: 'overrideEnabled',
       type: 'checkbox',

@@ -176,6 +176,33 @@ export default function KioskDisplayPage({
     ...state.slides,
   ]
 
+  // Report current slide to the server so admins can monitor what's on screen.
+  const reportCurrentSlide = (slide: CarouselSlide, index: number) => {
+    if (!credentials?.secret) return
+    const title =
+      slide.type === 'prayer-times'
+        ? 'Prayer Times'
+        : (slide.payload as any)?.title ?? `${slide.type} slide`
+    fetch('/api/kiosk/slide-report', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-kiosk-device-id': credentials.deviceId,
+        'x-kiosk-secret': credentials.secret,
+      },
+      body: JSON.stringify({
+        title,
+        type: slide.type,
+        index,
+        total: slidesWithPrayer.length,
+        durationMs: slide.durationMs,
+        startedAt: new Date().toISOString(),
+      }),
+    }).catch(() => {
+      /* monitor reports are best-effort */
+    })
+  }
+
   return (
     <main
       style={{
@@ -186,7 +213,11 @@ export default function KioskDisplayPage({
       }}
     >
       <CarouselErrorBoundary>
-        <CarouselLayout slides={slidesWithPrayer} renderSlide={renderSlide} />
+        <CarouselLayout
+          slides={slidesWithPrayer}
+          renderSlide={renderSlide}
+          onSlideChange={reportCurrentSlide}
+        />
       </CarouselErrorBoundary>
       {error && (
         <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0.6 }}>● offline</div>

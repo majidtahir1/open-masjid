@@ -880,6 +880,17 @@ export interface Kiosk {
   userAgent?: string | null;
   kioskPushAt?: string | null;
   /**
+   * Last slide reported by this kiosk. Updates every time the kiosk advances.
+   */
+  currentSlide?: {
+    title?: string | null;
+    type?: string | null;
+    index?: number | null;
+    total?: number | null;
+    durationMs?: number | null;
+    startedAt?: string | null;
+  };
+  /**
    * When on, this kiosk shows only the slides selected below.
    */
   overrideEnabled?: boolean | null;
@@ -1936,6 +1947,16 @@ export interface KiosksSelect<T extends boolean = true> {
   lastSeenIp?: T;
   userAgent?: T;
   kioskPushAt?: T;
+  currentSlide?:
+    | T
+    | {
+        title?: T;
+        type?: T;
+        index?: T;
+        total?: T;
+        durationMs?: T;
+        startedAt?: T;
+      };
   overrideEnabled?: T;
   slideOverrides?: T;
   tenant?: T;
