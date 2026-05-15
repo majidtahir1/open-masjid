@@ -175,23 +175,25 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
         }}
       >
         <div className="text-center max-w-[85%] w-full">
-          {/* Title */}
-          <h1
-            className={`font-display font-bold ${
-              slide.prayerTimingsEnabled
-                ? 'text-tv-xl mb-3 leading-tight'
-                : 'text-tv-hero mb-6 leading-tight'
-            }`}
-            style={{
-              color: hasTheme ? theme.textColor : 'white',
-              fontSize: hasTheme
-                ? `clamp(${theme.typography.titleSize.min}px, ${theme.typography.titleSize.preferred}, ${theme.typography.titleSize.max}px)`
-                : undefined,
-              textShadow: hasTheme && theme.id === 'full-ambiance' ? '3px 3px 16px rgba(0,0,0,0.8)' : undefined,
-            }}
-          >
-            {slide.title}
-          </h1>
+          {/* Title — hidden when a slide image is attached (the image is the message) */}
+          {!slideImageUrl && (
+            <h1
+              className={`font-display font-bold ${
+                slide.prayerTimingsEnabled
+                  ? 'text-tv-xl mb-3 leading-tight'
+                  : 'text-tv-hero mb-6 leading-tight'
+              }`}
+              style={{
+                color: hasTheme ? theme.textColor : 'white',
+                fontSize: hasTheme
+                  ? `clamp(${theme.typography.titleSize.min}px, ${theme.typography.titleSize.preferred}, ${theme.typography.titleSize.max}px)`
+                  : undefined,
+                textShadow: hasTheme && theme.id === 'full-ambiance' ? '3px 3px 16px rgba(0,0,0,0.8)' : undefined,
+              }}
+            >
+              {slide.title}
+            </h1>
+          )}
 
           {/* Details */}
           <div className={`space-y-2 ${slide.prayerTimingsEnabled ? 'mb-3' : 'mb-8'}`}>
