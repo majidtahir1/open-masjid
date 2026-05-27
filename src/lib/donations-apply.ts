@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import type { DonationAction } from './donations-webhook'
+import { relationshipId, tenantIdForConnectedAccount } from './stripe-connect-binding'
 
 export async function applyDonationAction(
   payload: Payload,
@@ -15,15 +16,45 @@ export async function applyDonationAction(
         overrideAccess: true,
       })
       if (existing.docs.length > 0) return
-      // Stripe metadata is always string-typed on the wire, but the Postgres
-      // FK columns are integer. Coerce relationship ids before insert.
-      const tenantId = Number(action.tenantId)
-      const fundId = Number(action.fundId)
-      if (!Number.isFinite(tenantId) || !Number.isFinite(fundId)) {
-        throw new Error(
-          `donations-apply: non-numeric ids in action metadata: tenant=${action.tenantId}, fund=${action.fundId}`,
+
+      // --- Connect attribution binding (CWE-639) ---
+      // Attribute the donation by the connected account that produced the
+      // event (action.stripeAccountId === event.account), never by the
+      // attacker-controllable metadata tenant/fund ids. We require that:
+      //   1. some tenant has this connected account configured,
+      //   2. the metadata tenantId matches that account owner, and
+      //   3. the fund belongs to that tenant.
+      // Any mismatch → drop the write (ack the event so Stripe stops retrying).
+      const tenantId = await tenantIdForConnectedAccount(payload, action.stripeAccountId)
+      if (tenantId === null) {
+        payload.logger?.warn?.(
+          `donations-apply: no tenant owns connected account ${action.stripeAccountId}; dropping donation`,
         )
+        return
       }
+      const metaTenantId = Number(action.tenantId)
+      if (!Number.isFinite(metaTenantId) || metaTenantId !== tenantId) {
+        payload.logger?.warn?.(
+          `donations-apply: metadata tenant ${action.tenantId} does not match account owner ${tenantId}; dropping donation`,
+        )
+        return
+      }
+      const fundId = Number(action.fundId)
+      if (!Number.isFinite(fundId)) return
+      const funds = await payload.find({
+        collection: 'donation-funds',
+        where: { id: { equals: fundId } },
+        limit: 1,
+        overrideAccess: true,
+      })
+      const fund = funds.docs[0]
+      if (!fund || relationshipId((fund as { tenant?: unknown }).tenant) !== tenantId) {
+        payload.logger?.warn?.(
+          `donations-apply: fund ${action.fundId} does not belong to tenant ${tenantId}; dropping donation`,
+        )
+        return
+      }
+
       await payload.create({
         collection: 'donations',
         data: {

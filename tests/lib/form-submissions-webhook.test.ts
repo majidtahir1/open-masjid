@@ -10,12 +10,15 @@ import { sendFormNotifications } from '@/lib/form-notifications'
 
 function makePayload({
   submissionStatus = 'pending_payment',
-}: { submissionStatus?: string } = {}) {
+  submissionTenant = 1,
+  accountTenantId = 1,
+}: { submissionStatus?: string; submissionTenant?: number; accountTenantId?: number | null } = {}) {
   const findByID = vi.fn(async ({ collection, id }: any) => {
     if (collection === 'form-submissions') {
       return {
         id,
         paymentStatus: submissionStatus,
+        tenant: submissionTenant,
         form: 'form_abc',
         amountCents: 1000,
         currency: 'usd',
@@ -29,12 +32,20 @@ function makePayload({
     }
     return {}
   })
+  // Connect-account → tenant resolution for the attribution binding.
+  const find = vi.fn(async ({ collection }: any) => {
+    if (collection === 'tenants') {
+      return { docs: accountTenantId === null ? [] : [{ id: accountTenantId }] }
+    }
+    return { docs: [] }
+  })
   const update = vi.fn(async (a: any) => a.data)
-  return { findByID, update } as any
+  return { findByID, find, update } as any
 }
 
 const baseCompletedEvent = {
   type: 'checkout.session.completed',
+  account: 'acct_x',
   data: {
     object: {
       id: 'cs_1',
@@ -53,6 +64,7 @@ const baseCompletedEvent = {
 
 const baseExpiredEvent = {
   type: 'checkout.session.expired',
+  account: 'acct_x',
   data: {
     object: {
       id: 'cs_2',
@@ -157,6 +169,23 @@ describe('handleFormSubmissionEvent', () => {
 
   it('is idempotent: if submission is already paid, does not update again or send double notification', async () => {
     const payload = makePayload({ submissionStatus: 'paid' })
+    await handleFormSubmissionEvent({ event: baseCompletedEvent as any, payload })
+
+    expect(payload.update).not.toHaveBeenCalled()
+    expect(sendFormNotifications).not.toHaveBeenCalled()
+  })
+
+  it('drops paid completion when the connected account does not own the submission tenant', async () => {
+    // submission belongs to tenant 1, but event.account resolves to tenant 2
+    const payload = makePayload({ submissionTenant: 1, accountTenantId: 2 })
+    await handleFormSubmissionEvent({ event: baseCompletedEvent as any, payload })
+
+    expect(payload.update).not.toHaveBeenCalled()
+    expect(sendFormNotifications).not.toHaveBeenCalled()
+  })
+
+  it('drops paid completion when no tenant owns the connected account', async () => {
+    const payload = makePayload({ accountTenantId: null })
     await handleFormSubmissionEvent({ event: baseCompletedEvent as any, payload })
 
     expect(payload.update).not.toHaveBeenCalled()

@@ -2,17 +2,34 @@
 import { describe, it, expect, vi } from 'vitest'
 import { handleMembershipEvent } from '@/lib/membership-webhook'
 
-function makePayload() {
-  const findStub = vi.fn(async ({ collection, where }: any) => {
-    // dispatch by collection + where
-    if (collection === 'tenants') return { docs: [{ id: 7, stripeAccountId: where.stripeAccountId.equals }] }
-    if (collection === 'membership-tiers') return { docs: [{ id: 11, tenant: 7, stripePriceId: where?.stripePriceId?.equals ?? 'price_x' }] }
-    if (collection === 'members') return { docs: [] }
+/**
+ * Collection-aware mock. By default tenant 7 owns connected account acct_x and
+ * tier 11 belongs to tenant 7 — the legitimate happy path. Overrides let each
+ * test simulate forged/cross-tenant events.
+ */
+function makePayload(
+  over: {
+    members?: any[]
+    tenantId?: number | null // tenant resolved from the connected account
+    tier?: any // tier returned for the checkout binding's id lookup
+    tierByPrice?: any // tier returned for the subscription.updated price lookup
+  } = {},
+) {
+  const members = over.members ?? []
+  const tenantDocs = over.tenantId === null ? [] : [{ id: over.tenantId ?? 7 }]
+  const tier = over.tier === undefined ? { id: 11, tenant: 7 } : over.tier
+  const find = vi.fn(async ({ collection, where }: any) => {
+    if (collection === 'tenants') return { docs: tenantDocs }
+    if (collection === 'membership-tiers') {
+      if (where?.id) return { docs: tier ? [tier] : [] }
+      return { docs: over.tierByPrice ? [over.tierByPrice] : [] }
+    }
+    if (collection === 'members') return { docs: members }
     return { docs: [] }
   })
   const create = vi.fn(async (a: any) => ({ id: 99, ...a.data }))
   const update = vi.fn(async (a: any) => a.data)
-  return { find: findStub, create, update } as any
+  return { find, create, update } as any
 }
 
 const baseSession = {
@@ -24,20 +41,16 @@ const baseSession = {
   metadata: { kind: 'membership', tenantId: '7', tierId: '11' },
 }
 
+const subFetch = () =>
+  vi.fn(async () => ({ id: 'sub_1', status: 'active', current_period_end: 1735689600 }))
+
 describe('handleMembershipEvent', () => {
   it('checkout.session.completed creates a Member row', async () => {
     const payload = makePayload()
-    payload.find = vi.fn(async ({ collection }: any) => {
-      if (collection === 'tenants') return { docs: [{ id: 7, stripeAccountId: 'acct_x' }] }
-      if (collection === 'membership-tiers') return { docs: [{ id: 11 }] }
-      if (collection === 'members') return { docs: [] }
-      return { docs: [] }
-    })
-    const subFetch = vi.fn(async () => ({ id: 'sub_1', status: 'active', current_period_end: 1735689600 }))
     await handleMembershipEvent({
       event: { type: 'checkout.session.completed', data: { object: baseSession }, account: 'acct_x' } as any,
       payload,
-      stripeSubscriptionRetrieve: subFetch,
+      stripeSubscriptionRetrieve: subFetch(),
     })
     expect(payload.create).toHaveBeenCalledWith(expect.objectContaining({
       collection: 'members',
@@ -55,38 +68,56 @@ describe('handleMembershipEvent', () => {
   })
 
   it('checkout.session.completed updates existing Member (same tenant+email)', async () => {
-    const payload = makePayload()
     const existingMember = { id: 55, email: 'a@b.com', tenant: 7, joinedAt: '2024-01-01T00:00:00.000Z' }
-    payload.find = vi.fn(async ({ collection }: any) => {
-      if (collection === 'membership-tiers') return { docs: [{ id: 11 }] }
-      if (collection === 'members') return { docs: [existingMember] }
-      return { docs: [] }
-    })
-    const subFetch = vi.fn(async () => ({ id: 'sub_1', status: 'active', current_period_end: 1735689600 }))
+    const payload = makePayload({ members: [existingMember] })
     await handleMembershipEvent({
       event: { type: 'checkout.session.completed', data: { object: baseSession }, account: 'acct_x' } as any,
       payload,
-      stripeSubscriptionRetrieve: subFetch,
+      stripeSubscriptionRetrieve: subFetch(),
     })
     expect(payload.create).not.toHaveBeenCalled()
     expect(payload.update).toHaveBeenCalledWith(expect.objectContaining({
       collection: 'members',
       id: 55,
-      data: expect.objectContaining({
-        // preserve the original joinedAt
-        joinedAt: '2024-01-01T00:00:00.000Z',
-        email: 'a@b.com',
-      }),
+      data: expect.objectContaining({ joinedAt: '2024-01-01T00:00:00.000Z', email: 'a@b.com' }),
       overrideAccess: true,
     }))
   })
 
-  it('customer.subscription.updated flips bucket to grace on past_due', async () => {
-    const payload = makePayload()
-    payload.find = vi.fn(async ({ collection }: any) => {
-      if (collection === 'members') return { docs: [{ id: 99, stripeSubscriptionId: 'sub_1' }] }
-      return { docs: [] }
+  it('drops checkout when no tenant owns the connected account', async () => {
+    const payload = makePayload({ tenantId: null })
+    await handleMembershipEvent({
+      event: { type: 'checkout.session.completed', data: { object: baseSession }, account: 'acct_attacker' } as any,
+      payload,
+      stripeSubscriptionRetrieve: subFetch(),
     })
+    expect(payload.create).not.toHaveBeenCalled()
+    expect(payload.update).not.toHaveBeenCalled()
+  })
+
+  it('drops checkout when metadata tenantId does not match the account owner', async () => {
+    const payload = makePayload({ tenantId: 7 }) // account owned by 7
+    const forged = { ...baseSession, metadata: { kind: 'membership', tenantId: '8', tierId: '11' } }
+    await handleMembershipEvent({
+      event: { type: 'checkout.session.completed', data: { object: forged }, account: 'acct_x' } as any,
+      payload,
+      stripeSubscriptionRetrieve: subFetch(),
+    })
+    expect(payload.create).not.toHaveBeenCalled()
+  })
+
+  it('drops checkout when the tier belongs to a different tenant', async () => {
+    const payload = makePayload({ tier: { id: 11, tenant: 2 } })
+    await handleMembershipEvent({
+      event: { type: 'checkout.session.completed', data: { object: baseSession }, account: 'acct_x' } as any,
+      payload,
+      stripeSubscriptionRetrieve: subFetch(),
+    })
+    expect(payload.create).not.toHaveBeenCalled()
+  })
+
+  it('customer.subscription.updated flips bucket to grace on past_due', async () => {
+    const payload = makePayload({ members: [{ id: 99, stripeSubscriptionId: 'sub_1', tenant: 7 }] })
     await handleMembershipEvent({
       event: {
         type: 'customer.subscription.updated',
@@ -103,14 +134,9 @@ describe('handleMembershipEvent', () => {
   })
 
   it('customer.subscription.updated updates tier when price ID matches a different tier (portal upgrade)', async () => {
-    const payload = makePayload()
-    payload.find = vi.fn(async ({ collection, where }: any) => {
-      if (collection === 'members') return { docs: [{ id: 99, stripeSubscriptionId: 'sub_1', tier: 11 }] }
-      if (collection === 'membership-tiers') {
-        // price_new matches tier 22
-        return { docs: [{ id: 22, stripePriceId: 'price_new' }] }
-      }
-      return { docs: [] }
+    const payload = makePayload({
+      members: [{ id: 99, stripeSubscriptionId: 'sub_1', tier: 11, tenant: 7 }],
+      tierByPrice: { id: 22, stripePriceId: 'price_new' },
     })
     await handleMembershipEvent({
       event: {
@@ -134,25 +160,21 @@ describe('handleMembershipEvent', () => {
     }))
   })
 
-  it('customer.subscription.deleted sets inactive + canceledAt', async () => {
-    const payload = makePayload()
-    payload.find = vi.fn(async () => ({ docs: [{ id: 99, stripeSubscriptionId: 'sub_1' }] }))
+  it('customer.subscription.updated drops when member tenant does not own the account', async () => {
+    const payload = makePayload({ members: [{ id: 99, stripeSubscriptionId: 'sub_1', tenant: 2 }], tenantId: 7 })
     await handleMembershipEvent({
       event: {
-        type: 'customer.subscription.deleted',
-        data: { object: { id: 'sub_1', status: 'canceled' } },
+        type: 'customer.subscription.updated',
+        data: { object: { id: 'sub_1', status: 'past_due', current_period_end: 1735689600 } },
         account: 'acct_x',
       } as any,
       payload,
     })
-    expect(payload.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ status: 'inactive', canceledAt: expect.any(String) }),
-    }))
+    expect(payload.update).not.toHaveBeenCalled()
   })
 
-  it('customer.subscription.deleted sets stripeSubscriptionStatus = "canceled"', async () => {
-    const payload = makePayload()
-    payload.find = vi.fn(async () => ({ docs: [{ id: 99, stripeSubscriptionId: 'sub_1' }] }))
+  it('customer.subscription.deleted sets inactive + canceledAt + canceled status', async () => {
+    const payload = makePayload({ members: [{ id: 99, stripeSubscriptionId: 'sub_1', tenant: 7 }] })
     await handleMembershipEvent({
       event: {
         type: 'customer.subscription.deleted',
@@ -162,7 +184,11 @@ describe('handleMembershipEvent', () => {
       payload,
     })
     expect(payload.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ stripeSubscriptionStatus: 'canceled' }),
+      data: expect.objectContaining({
+        status: 'inactive',
+        canceledAt: expect.any(String),
+        stripeSubscriptionStatus: 'canceled',
+      }),
     }))
   })
 
@@ -189,8 +215,7 @@ describe('handleMembershipEvent', () => {
   })
 
   it('customer.subscription.updated: no-op when member not found', async () => {
-    const payload = makePayload()
-    payload.find = vi.fn(async () => ({ docs: [] }))
+    const payload = makePayload({ members: [] })
     await handleMembershipEvent({
       event: {
         type: 'customer.subscription.updated',
@@ -203,8 +228,7 @@ describe('handleMembershipEvent', () => {
   })
 
   it('customer.subscription.deleted: no-op when member not found', async () => {
-    const payload = makePayload()
-    payload.find = vi.fn(async () => ({ docs: [] }))
+    const payload = makePayload({ members: [] })
     await handleMembershipEvent({
       event: {
         type: 'customer.subscription.deleted',

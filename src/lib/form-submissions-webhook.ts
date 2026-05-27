@@ -1,6 +1,7 @@
 import type Stripe from 'stripe'
 import type { Payload } from 'payload'
 import { sendFormNotifications } from './form-notifications'
+import { relationshipId, tenantIdForConnectedAccount } from './stripe-connect-binding'
 
 interface Args {
   event: Stripe.Event
@@ -33,6 +34,17 @@ export async function handleFormSubmissionEvent({ event, payload }: Args) {
     overrideAccess: true,
   })
   if (sub.paymentStatus === 'paid') return // idempotent
+
+  // --- Connect attribution binding (CWE-639) ---
+  // The submission carries the tenant it belongs to; require that the
+  // connected account producing this event is the one that tenant configured.
+  // Otherwise a malicious connected account could mark another tenant's
+  // submission paid by putting its submissionId in their own session metadata.
+  const account = (event as Stripe.Event & { account?: string }).account
+  const accountTenantId = await tenantIdForConnectedAccount(payload, account)
+  if (accountTenantId === null || relationshipId((sub as { tenant?: unknown }).tenant) !== accountTenantId) {
+    return
+  }
 
   await payload.update({
     collection: 'form-submissions',

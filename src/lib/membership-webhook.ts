@@ -1,5 +1,6 @@
 import type Stripe from 'stripe'
 import { bucketFromStripeStatus } from './membership-status'
+import { relationshipId, tenantIdForConnectedAccount } from './stripe-connect-binding'
 
 interface PayloadLike {
   find: (args: any) => Promise<{ docs: any[] }>
@@ -39,6 +40,21 @@ export async function handleMembershipEvent({
       const tenantId = Number(md.tenantId)
       const tierId = Number(md.tierId)
       if (!tenantId || !tierId) return
+
+      // --- Connect attribution binding (CWE-639) ---
+      // Attribute the member by the connected account that produced the event,
+      // never by metadata alone. Require: a tenant owns this account, the
+      // metadata tenantId matches that owner, and the tier belongs to it.
+      const accountTenantId = await tenantIdForConnectedAccount(payload, account)
+      if (accountTenantId === null || accountTenantId !== tenantId) return
+      const tierLookup = await payload.find({
+        collection: 'membership-tiers',
+        where: { id: { equals: tierId } },
+        limit: 1,
+        overrideAccess: true,
+      })
+      const tierDoc = tierLookup.docs[0]
+      if (!tierDoc || relationshipId(tierDoc.tenant) !== tenantId) return
 
       // Extract subscription id — may be a string or an expanded object
       const subId =
@@ -110,6 +126,9 @@ export async function handleMembershipEvent({
       })
       const member = found.docs[0]
       if (!member) return
+      // Bind the event's connected account to the member's tenant.
+      const updatedAccountTenantId = await tenantIdForConnectedAccount(payload, account)
+      if (updatedAccountTenantId === null || relationshipId(member.tenant) !== updatedAccountTenantId) return
 
       // Detect Customer Portal upgrade/downgrade: match new Price ID to a tier.
       // The subscription's items.data[0].price.id may match either the current
@@ -186,6 +205,9 @@ export async function handleMembershipEvent({
       })
       const member = found.docs[0]
       if (!member) return
+      // Bind the event's connected account to the member's tenant.
+      const deletedAccountTenantId = await tenantIdForConnectedAccount(payload, account)
+      if (deletedAccountTenantId === null || relationshipId(member.tenant) !== deletedAccountTenantId) return
 
       await payload.update({
         collection: 'members',
