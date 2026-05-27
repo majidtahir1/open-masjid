@@ -86,7 +86,10 @@ export const ISLAMIC_THEMES: Record<string, IslamicTheme> = {
     datetimeColor: '#2C5A5A',
     qrBorderColor: '#4A8080',
     safeZones: {
-      topMargin: '15%',
+      // Symmetric top/bottom so the centered text sits at the true vertical
+      // center — the corner decoration is symmetric, so a heavier top margin
+      // just pushed the text low.
+      topMargin: '8%',
       bottomMargin: '8%',
       sidePadding: '220px',
     },
