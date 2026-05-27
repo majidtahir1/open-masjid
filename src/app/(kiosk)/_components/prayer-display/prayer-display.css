@@ -201,7 +201,7 @@
 .pd-cream .pd-prayer-adhan sup {
   font-size: 0.42em;
   font-weight: 400;
-  vertical-align: top;
+  vertical-align: middle;
   margin-left: 4px;
   color: rgba(15,30,74,0.5);
   text-transform: lowercase;
@@ -368,7 +368,7 @@
   font-weight: 300;
   margin-left: 4px;
   color: rgba(240,239,232,0.5);
-  vertical-align: top;
+  vertical-align: middle;
   text-transform: lowercase;
 }
 .pd-night .pd-prayer-iqamah {
@@ -530,7 +530,7 @@
   font-weight: 400;
   margin-left: 4px;
   color: rgba(15,30,74,0.5);
-  vertical-align: top;
+  vertical-align: middle;
 }
 .pd-mihrab .pd-prayer-iqamah {
   font-family: var(--pd-inter);
