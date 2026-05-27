@@ -24,6 +24,30 @@ describe('computeSalahState (auto)', () => {
     const s = computeSalahState({ now: at(6, 1), iqamahs, holdoverMinutes: 15, manualUntil: null, manualClearedAt: null })
     expect(s.active).toBe(false)
   })
+  it('an "End now" during the auto window ends the auto takeover', () => {
+    // Fajr iqamah 5:45, holdover 15 → window 5:45–6:00. now 5:50; admin pressed
+    // End now at 5:48 (no manual trigger involved — manualUntil is null).
+    const s = computeSalahState({
+      now: at(5, 50),
+      iqamahs,
+      holdoverMinutes: 15,
+      manualUntil: null,
+      manualClearedAt: at(5, 48).toISOString(),
+    })
+    expect(s.active).toBe(false)
+  })
+  it('a clear from an earlier window does not suppress a later prayer', () => {
+    // A clear at 5:48 (Fajr) must not suppress the Maghrib window (8:33–8:48).
+    const s = computeSalahState({
+      now: at(20, 40),
+      iqamahs,
+      holdoverMinutes: 15,
+      manualUntil: null,
+      manualClearedAt: at(5, 48).toISOString(),
+    })
+    expect(s.active).toBe(true)
+    expect(s.prayerName).toBe('Maghrib')
+  })
 })
 
 describe('computeSalahState (manual)', () => {

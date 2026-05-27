@@ -337,12 +337,12 @@ export const Tenants: CollectionConfig = {
                   name: 'salahHoldoverMinutes',
                   type: 'number',
                   label: 'Salah holdover (minutes)',
-                  defaultValue: 15,
+                  defaultValue: 5,
                   min: 1,
                   max: 90,
                   admin: {
                     description:
-                      'How long the "Salah in progress" screen stays up after iqamah, for all prayers (1–90). Default 15.',
+                      'How long the "Salah in progress" screen stays up after iqamah, for all prayers (1–90). Default 5.',
                   },
                 },
                 {
