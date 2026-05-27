@@ -37,6 +37,7 @@ export async function POST(req: Request) {
   const data =
     action === 'start'
       ? {
+          kioskBroadcastAt: now.toISOString(),
           prayerDisplay: {
             ...((tenantDoc as any).prayerDisplay ?? {}),
             salahManualUntil: new Date(now.getTime() + holdover * 60_000).toISOString(),
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
           },
         }
       : {
+          kioskBroadcastAt: now.toISOString(),
           prayerDisplay: {
             ...((tenantDoc as any).prayerDisplay ?? {}),
             salahManualClearedAt: now.toISOString(),

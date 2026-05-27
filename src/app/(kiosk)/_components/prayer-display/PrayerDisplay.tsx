@@ -28,10 +28,11 @@ export interface PrayerDisplayProps {
   venueName: string
   displayCity: string | null
   timezone: string
+  jummahTimes: string[]
 }
 
 export default function PrayerDisplay({
-  variant, content, day, venueName, displayCity, timezone,
+  variant, content, day, venueName, displayCity, timezone, jummahTimes,
 }: PrayerDisplayProps) {
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
@@ -41,8 +42,9 @@ export default function PrayerDisplay({
 
   const isFriday = now.getDay() === 5
   const timetable = useMemo(
-    () => (day ? buildTimetable({ day, now, isFriday, jummahTimes: [] }) : { entries: [], nextKey: null }),
-    [day, now, isFriday],
+    () => (day ? buildTimetable({ day, now, isFriday, jummahTimes }) : { entries: [], nextKey: null }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [day, now, isFriday, jummahTimes],
   )
 
   const clock = fmtClock(now)
@@ -54,6 +56,7 @@ export default function PrayerDisplay({
   const eyebrow = content ? EYEBROW[content.kind] : null
 
   return (
+    <div className="pd-stage">
     <div className={`pd-screen pd-${variant}`}>
       <div className="pd-topbar">
         <div className="pd-tb-venue">
@@ -98,6 +101,7 @@ export default function PrayerDisplay({
           )
         })}
       </div>
+    </div>
     </div>
   )
 }

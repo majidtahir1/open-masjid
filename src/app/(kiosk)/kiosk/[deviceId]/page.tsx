@@ -292,6 +292,7 @@ export default function KioskDisplayPage({
             venueName={state.tenant.name}
             displayCity={state.prayerDisplay.displayCity}
             timezone={state.tenant.timezone}
+            jummahTimes={state.prayerTimes?.jummahTimes?.map((j: any) => j.time).filter(Boolean) ?? []}
           />
         )
       case 'carousel':

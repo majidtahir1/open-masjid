@@ -5,6 +5,19 @@
   --pd-quran: var(--font-amiri-quran-loaded), serif;
 }
 
+/* Scale the fixed 1920x1080 frame to fit the actual display (kiosk is fullscreen). */
+.pd-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000;
+}
+.pd-stage > .pd-screen {
+  transform: scale(min(100vw / 1920, 100vh / 1080));
+}
+
 /* Prayer Display variants — refined & reverent, mostly type.
    Each .pd-screen is a 1920x1080 fixed frame (16:9 TV display). */
 
@@ -13,11 +26,7 @@
   height: 1080px;
   position: relative;
   overflow: hidden;
-  font-family: 'Inter', system-ui, sans-serif;
-  --pd-fraunces: 'Fraunces', Georgia, serif;
-  --pd-inter: 'Inter', system-ui, sans-serif;
-  --pd-amiri: 'Amiri', serif;
-  --pd-quran: 'Amiri Quran', 'Amiri', serif;
+  font-family: var(--pd-inter);
   user-select: none;
   -webkit-font-smoothing: antialiased;
 }
