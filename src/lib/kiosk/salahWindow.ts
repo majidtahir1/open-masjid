@@ -35,10 +35,20 @@ export function computeSalahState(args: SalahStateArgs): SalahState {
     }
   }
 
-  // Auto: within holdover minutes after any prayer's iqamah.
+  // Auto: within holdover minutes after any prayer's iqamah — unless an admin
+  // pressed "End now" (manualClearedAt) at or after this prayer's iqamah today,
+  // which ends the takeover for the rest of this window. Without this check the
+  // auto trigger re-asserts "active" on every 5s poll and "End now" appears to
+  // do nothing for an auto-triggered takeover.
   const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60
+  const clearedAt = manualClearedAt ? new Date(manualClearedAt).getTime() : null
   for (const p of iqamahs) {
     if (nowMin >= p.minutes && nowMin < p.minutes + holdoverMinutes) {
+      const windowStart = new Date(now)
+      windowStart.setHours(Math.floor(p.minutes / 60), p.minutes % 60, 0, 0)
+      if (clearedAt !== null && clearedAt >= windowStart.getTime()) {
+        return INACTIVE
+      }
       return { active: true, prayerName: p.name, iqamahLabel: p.label }
     }
   }
