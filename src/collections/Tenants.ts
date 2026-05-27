@@ -305,6 +305,66 @@ export const Tenants: CollectionConfig = {
               ],
             },
             {
+              name: 'prayerDisplay',
+              type: 'group',
+              label: 'Prayer Display',
+              admin: {
+                description: 'Settings for the kiosk prayer display (the lobby TV screen).',
+              },
+              fields: [
+                {
+                  name: 'displayCity',
+                  type: 'text',
+                  label: 'Display city',
+                  admin: {
+                    description:
+                      'Shown under the masjid name on the prayer display, e.g. "Plano, TX". Leave blank to hide.',
+                  },
+                },
+                {
+                  name: 'dwellSeconds',
+                  type: 'number',
+                  label: 'Prayer screen dwell (seconds)',
+                  defaultValue: 10,
+                  min: 5,
+                  max: 60,
+                  admin: {
+                    description:
+                      'How long the prayer screen stays up before the carousel advances (5–60). Default 10.',
+                  },
+                },
+                {
+                  name: 'salahHoldoverMinutes',
+                  type: 'number',
+                  label: 'Salah holdover (minutes)',
+                  defaultValue: 15,
+                  min: 1,
+                  max: 90,
+                  admin: {
+                    description:
+                      'How long the "Salah in progress" screen stays up after iqamah, for all prayers (1–90). Default 15.',
+                  },
+                },
+                {
+                  name: 'salahManualUntil',
+                  type: 'date',
+                  admin: {
+                    hidden: true,
+                    description:
+                      'Set by the "Salah now" admin control; the takeover stays up until this time.',
+                  },
+                },
+                {
+                  name: 'salahManualClearedAt',
+                  type: 'date',
+                  admin: {
+                    hidden: true,
+                    description: 'Set by "End now"; clears an active manual takeover.',
+                  },
+                },
+              ],
+            },
+            {
               name: 'prayerCalc',
               type: 'group',
               label: 'Calculation Method',
@@ -665,6 +725,15 @@ export const Tenants: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'kioskBroadcastAt',
+      type: 'date',
+      label: 'Kiosk Broadcast Timestamp',
+      admin: {
+        hidden: true,
+        description: 'Internal — bumped when admin clicks "Push update to all kiosks".',
+      },
     },
   ],
 }

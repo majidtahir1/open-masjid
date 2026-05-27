@@ -7,6 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
+import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { buildLivePreviewUrl, buildPreviewUrl } from '../lib/previewUrl'
 
@@ -40,7 +41,7 @@ export const Events: CollectionConfig = {
   },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Website',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'tag', '_status', 'startDate', 'featured'],
@@ -62,10 +63,10 @@ export const Events: CollectionConfig = {
     },
   },
   access: {
-    read: tenantScopedRead,
-    create: withBillingLock(tenantScopedCreate),
-    update: withBillingLock(tenantScopedUpdate),
-    delete: withBillingLock(tenantScopedDelete),
+    read: denyKioskManager(tenantScopedRead),
+    create: denyKioskManager(withBillingLock(tenantScopedCreate)),
+    update: denyKioskManager(withBillingLock(tenantScopedUpdate)),
+    delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
     beforeChange: [setTenantFromUser],

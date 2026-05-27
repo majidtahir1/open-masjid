@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScopedAccess } from '../access/tenantScoped'
+import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 /**
@@ -27,7 +28,12 @@ export const DonationFunds: CollectionConfig = {
       },
     },
   },
-  access: tenantScopedAccess(),
+  access: {
+    read: denyKioskManager(tenantScopedAccess().read),
+    create: denyKioskManager(tenantScopedAccess().create),
+    update: denyKioskManager(tenantScopedAccess().update),
+    delete: denyKioskManager(tenantScopedAccess().delete),
+  },
   hooks: {
     beforeChange: [setTenantFromUser],
   },

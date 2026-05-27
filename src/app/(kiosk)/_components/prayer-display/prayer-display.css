@@ -1,0 +1,759 @@
+.pd-screen {
+  --pd-fraunces: var(--font-display-loaded), serif;
+  --pd-inter: var(--font-body-loaded), system-ui, sans-serif;
+  --pd-amiri: var(--font-arabic-loaded), serif;
+  --pd-quran: var(--font-amiri-quran-loaded), serif;
+}
+
+/* Scale-to-fit is handled in JS by PrayerStage.tsx (a pure-CSS
+   `scale(100vw/1920)` yields a length, which transform: scale() ignores). */
+
+/* Prayer Display variants — refined & reverent, mostly type.
+   Each .pd-screen is a 1920x1080 fixed frame (16:9 TV display). */
+
+.pd-screen {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--pd-inter);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   V1 — CREAM QUIET (daytime / editorial)
+   ============================================================ */
+.pd-cream {
+  background: #F0EFE8;
+  color: #0F1E4A;
+}
+.pd-cream::before {
+  /* paper-grain noise overlay */
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(15,30,74,0.04), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(15,30,74,0.03), transparent 60%);
+  pointer-events: none;
+}
+.pd-cream::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.12 0 0 0 0 0.29 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.6;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Shared topbar — same shape across all three so rotation feels coherent.
+   Venue (left) + clock & dates (right). */
+.pd-screen .pd-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 52px 88px 0;
+  font-family: var(--pd-inter);
+}
+.pd-screen .pd-tb-venue {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.pd-screen .pd-tb-name {
+  font-family: var(--pd-fraunces);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1;
+}
+.pd-screen .pd-tb-city {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.pd-screen .pd-tb-right {
+  text-align: right;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.pd-screen .pd-tb-clock {
+  font-family: var(--pd-fraunces);
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  font-feature-settings: "tnum";
+}
+.pd-screen .pd-tb-clock sup {
+  font-size: 0.46em;
+  font-weight: 400;
+  margin-left: 4px;
+  opacity: 0.5;
+  vertical-align: top;
+  text-transform: lowercase;
+}
+.pd-screen .pd-tb-dates {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.pd-screen .pd-tb-dates .pd-dot {
+  display: inline-block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  margin: 0 10px 3px;
+  vertical-align: middle;
+  opacity: 0.7;
+}
+
+/* Cream topbar palette */
+.pd-cream .pd-topbar { color: #0F1E4A; }
+.pd-cream .pd-tb-dates .pd-dot { background: #D9A84E; opacity: 1; }
+
+/* Night topbar palette */
+.pd-night .pd-topbar { color: #F0EFE8; }
+.pd-night .pd-tb-dates .pd-dot { background: #5CB8C3; opacity: 1; }
+
+/* Mihrab topbar palette */
+.pd-mihrab .pd-topbar { color: #0F1E4A; }
+.pd-mihrab .pd-tb-dates .pd-dot { background: #D9A84E; opacity: 1; }
+
+/* Cream hero — Bismillah */
+.pd-cream .pd-hero {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 200px 120px 0;
+}
+.pd-cream .pd-bismillah {
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 168px;
+  line-height: 1.9;
+  color: #0F1E4A;
+  font-weight: 400;
+  letter-spacing: 0;
+  padding-bottom: 36px;
+}
+.pd-cream .pd-bismillah-translit {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1.4;
+  color: rgba(15,30,74,0.55);
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* Bottom timetable for V1 */
+.pd-cream .pd-timetable {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 360px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  z-index: 3;
+  border-top: 1px solid rgba(15,30,74,0.12);
+}
+.pd-cream .pd-prayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  position: relative;
+  text-align: center;
+  border-right: 1px solid rgba(15,30,74,0.08);
+}
+.pd-cream .pd-prayer:last-child { border-right: 0; }
+.pd-cream .pd-prayer-ar {
+  font-family: var(--pd-amiri);
+  font-size: 40px;
+  color: rgba(15,30,74,0.55);
+  font-weight: 400;
+  margin-bottom: 6px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+}
+.pd-cream .pd-prayer-name {
+  font-family: var(--pd-fraunces);
+  font-weight: 400;
+  font-size: 36px;
+  letter-spacing: -0.01em;
+  color: rgba(15,30,74,0.7);
+  margin-bottom: 14px;
+}
+.pd-cream .pd-prayer-adhan {
+  font-family: var(--pd-fraunces);
+  font-weight: 400;
+  font-size: 76px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #0F1E4A;
+  font-feature-settings: "tnum";
+}
+.pd-cream .pd-prayer-adhan sup {
+  font-size: 0.42em;
+  font-weight: 400;
+  vertical-align: middle;
+  margin-left: 4px;
+  color: rgba(15,30,74,0.5);
+  text-transform: lowercase;
+}
+.pd-cream .pd-prayer-iqamah {
+  font-family: var(--pd-inter);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(15,30,74,0.45);
+  margin-top: 18px;
+  font-feature-settings: "tnum";
+}
+
+/* Next-prayer subtle highlight */
+.pd-cream .pd-prayer.is-next {
+  background: rgba(217,168,78,0.06);
+}
+.pd-cream .pd-prayer.is-next .pd-prayer-name,
+.pd-cream .pd-prayer.is-next .pd-prayer-adhan { color: #0F1E4A; }
+.pd-cream .pd-prayer.is-next .pd-prayer-iqamah { color: #9A7428; }
+.pd-cream .pd-prayer.is-next::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: 24px; right: 24px;
+  height: 2px;
+  background: #D9A84E;
+}
+.pd-cream .pd-next-tag {
+  position: absolute;
+  top: 20px; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--pd-inter);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #9A7428;
+}
+
+/* ============================================================
+   V2 — NIGHT HALL (deep navy, evening)
+   ============================================================ */
+.pd-night {
+  background: #050B22;
+  color: #F0EFE8;
+}
+.pd-night::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(60,164,178,0.10), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(15,30,74,0.6), transparent 70%);
+}
+/* Subtle 8-point-star geometric watermark */
+.pd-night::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><g fill='none' stroke='rgba(217,168,78,0.06)' stroke-width='0.8'><rect x='45' y='45' width='90' height='90' transform='rotate(0 90 90)'/><rect x='45' y='45' width='90' height='90' transform='rotate(45 90 90)'/></g></svg>");
+  background-size: 180px 180px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.pd-night .pd-hero {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 200px 160px 0;
+}
+.pd-night .pd-verse-eyebrow {
+  font-family: var(--pd-inter);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #5CB8C3;
+  margin-bottom: 28px;
+}
+.pd-night .pd-verse {
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 96px;
+  line-height: 1.7;
+  color: #F0EFE8;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.pd-night .pd-verse-translation {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.5;
+  color: rgba(240,239,232,0.78);
+  margin-top: 36px;
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: 0.005em;
+}
+.pd-night .pd-verse-cite {
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D9A84E;
+  margin-top: 28px;
+}
+
+/* Timetable for V2 — quiet bottom band */
+.pd-night .pd-timetable {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 320px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  z-index: 3;
+}
+.pd-night .pd-timetable::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 96px; right: 96px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217,168,78,0.35), transparent);
+}
+.pd-night .pd-prayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  position: relative;
+  text-align: center;
+}
+.pd-night .pd-prayer-ar {
+  font-family: var(--pd-amiri);
+  font-size: 36px;
+  color: rgba(92,184,195,0.7);
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+.pd-night .pd-prayer-name {
+  font-family: var(--pd-fraunces);
+  font-weight: 300;
+  font-size: 30px;
+  letter-spacing: 0.04em;
+  color: rgba(240,239,232,0.65);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.pd-night .pd-prayer-adhan {
+  font-family: var(--pd-fraunces);
+  font-weight: 300;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #F0EFE8;
+  font-feature-settings: "tnum";
+}
+.pd-night .pd-prayer-adhan sup {
+  font-size: 0.4em;
+  font-weight: 300;
+  margin-left: 4px;
+  color: rgba(240,239,232,0.5);
+  vertical-align: middle;
+  text-transform: lowercase;
+}
+.pd-night .pd-prayer-iqamah {
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(240,239,232,0.4);
+  margin-top: 16px;
+  font-feature-settings: "tnum";
+}
+
+.pd-night .pd-prayer.is-next .pd-prayer-name {
+  color: #D9A84E;
+}
+.pd-night .pd-prayer.is-next .pd-prayer-adhan {
+  color: #F6E6BF;
+  text-shadow: 0 0 60px rgba(217,168,78,0.4);
+}
+.pd-night .pd-prayer.is-next .pd-prayer-iqamah { color: rgba(217,168,78,0.7); }
+.pd-night .pd-prayer.is-next .pd-prayer-ar { color: #D9A84E; }
+.pd-night .pd-next-tag {
+  position: absolute;
+  top: 22px; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--pd-inter);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #D9A84E;
+}
+
+/* ============================================================
+   V3 — MIHRAB (cream with subtle arch motif)
+   ============================================================ */
+.pd-mihrab {
+  background: linear-gradient(180deg, #F4F1E8 0%, #EDE9DE 100%);
+  color: #0F1E4A;
+}
+.pd-mihrab::before {
+  /* Mihrab arch silhouette */
+  content: "";
+  position: absolute;
+  top: 156px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 720px;
+  height: 580px;
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 100%, rgba(15,30,74,0.04), transparent 70%);
+  border-radius: 360px 360px 14px 14px / 380px 380px 14px 14px;
+  border: 1.5px solid rgba(15,30,74,0.18);
+  pointer-events: none;
+}
+.pd-mihrab::after {
+  content: "";
+  position: absolute;
+  top: 170px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 686px;
+  height: 552px;
+  border-radius: 343px 343px 8px 8px / 360px 360px 8px 8px;
+  border: 1px solid rgba(217,168,78,0.35);
+  pointer-events: none;
+}
+
+.pd-mihrab .pd-hero {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 220px 120px 0;
+}
+.pd-mihrab .pd-hadith-ar {
+  font-family: var(--pd-amiri);
+  direction: rtl;
+  font-size: 80px;
+  line-height: 1.7;
+  color: #0F1E4A;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.pd-mihrab .pd-hadith-tr {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.5;
+  color: rgba(15,30,74,0.7);
+  margin-top: 36px;
+  max-width: 820px;
+  margin-left: auto; margin-right: auto;
+}
+.pd-mihrab .pd-hadith-cite {
+  font-family: var(--pd-inter);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #9A7428;
+  margin-top: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.pd-mihrab .pd-hadith-cite::before,
+.pd-mihrab .pd-hadith-cite::after {
+  content: "";
+  width: 32px; height: 1px;
+  background: rgba(154,116,40,0.4);
+}
+
+/* Timetable for V3 */
+.pd-mihrab .pd-timetable {
+  position: absolute;
+  bottom: 60px; left: 96px; right: 96px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  z-index: 3;
+  border-top: 1px solid rgba(15,30,74,0.18);
+  padding-top: 36px;
+}
+.pd-mihrab .pd-prayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 16px 0;
+  position: relative;
+  text-align: center;
+}
+.pd-mihrab .pd-prayer-ar {
+  font-family: var(--pd-amiri);
+  font-size: 28px;
+  color: rgba(15,30,74,0.45);
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+.pd-mihrab .pd-prayer-name {
+  font-family: var(--pd-fraunces);
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: -0.005em;
+  color: rgba(15,30,74,0.65);
+  margin-bottom: 10px;
+}
+.pd-mihrab .pd-prayer-adhan {
+  font-family: var(--pd-fraunces);
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #0F1E4A;
+  font-feature-settings: "tnum";
+}
+.pd-mihrab .pd-prayer-adhan sup {
+  font-size: 0.4em;
+  font-weight: 400;
+  margin-left: 4px;
+  color: rgba(15,30,74,0.5);
+  vertical-align: middle;
+}
+.pd-mihrab .pd-prayer-iqamah {
+  font-family: var(--pd-inter);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(15,30,74,0.45);
+  margin-top: 12px;
+  font-feature-settings: "tnum";
+}
+.pd-mihrab .pd-prayer.is-next::before {
+  content: "";
+  position: absolute;
+  top: -37px;
+  left: 50%; transform: translateX(-50%);
+  width: 8px; height: 8px;
+  background: #D9A84E;
+  border-radius: 50%;
+}
+.pd-mihrab .pd-prayer.is-next .pd-prayer-name { color: #0F1E4A; }
+.pd-mihrab .pd-prayer.is-next .pd-prayer-adhan { color: #0F1E4A; }
+.pd-mihrab .pd-prayer.is-next .pd-prayer-iqamah { color: #9A7428; }
+
+/* ============================================================
+   V4 — SALAH IN PROGRESS (takeover state)
+   ============================================================ */
+.pd-salah {
+  background: #050B22;
+  color: #F0EFE8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.pd-salah::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(60,164,178,0.10), transparent 70%);
+}
+.pd-salah-ornament {
+  position: relative; z-index: 2;
+  font-family: var(--pd-amiri);
+  font-size: 56px;
+  color: rgba(217,168,78,0.7);
+  margin-bottom: 40px;
+  letter-spacing: 0.4em;
+}
+.pd-salah-call {
+  position: relative; z-index: 2;
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 132px;
+  line-height: 1.5;
+  color: #F0EFE8;
+  font-weight: 400;
+  letter-spacing: 0;
+  animation: pd-breathe 6s ease-in-out infinite;
+}
+.pd-salah-title {
+  position: relative; z-index: 2;
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 56px;
+  color: rgba(240,239,232,0.85);
+  margin-top: 56px;
+  letter-spacing: 0.005em;
+}
+.pd-salah-sub {
+  position: relative; z-index: 2;
+  font-family: var(--pd-inter);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: rgba(240,239,232,0.45);
+  margin-top: 28px;
+}
+.pd-salah-prayer {
+  position: absolute;
+  top: 64px;
+  left: 0; right: 0;
+  text-align: center;
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #5CB8C3;
+  z-index: 3;
+}
+.pd-salah-prayer b {
+  display: block;
+  font-family: var(--pd-fraunces);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #F0EFE8;
+  margin-top: 12px;
+}
+
+@keyframes pd-breathe {
+  0%, 100% { opacity: 0.92; }
+  50% { opacity: 1; }
+}
+
+/* ============================================================
+   Generic hero aliases — the production component renders one
+   hero shape (.pd-hero-arabic / .pd-hero-english / .pd-hero-cite)
+   for every variant; these rules reproduce the original
+   variant-specific hero styling onto the generic classes.
+   ============================================================ */
+
+/* --- Cream aliases (originally .pd-bismillah / .pd-bismillah-translit) --- */
+.pd-cream .pd-hero-arabic {
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 96px;
+  line-height: 1.9;
+  color: #0F1E4A;
+  font-weight: 400;
+  letter-spacing: 0;
+  padding-bottom: 36px;
+}
+.pd-cream .pd-hero-english {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1.4;
+  color: rgba(15,30,74,0.55);
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+/* Cream had no original citation rule; use Night's cite treatment as reasonable default */
+.pd-cream .pd-hero-cite {
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D9A84E;
+  margin-top: 28px;
+}
+
+/* --- Night aliases (originally .pd-verse / .pd-verse-translation / .pd-verse-cite) --- */
+/* Note: .pd-night .pd-verse-eyebrow already exists in the CSS above and is reused as-is
+   by the component (the class name is identical), so no alias needed for eyebrow. */
+.pd-night .pd-hero-arabic {
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 96px;
+  line-height: 1.7;
+  color: #F0EFE8;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.pd-night .pd-hero-english {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.5;
+  color: rgba(240,239,232,0.78);
+  margin-top: 36px;
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: 0.005em;
+}
+.pd-night .pd-hero-cite {
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D9A84E;
+  margin-top: 28px;
+}
+
+/* --- Mihrab aliases (originally .pd-hadith-ar / .pd-hadith-tr / .pd-hadith-cite) --- */
+.pd-mihrab .pd-hero-arabic {
+  font-family: var(--pd-amiri);
+  direction: rtl;
+  font-size: 80px;
+  line-height: 1.7;
+  color: #0F1E4A;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.pd-mihrab .pd-hero-english {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.5;
+  color: rgba(15,30,74,0.7);
+  margin-top: 36px;
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pd-mihrab .pd-hero-cite {
+  font-family: var(--pd-inter);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #9A7428;
+  margin-top: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.pd-mihrab .pd-hero-cite::before,
+.pd-mihrab .pd-hero-cite::after {
+  content: "";
+  width: 32px;
+  height: 1px;
+  background: rgba(154,116,40,0.4);
+}

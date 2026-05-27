@@ -11,12 +11,33 @@ interface PayloadLike {
     sort?: string | string[]
     overrideAccess?: boolean
     draft?: boolean
-  }) => Promise<{ docs: unknown[] }>
+    user?: unknown
+  }) => Promise<{ docs: any[] }>
   findByID: (args: {
     collection: string
     id: string | number
     overrideAccess?: boolean
-  }) => Promise<unknown>
+    user?: unknown
+  }) => Promise<any>
+  create: (args: {
+    collection: string
+    data: Record<string, unknown>
+    file?: { data: Buffer; mimetype: string; name: string; size: number }
+    overrideAccess?: boolean
+    req?: unknown
+    user?: unknown
+  }) => Promise<any>
+  update: (args: {
+    collection: string
+    id: string | number
+    data: Record<string, unknown>
+    file?: { data: Buffer; mimetype: string; name: string; size: number }
+    overrideAccess?: boolean
+    req?: unknown
+    user?: unknown
+  }) => Promise<any>
+  auth: (args: { headers: Headers }) => Promise<{ user: unknown }>
+  logger: { error: (...args: unknown[]) => void; info?: (...args: unknown[]) => void }
 }
 
 let payloadClientPromise: Promise<PayloadLike | null> | null = null

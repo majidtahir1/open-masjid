@@ -8,17 +8,23 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Announcements } from './collections/Announcements'
+import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
 import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
 import { HeroSlides } from './collections/HeroSlides'
+import { Kiosks } from './collections/Kiosks'
+import { SponsorSlides } from './collections/SponsorSlides'
+import { WeeklyEventsSlides } from './collections/WeeklyEventsSlides'
 import { Media } from './collections/Media'
 import { Forms } from './collections/Forms'
 import { FormSubmissions } from './collections/FormSubmissions'
 import { Pages } from './collections/Pages'
+import { PrayerDisplayContent } from './collections/PrayerDisplayContent'
 import { PrayerSchedules } from './collections/PrayerSchedules'
+import { QRCodes } from './collections/QRCodes'
 import { Services } from './collections/Services'
 import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
@@ -115,8 +121,14 @@ export default buildConfig({
   // (Library hidden), (People hidden), (Site hidden via HideTenantsNav).
   collections: [
     PrayerSchedules,
+    PrayerDisplayContent,
     Events,
     HeroSlides,
+    CarouselSlides,
+    SponsorSlides,
+    WeeklyEventsSlides,
+    Kiosks,
+    QRCodes,
     Announcements,
     Services,
     Pages,

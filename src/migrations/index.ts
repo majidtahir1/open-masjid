@@ -16,6 +16,13 @@ import * as migration_20260506_033040 from './20260506_033040';
 import * as migration_20260506_033322 from './20260506_033322';
 import * as migration_20260506_142348___name from './20260506_142348___name';
 import * as migration_20260507_042454 from './20260507_042454';
+import * as migration_20260514_181910_kiosks_collection from './20260514_181910_kiosks_collection';
+import * as migration_20260514_182235_slide_collections from './20260514_182235_slide_collections';
+import * as migration_20260514_182517_qr_codes_collection from './20260514_182517_qr_codes_collection';
+import * as migration_20260514_204832_expand_background_theme_enum from './20260514_204832_expand_background_theme_enum';
+import * as migration_20260514_205028_background_theme_to_text from './20260514_205028_background_theme_to_text';
+import * as migration_20260515_042807_kiosk_current_slide from './20260515_042807_kiosk_current_slide';
+import * as migration_20260527_052028 from './20260527_052028';
 
 export const migrations = [
   {
@@ -106,6 +113,41 @@ export const migrations = [
   {
     up: migration_20260507_042454.up,
     down: migration_20260507_042454.down,
-    name: '20260507_042454'
+    name: '20260507_042454',
+  },
+  {
+    up: migration_20260514_181910_kiosks_collection.up,
+    down: migration_20260514_181910_kiosks_collection.down,
+    name: '20260514_181910_kiosks_collection',
+  },
+  {
+    up: migration_20260514_182235_slide_collections.up,
+    down: migration_20260514_182235_slide_collections.down,
+    name: '20260514_182235_slide_collections',
+  },
+  {
+    up: migration_20260514_182517_qr_codes_collection.up,
+    down: migration_20260514_182517_qr_codes_collection.down,
+    name: '20260514_182517_qr_codes_collection',
+  },
+  {
+    up: migration_20260514_204832_expand_background_theme_enum.up,
+    down: migration_20260514_204832_expand_background_theme_enum.down,
+    name: '20260514_204832_expand_background_theme_enum',
+  },
+  {
+    up: migration_20260514_205028_background_theme_to_text.up,
+    down: migration_20260514_205028_background_theme_to_text.down,
+    name: '20260514_205028_background_theme_to_text',
+  },
+  {
+    up: migration_20260515_042807_kiosk_current_slide.up,
+    down: migration_20260515_042807_kiosk_current_slide.down,
+    name: '20260515_042807_kiosk_current_slide',
+  },
+  {
+    up: migration_20260527_052028.up,
+    down: migration_20260527_052028.down,
+    name: '20260527_052028'
   },
 ];

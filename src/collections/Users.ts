@@ -253,10 +253,11 @@ export const Users: CollectionConfig = {
         { label: 'Platform Owner (manages all tenants)', value: 'platformOwner' },
         { label: 'Admin (full access within one tenant)', value: 'admin' },
         { label: 'Staff (content only within one tenant)', value: 'staff' },
+        { label: 'Kiosk Manager (kiosk content only within one tenant)', value: 'kioskManager' },
       ],
       admin: {
         description:
-          'Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.',
+          'Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content.',
         components: {
           Field: '/src/fields/SelectField#default',
         },

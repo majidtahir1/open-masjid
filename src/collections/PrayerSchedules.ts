@@ -7,7 +7,9 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
+import { allowKioskManagerRead, denyKioskManager } from '../access/kioskRoles'
 import { autoRegeneratePrayerDays } from '../hooks/autoRegeneratePrayerDays'
+import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { trimDaysToRange } from '../hooks/trimDaysToRange'
 
@@ -101,13 +103,14 @@ export const PrayerSchedules: CollectionConfig = {
   },
   defaultSort: '-startDate',
   access: {
-    read: tenantScopedRead,
-    create: withBillingLock(tenantScopedCreate),
-    update: withBillingLock(tenantScopedUpdate),
-    delete: withBillingLock(tenantScopedDelete),
+    read: allowKioskManagerRead(tenantScopedRead),
+    create: denyKioskManager(withBillingLock(tenantScopedCreate)),
+    update: denyKioskManager(withBillingLock(tenantScopedUpdate)),
+    delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
     beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays],
+    afterChange: [bumpKioskBroadcast],
   },
   fields: [
     {

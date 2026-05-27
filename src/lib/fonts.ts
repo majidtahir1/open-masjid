@@ -1,4 +1,4 @@
-import { Fraunces, Inter, Amiri } from 'next/font/google'
+import { Fraunces, Inter, Amiri, Amiri_Quran } from 'next/font/google'
 
 /**
  * OpenMasjid fonts, loaded via next/font/google (self-hosted, no runtime
@@ -30,4 +30,11 @@ export const amiri = Amiri({
   variable: '--font-arabic-loaded',
   display: 'swap',
   weight: ['400', '700'],
+})
+
+export const amiriQuran = Amiri_Quran({
+  subsets: ['arabic'],
+  variable: '--font-amiri-quran-loaded',
+  display: 'swap',
+  weight: '400',
 })

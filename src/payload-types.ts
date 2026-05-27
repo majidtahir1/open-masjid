@@ -68,8 +68,14 @@ export interface Config {
   blocks: {};
   collections: {
     'prayer-schedules': PrayerSchedule;
+    'prayer-display-content': PrayerDisplayContent;
     events: Event;
     'hero-slides': HeroSlide;
+    'carousel-slides': CarouselSlide;
+    'sponsor-slides': SponsorSlide;
+    'weekly-events-slides': WeeklyEventsSlide;
+    kiosks: Kiosk;
+    'qr-codes': QrCode;
     announcements: Announcement;
     services: Service;
     pages: Page;
@@ -91,8 +97,14 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
+    'prayer-display-content': PrayerDisplayContentSelect<false> | PrayerDisplayContentSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
+    'carousel-slides': CarouselSlidesSelect<false> | CarouselSlidesSelect<true>;
+    'sponsor-slides': SponsorSlidesSelect<false> | SponsorSlidesSelect<true>;
+    'weekly-events-slides': WeeklyEventsSlidesSelect<false> | WeeklyEventsSlidesSelect<true>;
+    kiosks: KiosksSelect<false> | KiosksSelect<true>;
+    'qr-codes': QrCodesSelect<false> | QrCodesSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -330,6 +342,31 @@ export interface Tenant {
     timezone?: string | null;
   };
   /**
+   * Settings for the kiosk prayer display (the lobby TV screen).
+   */
+  prayerDisplay?: {
+    /**
+     * Shown under the masjid name on the prayer display, e.g. "Plano, TX". Leave blank to hide.
+     */
+    displayCity?: string | null;
+    /**
+     * How long the prayer screen stays up before the carousel advances (5–60). Default 10.
+     */
+    dwellSeconds?: number | null;
+    /**
+     * How long the "Salah in progress" screen stays up after iqamah, for all prayers (1–90). Default 15.
+     */
+    salahHoldoverMinutes?: number | null;
+    /**
+     * Set by the "Salah now" admin control; the takeover stays up until this time.
+     */
+    salahManualUntil?: string | null;
+    /**
+     * Set by "End now"; clears an active manual takeover.
+     */
+    salahManualClearedAt?: string | null;
+  };
+  /**
    * Select the calculation convention your community follows. ISNA is the default in North America.
    */
   prayerCalc?: {
@@ -446,6 +483,10 @@ export interface Tenant {
    * Set when the user dismisses the celebratory screen.
    */
   onboardingCompletedAt?: string | null;
+  /**
+   * Internal — bumped when admin clicks "Push update to all kiosks".
+   */
+  kioskBroadcastAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -502,6 +543,38 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Verses, hadith, and du’as shown in the hero of the prayer display. Any entry can appear on any of the three looks. Changes auto-broadcast to kiosks on save.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prayer-display-content".
+ */
+export interface PrayerDisplayContent {
+  id: number;
+  /**
+   * A label only — it drives the small eyebrow text, not which look shows it.
+   */
+  kind: 'ayah' | 'hadith' | 'dua' | 'bismillah';
+  /**
+   * Arabic text with diacritics. Required.
+   */
+  arabic: string;
+  /**
+   * Required.
+   */
+  english: string;
+  /**
+   * Free-form, e.g. "Surah An-Nisāʿ · 4:103" or "Ṣaḥīḥ al-Bukhārī".
+   */
+  citation?: string | null;
+  /**
+   * Off → removed from the rotation pool immediately on save.
+   */
+  active?: boolean | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Classes, programs, and gatherings. Published events appear on the public Events page; featured events also appear in the homepage hero.
@@ -734,6 +807,270 @@ export interface HeroSlide {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Slides shown in rotation on the kiosk carousel. Changes auto-broadcast to all kiosks on save.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel-slides".
+ */
+export interface CarouselSlide {
+  id: number;
+  /**
+   * Hidden on the kiosk when an image is attached below.
+   */
+  title: string;
+  /**
+   * Optional supporting line shown under the title.
+   */
+  details1?: string | null;
+  /**
+   * Optional second supporting line.
+   */
+  details2?: string | null;
+  /**
+   * Optional. Pick from the Media library or upload. When set, this image renders full-screen and the title is hidden.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Optional. Pick from the QR Code library — congregants can scan.
+   */
+  qrCode?: (number | null) | QrCode;
+  /**
+   * Visual treatment when no image is attached. Themes are defined in islamicThemes.ts — adding one there does not require a migration.
+   */
+  backgroundTheme?: string | null;
+  /**
+   * Tucks a small next-prayer countdown into the corner of the slide.
+   */
+  prayerTimingsEnabled?: boolean | null;
+  /**
+   * Time on screen in milliseconds (5000–60000). 10000 = 10 seconds.
+   */
+  displayDurationMs?: number | null;
+  /**
+   * Off → slide is removed from rotation immediately on save.
+   */
+  active?: boolean | null;
+  /**
+   * Off → keep the record but hide it from kiosks.
+   */
+  showInCarousel?: boolean | null;
+  /**
+   * Higher numbers appear earlier in the rotation (0–10).
+   */
+  priority?: number | null;
+  /**
+   * Optional. Slide stays hidden until this date.
+   */
+  startDate?: string | null;
+  /**
+   * Optional. Slide auto-hides after this date.
+   */
+  endDate?: string | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Reusable QR codes attached to carousel and sponsor slides. Changes auto-broadcast to all kiosks on save.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qr-codes".
+ */
+export interface QrCode {
+  id: number;
+  /**
+   * How you find this QR later. Not shown to congregants.
+   */
+  label: string;
+  /**
+   * Where congregants land when they scan.
+   */
+  targetUrl: string;
+  /**
+   * Auto-generated. Refresh after save to see the PNG.
+   */
+  generatedImage?: (number | null) | Media;
+  /**
+   * Hex format: #RRGGBB
+   */
+  fgColor?: string | null;
+  /**
+   * Hex format: #RRGGBB
+   */
+  bgColor?: string | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Advertiser / sponsor slides shown on the kiosk carousel. Changes auto-broadcast to all kiosks on save.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsor-slides".
+ */
+export interface SponsorSlide {
+  id: number;
+  title: string;
+  /**
+   * Short subtitle shown below the company name.
+   */
+  tagline?: string | null;
+  /**
+   * Sponsor logo. Transparent PNG recommended.
+   */
+  logo?: (number | null) | Media;
+  details1?: string | null;
+  details2?: string | null;
+  details3?: string | null;
+  contactPhone?: string | null;
+  contactAddress?: string | null;
+  contactWebsite?: string | null;
+  /**
+   * Short button-like text, e.g. "Visit us" or "Order online".
+   */
+  ctaText?: string | null;
+  /**
+   * Optional. Pick from the QR Code library.
+   */
+  qrCode?: (number | null) | QrCode;
+  /**
+   * Layout for the slide. Each renders the same fields differently.
+   */
+  layoutTemplate: 'logo-left' | 'logo-top-centered' | 'logo-dominant' | 'split-screen';
+  /**
+   * How the slide background is filled.
+   */
+  backgroundStyle?: ('gradient' | 'solid' | 'brand-primary' | 'brand-secondary') | null;
+  /**
+   * Hex format: #RRGGBB
+   */
+  brandColorPrimary?: string | null;
+  /**
+   * Hex format: #RRGGBB
+   */
+  brandColorSecondary?: string | null;
+  active?: boolean | null;
+  /**
+   * Higher numbers appear earlier in the rotation (0–10).
+   */
+  priority?: number | null;
+  /**
+   * Time on screen in milliseconds (5000–60000).
+   */
+  displayDurationMs?: number | null;
+  /**
+   * Optional.
+   */
+  startDate?: string | null;
+  /**
+   * Optional.
+   */
+  endDate?: string | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Recurring weekly schedule shown on the kiosk. Changes auto-broadcast to all kiosks on save.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "weekly-events-slides".
+ */
+export interface WeeklyEventsSlide {
+  id: number;
+  /**
+   * Heading shown on the slide.
+   */
+  title: string;
+  entries?:
+    | {
+        day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+        time: string;
+        /**
+         * e.g. "Quran Class with Sh. Ahmad"
+         */
+        name: string;
+        /**
+         * Optional. e.g. "Hall A"
+         */
+        location?: string | null;
+        /**
+         * Optional. e.g. "Sisters" or "Youth"
+         */
+        audience?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  active?: boolean | null;
+  /**
+   * Time on screen in milliseconds. Default 15000 (15s).
+   */
+  displayDurationMs?: number | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Physical display screens. Pair a new kiosk by typing the code shown on its screen into the Pairing Code field below.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kiosks".
+ */
+export interface Kiosk {
+  id: number;
+  name: string;
+  location?: string | null;
+  status?: ('UNPAIRED' | 'ONLINE' | 'OFFLINE' | 'MAINTENANCE') | null;
+  /**
+   * Type the 6-character code shown on the kiosk screen here, then save. Format: ABC-123.
+   */
+  pairingCode?: string | null;
+  deviceId?: string | null;
+  secretHash?: string | null;
+  pairingCodeExpiresAt?: string | null;
+  lastSeenAt?: string | null;
+  lastSeenIp?: string | null;
+  userAgent?: string | null;
+  kioskPushAt?: string | null;
+  /**
+   * Last slide reported by this kiosk. Updates every time the kiosk advances.
+   */
+  currentSlide?: {
+    title?: string | null;
+    type?: string | null;
+    index?: number | null;
+    total?: number | null;
+    durationMs?: number | null;
+    startedAt?: string | null;
+  };
+  /**
+   * When on, this kiosk shows only the slides selected below.
+   */
+  overrideEnabled?: boolean | null;
+  /**
+   * Specific slides this kiosk should show (when override is on).
+   */
+  slideOverrides?:
+    | (
+        | {
+            relationTo: 'carousel-slides';
+            value: number | CarouselSlide;
+          }
+        | {
+            relationTo: 'sponsor-slides';
+            value: number | SponsorSlide;
+          }
+        | {
+            relationTo: 'weekly-events-slides';
+            value: number | WeeklyEventsSlide;
+          }
+      )[]
+    | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Short-lived notices shown at the top of the public site (closures, schedule changes, reminders). Use Events for programs; use Announcements for quick updates.
@@ -1235,9 +1572,9 @@ export interface User {
    */
   lastName: string;
   /**
-   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users.
+   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content.
    */
-  role: 'platformOwner' | 'admin' | 'staff';
+  role: 'platformOwner' | 'admin' | 'staff' | 'kioskManager';
   /**
    * Which masjid this user belongs to. Required for Admin and Staff; leave blank for Platform Owner (they access every tenant). Only a Platform Owner can change this field.
    */
@@ -1386,12 +1723,36 @@ export interface PayloadLockedDocument {
         value: number | PrayerSchedule;
       } | null)
     | ({
+        relationTo: 'prayer-display-content';
+        value: number | PrayerDisplayContent;
+      } | null)
+    | ({
         relationTo: 'events';
         value: number | Event;
       } | null)
     | ({
         relationTo: 'hero-slides';
         value: number | HeroSlide;
+      } | null)
+    | ({
+        relationTo: 'carousel-slides';
+        value: number | CarouselSlide;
+      } | null)
+    | ({
+        relationTo: 'sponsor-slides';
+        value: number | SponsorSlide;
+      } | null)
+    | ({
+        relationTo: 'weekly-events-slides';
+        value: number | WeeklyEventsSlide;
+      } | null)
+    | ({
+        relationTo: 'kiosks';
+        value: number | Kiosk;
+      } | null)
+    | ({
+        relationTo: 'qr-codes';
+        value: number | QrCode;
       } | null)
     | ({
         relationTo: 'announcements';
@@ -1580,6 +1941,20 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prayer-display-content_select".
+ */
+export interface PrayerDisplayContentSelect<T extends boolean = true> {
+  kind?: T;
+  arabic?: T;
+  english?: T;
+  citation?: T;
+  active?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "events_select".
  */
 export interface EventsSelect<T extends boolean = true> {
@@ -1655,6 +2030,125 @@ export interface HeroSlidesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carousel-slides_select".
+ */
+export interface CarouselSlidesSelect<T extends boolean = true> {
+  title?: T;
+  details1?: T;
+  details2?: T;
+  image?: T;
+  qrCode?: T;
+  backgroundTheme?: T;
+  prayerTimingsEnabled?: T;
+  displayDurationMs?: T;
+  active?: T;
+  showInCarousel?: T;
+  priority?: T;
+  startDate?: T;
+  endDate?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsor-slides_select".
+ */
+export interface SponsorSlidesSelect<T extends boolean = true> {
+  title?: T;
+  tagline?: T;
+  logo?: T;
+  details1?: T;
+  details2?: T;
+  details3?: T;
+  contactPhone?: T;
+  contactAddress?: T;
+  contactWebsite?: T;
+  ctaText?: T;
+  qrCode?: T;
+  layoutTemplate?: T;
+  backgroundStyle?: T;
+  brandColorPrimary?: T;
+  brandColorSecondary?: T;
+  active?: T;
+  priority?: T;
+  displayDurationMs?: T;
+  startDate?: T;
+  endDate?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "weekly-events-slides_select".
+ */
+export interface WeeklyEventsSlidesSelect<T extends boolean = true> {
+  title?: T;
+  entries?:
+    | T
+    | {
+        day?: T;
+        time?: T;
+        name?: T;
+        location?: T;
+        audience?: T;
+        id?: T;
+      };
+  active?: T;
+  displayDurationMs?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kiosks_select".
+ */
+export interface KiosksSelect<T extends boolean = true> {
+  name?: T;
+  location?: T;
+  status?: T;
+  pairingCode?: T;
+  deviceId?: T;
+  secretHash?: T;
+  pairingCodeExpiresAt?: T;
+  lastSeenAt?: T;
+  lastSeenIp?: T;
+  userAgent?: T;
+  kioskPushAt?: T;
+  currentSlide?:
+    | T
+    | {
+        title?: T;
+        type?: T;
+        index?: T;
+        total?: T;
+        durationMs?: T;
+        startedAt?: T;
+      };
+  overrideEnabled?: T;
+  slideOverrides?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qr-codes_select".
+ */
+export interface QrCodesSelect<T extends boolean = true> {
+  label?: T;
+  targetUrl?: T;
+  generatedImage?: T;
+  fgColor?: T;
+  bgColor?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1989,6 +2483,15 @@ export interface TenantsSelect<T extends boolean = true> {
         lng?: T;
         timezone?: T;
       };
+  prayerDisplay?:
+    | T
+    | {
+        displayCity?: T;
+        dwellSeconds?: T;
+        salahHoldoverMinutes?: T;
+        salahManualUntil?: T;
+        salahManualClearedAt?: T;
+      };
   prayerCalc?:
     | T
     | {
@@ -2040,6 +2543,7 @@ export interface TenantsSelect<T extends boolean = true> {
         donations?: T;
       };
   onboardingCompletedAt?: T;
+  kioskBroadcastAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
