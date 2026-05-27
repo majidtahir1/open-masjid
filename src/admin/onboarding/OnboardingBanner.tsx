@@ -1,5 +1,3 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import Link from 'next/link'
 import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
 import {
@@ -15,14 +13,16 @@ function tenantIdOf(t: unknown): string | number | null {
 }
 
 export default async function OnboardingBanner() {
-  const { user } = await getAdminUser()
+  const { user, payload } = await getAdminUser()
   if (!user || user.role !== 'admin') return null
   const tenantId = tenantIdOf((user as { tenant?: unknown }).tenant)
   if (!tenantId) return null
 
   const tenantDoc = (await getAdminTenant(tenantId)) as unknown as Record<string, unknown>
 
-  const payload = await getPayload({ config })
+  // Reuse the cached Payload instance from getAdminUser() — instantiating a
+  // second one (getPayload({ config })) on every admin page was redundant work
+  // and, in the bundled standalone build, risked a second Payload init + pool.
   const [prayerCount, eventsCount, heroCount] = await Promise.all([
     payload
       .find({
