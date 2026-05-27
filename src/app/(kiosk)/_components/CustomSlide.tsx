@@ -118,6 +118,27 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
     return slide.image.url ?? null
   }, [slide.image])
 
+  // Image-backed slides render the image on a dark backdrop with the title
+  // hidden. If the image fails to load (transient network blip, or the file
+  // isn't served yet right after upload), don't leave a permanent black slide
+  // on an unattended display: fall back to the title/theme and retry the image
+  // periodically so it self-heals without a manual refresh.
+  const [imgFailed, setImgFailed] = useState(false)
+  const [imgAttempt, setImgAttempt] = useState(0)
+  useEffect(() => {
+    setImgFailed(false)
+    setImgAttempt(0)
+  }, [slideImageUrl])
+  useEffect(() => {
+    if (!imgFailed) return
+    const t = setTimeout(() => {
+      setImgFailed(false)
+      setImgAttempt((n) => n + 1)
+    }, 15_000)
+    return () => clearTimeout(t)
+  }, [imgFailed])
+  const showImage = Boolean(slideImageUrl) && !imgFailed
+
   return (
     <div
       className="w-full h-full flex flex-col relative"
@@ -126,23 +147,27 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
         transition: 'background 2s ease-in-out',
       }}
     >
-      {/* Slide image background (highest priority — overrides theme & gradient) */}
-      {slideImageUrl && (
+      {/* Slide image (highest priority — overrides theme & gradient). Rendered
+          as an <img> so we can catch load failures via onError and fall back
+          to the title/theme instead of a permanent black screen. */}
+      {showImage && (
         <div
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{
-            backgroundImage: `url('${slideImageUrl}')`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundColor: '#000',
-            zIndex: 0,
-          }}
-        />
+          style={{ backgroundColor: '#000', zIndex: 0 }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={imgAttempt}
+            src={slideImageUrl as string}
+            alt=""
+            onError={() => setImgFailed(true)}
+            className="w-full h-full object-contain"
+          />
+        </div>
       )}
 
-      {/* Islamic Pattern Background Overlay (theme bg pattern — skipped when slide image is set) */}
-      {!slideImageUrl && hasTheme && theme.backgroundImage !== 'none' && (
+      {/* Islamic Pattern Background Overlay (theme bg pattern — skipped when slide image is shown) */}
+      {!showImage && hasTheme && theme.backgroundImage !== 'none' && (
         <div
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
@@ -170,8 +195,9 @@ const CustomSlide: React.FC<CustomSlideProps> = ({ slide, gradientKey = 0, praye
         }}
       >
         <div className="text-center max-w-[85%] w-full">
-          {/* Title — hidden when a slide image is attached (the image is the message) */}
-          {!slideImageUrl && (
+          {/* Title — hidden when the slide image is shown (the image is the
+              message). Shown as the fallback if the image fails to load. */}
+          {!showImage && (
             <h1
               className={`font-display font-bold ${
                 slide.prayerTimingsEnabled
