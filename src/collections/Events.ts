@@ -41,7 +41,7 @@ export const Events: CollectionConfig = {
   },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Website',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'tag', '_status', 'startDate', 'featured'],

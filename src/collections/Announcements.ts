@@ -19,7 +19,7 @@ export const Announcements: CollectionConfig = {
   },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Website',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'priority', 'active', 'expiresAt'],

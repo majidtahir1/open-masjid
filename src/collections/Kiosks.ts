@@ -13,7 +13,7 @@ export const Kiosks: CollectionConfig = {
   labels: { singular: 'Kiosk', plural: 'Kiosks' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Kiosk',
+    group: 'Displays',
     hideAPIURL: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'location', 'status', 'currentSlide', 'lastSeenAt'],

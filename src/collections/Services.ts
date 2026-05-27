@@ -19,7 +19,7 @@ export const Services: CollectionConfig = {
   },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Website',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'icon', 'sortOrder'],

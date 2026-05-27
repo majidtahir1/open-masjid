@@ -37,7 +37,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Website',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug'],

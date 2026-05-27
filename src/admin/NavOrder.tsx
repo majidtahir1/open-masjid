@@ -10,8 +10,8 @@ import React from 'react'
  *
  *   1. Dashboard link
  *   2. Prayer group        (native)
- *   3. Content group       (native)
- *   4. Kiosk group         (native — its own section, directly below Content)
+ *   3. Website group       (native)
+ *   4. Displays group      (native — its own section, directly below Website)
  *   5. Forms group         (native)
  *   6. Membership link     (custom — overview-only; collections are hidden)
  *   7. Donations link      (custom)
