@@ -59,7 +59,7 @@ export async function GET(req: Request) {
   const broadcastAt = (tenantDoc as any).kioskBroadcastAt ?? null
   const pushAt = (kiosk as any).kioskPushAt ?? null
 
-  const { slides, tenant } = await composeKioskState({
+  const { slides, tenant, contentPool, contentUpdatedAts } = await composeKioskState({
     payload: payload as any,
     tenantId: String(tenantId),
     now,
@@ -67,6 +67,8 @@ export async function GET(req: Request) {
     broadcastAt,
     pushAt,
   })
+
+  const pd = (tenantDoc as any).prayerDisplay ?? {}
 
   // Pick the schedule whose date range covers today, not just the latest one.
   const todayIso = now.toISOString()
@@ -93,8 +95,8 @@ export async function GET(req: Request) {
   const dayKey = now.toISOString().slice(0, 10)
   const scheduleUpdatedAt = (prayerTimes as any)?.updatedAt ?? ''
   const version = versionHash({
-    slideIds: [...slides.map((s) => `${s.type}:${s.id}`), 'prayer-schedule'],
-    slideUpdatedAts: [...slides.map((s) => s.updatedAt), scheduleUpdatedAt],
+    slideIds: [...slides.map((s) => `${s.type}:${s.id}`), 'prayer-schedule', ...contentPool.map((c) => c.id)],
+    slideUpdatedAts: [...slides.map((s) => s.updatedAt), scheduleUpdatedAt, ...contentUpdatedAts],
     day: dayKey,
     broadcastAt,
     pushAt,
@@ -130,5 +132,13 @@ export async function GET(req: Request) {
     slides,
     version,
     pollIntervalMs: 5_000,
+    prayerDisplay: {
+      dwellSeconds: Number(pd.dwellSeconds ?? 10),
+      displayCity: pd.displayCity ?? null,
+      salahHoldoverMinutes: Number(pd.salahHoldoverMinutes ?? 15),
+      salahManualUntil: pd.salahManualUntil ?? null,
+      salahManualClearedAt: pd.salahManualClearedAt ?? null,
+      contentPool,
+    },
   })
 }

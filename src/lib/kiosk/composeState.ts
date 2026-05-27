@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { PRAYER_CONTENT_SEEDS, type ContentEntry } from './prayerContentSeeds'
 
 export type SlideType = 'carousel' | 'sponsor' | 'weekly-events'
 
@@ -40,6 +41,19 @@ export interface KioskState {
   pollIntervalMs: number
 }
 
+export function resolveContentPool(docs: any[]): ContentEntry[] {
+  const active = docs
+    .filter((d) => d?.active)
+    .map((d) => ({
+      id: String(d.id),
+      kind: d.kind,
+      arabic: d.arabic ?? '',
+      english: d.english ?? '',
+      citation: d.citation ?? '',
+    })) as ContentEntry[]
+  return active.length > 0 ? active : PRAYER_CONTENT_SEEDS
+}
+
 export async function composeKioskState(args: {
   payload: Payload
   tenantId: string
@@ -47,10 +61,15 @@ export async function composeKioskState(args: {
   overrideIds: string[] | null
   broadcastAt: string | null
   pushAt: string | null
-}): Promise<{ slides: NormalizedSlide[]; tenant: KioskState['tenant'] }> {
+}): Promise<{
+  slides: NormalizedSlide[]
+  tenant: KioskState['tenant']
+  contentPool: ContentEntry[]
+  contentUpdatedAts: string[]
+}> {
   const { payload, tenantId, now, overrideIds } = args
 
-  const [carousel, sponsors, weekly, tenantDoc] = await Promise.all([
+  const [carousel, sponsors, weekly, tenantDoc, content] = await Promise.all([
     payload.find({
       collection: 'carousel-slides',
       where: { tenant: { equals: tenantId } },
@@ -70,6 +89,12 @@ export async function composeKioskState(args: {
       overrideAccess: true,
     }),
     payload.findByID({ collection: 'tenants', id: tenantId, overrideAccess: true }),
+    payload.find({
+      collection: 'prayer-display-content',
+      where: { tenant: { equals: tenantId } },
+      limit: 200,
+      overrideAccess: true,
+    }),
   ])
 
   const normalize =
@@ -102,5 +127,8 @@ export async function composeKioskState(args: {
     timezone: t.timezone ?? 'UTC',
   }
 
-  return { slides, tenant }
+  const contentPool = resolveContentPool(content.docs)
+  const contentUpdatedAts = content.docs.map((d: any) => d.updatedAt ?? '')
+
+  return { slides, tenant, contentPool, contentUpdatedAts }
 }
