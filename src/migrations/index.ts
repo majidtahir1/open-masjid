@@ -23,6 +23,7 @@ import * as migration_20260514_204832_expand_background_theme_enum from './20260
 import * as migration_20260514_205028_background_theme_to_text from './20260514_205028_background_theme_to_text';
 import * as migration_20260515_042807_kiosk_current_slide from './20260515_042807_kiosk_current_slide';
 import * as migration_20260527_052028 from './20260527_052028';
+import * as migration_20260527_162430_salah_holdover_default_5 from './20260527_162430_salah_holdover_default_5';
 import * as migration_20260527_181500_media_alt_nullable from './20260527_181500_media_alt_nullable';
 
 export const migrations = [
@@ -149,7 +150,12 @@ export const migrations = [
   {
     up: migration_20260527_052028.up,
     down: migration_20260527_052028.down,
-    name: '20260527_052028'
+    name: '20260527_052028',
+  },
+  {
+    up: migration_20260527_162430_salah_holdover_default_5.up,
+    down: migration_20260527_162430_salah_holdover_default_5.down,
+    name: '20260527_162430_salah_holdover_default_5'
   },
   {
     up: migration_20260527_181500_media_alt_nullable.up,

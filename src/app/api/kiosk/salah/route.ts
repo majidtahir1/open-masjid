@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     user: auth.user,
     overrideAccess: false,
   })
-  const holdover = Number((tenantDoc as any).prayerDisplay?.salahHoldoverMinutes ?? 15)
+  const holdover = Number((tenantDoc as any).prayerDisplay?.salahHoldoverMinutes ?? 5)
   const now = new Date()
 
   const data =

@@ -135,7 +135,7 @@ export async function GET(req: Request) {
     prayerDisplay: {
       dwellSeconds: Number(pd.dwellSeconds ?? 10),
       displayCity: pd.displayCity ?? null,
-      salahHoldoverMinutes: Number(pd.salahHoldoverMinutes ?? 15),
+      salahHoldoverMinutes: Number(pd.salahHoldoverMinutes ?? 5),
       salahManualUntil: pd.salahManualUntil ?? null,
       salahManualClearedAt: pd.salahManualClearedAt ?? null,
       contentPool,
