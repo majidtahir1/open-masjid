@@ -15,7 +15,7 @@ export const SponsorSlides: CollectionConfig = {
   labels: { singular: 'Sponsor Slide', plural: 'Sponsor Slides' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Kiosk',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'layoutTemplate'],

@@ -13,7 +13,7 @@ export const CarouselSlides: CollectionConfig = {
   labels: { singular: 'Carousel Slide', plural: 'Carousel Slides' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Kiosk',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'active', 'priority', 'startDate', 'endDate'],

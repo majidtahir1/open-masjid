@@ -12,7 +12,7 @@ export const PrayerDisplayContent: CollectionConfig = {
   slug: 'prayer-display-content',
   labels: { singular: 'Prayer Display Content', plural: 'Prayer Display Content' },
   admin: {
-    group: 'Content',
+    group: 'Kiosk',
     hideAPIURL: true,
     useAsTitle: 'english',
     defaultColumns: ['english', 'kind', 'active'],

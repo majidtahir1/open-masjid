@@ -11,10 +11,10 @@ import React from 'react'
  *   1. Dashboard link
  *   2. Prayer group        (native)
  *   3. Content group       (native)
- *   4. Forms group         (native)
- *   5. Membership link     (custom — overview-only; collections are hidden)
- *   6. Donations link      (custom)
- *   7. Library group       (native — Media, lives inside Content)
+ *   4. Kiosk group         (native — its own section, directly below Content)
+ *   5. Forms group         (native)
+ *   6. Membership link     (custom — overview-only; collections are hidden)
+ *   7. Donations link      (custom)
  *   8. View public site    (custom)
  *   99. Site Settings      (custom — pinned bottom)
  *   100. Logout
@@ -36,9 +36,10 @@ export default function NavOrder() {
     .nav .nav__link--dashboard { order: 1; }
     .nav .nav-group:has(a[href^="/admin/collections/prayer-schedules"]) { order: 2; }
     .nav .nav-group:has(a[href^="/admin/collections/events"]) { order: 3; }
-    .nav .nav-group:has(a[href^="/admin/collections/forms"]) { order: 4; }
-    .nav a[data-membership-nav-link] { order: 5; }
-    .nav a[data-donations-nav-link] { order: 6; }
+    .nav .nav-group:has(a[href^="/admin/collections/kiosks"]) { order: 4; }
+    .nav .nav-group:has(a[href^="/admin/collections/forms"]) { order: 5; }
+    .nav a[data-membership-nav-link] { order: 6; }
+    .nav a[data-donations-nav-link] { order: 7; }
     .nav a[data-view-public-site] { order: 8; }
 
     /* Pin Site Settings just above the logout, with all the empty space

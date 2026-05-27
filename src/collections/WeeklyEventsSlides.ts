@@ -13,7 +13,7 @@ export const WeeklyEventsSlides: CollectionConfig = {
   labels: { singular: 'Weekly Events Slide', plural: 'Weekly Events Slides' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Content',
+    group: 'Kiosk',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'active'],
