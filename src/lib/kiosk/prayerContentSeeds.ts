@@ -137,3 +137,29 @@ export const PRAYER_CONTENT_SEEDS: ContentEntry[] = [
     citation: 'Sahih Bukhari',
   },
 ]
+
+export interface PrayerContentSeedRow {
+  tenant: number
+  kind: ContentKind
+  arabic: string
+  english: string
+  citation: string
+  active: true
+}
+
+/**
+ * Map the in-code seeds to create-payloads for the `prayer-display-content`
+ * collection, scoped to a tenant. The in-code `id` is intentionally dropped —
+ * the DB assigns its own. Used by both the tenant-create seeding hook and the
+ * one-shot backfill script so existing and future tenants get the same set.
+ */
+export function prayerContentSeedRows(tenantId: number): PrayerContentSeedRow[] {
+  return PRAYER_CONTENT_SEEDS.map((s) => ({
+    tenant: tenantId,
+    kind: s.kind,
+    arabic: s.arabic,
+    english: s.english,
+    citation: s.citation,
+    active: true,
+  }))
+}

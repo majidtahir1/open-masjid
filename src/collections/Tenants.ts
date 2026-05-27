@@ -4,6 +4,7 @@ import { platformOwnerOnly } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
 import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
 import { seedDefaultDonationFunds } from '../hooks/seedDefaultDonationFunds'
+import { seedPrayerDisplayContent } from '../hooks/seedPrayerDisplayContent'
 
 /**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
@@ -32,7 +33,7 @@ export const Tenants: CollectionConfig = {
   },
   hooks: {
     beforeChange: [geocodeTenantAddress],
-    afterChange: [seedDefaultDonationFunds],
+    afterChange: [seedDefaultDonationFunds, seedPrayerDisplayContent],
   },
   access: {
     // Only platform owners can create or delete tenants.
