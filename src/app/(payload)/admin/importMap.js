@@ -44,6 +44,7 @@ import { SponsorSlidesBanner as SponsorSlidesBanner_2db377ce76905e597f005b9f5908
 import { WeeklyEventsSlidesBanner as WeeklyEventsSlidesBanner_2db377ce76905e597f005b9f590842db } from '../../../../src/admin/KioskContentBanner'
 import { default as default_c9a56b800e0b79f16395db06cfb7372e } from '../../../../src/components/admin/KioskCurrentlyShowingPanel'
 import { default as default_ec1289ba7508ffa2f2c7670aad4838a4 } from '../../../../src/admin/KiosksListBanner'
+import { default as default_3e4c7a1fdd0667adca0363880b97c34e } from '../../../../src/admin/SalahControlBanner'
 import { default as default_38727da74a0dfb27644db6f8ebfa8887 } from '../../../../src/components/admin/KioskPushButton'
 import { default as default_9ba6ace7b1855b96dfbda624ec3857fe } from '../../../../src/components/admin/KioskResetButton'
 import { QRCodesBanner as QRCodesBanner_2db377ce76905e597f005b9f590842db } from '../../../../src/admin/KioskContentBanner'
@@ -130,6 +131,7 @@ export const importMap = {
   "/src/admin/KioskContentBanner#WeeklyEventsSlidesBanner": WeeklyEventsSlidesBanner_2db377ce76905e597f005b9f590842db,
   "/src/components/admin/KioskCurrentlyShowingPanel#default": default_c9a56b800e0b79f16395db06cfb7372e,
   "/src/admin/KiosksListBanner#default": default_ec1289ba7508ffa2f2c7670aad4838a4,
+  "/src/admin/SalahControlBanner#default": default_3e4c7a1fdd0667adca0363880b97c34e,
   "/src/components/admin/KioskPushButton#default": default_38727da74a0dfb27644db6f8ebfa8887,
   "/src/components/admin/KioskResetButton#default": default_9ba6ace7b1855b96dfbda624ec3857fe,
   "/src/admin/KioskContentBanner#QRCodesBanner": QRCodesBanner_2db377ce76905e597f005b9f590842db,

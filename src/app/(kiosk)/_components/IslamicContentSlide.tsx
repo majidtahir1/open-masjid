@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import IslamicContentDisplay from './IslamicContentDisplay'
 
+/** @deprecated Legacy slide – superseded by the seeded prayer-display-content collection. */
 const IslamicContentSlide: React.FC = () => {
   return (
     <div className="w-full h-full bg-slate-900 flex items-center justify-center relative">
@@ -14,11 +14,7 @@ const IslamicContentSlide: React.FC = () => {
           backgroundSize: '60px 60px',
         }}
       />
-
-      {/* Main Content */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center p-8">
-        <IslamicContentDisplay />
-      </div>
+      <div className="relative z-10 w-full h-full flex items-center justify-center p-8" />
     </div>
   )
 }
