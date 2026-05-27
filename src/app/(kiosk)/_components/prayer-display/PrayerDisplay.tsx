@@ -76,15 +76,18 @@ export default function PrayerDisplay({
     const ar = arabicRef.current
     if (!hero || !ar) return
     const budget = HERO_BUDGET[variant]
-    hero.style.maxHeight = `${budget}px`
-    hero.style.overflow = 'hidden'
+    // Measure in the natural (unclamped) state: scrollHeight reports the full
+    // content height including the English + citation, so the search shrinks
+    // the Arabic until everything fits — not just the Arabic.
+    hero.style.maxHeight = ''
+    hero.style.overflow = ''
     let lo = 34
-    let hi = 150
+    let hi = 160
     let best = 34
     while (lo <= hi) {
       const mid = Math.floor((lo + hi) / 2)
       ar.style.fontSize = `${mid}px`
-      if (hero.offsetHeight <= budget) {
+      if (hero.scrollHeight <= budget) {
         best = mid
         lo = mid + 1
       } else {
@@ -92,6 +95,9 @@ export default function PrayerDisplay({
       }
     }
     ar.style.fontSize = `${best}px`
+    // Safety clip in case even the minimum size overflows.
+    hero.style.maxHeight = `${budget}px`
+    hero.style.overflow = 'hidden'
   }, [content, variant])
 
   return (
@@ -126,16 +132,20 @@ export default function PrayerDisplay({
       <div className="pd-timetable">
         {timetable.entries.map((p) => {
           const isNext = p.key === timetable.nextKey
-          const adhanMin = parseTimeToMinutes(p.adhan)
-          const ampm = adhanMin !== null && adhanMin >= 12 * 60 ? 'pm' : 'am'
+          // Iqamah (jamaa) is the focal time, so it fills the large slot
+          // (`.pd-prayer-adhan`, which carries the large styling); adhan is
+          // the small secondary line.
+          const iqamahMin = parseTimeToMinutes(p.iqamah)
+          const iqamahAmpm = iqamahMin !== null && iqamahMin >= 12 * 60 ? 'pm' : 'am'
+          const iqamahHM = p.iqamah ? p.iqamah.replace(/\s*[ap]m$/i, '') : '—'
           const adhanHM = p.adhan ? p.adhan.replace(/\s*[ap]m$/i, '') : '—'
           return (
             <div key={p.key} className={`pd-prayer${isNext ? ' is-next' : ''}`}>
               {isNext && <div className="pd-next-tag">Next</div>}
               <div className="pd-prayer-ar">{p.ar}</div>
               <div className="pd-prayer-name">{p.en}</div>
-              <div className="pd-prayer-adhan">{adhanHM}<sup>{ampm}</sup></div>
-              <div className="pd-prayer-iqamah">Iqamah · {p.iqamah ? p.iqamah.replace(/\s*[AP]M$/i, '') : '—'}</div>
+              <div className="pd-prayer-adhan">{iqamahHM}<sup>{iqamahAmpm}</sup></div>
+              <div className="pd-prayer-iqamah">Adhan · {adhanHM}</div>
             </div>
           )
         })}
