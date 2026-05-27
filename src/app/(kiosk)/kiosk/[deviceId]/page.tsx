@@ -5,7 +5,12 @@ import CarouselLayout, { type CarouselSlide } from '../../_components/CarouselLa
 import CustomSlide from '../../_components/CustomSlide'
 import AdvertiserSlide from '../../_components/AdvertiserSlide'
 import WeeklyEventsSlide from '../../_components/WeeklyEventsSlide'
-import PrayerTimesSlide from '../../_components/PrayerTimesSlide'
+import PrayerDisplay from '../../_components/prayer-display/PrayerDisplay'
+import SalahTakeover from '../../_components/prayer-display/SalahTakeover'
+import { pickVariant, pickContent, type PrayerVariant } from '@/lib/kiosk/prayerDisplaySelection'
+import { computeSalahState, type IqamahPoint } from '@/lib/kiosk/salahWindow'
+import { parseTimeToMinutes, type DayData } from '@/lib/kiosk/prayerTimetable'
+import type { ContentEntry } from '@/lib/kiosk/prayerContentSeeds'
 import CarouselErrorBoundary from '../../_components/CarouselErrorBoundary'
 
 type Slide = {
@@ -21,6 +26,14 @@ type State = {
   slides: Slide[]
   version: string
   pollIntervalMs: number
+  prayerDisplay: {
+    dwellSeconds: number
+    displayCity: string | null
+    salahHoldoverMinutes: number
+    salahManualUntil: string | null
+    salahManualClearedAt: string | null
+    contentPool: ContentEntry[]
+  }
 }
 
 export default function KioskDisplayPage({
@@ -147,18 +160,71 @@ export default function KioskDisplayPage({
     }
   }, [credentials])
 
+  // Prayer display variant + content re-rolling
+  const [variant, setVariant] = useState<PrayerVariant>('cream')
+  const [content, setContent] = useState<ContentEntry | null>(null)
+  const seenRef = useRef<string[]>([])
+
+  // Today's prayer day data
+  const todayDay: DayData | null = useMemo(() => {
+    const days = state?.prayerTimes?.days ?? []
+    const n = new Date()
+    return (
+      days.find((d: any) => {
+        const dd = new Date(d.date)
+        return dd.getFullYear() === n.getFullYear() && dd.getMonth() === n.getMonth() && dd.getDate() === n.getDate()
+      }) ?? null
+    )
+  }, [state?.prayerTimes])
+
+  // Salah takeover state — evaluated every 5s
+  const [salah, setSalah] = useState({ active: false, prayerName: null as string | null, iqamahLabel: null as string | null })
+  useEffect(() => {
+    if (!state) return
+    const evaluate = () => {
+      const now = new Date()
+      const isFriday = now.getDay() === 5
+      const jummah: string[] = state.prayerTimes?.jummahTimes?.map((j: any) => j.time).filter(Boolean) ?? []
+      const order: { name: string; key: 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha' }[] = [
+        { name: 'Fajr', key: 'fajr' }, { name: 'Dhuhr', key: 'zuhr' }, { name: 'Asr', key: 'asr' },
+        { name: 'Maghrib', key: 'maghrib' }, { name: 'Isha', key: 'isha' },
+      ]
+      const iqamahs: IqamahPoint[] = order
+        .map(({ name, key }) => {
+          let label = todayDay?.[key]?.iqamah as string | undefined
+          if (key === 'zuhr' && isFriday && jummah.length > 0) label = jummah[0]
+          const minutes = parseTimeToMinutes(label)
+          return label && minutes !== null ? { name, label, minutes } : null
+        })
+        .filter((x): x is IqamahPoint => x !== null)
+      setSalah(
+        computeSalahState({
+          now,
+          iqamahs,
+          holdoverMinutes: state.prayerDisplay.salahHoldoverMinutes,
+          manualUntil: state.prayerDisplay.salahManualUntil,
+          manualClearedAt: state.prayerDisplay.salahManualClearedAt,
+        }),
+      )
+    }
+    evaluate()
+    const t = setInterval(evaluate, 5_000)
+    return () => clearInterval(t)
+  }, [state, todayDay])
+
   // Always lead the rotation with prayer times — even if no other slides exist.
   // Memoize so the array reference stays stable across state polls when the
   // underlying slide ids haven't changed; otherwise CarouselLayout's
   // onSlideChange effect re-fires every 5s.
   const slidesKey = state ? state.slides.map((s) => `${s.type}:${s.id}`).join(',') : ''
+  const dwellMs = (state?.prayerDisplay?.dwellSeconds ?? 10) * 1000
   const slidesWithPrayer = useMemo<CarouselSlide[]>(
     () => [
-      { id: 'prayer-times', type: 'prayer-times', durationMs: 15000, payload: {} },
+      { id: 'prayer-times', type: 'prayer-times', durationMs: dwellMs, payload: {} },
       ...(state?.slides ?? []),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [slidesKey, state?.slides.length],
+    [slidesKey, state?.slides.length, dwellMs],
   )
 
   // Report current slide to the server so admins can monitor what's on screen.
@@ -191,6 +257,22 @@ export default function KioskDisplayPage({
     [credentials, slidesWithPrayer.length],
   )
 
+  const onSlideChange = useCallback(
+    (slide: CarouselSlide, index: number) => {
+      reportCurrentSlide(slide, index)
+      if (slide.type === 'prayer-times') {
+        setVariant((prev) => pickVariant(prev))
+        const pool = state?.prayerDisplay?.contentPool ?? []
+        const next = pickContent(pool, seenRef.current)
+        if (next) {
+          seenRef.current = [...seenRef.current, next.id]
+          setContent(next)
+        }
+      }
+    },
+    [reportCurrentSlide, state?.prayerDisplay?.contentPool],
+  )
+
   if (!state) {
     return (
       <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
@@ -202,7 +284,16 @@ export default function KioskDisplayPage({
   const renderSlide = (slide: CarouselSlide) => {
     switch (slide.type) {
       case 'prayer-times':
-        return <PrayerTimesSlide prayerTimes={state.prayerTimes} tenantName={state.tenant.name} />
+        return (
+          <PrayerDisplay
+            variant={variant}
+            content={content}
+            day={todayDay}
+            venueName={state.tenant.name}
+            displayCity={state.prayerDisplay.displayCity}
+            timezone={state.tenant.timezone}
+          />
+        )
       case 'carousel':
         return <CustomSlide slide={slide.payload} prayerTimes={state.prayerTimes} />
       case 'sponsor':
@@ -227,9 +318,12 @@ export default function KioskDisplayPage({
         <CarouselLayout
           slides={slidesWithPrayer}
           renderSlide={renderSlide}
-          onSlideChange={reportCurrentSlide}
+          onSlideChange={onSlideChange}
         />
       </CarouselErrorBoundary>
+      {salah.active && (
+        <SalahTakeover prayerName={salah.prayerName} iqamahLabel={salah.iqamahLabel} />
+      )}
       {error && (
         <div style={{ position: 'absolute', top: 8, right: 8, opacity: 0.6 }}>● offline</div>
       )}
