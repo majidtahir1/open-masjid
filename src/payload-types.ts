@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     'prayer-schedules': PrayerSchedule;
+    'prayer-display-content': PrayerDisplayContent;
     events: Event;
     'hero-slides': HeroSlide;
     'carousel-slides': CarouselSlide;
@@ -96,6 +97,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
+    'prayer-display-content': PrayerDisplayContentSelect<false> | PrayerDisplayContentSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'hero-slides': HeroSlidesSelect<false> | HeroSlidesSelect<true>;
     'carousel-slides': CarouselSlidesSelect<false> | CarouselSlidesSelect<true>;
@@ -541,6 +543,38 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Verses, hadith, and du’as shown in the hero of the prayer display. Any entry can appear on any of the three looks. Changes auto-broadcast to kiosks on save.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prayer-display-content".
+ */
+export interface PrayerDisplayContent {
+  id: number;
+  /**
+   * A label only — it drives the small eyebrow text, not which look shows it.
+   */
+  kind: 'ayah' | 'hadith' | 'dua' | 'bismillah';
+  /**
+   * Arabic text with diacritics. Required.
+   */
+  arabic: string;
+  /**
+   * Required.
+   */
+  english: string;
+  /**
+   * Free-form, e.g. "Surah An-Nisāʿ · 4:103" or "Ṣaḥīḥ al-Bukhārī".
+   */
+  citation?: string | null;
+  /**
+   * Off → removed from the rotation pool immediately on save.
+   */
+  active?: boolean | null;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Classes, programs, and gatherings. Published events appear on the public Events page; featured events also appear in the homepage hero.
@@ -1689,6 +1723,10 @@ export interface PayloadLockedDocument {
         value: number | PrayerSchedule;
       } | null)
     | ({
+        relationTo: 'prayer-display-content';
+        value: number | PrayerDisplayContent;
+      } | null)
+    | ({
         relationTo: 'events';
         value: number | Event;
       } | null)
@@ -1897,6 +1935,20 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prayer-display-content_select".
+ */
+export interface PrayerDisplayContentSelect<T extends boolean = true> {
+  kind?: T;
+  arabic?: T;
+  english?: T;
+  citation?: T;
+  active?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;

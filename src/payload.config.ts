@@ -22,6 +22,7 @@ import { Media } from './collections/Media'
 import { Forms } from './collections/Forms'
 import { FormSubmissions } from './collections/FormSubmissions'
 import { Pages } from './collections/Pages'
+import { PrayerDisplayContent } from './collections/PrayerDisplayContent'
 import { PrayerSchedules } from './collections/PrayerSchedules'
 import { QRCodes } from './collections/QRCodes'
 import { Services } from './collections/Services'
@@ -120,6 +121,7 @@ export default buildConfig({
   // (Library hidden), (People hidden), (Site hidden via HideTenantsNav).
   collections: [
     PrayerSchedules,
+    PrayerDisplayContent,
     Events,
     HeroSlides,
     CarouselSlides,
