@@ -1,5 +1,6 @@
 import type { CollectionConfig, Where } from 'payload'
 import { withBillingLock } from '../access/billingLocked'
+import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 /**
  * Users — extends Payload's built-in auth.
@@ -16,6 +17,13 @@ export const Users: CollectionConfig = {
     plural: 'Users',
   },
   hooks: {
+    // Force the tenant to the authenticated creator's tenant on create (no-op
+    // for platformOwner and for server-side calls that pass no req.user). This
+    // closes the cross-tenant user-creation hole: a tenant admin can no longer
+    // POST a create with another tenant's id. Mirrors every other tenant-owned
+    // collection. The `tenant` field's update access (platformOwner-only)
+    // already prevents reassigning tenant after creation.
+    beforeChange: [setTenantFromUser],
     afterLogin: [
       // Flip the user's tenant from 'pending' → 'trialing' on first successful
       // login. Cheap to run on every login: it's a no-op for already-active
