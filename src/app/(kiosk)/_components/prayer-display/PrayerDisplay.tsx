@@ -1,16 +1,27 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { PrayerVariant } from '@/lib/kiosk/prayerDisplaySelection'
 import type { ContentEntry } from '@/lib/kiosk/prayerContentSeeds'
 import { buildTimetable, parseTimeToMinutes, type DayData } from '@/lib/kiosk/prayerTimetable'
 import { formatHijri } from '@/lib/hijri'
+import PrayerStage from './PrayerStage'
 
 const EYEBROW: Record<ContentEntry['kind'], string | null> = {
   ayah: 'Ayah of the day',
   hadith: 'Hadith',
   dua: "Du'a",
   bismillah: null,
+}
+
+// Max height (in 1920x1080 design px) the hero may occupy before it would
+// collide with the bottom timetable, per variant. The hero starts at y=0 in
+// flow (the topbar is absolutely positioned), so this equals the timetable's
+// top edge minus a small margin.
+const HERO_BUDGET: Record<PrayerVariant, number> = {
+  cream: 700, // timetable height 360 → top at 720
+  night: 740, // timetable height 320 → top at 760
+  mihrab: 700, // keep the hadith within the arch motif
 }
 
 function fmtClock(d: Date) {
@@ -55,8 +66,36 @@ export default function PrayerDisplay({
 
   const eyebrow = content ? EYEBROW[content.kind] : null
 
+  // Auto-fit the Arabic hero text so any content length fits the available
+  // band without overflowing into the timetable. A short Bismillah stays
+  // large and dramatic; a long ayah shrinks to fit. Runs before paint.
+  const heroRef = useRef<HTMLDivElement>(null)
+  const arabicRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const hero = heroRef.current
+    const ar = arabicRef.current
+    if (!hero || !ar) return
+    const budget = HERO_BUDGET[variant]
+    hero.style.maxHeight = `${budget}px`
+    hero.style.overflow = 'hidden'
+    let lo = 34
+    let hi = 150
+    let best = 34
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2)
+      ar.style.fontSize = `${mid}px`
+      if (hero.offsetHeight <= budget) {
+        best = mid
+        lo = mid + 1
+      } else {
+        hi = mid - 1
+      }
+    }
+    ar.style.fontSize = `${best}px`
+  }, [content, variant])
+
   return (
-    <div className="pd-stage">
+    <PrayerStage>
     <div className={`pd-screen pd-${variant}`}>
       <div className="pd-topbar">
         <div className="pd-tb-venue">
@@ -73,11 +112,11 @@ export default function PrayerDisplay({
         </div>
       </div>
 
-      <div className="pd-hero">
+      <div className="pd-hero" ref={heroRef}>
         {eyebrow && <div className="pd-verse-eyebrow">{eyebrow}</div>}
         {content && (
           <>
-            <div className="pd-hero-arabic" dir="rtl">{content.arabic}</div>
+            <div className="pd-hero-arabic" dir="rtl" ref={arabicRef}>{content.arabic}</div>
             <div className="pd-hero-english">{content.english}</div>
             {content.citation && <div className="pd-hero-cite">{content.citation}</div>}
           </>
@@ -102,6 +141,6 @@ export default function PrayerDisplay({
         })}
       </div>
     </div>
-    </div>
+    </PrayerStage>
   )
 }

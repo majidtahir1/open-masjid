@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import PrayerStage from './PrayerStage'
 
 export interface SalahTakeoverProps {
   prayerName: string | null
@@ -13,7 +14,7 @@ export default function SalahTakeover({ prayerName, iqamahLabel }: SalahTakeover
       ? `Now praying — ${prayerName} · Iqamah ${iqamahLabel}`
       : 'Now praying'
   return (
-    <div className="pd-stage" style={{ zIndex: 40 }}>
+    <PrayerStage zIndex={40}>
       <div className="pd-screen pd-salah">
         <div className="pd-salah-prayer">{header}</div>
         <div className="pd-salah-ornament">۞ ۞ ۞</div>
@@ -21,6 +22,6 @@ export default function SalahTakeover({ prayerName, iqamahLabel }: SalahTakeover
         <div className="pd-salah-title">Salah is in progress</div>
         <div className="pd-salah-sub">Please silence your phone</div>
       </div>
-    </div>
+    </PrayerStage>
   )
 }
