@@ -340,6 +340,31 @@ export interface Tenant {
     timezone?: string | null;
   };
   /**
+   * Settings for the kiosk prayer display (the lobby TV screen).
+   */
+  prayerDisplay?: {
+    /**
+     * Shown under the masjid name on the prayer display, e.g. "Plano, TX". Leave blank to hide.
+     */
+    displayCity?: string | null;
+    /**
+     * How long the prayer screen stays up before the carousel advances (5–60). Default 10.
+     */
+    dwellSeconds?: number | null;
+    /**
+     * How long the "Salah in progress" screen stays up after iqamah, for all prayers (1–90). Default 15.
+     */
+    salahHoldoverMinutes?: number | null;
+    /**
+     * Set by the "Salah now" admin control; the takeover stays up until this time.
+     */
+    salahManualUntil?: string | null;
+    /**
+     * Set by "End now"; clears an active manual takeover.
+     */
+    salahManualClearedAt?: string | null;
+  };
+  /**
    * Select the calculation convention your community follows. ISNA is the default in North America.
    */
   prayerCalc?: {
@@ -2405,6 +2430,15 @@ export interface TenantsSelect<T extends boolean = true> {
         lat?: T;
         lng?: T;
         timezone?: T;
+      };
+  prayerDisplay?:
+    | T
+    | {
+        displayCity?: T;
+        dwellSeconds?: T;
+        salahHoldoverMinutes?: T;
+        salahManualUntil?: T;
+        salahManualClearedAt?: T;
       };
   prayerCalc?:
     | T
