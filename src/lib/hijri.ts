@@ -5,7 +5,7 @@
  */
 export function formatHijri(date: Date, timezone: string): string {
   const make = (tz: string | undefined) =>
-    new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+    new Intl.DateTimeFormat('en-GB-u-ca-islamic-umalqura', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
