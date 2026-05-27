@@ -16,7 +16,7 @@ export const QRCodes: CollectionConfig = {
   labels: { singular: 'QR Code', plural: 'QR Codes' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Kiosk',
+    group: 'Content',
     hideAPIURL: true,
     useAsTitle: 'label',
     defaultColumns: ['label', 'targetUrl', 'createdAt'],
