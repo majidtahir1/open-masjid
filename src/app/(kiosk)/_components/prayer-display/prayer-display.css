@@ -642,3 +642,119 @@
   0%, 100% { opacity: 0.92; }
   50% { opacity: 1; }
 }
+
+/* ============================================================
+   Generic hero aliases — the production component renders one
+   hero shape (.pd-hero-arabic / .pd-hero-english / .pd-hero-cite)
+   for every variant; these rules reproduce the original
+   variant-specific hero styling onto the generic classes.
+   ============================================================ */
+
+/* --- Cream aliases (originally .pd-bismillah / .pd-bismillah-translit) --- */
+.pd-cream .pd-hero-arabic {
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 168px;
+  line-height: 1.9;
+  color: #0F1E4A;
+  font-weight: 400;
+  letter-spacing: 0;
+  padding-bottom: 36px;
+}
+.pd-cream .pd-hero-english {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1.4;
+  color: rgba(15,30,74,0.55);
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+/* Cream had no original citation rule; use Night's cite treatment as reasonable default */
+.pd-cream .pd-hero-cite {
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D9A84E;
+  margin-top: 28px;
+}
+
+/* --- Night aliases (originally .pd-verse / .pd-verse-translation / .pd-verse-cite) --- */
+/* Note: .pd-night .pd-verse-eyebrow already exists in the CSS above and is reused as-is
+   by the component (the class name is identical), so no alias needed for eyebrow. */
+.pd-night .pd-hero-arabic {
+  font-family: var(--pd-quran);
+  direction: rtl;
+  font-size: 96px;
+  line-height: 1.7;
+  color: #F0EFE8;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.pd-night .pd-hero-english {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.5;
+  color: rgba(240,239,232,0.78);
+  margin-top: 36px;
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: 0.005em;
+}
+.pd-night .pd-hero-cite {
+  font-family: var(--pd-inter);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D9A84E;
+  margin-top: 28px;
+}
+
+/* --- Mihrab aliases (originally .pd-hadith-ar / .pd-hadith-tr / .pd-hadith-cite) --- */
+.pd-mihrab .pd-hero-arabic {
+  font-family: var(--pd-amiri);
+  direction: rtl;
+  font-size: 80px;
+  line-height: 1.7;
+  color: #0F1E4A;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.pd-mihrab .pd-hero-english {
+  font-family: var(--pd-fraunces);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.5;
+  color: rgba(15,30,74,0.7);
+  margin-top: 36px;
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pd-mihrab .pd-hero-cite {
+  font-family: var(--pd-inter);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #9A7428;
+  margin-top: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.pd-mihrab .pd-hero-cite::before,
+.pd-mihrab .pd-hero-cite::after {
+  content: "";
+  width: 32px;
+  height: 1px;
+  background: rgba(154,116,40,0.4);
+}
