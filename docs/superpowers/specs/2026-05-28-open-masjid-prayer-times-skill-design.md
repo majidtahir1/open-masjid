@@ -67,7 +67,7 @@ Eventually OpenMasjid will ship with a bundled chat bot (Hermes-style) so any te
                                          └──────────────────────────────┘
 ```
 
-The skill is a single prompt file. It contains no code; it teaches Claude how to make HTTP calls against the existing Payload REST API. All authorization is enforced server-side by Payload's existing access control chain (now extended with `requireScope`).
+The skill is a single prompt file. It contains no code; it teaches Claude how to make HTTP calls against the existing Payload REST API. All authorization is enforced server-side by Payload's existing access control chain, with a new platform-wide gate (`gateByApiKeyScope`) that default-denies scoped API keys on every unmapped collection.
 
 ### Why REST and not the Payload local API
 
@@ -122,53 +122,84 @@ export const Users: CollectionConfig = {
 
 ### 4.2 Enforcement helper
 
+Detect API-key auth via Payload's `req.user._strategy === 'api-key'` marker (set by `node_modules/payload/dist/auth/strategies/apiKey.js`). Build a `(slug, op) → required scope` map and gate every collection's access against it centrally.
+
 ```ts
 // src/access/apiScoped.ts
-import type { Access, PayloadRequest } from 'payload'
+import type { Access, CollectionConfig, PayloadRequest } from 'payload'
 
-export const isApiKeyAuth = (req: PayloadRequest): boolean => {
-  // Payload exposes the auth strategy used for the current request via a
-  // field on `req` (likely `req.user._strategy === 'api-key'` or
-  // `req.authStrategy === 'api-key'` — confirm against the installed
-  // Payload version during implementation; this is a 10-minute spike).
-  return (req as { authStrategy?: string }).authStrategy === 'api-key'
+type Op = 'read' | 'create' | 'update' | 'delete'
+
+export const isApiKeyAuth = (req: PayloadRequest): boolean =>
+  (req.user as { _strategy?: string } | null)?._strategy === 'api-key'
+
+// Adding a new scope means: extend User.apiScopes options AND add an entry here.
+const SCOPE_MAP: Record<string, Partial<Record<Op, string>>> = {
+  'prayer-schedules': {
+    read: 'prayer-times:read',
+    create: 'prayer-times:write',
+    update: 'prayer-times:write',
+    delete: 'prayer-times:write',
+  },
 }
 
-export const requireScope =
-  (scope: string) =>
-  (existing: Access): Access =>
+const PAYLOAD_DEFAULT_ACCESS: Access = ({ req }) => Boolean(req.user)
+
+export const gateByApiKeyScope =
+  (slug: string, op: Op) =>
+  (existing: Access | undefined): Access =>
   (args) => {
     const { req } = args
-    if (req.user && isApiKeyAuth(req)) {
-      const scopes = ((req.user as { apiScopes?: string[] }).apiScopes ?? []) as string[]
-      if (scopes.length > 0 && !scopes.includes(scope)) return false
+    const user = req.user as { _strategy?: string; apiScopes?: string[] } | null
+    if (user && isApiKeyAuth(req)) {
+      const scopes = user.apiScopes ?? []
+      if (scopes.length > 0) {
+        const required = SCOPE_MAP[slug]?.[op]
+        if (!required || !scopes.includes(required)) return false
+      }
     }
-    return existing(args)
+    return (existing ?? PAYLOAD_DEFAULT_ACCESS)(args)
   }
+
+export const withApiKeyScopeEnforcement = (c: CollectionConfig): CollectionConfig => ({
+  ...c,
+  access: {
+    ...(c.access ?? {}),
+    read: gateByApiKeyScope(c.slug, 'read')(c.access?.read),
+    create: gateByApiKeyScope(c.slug, 'create')(c.access?.create),
+    update: gateByApiKeyScope(c.slug, 'update')(c.access?.update),
+    delete: gateByApiKeyScope(c.slug, 'delete')(c.access?.delete),
+  },
+})
 ```
 
 **Properties:**
 
 - **UI sessions are never restricted by scopes.** Scopes only apply when the request is authenticated via API key. A tenant admin's web admin session still has full role permissions.
 - **Empty scopes = open.** A key with no scopes set behaves like the old behavior (inherits role permissions). Lets existing keys keep working and lets operators opt in gradually.
-- **Composable.** `requireScope` wraps existing `Access` functions. It does not replace `tenantScopedUpdate`, `withBillingLock`, or role checks — it stacks on top, so tenant isolation and billing lock remain in force.
+- **Non-empty scopes = default-deny across the platform.** A key with any scope set is restricted to *only* the `(slug, op)` pairs that scope unlocks — every other collection denies even if role and tenant access would otherwise allow. This is the property that makes scoped keys actually scoped, and it's enforced centrally so adding a new collection doesn't risk a bypass.
+- **Composable.** The gate runs *before* the existing `Access` chain (`tenantScopedUpdate`, `withBillingLock`, `denyKioskManager`, etc.) — those still apply after a scope check passes, so tenant isolation and billing lock remain in force.
 
-### 4.3 Wiring into PrayerSchedules
+### 4.3 Wiring — centralized in `payload.config.ts`
+
+Scope enforcement is applied to *every* collection by mapping the array through `withApiKeyScopeEnforcement` at config time. Individual collection files are not modified.
 
 ```ts
-// src/collections/PrayerSchedules.ts
-import { requireScope } from '../access/apiScoped'
+// src/payload.config.ts
+import { withApiKeyScopeEnforcement } from './access/apiScoped'
 
-export const PrayerSchedules: CollectionConfig = {
-  ...,
-  access: {
-    read:   requireScope('prayer-times:read')(tenantScopedRead),
-    create: requireScope('prayer-times:write')(withBillingLock(tenantScopedCreate)),
-    update: requireScope('prayer-times:write')(withBillingLock(tenantScopedUpdate)),
-    delete: requireScope('prayer-times:write')(withBillingLock(tenantScopedDelete)),
-  },
-}
+export default buildConfig({
+  collections: [
+    PrayerSchedules,
+    PrayerDisplayContent,
+    Events,
+    // ...
+  ].map(withApiKeyScopeEnforcement),
+  // ...
+})
 ```
+
+This is the critical architectural choice: per-collection wiring would leave a bypass any time a new collection is added without remembering to wrap its access. Central wrapping makes default-deny the default, and adding a new collection to scoped-key access is a one-line `SCOPE_MAP` entry rather than an edit to the collection file.
 
 ### 4.4 Migration
 
@@ -177,12 +208,15 @@ Payload will generate a migration for the new `enableAPIKey`, `apiKey`, `apiKeyI
 ### 4.5 Tests
 
 - `src/access/apiScoped.test.ts` unit-tests:
-  - UI session, no scopes set → existing access decision passes through.
-  - API key, no scopes set → existing access decision passes through.
-  - API key, scope present → existing access decision passes through.
-  - API key, scope missing → access denied even if existing access would allow.
-  - Tenant cross-over: API key with the required scope but for a different tenant → still denied (tenant scoping wins).
-  - Billing-locked tenant + write scope → still denied (billing lock wins).
+  - UI session (mapped or unmapped collection) → existing access decision passes through.
+  - API key, no `apiScopes` field → existing access decision passes through (back-compat).
+  - API key, empty `apiScopes` → existing access decision passes through (back-compat).
+  - API key, non-empty scopes, **unmapped** collection → denied for every CRUD op, even when existing access would allow. This is the security boundary.
+  - API key, non-empty scopes, mapped collection + required scope missing → denied.
+  - API key, non-empty scopes, mapped collection + required scope present → existing access decision passes through.
+  - Tenant cross-over: scope matches but existing tenant-scoped access denies → still denied (tenant scoping wins).
+  - Where-clause returns from existing access are preserved through the gate.
+  - Missing existing access function (collection didn't define one) falls back to Payload's default `({ req }) => Boolean(req.user)`.
 
 ---
 
@@ -305,7 +339,7 @@ Example: "Change Fajr to 5:30 AM."
 
 **Automated (covers the platform feature):**
 
-- Unit tests for `requireScope` and `isApiKeyAuth` (cases listed in §4.5).
+- Unit tests for `isApiKeyAuth` and `gateByApiKeyScope` (cases listed in §4.5).
 - No new tests on `PrayerSchedules.ts` beyond compile-time wiring; existing access tests remain.
 
 **Manual (validates the skill):**
@@ -343,9 +377,9 @@ For v1, the skill is a single SKILL.md, not an MCP server. The reasoning:
 
 ```
 src/collections/Users.ts                                  modified  enable useAPIKey, add apiScopes field
-src/collections/PrayerSchedules.ts                        modified  wrap access with requireScope
-src/access/apiScoped.ts                                   new       requireScope + isApiKeyAuth helpers
-src/access/apiScoped.test.ts                              new       unit tests for scope gating
+src/payload.config.ts                                     modified  apply withApiKeyScopeEnforcement to every collection
+src/access/apiScoped.ts                                   new       isApiKeyAuth + gateByApiKeyScope + withApiKeyScopeEnforcement
+src/access/apiScoped.test.ts                              new       unit tests for scope gating (mapped + unmapped collections)
 src/migrations/<timestamp>-user-api-scopes.ts             new       Payload-generated migration
 docs/superpowers/specs/2026-05-28-open-masjid-prayer-times-skill-design.md   new   this doc
 ~/.claude/skills/open-masjid-prayer-times/SKILL.md        new       the skill (lives outside repo)
@@ -356,8 +390,8 @@ docs/superpowers/specs/2026-05-28-open-masjid-prayer-times-skill-design.md   new
 ## 10. Definition of done
 
 - `auth.useAPIKey: true` and the `apiScopes` field are live on `Users`, with a migration applied.
-- `requireScope` and `isApiKeyAuth` are implemented and unit-tested per §4.5.
-- `PrayerSchedules` access controls are wrapped with `requireScope` for both read and write.
+- `isApiKeyAuth`, `gateByApiKeyScope`, and `withApiKeyScopeEnforcement` are implemented and unit-tested per §4.5.
+- Every collection in `payload.config.ts` is wrapped with `withApiKeyScopeEnforcement`, so non-empty `apiScopes` is default-deny except for the `(slug, op)` pairs declared in `SCOPE_MAP`.
 - The skill exists, activates on `/masjid` and on natural mentions of prayer times, and an operator can chat through a Fajr iqamah change end-to-end with a working diff preview.
 - All six manual test cases in §7 pass against a local dev server.
 - This spec is committed.
