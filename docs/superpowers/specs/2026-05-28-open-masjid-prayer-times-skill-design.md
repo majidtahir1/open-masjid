@@ -127,10 +127,11 @@ export const Users: CollectionConfig = {
 import type { Access, PayloadRequest } from 'payload'
 
 export const isApiKeyAuth = (req: PayloadRequest): boolean => {
-  // Payload exposes the auth strategy used for the current request. The exact
-  // attribute name is version-dependent; the implementation plan must verify
-  // (likely req.user?._strategy === 'api-key' or req.authStrategy).
-  return /* see plan: spike on Payload internals */ false
+  // Payload exposes the auth strategy used for the current request via a
+  // field on `req` (likely `req.user._strategy === 'api-key'` or
+  // `req.authStrategy === 'api-key'` — confirm against the installed
+  // Payload version during implementation; this is a 10-minute spike).
+  return (req as { authStrategy?: string }).authStrategy === 'api-key'
 }
 
 export const requireScope =
