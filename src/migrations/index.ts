@@ -25,6 +25,7 @@ import * as migration_20260515_042807_kiosk_current_slide from './20260515_04280
 import * as migration_20260527_052028 from './20260527_052028';
 import * as migration_20260527_162430_salah_holdover_default_5 from './20260527_162430_salah_holdover_default_5';
 import * as migration_20260527_181500_media_alt_nullable from './20260527_181500_media_alt_nullable';
+import * as migration_20260528_143426 from './20260528_143426';
 
 export const migrations = [
   {
@@ -155,11 +156,16 @@ export const migrations = [
   {
     up: migration_20260527_162430_salah_holdover_default_5.up,
     down: migration_20260527_162430_salah_holdover_default_5.down,
-    name: '20260527_162430_salah_holdover_default_5'
+    name: '20260527_162430_salah_holdover_default_5',
   },
   {
     up: migration_20260527_181500_media_alt_nullable.up,
     down: migration_20260527_181500_media_alt_nullable.down,
     name: '20260527_181500_media_alt_nullable',
+  },
+  {
+    up: migration_20260528_143426.up,
+    down: migration_20260528_143426.down,
+    name: '20260528_143426'
   },
 ];

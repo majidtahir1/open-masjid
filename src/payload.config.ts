@@ -33,6 +33,7 @@ import { createTenantEndpoint } from './endpoints/createTenant'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
 import { runJobsDevEndpoint } from './endpoints/runJobsDev'
+import { withApiKeyScopeEnforcement } from './access/apiScoped'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -91,6 +92,7 @@ export default buildConfig({
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
+        '/src/admin/ProfileLink#default',
         '/src/admin/SiteSettingsCluster#default',
       ],
       header: [
@@ -119,6 +121,11 @@ export default buildConfig({
   // Order matters — Payload renders sidebar groups in the order their first
   // collection appears here. Desired order: Prayer, Content, Donations,
   // (Library hidden), (People hidden), (Site hidden via HideTenantsNav).
+  // Every collection's access functions are wrapped with
+  // `withApiKeyScopeEnforcement` so a key with non-empty `apiScopes` is
+  // default-deny everywhere except for the (slug, op) pairs declared in
+  // `src/access/apiScoped.ts#SCOPE_MAP`. UI sessions and keys with empty
+  // scopes are unaffected.
   collections: [
     PrayerSchedules,
     PrayerDisplayContent,
@@ -141,7 +148,7 @@ export default buildConfig({
     Media,
     Users,
     Tenants,
-  ],
+  ].map(withApiKeyScopeEnforcement),
   endpoints: [
     generatePrayerTimesEndpoint,
     applyIqamahRulesEndpoint,

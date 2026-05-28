@@ -16,6 +16,7 @@ import React from 'react'
  *   6. Membership link     (custom — overview-only; collections are hidden)
  *   7. Donations link      (custom)
  *   8. View public site    (custom)
+ *   98. My Profile         (custom — pinned bottom, above Site Settings)
  *   99. Site Settings      (custom — pinned bottom)
  *   100. Logout
  *
@@ -42,11 +43,15 @@ export default function NavOrder() {
     .nav a[data-donations-nav-link] { order: 7; }
     .nav a[data-view-public-site] { order: 8; }
 
-    /* Pin Site Settings just above the logout, with all the empty space
-       above it. */
+    /* Pin My Profile and Site Settings to the bottom of the sidebar.
+       My Profile takes the auto-margin so it eats the empty space above;
+       Site Settings sits just below it (still above the logout). */
+    .nav a[data-profile-link] {
+      order: 98;
+      margin-top: auto !important;
+    }
     .nav a[data-site-settings-link] {
       order: 99;
-      margin-top: auto !important;
     }
 
     /* Logout sits at the very bottom, right under Site Settings. */
