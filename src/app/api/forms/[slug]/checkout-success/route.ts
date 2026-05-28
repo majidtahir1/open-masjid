@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { getStripe } from '@/lib/stripe'
+import { relationshipId } from '@/lib/stripe-connect-binding'
 import type Stripe from 'stripe'
 
 export const runtime = 'nodejs'
@@ -30,6 +31,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     id: submissionId,
     overrideAccess: true,
   })
+  // The session was retrieved from the current tenant's connected account, but
+  // also require the submission itself to belong to this tenant before mutating
+  // it — never mark another tenant's submission paid.
+  const currentTenantId = relationshipId((tenant as { id?: unknown } | null)?.id ?? null)
+  if (currentTenantId === null || relationshipId((sub as { tenant?: unknown }).tenant) !== currentTenantId) {
+    return NextResponse.json({ error: 'tenant_mismatch' }, { status: 403 })
+  }
   if (sub.paymentStatus === 'pending_payment' && session.payment_status === 'paid') {
     await payload.update({
       collection: 'form-submissions',

@@ -64,6 +64,7 @@ beforeEach(() => {
   payloadFindByID.mockResolvedValue({
     id: 'sub_abc',
     paymentStatus: 'pending_payment',
+    tenant: 7,
     amountCents: 5000,
     currency: 'usd',
   })
@@ -146,6 +147,7 @@ describe('GET /api/forms/[slug]/checkout-success', () => {
     payloadFindByID.mockResolvedValueOnce({
       id: 'sub_abc',
       paymentStatus: 'paid',
+      tenant: 7,
       amountCents: 5000,
       currency: 'usd',
     })
@@ -170,6 +172,7 @@ describe('GET /api/forms/[slug]/checkout-success', () => {
     payloadFindByID.mockResolvedValueOnce({
       id: 'sub_abc',
       paymentStatus: 'pending_payment',
+      tenant: 7,
       amountCents: 5000,
       currency: 'usd',
     })
@@ -177,5 +180,18 @@ describe('GET /api/forms/[slug]/checkout-success', () => {
     expect(payloadUpdate).not.toHaveBeenCalled()
     // Still redirects
     expect(res.status).toBe(303)
+  })
+
+  it('returns 403 and does not update when the submission belongs to another tenant', async () => {
+    payloadFindByID.mockResolvedValueOnce({
+      id: 'sub_abc',
+      paymentStatus: 'pending_payment',
+      tenant: 999, // different from currentTenant.id (7)
+      amountCents: 5000,
+      currency: 'usd',
+    })
+    const res = await GET(makeReq('my-form', 'cs_test'), makeParams('my-form'))
+    expect(res.status).toBe(403)
+    expect(payloadUpdate).not.toHaveBeenCalled()
   })
 })

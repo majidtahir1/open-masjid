@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { applyDonationAction } from '@/lib/donations-apply'
 import type { Payload } from 'payload'
 
-type Row = Record<string, any> & { id: string }
+type Row = Record<string, any> & { id: string | number }
 
 function makeMockPayload() {
   const tables: Record<string, Row[]> = { donations: [], tenants: [] }
@@ -62,19 +62,28 @@ function makeMockPayload() {
 }
 
 describe('applyDonationAction — recordDonation', () => {
-  it('inserts a donation row', async () => {
+  // Tenant 1 owns connected account acct_1 and fund 1.
+  function seedTenantAndFund(tables: Record<string, Row[]>) {
+    tables.tenants.push({ id: 1, donationConfig: { stripeAccountId: 'acct_1' } })
+    tables['donation-funds'] = [{ id: 1, tenant: 1 }]
+  }
+
+  const baseAction = {
+    kind: 'recordDonation' as const,
+    tenantId: '1',
+    fundId: '1',
+    frequency: 'one_time' as const,
+    amountCents: 5000,
+    currency: 'usd',
+    status: 'succeeded' as const,
+    stripePaymentIntentId: 'pi_1',
+    stripeAccountId: 'acct_1',
+  }
+
+  it('inserts a donation row when account, tenant, and fund all bind', async () => {
     const { payload, tables } = makeMockPayload()
-    await applyDonationAction(payload, {
-      kind: 'recordDonation',
-      tenantId: '1',
-      fundId: '1',
-      frequency: 'one_time',
-      amountCents: 5000,
-      currency: 'usd',
-      status: 'succeeded',
-      stripePaymentIntentId: 'pi_1',
-      stripeAccountId: 'acct_1',
-    })
+    seedTenantAndFund(tables)
+    await applyDonationAction(payload, baseAction)
     expect(tables.donations).toHaveLength(1)
     expect(tables.donations[0]).toMatchObject({
       tenant: 1,
@@ -90,20 +99,48 @@ describe('applyDonationAction — recordDonation', () => {
 
   it('is idempotent by stripePaymentIntentId — second call does not create a duplicate', async () => {
     const { payload, tables } = makeMockPayload()
-    const action = {
-      kind: 'recordDonation' as const,
-      tenantId: '1',
-      fundId: '1',
-      frequency: 'one_time' as const,
-      amountCents: 5000,
-      currency: 'usd',
-      status: 'succeeded' as const,
-      stripePaymentIntentId: 'pi_dup',
-      stripeAccountId: 'acct_1',
-    }
+    seedTenantAndFund(tables)
+    const action = { ...baseAction, stripePaymentIntentId: 'pi_dup' }
     await applyDonationAction(payload, action)
     await applyDonationAction(payload, action)
     expect(tables.donations).toHaveLength(1)
+  })
+
+  it('drops the donation when no tenant owns the connected account', async () => {
+    const { payload, tables } = makeMockPayload()
+    tables.tenants.push({ id: 1, donationConfig: { stripeAccountId: 'acct_real' } })
+    tables['donation-funds'] = [{ id: 1, tenant: 1 }]
+    await applyDonationAction(payload, {
+      ...baseAction,
+      stripePaymentIntentId: 'pi_attacker',
+      stripeAccountId: 'acct_attacker',
+    })
+    expect(tables.donations).toHaveLength(0)
+  })
+
+  it('drops the donation when metadata tenantId does not match the account owner', async () => {
+    const { payload, tables } = makeMockPayload()
+    // acct_1 belongs to tenant 1, but a forged event claims victim tenant 2.
+    tables.tenants.push({ id: 1, donationConfig: { stripeAccountId: 'acct_1' } })
+    tables['donation-funds'] = [{ id: 9, tenant: 2 }]
+    await applyDonationAction(payload, {
+      ...baseAction,
+      tenantId: '2',
+      fundId: '9',
+      stripePaymentIntentId: 'pi_forged',
+    })
+    expect(tables.donations).toHaveLength(0)
+  })
+
+  it('drops the donation when the fund belongs to a different tenant', async () => {
+    const { payload, tables } = makeMockPayload()
+    tables.tenants.push({ id: 1, donationConfig: { stripeAccountId: 'acct_1' } })
+    tables['donation-funds'] = [{ id: 1, tenant: 2 }]
+    await applyDonationAction(payload, {
+      ...baseAction,
+      stripePaymentIntentId: 'pi_crossfund',
+    })
+    expect(tables.donations).toHaveLength(0)
   })
 })
 
