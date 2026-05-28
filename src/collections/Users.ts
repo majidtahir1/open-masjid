@@ -53,6 +53,7 @@ export const Users: CollectionConfig = {
   },
   auth: {
     depth: 0,
+    useAPIKey: true,
     forgotPassword: {
       generateEmailSubject: () => 'Set your password — OpenMasjid',
       generateEmailHTML: async (args) => {
@@ -308,6 +309,21 @@ export const Users: CollectionConfig = {
           if (!user) return false
           return user.role === 'platformOwner'
         },
+      },
+    },
+    {
+      name: 'apiScopes',
+      type: 'select',
+      hasMany: true,
+      label: 'API scopes',
+      options: [
+        { label: 'Prayer times — read', value: 'prayer-times:read' },
+        { label: 'Prayer times — write', value: 'prayer-times:write' },
+      ],
+      admin: {
+        description:
+          "Restricts what this user's API key can do. Leave empty to inherit the user's full role permissions. UI session permissions are never restricted by this field.",
+        condition: (data) => Boolean(data?.enableAPIKey),
       },
     },
     {

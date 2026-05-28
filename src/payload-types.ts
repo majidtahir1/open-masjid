@@ -1580,11 +1580,18 @@ export interface User {
    */
   tenant?: (number | null) | Tenant;
   /**
+   * Restricts what this user's API key can do. Leave empty to inherit the user's full role permissions. UI session permissions are never restricted by this field.
+   */
+  apiScopes?: ('prayer-times:read' | 'prayer-times:write')[] | null;
+  /**
    * Set the first time this user sees the onboarding welcome dialog. Used to suppress re-showing it on subsequent logins.
    */
   onboardingWelcomeSeenAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -2434,9 +2441,13 @@ export interface UsersSelect<T extends boolean = true> {
   lastName?: T;
   role?: T;
   tenant?: T;
+  apiScopes?: T;
   onboardingWelcomeSeenAt?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
