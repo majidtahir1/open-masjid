@@ -1,10 +1,22 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, FieldAccess } from 'payload'
 
 import { platformOwnerOnly } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
 import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
 import { seedDefaultDonationFunds } from '../hooks/seedDefaultDonationFunds'
 import { seedPrayerDisplayContent } from '../hooks/seedPrayerDisplayContent'
+
+/**
+ * Field-update guard for tenant lifecycle / billing / Stripe-derived state.
+ * Tenant admins can update their own tenant doc, but these fields must only
+ * change via platform-owner action or the trusted server paths that use
+ * `overrideAccess` (afterLogin, billing webhook, Stripe Connect callback /
+ * disconnect, donations sync). `admin.hidden` / `admin.readOnly` are UI-only
+ * controls — this enforces the boundary server-side. `overrideAccess` writes
+ * bypass field access, so the legitimate server writers are unaffected.
+ */
+const platformOwnerFieldUpdate: FieldAccess = ({ req: { user } }) =>
+  (user as { role?: string } | null)?.role === 'platformOwner'
 
 /**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
@@ -537,6 +549,7 @@ export const Tenants: CollectionConfig = {
                 description:
                   'A tenant is "pending" until its admin user signs in for the first time. Pending tenants are subject to auto-cleanup after 7 days.',
               },
+              access: { update: platformOwnerFieldUpdate },
             },
             {
               name: 'trialEndsAt',
@@ -547,6 +560,7 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Recorded at signup (now + 14 days). Not enforced yet — billing/paywall will read this when introduced.',
               },
+              access: { update: platformOwnerFieldUpdate },
             },
             {
               name: 'signupMetadata',
@@ -557,6 +571,7 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Free-form blob captured at public signup (role, migration source, etc.). Used for analytics, not for product logic.',
               },
+              access: { update: platformOwnerFieldUpdate },
             },
           ],
         },
@@ -583,10 +598,26 @@ export const Tenants: CollectionConfig = {
                 { label: 'Grandfathered (free)', value: 'grandfathered' },
               ],
               admin: { hidden: true, readOnly: true },
+              access: { update: platformOwnerFieldUpdate },
             },
-            { name: 'stripeCustomerId', type: 'text', admin: { hidden: true, readOnly: true } },
-            { name: 'stripeSubscriptionId', type: 'text', admin: { hidden: true, readOnly: true } },
-            { name: 'currentPeriodEnd', type: 'date', admin: { hidden: true, readOnly: true } },
+            {
+              name: 'stripeCustomerId',
+              type: 'text',
+              admin: { hidden: true, readOnly: true },
+              access: { update: platformOwnerFieldUpdate },
+            },
+            {
+              name: 'stripeSubscriptionId',
+              type: 'text',
+              admin: { hidden: true, readOnly: true },
+              access: { update: platformOwnerFieldUpdate },
+            },
+            {
+              name: 'currentPeriodEnd',
+              type: 'date',
+              admin: { hidden: true, readOnly: true },
+              access: { update: platformOwnerFieldUpdate },
+            },
             {
               name: 'gracePeriodEndsAt',
               type: 'date',
@@ -596,6 +627,7 @@ export const Tenants: CollectionConfig = {
                 description:
                   'Set when entering past_due (from trial) or canceled. Public site goes offline after this date.',
               },
+              access: { update: platformOwnerFieldUpdate },
             },
           ],
         },
@@ -653,28 +685,33 @@ export const Tenants: CollectionConfig = {
                     description:
                       'Connected Stripe account ID. Set automatically by the Connect OAuth flow.',
                   },
+                  access: { update: platformOwnerFieldUpdate },
                 },
                 {
                   name: 'stripeAccountConnectedAt',
                   type: 'date',
                   admin: { hidden: true, readOnly: true },
+                  access: { update: platformOwnerFieldUpdate },
                 },
                 {
                   name: 'stripeChargesEnabled',
                   type: 'checkbox',
                   defaultValue: false,
                   admin: { hidden: true, readOnly: true },
+                  access: { update: platformOwnerFieldUpdate },
                 },
                 {
                   name: 'stripePayoutsEnabled',
                   type: 'checkbox',
                   defaultValue: false,
                   admin: { hidden: true, readOnly: true },
+                  access: { update: platformOwnerFieldUpdate },
                 },
                 {
                   name: 'stripeAccountLastSyncedAt',
                   type: 'date',
                   admin: { hidden: true, readOnly: true },
+                  access: { update: platformOwnerFieldUpdate },
                 },
               ],
             },
