@@ -560,6 +560,28 @@ export const Tenants: CollectionConfig = {
           ],
         },
         {
+          label: 'Team',
+          description: 'People who can sign in to manage this masjid.',
+          fields: [
+            {
+              name: 'teamPanel',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '/src/admin/TeamPanel#default',
+                },
+                // Hide the tab entirely for roles that can't manage other users.
+                // Staff can only see themselves and kioskManager has even
+                // narrower scope — neither has a useful view here.
+                condition: (_data, _siblingData, { user }) => {
+                  const role = (user as { role?: string } | null | undefined)?.role
+                  return role === 'platformOwner' || role === 'admin'
+                },
+              },
+            },
+          ],
+        },
+        {
           label: 'Billing',
           description: 'Subscription, payment method, and invoices.',
           fields: [

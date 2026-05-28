@@ -64,6 +64,7 @@ import { default as default_102c9f369a2a51690f6afb9e66bfefd6 } from '../../../..
 import { default as default_6be9fe46a5d0b8701eabd18cf8509bb0 } from '../../../../src/admin/InviteUserPanel'
 import { default as default_b265241eae706a0b7cddb9ba85c0aab9 } from '../../../../src/admin/SiteSettingsIdentityField'
 import { default as default_446124d7ee8ac8871d34efe9e97a216f } from '../../../../src/admin/SiteSettingsBrandingField'
+import { default as default_cc3379bc86beb1c39f1499840395f332 } from '../../../../src/admin/TeamPanel'
 import { default as default_980fed5703db1f4b51a0b7179e8c7ab9 } from '../../../../src/admin/BillingTabIntro'
 import { default as default_ed26a91d770179c222166a676f958f4e } from '../../../../src/admin/CreateTenantPanel'
 import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
@@ -74,6 +75,7 @@ import { default as default_5a77304c25d095fa2525a732ca036e46 } from '../../../..
 import { default as default_93bdb0b944d761991c1e0bf71b7ac82d } from '../../../../src/admin/TenantThemeStyle'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
 import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
+import { default as default_ff3409c169dfdc444cb9eac594ede6a8 } from '../../../../src/admin/ProfileLink'
 import { default as default_01d61330f15c28209a242e90a2460c7d } from '../../../../src/admin/SiteSettingsCluster'
 import { default as default_01bbfbfd80ab6abe9b51ff2e0e76733f } from '../../../../src/admin/BillingBanner'
 import { default as default_8cbcecd357807e8c27e7c48ba30ad9a1 } from '../../../../src/admin/onboarding/OnboardingBanner'
@@ -151,6 +153,7 @@ export const importMap = {
   "/src/admin/InviteUserPanel#default": default_6be9fe46a5d0b8701eabd18cf8509bb0,
   "/src/admin/SiteSettingsIdentityField#default": default_b265241eae706a0b7cddb9ba85c0aab9,
   "/src/admin/SiteSettingsBrandingField#default": default_446124d7ee8ac8871d34efe9e97a216f,
+  "/src/admin/TeamPanel#default": default_cc3379bc86beb1c39f1499840395f332,
   "/src/admin/BillingTabIntro#default": default_980fed5703db1f4b51a0b7179e8c7ab9,
   "/src/admin/CreateTenantPanel#default": default_ed26a91d770179c222166a676f958f4e,
   "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
@@ -161,6 +164,7 @@ export const importMap = {
   "/src/admin/TenantThemeStyle#default": default_93bdb0b944d761991c1e0bf71b7ac82d,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
   "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
+  "/src/admin/ProfileLink#default": default_ff3409c169dfdc444cb9eac594ede6a8,
   "/src/admin/SiteSettingsCluster#default": default_01d61330f15c28209a242e90a2460c7d,
   "/src/admin/BillingBanner#default": default_01bbfbfd80ab6abe9b51ff2e0e76733f,
   "/src/admin/onboarding/OnboardingBanner#default": default_8cbcecd357807e8c27e7c48ba30ad9a1,

@@ -91,6 +91,7 @@ export default buildConfig({
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
+        '/src/admin/ProfileLink#default',
         '/src/admin/SiteSettingsCluster#default',
       ],
       header: [
