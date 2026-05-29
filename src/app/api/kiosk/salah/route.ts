@@ -12,6 +12,11 @@ export async function POST(req: Request) {
   const user = auth.user as { id: string; role?: string; tenant?: any } | null
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
+  const allowedRoles = new Set(['platformOwner', 'admin', 'staff', 'kioskManager'])
+  if (!user.role || !allowedRoles.has(user.role)) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+
   const body = await req.json().catch(() => ({}))
   const action = body?.action === 'end' ? 'end' : 'start'
 
@@ -25,11 +30,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 })
   }
 
+  // Tenant.update access is admin-only by design, but the Salah-now banner
+  // is intentionally available to staff and Display Managers too. We've
+  // already authorized the caller above, so bypass collection access for
+  // this narrow update.
   const tenantDoc = await payload.findByID({
     collection: 'tenants',
     id: tenantId as string | number,
-    user: auth.user,
-    overrideAccess: false,
+    overrideAccess: true,
   })
   const holdover = Number((tenantDoc as any).prayerDisplay?.salahHoldoverMinutes ?? 5)
   const now = new Date()
@@ -56,8 +64,7 @@ export async function POST(req: Request) {
     collection: 'tenants',
     id: tenantId as string | number,
     data,
-    user: auth.user,
-    overrideAccess: false,
+    overrideAccess: true,
   })
 
   return NextResponse.json({ ok: true, action })
