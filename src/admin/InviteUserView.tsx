@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 
-type Role = 'platformOwner' | 'admin' | 'staff'
+type Role = 'platformOwner' | 'admin' | 'staff' | 'kioskManager'
 
 type Tenant = { id: string | number; name?: string | null }
 
@@ -165,6 +165,7 @@ export default function InviteUserForm({
           ) : null}
           <option value="admin">Admin — full access within a tenant</option>
           <option value="staff">Staff — content only within a tenant</option>
+          <option value="kioskManager">Display Manager — kiosk/display content only within a tenant</option>
         </select>
       </div>
       {role !== 'platformOwner' ? (
