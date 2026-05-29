@@ -11,6 +11,14 @@ export const denyKioskManager = (inner: Access): Access => (args) => {
 }
 
 /**
+ * Use as a collection's `admin.hidden` value to remove its sidebar entry
+ * for kioskManager users. Access controls still enforce the API-level deny;
+ * this just keeps the nav uncluttered.
+ */
+export const hideForKioskManager = ({ user }: { user: unknown }) =>
+  (user as { role?: string } | null | undefined)?.role === 'kioskManager'
+
+/**
  * Allow kioskManager read-only access (tenant-scoped); defer to inner for everything else.
  */
 export const allowKioskManagerRead = (inner: Access): Access => (args) => {

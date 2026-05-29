@@ -28,6 +28,7 @@ export default async function MembershipNav() {
 
     const u = user as { tenant?: TenantRef; role?: string }
     if (u.role === 'platformOwner') return null
+    if (u.role === 'kioskManager') return null
 
     const tenantId = tenantIdOf(u.tenant)
     if (!tenantId) return null

@@ -7,7 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
-import { denyKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { applyHeroStyleDefaults } from '../hooks/applyHeroStyleDefaults'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateLucideIcon } from '../lib/validateLucideIcon'
@@ -21,6 +21,7 @@ export const HeroSlides: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Website',
+    hidden: hideForKioskManager,
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'accent', 'active', 'sortOrder'],

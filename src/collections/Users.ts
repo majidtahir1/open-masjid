@@ -173,8 +173,8 @@ export const Users: CollectionConfig = {
       if (!user) return false
       if (user.role === 'platformOwner') return true
 
-      // Staff: only themselves.
-      if (user.role === 'staff') {
+      // Staff and Display Manager: only themselves.
+      if (user.role === 'staff' || user.role === 'kioskManager') {
         const where: Where = { id: { equals: user.id } }
         return where
       }
@@ -197,7 +197,7 @@ export const Users: CollectionConfig = {
       if (!user) return false
       if (user.role === 'platformOwner') return true
 
-      if (user.role === 'staff') {
+      if (user.role === 'staff' || user.role === 'kioskManager') {
         const where: Where = { id: { equals: user.id } }
         return where
       }
