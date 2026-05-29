@@ -4,7 +4,7 @@ import type { Endpoint, PayloadHandler } from 'payload'
 
 type InviteBody = {
   email?: string
-  role?: 'platformOwner' | 'admin' | 'staff'
+  role?: 'platformOwner' | 'admin' | 'staff' | 'kioskManager'
   tenant?: string | number | null
   firstName?: string
   lastName?: string
@@ -63,7 +63,7 @@ const handler: PayloadHandler = async (req) => {
   }
   if (role !== 'platformOwner' && !targetTenant) {
     return Response.json(
-      { error: 'tenant is required for admin and staff roles.' },
+      { error: 'tenant is required for admin, staff, and kiosk manager roles.' },
       { status: 400 },
     )
   }
