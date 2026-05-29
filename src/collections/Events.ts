@@ -7,7 +7,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
-import { denyKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { buildLivePreviewUrl, buildPreviewUrl } from '../lib/previewUrl'
 
@@ -42,6 +42,7 @@ export const Events: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Website',
+    hidden: hideForKioskManager,
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'tag', '_status', 'startDate', 'featured'],

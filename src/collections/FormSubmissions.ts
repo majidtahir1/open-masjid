@@ -1,7 +1,7 @@
 // src/collections/FormSubmissions.ts
 import type { CollectionConfig } from 'payload'
 import { tenantScopedRead } from '../access/tenantScoped'
-import { denyKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
@@ -9,6 +9,7 @@ export const FormSubmissions: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Forms',
+    hidden: hideForKioskManager,
     useAsTitle: 'submitterEmail',
     defaultColumns: ['submittedAt', 'submitterEmail', 'form', 'status', 'paymentStatus'],
     description: 'Form submissions. Read-only — created by the public submit endpoint.',

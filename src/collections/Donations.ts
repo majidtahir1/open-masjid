@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScopedReadAccess } from '../access/tenantScoped'
-import { denyKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 
 /**
  * Donations — aggregate-only donation records written by the Stripe Connect
@@ -13,6 +13,7 @@ export const Donations: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Donations',
+    hidden: hideForKioskManager,
     useAsTitle: 'stripePaymentIntentId',
     defaultColumns: ['createdAt', 'fund', 'amount', 'frequency', 'status'],
     description:

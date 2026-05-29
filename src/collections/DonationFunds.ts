@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScopedAccess } from '../access/tenantScoped'
-import { denyKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 
 /**
@@ -15,6 +15,7 @@ export const DonationFunds: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Donations',
+    hidden: hideForKioskManager,
     useAsTitle: 'name',
     defaultColumns: ['name', 'zakatEligible', 'active', 'sortOrder'],
     description:

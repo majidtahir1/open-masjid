@@ -6,7 +6,7 @@ import {
   tenantScopedUpdate,
 } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
-import { denyKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateSchema } from '../lib/form-schema'
 
@@ -29,6 +29,7 @@ export const Forms: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Forms',
+    hidden: hideForKioskManager,
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
   },
