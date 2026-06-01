@@ -151,4 +151,77 @@ describe('gateByApiKeyScope', () => {
       expect(access(argsFor(req))).toBe(false)
     })
   })
+
+  describe('v1 capability-surface mappings', () => {
+    const keyWith = (scopes: string[]) =>
+      reqWith({ id: 1, _strategy: 'api-key', apiScopes: scopes })
+
+    // [slug, op, requiredScope] — the scope that must be present to pass.
+    const allowCases: Array<[string, 'read' | 'create' | 'update' | 'delete', string]> = [
+      ['announcements', 'read', 'announcements:read'],
+      ['announcements', 'create', 'announcements:write'],
+      ['announcements', 'update', 'announcements:write'],
+      ['announcements', 'delete', 'announcements:write'],
+      ['forms', 'read', 'forms:read'],
+      ['forms', 'create', 'forms:write'],
+      ['forms', 'update', 'forms:write'],
+      ['forms', 'delete', 'forms:write'],
+      ['form-submissions', 'read', 'forms:read'],
+      ['events', 'read', 'events:read'],
+      ['events', 'create', 'events:write'],
+      ['events', 'update', 'events:write'],
+      ['events', 'delete', 'events:write'],
+      ['members', 'read', 'members:read'],
+    ]
+
+    for (const [slug, op, scope] of allowCases) {
+      it(`allows ${op} on ${slug} when key has ${scope}`, () => {
+        const access = gateByApiKeyScope(slug, op)(allow)
+        expect(access(argsFor(keyWith([scope])))).toBe(true)
+      })
+
+      it(`denies ${op} on ${slug} when key lacks ${scope}`, () => {
+        const access = gateByApiKeyScope(slug, op)(allow)
+        // a non-empty but irrelevant scope set → default-deny
+        expect(access(argsFor(keyWith(['prayer-times:read'])))).toBe(false)
+      })
+    }
+
+    // Read scope must NOT grant writes.
+    const readDoesNotGrantWrite: Array<[string, 'create' | 'update' | 'delete', string]> = [
+      ['announcements', 'create', 'announcements:read'],
+      ['forms', 'update', 'forms:read'],
+      ['events', 'delete', 'events:read'],
+    ]
+    for (const [slug, op, readScope] of readDoesNotGrantWrite) {
+      it(`denies ${op} on ${slug} when key only has ${readScope}`, () => {
+        const access = gateByApiKeyScope(slug, op)(allow)
+        expect(access(argsFor(keyWith([readScope])))).toBe(false)
+      })
+    }
+
+    // Read-only collections expose no write mapping → scoped keys are denied writes.
+    const readOnlyWriteDenied: Array<[string, 'create' | 'update' | 'delete']> = [
+      ['members', 'create'],
+      ['members', 'update'],
+      ['members', 'delete'],
+      ['form-submissions', 'create'],
+      ['form-submissions', 'update'],
+      ['form-submissions', 'delete'],
+    ]
+    for (const [slug, op] of readOnlyWriteDenied) {
+      it(`denies ${op} on read-only ${slug} even with that domain's read scope`, () => {
+        const readScope = slug === 'form-submissions' ? 'forms:read' : `${slug}:read`
+        const access = gateByApiKeyScope(slug, op)(allow)
+        expect(access(argsFor(keyWith([readScope])))).toBe(false)
+      })
+    }
+
+    it('preserves a where-clause return from existing access on a newly mapped collection', () => {
+      const access = gateByApiKeyScope('members', 'read')(allowOwnTenant)
+      const req = keyWith(['members:read'])
+      ;(req.user as { tenant?: string }).tenant = 'abc'
+      expect(access(argsFor(req))).toEqual({ tenant: { equals: 'abc' } })
+    })
+  })
 })
