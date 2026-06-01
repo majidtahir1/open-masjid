@@ -327,6 +327,13 @@ export const Users: CollectionConfig = {
       options: [
         { label: 'Prayer times — read', value: 'prayer-times:read' },
         { label: 'Prayer times — write', value: 'prayer-times:write' },
+        { label: 'Announcements — read', value: 'announcements:read' },
+        { label: 'Announcements — write', value: 'announcements:write' },
+        { label: 'Forms & submissions — read', value: 'forms:read' },
+        { label: 'Forms — write', value: 'forms:write' },
+        { label: 'Events — read', value: 'events:read' },
+        { label: 'Events — write', value: 'events:write' },
+        { label: 'Members — read', value: 'members:read' },
       ],
       admin: {
         description:
