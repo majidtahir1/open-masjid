@@ -3,7 +3,7 @@
 - **Date:** 2026-05-31
 - **Status:** Approved (brainstorm) → future implementation (after capability surface v1)
 - **Depends on:** [Agent Capability Surface v1](./2026-05-31-ai-agent-capability-surface-v1-design.md)
-- **Related:** [Marketing Spotlight](./2026-05-31-ai-assistant-marketing-spotlight-design.md)
+- **Related:** [Marketing Spotlight](./2026-05-31-ai-assistant-marketing-spotlight-design.md), [Multi-Tenant Productization](./2026-05-31-ansari-multi-tenant-productization-design.md)
 
 ## Context
 
@@ -187,7 +187,7 @@ A per-tenant **AnsariSettings** Payload admin screen controlling:
 
 ## Out of scope
 
-- **Multi-tenant** scheduling/fan-out — engine runs for the single configured tenant for now; per-tenant productization is separate and not yet designed.
+- **Multi-tenant** scheduling/fan-out — engine runs for the single configured tenant for now; per-tenant productization is designed separately in [Multi-Tenant Productization](./2026-05-31-ansari-multi-tenant-productization-design.md) (profile-per-masjid).
 - **Auto-act** (autonomy level 3) — explicitly rejected; everything is suggest + confirm.
 - **Real-time event-driven nudges** (webhooks the instant a form hits capacity) — the daily scan approximates this; revisit if latency matters.
 - **Admin-tunable numeric thresholds** — defaults only in v1.

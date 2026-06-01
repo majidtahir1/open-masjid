@@ -74,7 +74,7 @@ New scope options:
 ## Out of scope (v1)
 
 - Kiosk slide control, advanced prayer writes (per-day, jummah, Ramadan bulk), donation-campaign writes.
-- Multi-tenant key productization (Hermes per-tenant) — separate, not yet designed.
+- Multi-tenant key productization (Hermes per-tenant) — designed separately in [Multi-Tenant Productization](./2026-05-31-ansari-multi-tenant-productization-design.md) (profile-per-masjid; scoped keys are minted per masjid into each profile).
 
 ## Open questions
 
