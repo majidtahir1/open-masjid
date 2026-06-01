@@ -1,7 +1,7 @@
 # Design: AI Agent — Capability Surface v1
 
 - **Date:** 2026-05-31
-- **Status:** Approved (brainstorm) → future implementation (after marketing spotlight)
+- **Status:** Implemented (backend scopes) — see [plan](../plans/2026-06-01-ai-agent-capability-surface-v1.md)
 - **Scope:** Backend (scopes + agent-reachable reads/writes) beyond prayer times.
 - **Related:** [Marketing Spotlight](./2026-05-31-ai-assistant-marketing-spotlight-design.md), [Proactive Nudge Engine](./2026-05-31-proactive-nudge-engine-design.md)
 
@@ -29,7 +29,7 @@ Define the v1 capability surface and the scope model that gates it, so the assis
 | Forms & RSVPs | signup counts, response summary | create an RSVP/form (capacity, price, fields) | ✅ |
 | Events | upcoming events, **signup counts** | create / update / cancel; from text or forwarded flyer image | ✅ |
 | Members | count, new-this-month, search | — | ✅ read only |
-| Donations | totals by fund, by month, campaign progress | — | ✅ read only |
+| Donations | totals by fund, by month, campaign progress | — | 🔜 v1.1 (needs sum endpoint) |
 | Kiosks/displays | what's showing | push/schedule a slide | ❌ later |
 | Prayer (advanced) | — | per-day overrides, jummah writes, Ramadan/seasonal bulk | ❌ later |
 | Donations (write) | — | create campaign/goal | ❌ later |
@@ -76,7 +76,10 @@ New scope options:
 - Kiosk slide control, advanced prayer writes (per-day, jummah, Ramadan bulk), donation-campaign writes.
 - Multi-tenant key productization (Hermes per-tenant) — separate, not yet designed.
 
-## Open questions
+## Open questions (resolved in implementation)
 
-- Do forms/event "create" flows need a dry-run/preview endpoint, or is the agent's own confirm step sufficient given server-side validation?
-- Members search: which fields are queryable via the scoped read without exposing sensitive PII?
+- **Dry-run/preview endpoint for create flows?** No — the agent's own confirm step plus server-side validation (`validateSchema` on forms, Payload field validation) is sufficient for v1. No new endpoint added.
+- **Members search PII?** `members:read` returns full member documents at the collection level (same data an admin sees in the UI); field-level redaction is deferred. The agent layer must avoid echoing Stripe IDs into chat. Because `Members` role-access denies `staff`, the agent key's user must be `admin`/`platformOwner` for reads to return data.
+- **Event signup counts** flow through `form-submissions` (gated by `forms:read`), since events have no form relationship field; an agent key needing them carries both `events:read` and `forms:read`.
+
+**Deferred to v1.1:** Donations read (`donations:read`). Payload REST has no SUM/group-by, so "totals by fund/month" and "building-fund progress" need a custom aggregation endpoint (`GET /api/donations/summary`, DB-level sum, scope-gated, mirroring `/api/apply-iqamah-rules`). There is also no `goal`/`target` field on funds, so "progress" would mean "total raised," not "% of goal." Tracked separately.
