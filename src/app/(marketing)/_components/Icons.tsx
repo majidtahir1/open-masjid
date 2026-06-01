@@ -143,9 +143,31 @@ export const Monitor = (p: IconProps) => (
     <path d="M12 17v4" />
   </svg>
 )
+export const MessageCircle = (p: IconProps) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" {...base} {...p}>
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z" />
+  </svg>
+)
+export const GitCompare = (p: IconProps) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" {...base} {...p}>
+    <circle cx="5" cy="6" r="3" /><path d="M12 6h5a2 2 0 0 1 2 2v7" /><path d="m15 9-3-3 3-3" />
+    <circle cx="19" cy="18" r="3" /><path d="M12 18H7a2 2 0 0 1-2-2V9" /><path d="m9 15 3 3-3 3" />
+  </svg>
+)
+export const ArrowUp = (p: IconProps) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" {...base} strokeWidth={2} {...p}>
+    <path d="m5 12 7-7 7 7" /><path d="M12 19V5" />
+  </svg>
+)
+export const Bell = (p: IconProps) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" {...base} {...p}>
+    <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+    <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+  </svg>
+)
 
 export const Icons = {
   Sunrise, Calendar, Heart, Palette, Shield, Code, Github, ArrowRight, Check, X, ChevronDown,
   MoonStar, Mail, Twitter, Linkedin, Server, Sparkles, Globe, Lock, Database, Layers, ClipboardList,
-  Monitor,
+  Monitor, MessageCircle, GitCompare, ArrowUp, Bell,
 }
