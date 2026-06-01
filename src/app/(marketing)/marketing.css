@@ -1182,3 +1182,319 @@
 @media (prefers-reduced-motion: reduce) {
   .om-app *, .om-app *::before, .om-app *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* =========================================================================
+   OPENMASJID ANSARI · AI assistant feature page + home banner
+   Centerpiece is the chat mockup. Channel-agnostic generic messaging UI.
+   Ported from the Claude Design handoff (assistant/assistant.css).
+   ========================================================================= */
+
+/* ---------- chat mockup ---------- */
+.oa-chat {
+  background: white;
+  border: 1px solid var(--om-border);
+  border-radius: 18px;
+  box-shadow: var(--sh-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.oa-chat-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--om-border);
+  background: white;
+}
+.oa-avatar {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  background: var(--om-brand);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.oa-chat-head-name { font-size: 14px; font-weight: 600; color: var(--fg1); margin: 0; line-height: 1.2; }
+.oa-chat-head-status {
+  font-size: 12px; color: var(--icp-success); margin: 2px 0 0;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.oa-chat-head-status::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--icp-success); box-shadow: 0 0 0 3px rgba(76, 139, 91, 0.18);
+}
+.oa-chat-body {
+  padding: 20px 18px;
+  background: var(--om-bg-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+/* message bubbles */
+.oa-msg {
+  max-width: 82%;
+  padding: 11px 15px;
+  border-radius: 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--fg1);
+  position: relative;
+  word-wrap: break-word;
+}
+.oa-msg.in {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid var(--om-border);
+  border-bottom-left-radius: 5px;
+}
+.oa-msg.out {
+  align-self: flex-end;
+  background: var(--om-brand);
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+.oa-msg.out b { color: white; }
+.oa-msg-time {
+  font-size: 10.5px;
+  color: var(--fg4);
+  margin-top: 3px;
+  padding: 0 6px;
+}
+
+/* a "card" rendered by the assistant inside a wide bubble */
+.oa-card-msg {
+  align-self: flex-start;
+  max-width: 92%;
+  background: white;
+  border: 1px solid var(--om-border);
+  border-radius: 16px;
+  border-bottom-left-radius: 5px;
+  padding: 14px;
+  box-shadow: var(--sh-sm);
+}
+.oa-card-msg-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--om-accent-deep); margin: 0 0 10px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+/* diff-then-confirm rows */
+.oa-diff { display: flex; flex-direction: column; gap: 7px; }
+.oa-diff-row { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+.oa-diff-row .oa-diff-key { color: var(--fg2); min-width: 92px; font-weight: 500; }
+.oa-diff-old {
+  color: var(--fg3); text-decoration: line-through;
+  font-family: var(--font-mono); font-size: 12.5px;
+}
+.oa-diff-arrow { color: var(--om-gold); font-size: 13px; }
+.oa-diff-new {
+  color: var(--fg1); font-weight: 600;
+  font-family: var(--font-mono); font-size: 13px;
+  background: var(--icp-teal-50); padding: 1px 7px; border-radius: 5px;
+}
+.oa-confirm {
+  display: flex; gap: 8px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--om-border);
+}
+.oa-chip {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: default; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.oa-chip.primary { background: var(--om-brand); color: white; }
+.oa-chip.ghost { background: var(--om-bg-soft); color: var(--fg2); border: 1px solid var(--om-border); }
+
+/* a result confirmation line */
+.oa-done {
+  align-self: flex-start; max-width: 82%;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13.5px; color: var(--icp-success); font-weight: 500;
+  background: rgba(76, 139, 91, 0.08); border: 1px solid rgba(76, 139, 91, 0.2);
+  padding: 9px 14px; border-radius: 12px;
+}
+.oa-done svg { flex-shrink: 0; }
+
+/* typing indicator */
+.oa-typing {
+  align-self: flex-start;
+  background: white; border: 1px solid var(--om-border);
+  border-radius: 16px; border-bottom-left-radius: 5px;
+  padding: 13px 16px; display: inline-flex; gap: 4px;
+}
+.oa-typing span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--fg4);
+  animation: oa-bounce 1.3s infinite ease-in-out;
+}
+.oa-typing span:nth-child(2) { animation-delay: 0.18s; }
+.oa-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes oa-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* attachment / forwarded image chip inside a bubble */
+.oa-attach {
+  display: flex; gap: 10px; align-items: center;
+  margin-top: 8px; padding: 8px; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+.oa-attach-thumb {
+  width: 44px; height: 56px; border-radius: 6px; flex-shrink: 0;
+  background-size: cover; background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.oa-attach-meta { font-size: 11.5px; line-height: 1.35; opacity: 0.85; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.oa-attach-meta b { font-weight: 600; }
+
+/* input bar */
+.oa-chat-input {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-top: 1px solid var(--om-border); background: white;
+}
+.oa-chat-input-field {
+  flex: 1; font-size: 13.5px; color: var(--fg3);
+  background: var(--om-bg-soft); border: 1px solid var(--om-border);
+  border-radius: 999px; padding: 10px 16px;
+}
+.oa-chat-send {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: var(--om-brand); color: white;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- hero · deep-navy night treatment ---------- */
+.oa-heroB {
+  position: relative; overflow: hidden;
+  background: var(--icp-navy-900);
+  color: white;
+  padding: 28px 0 30px;
+}
+.oa-heroB-glow {
+  position: absolute; pointer-events: none; z-index: 0;
+  top: -260px; left: 50%; transform: translateX(-40%);
+  width: 1200px; height: 820px;
+  background: radial-gradient(ellipse at center, rgba(40, 160, 180, 0.30), rgba(40, 160, 180, 0.06) 42%, transparent 70%);
+}
+.oa-heroB-stars { position: absolute; inset: 0; z-index: 0; opacity: 0.5; pointer-events: none; }
+.oa-heroB-grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center;
+}
+.oa-heroB-text > * + * { margin-top: 18px; }
+.oa-heroB .om-h1 { text-wrap: normal; }
+.oa-heroB h1 { color: white; }
+/* tighten the hero chat so the whole section fits the viewport (scoped to the
+   hero; the capability-row chats below keep their roomier spacing) */
+.oa-heroB .oa-chat-head { padding: 8px 16px; }
+.oa-heroB .oa-chat-body { padding: 10px 16px; gap: 4px; }
+.oa-heroB .oa-msg { padding: 6px 13px; font-size: 13.5px; }
+.oa-heroB .oa-msg-time { margin-top: 1px; }
+.oa-heroB .oa-card-msg { padding: 8px 10px; }
+.oa-heroB .oa-typing { padding: 6px 14px; }
+.oa-heroB .oa-chat-input { padding: 6px 13px; }
+
+/* ---------- shared kicker / eyebrow ---------- */
+.oa-kicker {
+  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--om-accent-deep);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.oa-kicker.on-dark { color: var(--icp-teal-300); }
+
+/* ---------- "what you can ask" prompt pills + flow line ---------- */
+.oa-heroC-flow {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; color: var(--om-gold); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.oa-heroC-flow::before, .oa-heroC-flow::after {
+  content: ""; height: 1px; flex: 1; max-width: 120px;
+  background: linear-gradient(90deg, transparent, var(--om-border-strong), transparent);
+}
+.oa-prompts { display: flex; flex-wrap: wrap; gap: 10px; }
+.oa-prompt {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 999px;
+  background: white; border: 1px solid var(--om-border);
+  font-size: 14px; color: var(--fg2); box-shadow: var(--sh-xs);
+}
+.oa-prompt .oa-prompt-q { color: var(--om-gold); font-weight: 700; }
+
+/* ---------- capability rows reuse .om-feature-row, plus a compact chat ---------- */
+.oa-cap-chat { max-width: 440px; }
+
+/* ---------- reassurance / safety strip (light) ---------- */
+.oa-assure { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.oa-assure-item { display: flex; flex-direction: column; gap: 8px; }
+.oa-assure-ico {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--om-accent-soft); color: var(--om-accent-deep);
+  display: flex; align-items: center; justify-content: center;
+}
+.oa-assure-item h4 { font-size: 15px; font-weight: 600; color: var(--fg1); margin: 0; }
+.oa-assure-item p { font-size: 13.5px; line-height: 1.55; color: var(--fg2); margin: 0; }
+
+@media (max-width: 880px) {
+  .oa-heroB-grid { grid-template-columns: 1fr; }
+  .oa-assure { grid-template-columns: 1fr; }
+}
+
+/* ---------- proactive section (navy band · "it reaches out first") ---------- */
+.oa-proactive {
+  position: relative; overflow: hidden;
+  background: var(--om-bg-night);
+  color: white;
+  padding: 80px 0;
+}
+.oa-proactive-glow {
+  position: absolute; pointer-events: none; z-index: 0;
+  top: -200px; left: -140px;
+  width: 900px; height: 700px;
+  background: radial-gradient(ellipse at center, rgba(40, 160, 180, 0.22), rgba(40, 160, 180, 0.05) 45%, transparent 70%);
+}
+.oa-proactive-grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
+}
+.oa-proactive-text > * + * { margin-top: 20px; }
+.oa-proactive-text .om-h2 { color: white; text-wrap: normal; }
+.oa-proactive-text .om-lede { color: var(--om-fg-on-night-soft); max-width: 480px; }
+.oa-watch-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
+.oa-watch-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14.5px; color: var(--om-fg-on-night); line-height: 1.5;
+}
+.oa-watch-list li svg { color: var(--icp-teal-300); flex-shrink: 0; margin-top: 2px; }
+@media (max-width: 880px) {
+  .oa-proactive-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- home-page banner (slim announcement strip above the hero) ---------- */
+.oa-home-banner {
+  background: var(--om-bg-night);
+  color: var(--om-fg-on-night);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.oa-home-banner-inner {
+  display: flex; align-items: center; gap: 24px;
+  padding: 16px 0;
+}
+.oa-home-banner-new {
+  flex-shrink: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #042024; background: var(--icp-teal-300);
+  padding: 4px 9px; border-radius: 999px;
+}
+.oa-home-banner-text {
+  font-size: 15.5px; line-height: 1.45; margin: 0; color: var(--om-fg-on-night);
+  display: flex; align-items: center; gap: 9px; flex: 1;
+}
+.oa-home-banner-text b { color: #fff; font-weight: 600; }
+.oa-home-banner-text .oa-bspark { color: var(--icp-gold-300); flex-shrink: 0; }
+.oa-home-banner .om-btn { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .oa-home-banner-inner { flex-wrap: wrap; gap: 14px; }
+}

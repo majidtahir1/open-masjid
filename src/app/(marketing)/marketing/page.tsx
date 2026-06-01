@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MarketingShell } from '../_components/MarketingShell'
+import { AnsariBanner } from '../_components/AnsariBanner'
 import OpenMasjidJsonLd from '../_components/OpenMasjidJsonLd'
 import { BrowserFrame, TenantPreview } from '../_components/TenantPreview'
 import {
@@ -59,6 +60,8 @@ export default function MarketingHome() {
   return (
     <MarketingShell current="/">
       <OpenMasjidJsonLd />
+      {/* Announcement banner — Meet Ansari, above the hero */}
+      <AnsariBanner />
       {/* Hero */}
       <section className="om-hero">
         <div className="om-container om-hero-grid">

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { OMLogo } from './Logo'
-import { ArrowRight, ChevronDown, Sunrise, Calendar, ClipboardList, Heart, Monitor, Palette, Shield } from './Icons'
+import { ArrowRight, ChevronDown, Sunrise, Calendar, ClipboardList, Heart, Monitor, Palette, Shield, Sparkles } from './Icons'
 
 const HEADER_NAV = [
   { label: 'Features', to: '/features', hasDropdown: true },
@@ -11,6 +11,7 @@ const HEADER_NAV = [
 ]
 
 const FEATURE_DROPDOWN = [
+  { to: '/features/ansari', Icon: Sparkles, title: 'Ansari · AI assistant', desc: 'Run your masjid by chatting with it.' },
   { to: '/features/prayer-times', Icon: Sunrise, title: 'Prayer Times', desc: 'Quick, easy setup for the whole year.' },
   { to: '/features/events', Icon: Calendar, title: 'Events & Flyers', desc: 'Three display modes. Recurring patterns.' },
   { to: '/features/donations', Icon: Heart, title: 'Donations', desc: 'Native Stripe. Sadaqah, Zakat, Building Fund.' },
