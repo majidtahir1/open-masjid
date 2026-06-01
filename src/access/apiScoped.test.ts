@@ -44,13 +44,13 @@ describe('gateByApiKeyScope', () => {
     })
 
     it('passes through to existing access for a UI session, unmapped collection', () => {
-      const access = gateByApiKeyScope('events', 'update')(allow)
+      const access = gateByApiKeyScope('pages', 'update')(allow)
       const req = reqWith({ id: 1, _strategy: 'local-jwt' })
       expect(access(argsFor(req))).toBe(true)
     })
 
     it('still defers to existing access when it denies (UI), unmapped collection', () => {
-      const access = gateByApiKeyScope('events', 'update')(deny)
+      const access = gateByApiKeyScope('pages', 'update')(deny)
       const req = reqWith({ id: 1, _strategy: 'local-jwt' })
       expect(access(argsFor(req))).toBe(false)
     })
@@ -58,13 +58,13 @@ describe('gateByApiKeyScope', () => {
 
   describe('API keys with empty/missing scopes are back-compat (inherit role)', () => {
     it('defers to existing access for API key with no apiScopes field, unmapped collection', () => {
-      const access = gateByApiKeyScope('events', 'update')(allow)
+      const access = gateByApiKeyScope('pages', 'update')(allow)
       const req = reqWith({ id: 1, _strategy: 'api-key' })
       expect(access(argsFor(req))).toBe(true)
     })
 
     it('defers to existing access for API key with empty apiScopes, unmapped collection', () => {
-      const access = gateByApiKeyScope('events', 'update')(allow)
+      const access = gateByApiKeyScope('pages', 'update')(allow)
       const req = reqWith({ id: 1, _strategy: 'api-key', apiScopes: [] })
       expect(access(argsFor(req))).toBe(true)
     })
@@ -72,7 +72,7 @@ describe('gateByApiKeyScope', () => {
 
   describe('API keys with non-empty scopes are default-deny', () => {
     it('denies unmapped collection even when the existing access would allow', () => {
-      const access = gateByApiKeyScope('events', 'update')(allow)
+      const access = gateByApiKeyScope('pages', 'update')(allow)
       const req = reqWith({
         id: 1,
         _strategy: 'api-key',
@@ -134,19 +134,19 @@ describe('gateByApiKeyScope', () => {
 
   describe('missing existing access function falls back to Payload default', () => {
     it('allows authed UI user when no existing access is provided', () => {
-      const access = gateByApiKeyScope('events', 'read')(undefined)
+      const access = gateByApiKeyScope('pages', 'read')(undefined)
       const req = reqWith({ id: 1, _strategy: 'local-jwt' })
       expect(access(argsFor(req))).toBe(true)
     })
 
     it('denies anonymous request when no existing access is provided', () => {
-      const access = gateByApiKeyScope('events', 'read')(undefined)
+      const access = gateByApiKeyScope('pages', 'read')(undefined)
       const req = reqWith(null)
       expect(access(argsFor(req))).toBe(false)
     })
 
     it('denies scoped key on unmapped collection regardless of missing existing access', () => {
-      const access = gateByApiKeyScope('events', 'update')(undefined)
+      const access = gateByApiKeyScope('pages', 'update')(undefined)
       const req = reqWith({ id: 1, _strategy: 'api-key', apiScopes: ['prayer-times:read'] })
       expect(access(argsFor(req))).toBe(false)
     })
