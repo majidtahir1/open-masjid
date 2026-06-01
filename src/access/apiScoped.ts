@@ -59,6 +59,13 @@ const SCOPE_MAP: Record<string, Partial<Record<Op, string>>> = {
   members: {
     read: 'members:read',
   },
+  // Flyer/image uploads (e.g. flyer-to-event) need to create media docs.
+  media: {
+    read: 'media:read',
+    create: 'media:write',
+    update: 'media:write',
+    delete: 'media:write',
+  },
   // NOTE: donations / donation-funds are intentionally NOT mapped here.
   // Donation Q&A (totals by fund/month) needs a custom sum endpoint that
   // Payload REST can't provide — deferred to v1.1.

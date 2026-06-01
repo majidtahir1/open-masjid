@@ -172,6 +172,10 @@ describe('gateByApiKeyScope', () => {
       ['events', 'update', 'events:write'],
       ['events', 'delete', 'events:write'],
       ['members', 'read', 'members:read'],
+      ['media', 'read', 'media:read'],
+      ['media', 'create', 'media:write'],
+      ['media', 'update', 'media:write'],
+      ['media', 'delete', 'media:write'],
     ]
 
     for (const [slug, op, scope] of allowCases) {
@@ -192,6 +196,7 @@ describe('gateByApiKeyScope', () => {
       ['announcements', 'create', 'announcements:read'],
       ['forms', 'update', 'forms:read'],
       ['events', 'delete', 'events:read'],
+      ['media', 'create', 'media:read'],
     ]
     for (const [slug, op, readScope] of readDoesNotGrantWrite) {
       it(`denies ${op} on ${slug} when key only has ${readScope}`, () => {

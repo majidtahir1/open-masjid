@@ -334,6 +334,8 @@ export const Users: CollectionConfig = {
         { label: 'Events — read', value: 'events:read' },
         { label: 'Events — write', value: 'events:write' },
         { label: 'Members — read', value: 'members:read' },
+        { label: 'Media — read', value: 'media:read' },
+        { label: 'Media — write', value: 'media:write' },
       ],
       admin: {
         description:

@@ -1593,6 +1593,8 @@ export interface User {
         | 'events:read'
         | 'events:write'
         | 'members:read'
+        | 'media:read'
+        | 'media:write'
       )[]
     | null;
   /**
