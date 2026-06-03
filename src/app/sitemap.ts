@@ -39,15 +39,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { path: '/get-started', changeFrequency: 'monthly', priority: 0.9 },
       { path: '/self-host', changeFrequency: 'monthly', priority: 0.7 },
       { path: '/blog', changeFrequency: 'weekly', priority: 0.5 },
+      { path: '/changelog', changeFrequency: 'weekly', priority: 0.5 },
       { path: '/docs', changeFrequency: 'weekly', priority: 0.6 },
     ]
 
-    return marketingPaths.map(({ path, changeFrequency, priority }) => ({
+    const staticEntries = marketingPaths.map(({ path, changeFrequency, priority }) => ({
       url: absoluteUrl(origin, path),
       lastModified: now,
       changeFrequency,
       priority,
     }))
+
+    const postEntries: MetadataRoute.Sitemap = []
+    try {
+      const payload = await getPayload({ config })
+      const posts = await payload.find({
+        collection: 'posts',
+        where: { kind: { equals: 'article' }, _status: { equals: 'published' } },
+        limit: 500,
+        depth: 0,
+        overrideAccess: true,
+      })
+      for (const doc of posts.docs as Array<{ slug?: string | null; updatedAt?: string | null }>) {
+        if (!doc.slug) continue
+        postEntries.push({
+          url: absoluteUrl(origin, `/blog/${doc.slug}`),
+          lastModified: doc.updatedAt ? new Date(doc.updatedAt) : now,
+          changeFrequency: 'monthly',
+          priority: 0.6,
+        })
+      }
+    } catch {
+      // Best-effort — emit static entries even if the posts lookup fails.
+    }
+
+    return [...staticEntries, ...postEntries]
   }
 
   // Tenant host (subdomain or custom domain) — per-tenant sitemap.

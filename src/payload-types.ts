@@ -79,6 +79,7 @@ export interface Config {
     announcements: Announcement;
     services: Service;
     pages: Page;
+    posts: Post;
     forms: Form;
     'form-submissions': FormSubmission;
     'donation-funds': DonationFund;
@@ -108,6 +109,7 @@ export interface Config {
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'donation-funds': DonationFundsSelect<false> | DonationFundsSelect<true>;
@@ -1222,6 +1224,75 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Marketing blog articles and changelog entries for openmasjid.app. Articles render at /blog, changelog entries at /changelog.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * Articles render at /blog; changelog entries at /changelog.
+   */
+  kind: 'article' | 'changelog';
+  /**
+   * Optional version label shown on the changelog.
+   */
+  version?: string | null;
+  /**
+   * Auto-generated from the title. Lowercase, numbers, dashes.
+   */
+  slug?: string | null;
+  /**
+   * Shown on the post and used for ordering. Set automatically on first publish if left blank.
+   */
+  publishedAt?: string | null;
+  author?: string | null;
+  /**
+   * Shown on index cards, at the top of the article, and as the social-share image.
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * Free-form topic tags. Power filtering on /blog.
+   */
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The article body. Supports headings, lists, links, and inline images.
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Optional overrides for search/social previews. Falls back to the title, auto-excerpt, and hero image.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    ogImage?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
@@ -1788,6 +1859,10 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: number | Form;
       } | null)
@@ -2211,6 +2286,36 @@ export interface PagesSelect<T extends boolean = true> {
   showInNav?: T;
   navOrder?: T;
   tenant?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        ogImage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  kind?: T;
+  version?: T;
+  slug?: T;
+  publishedAt?: T;
+  author?: T;
+  heroImage?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  content?: T;
   seo?:
     | T
     | {
@@ -2677,6 +2782,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'pages';
           value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: number | Post;
         } | null);
     global?: string | null;
     user?: (number | null) | User;
