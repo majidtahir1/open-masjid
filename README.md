@@ -1,14 +1,215 @@
+<div align="center">
+
 # OpenMasjid
 
-Multi-tenant platform for masjid websites, built with Next.js 15 and Payload CMS 3 on Postgres.
+### A modern website for your masjid — built for the age of AI agents.
 
-## Prerequisites
+Prayer times, events, donations, memberships, and a lobby display — all in one place,
+managed by your volunteers instead of your IT vendor. And because every part of the
+platform is exposed through a scoped, permissioned API, an AI assistant can run the
+masjid for you just by being asked.
+
+**Free to self-host. Open source. Agent-ready.**
+
+![OpenMasjid homepage](docs/screenshots/marketing-home.png)
+
+</div>
+
+---
+
+## What is OpenMasjid?
+
+OpenMasjid is a ready-to-go website platform built specifically for mosques. Instead of
+wrangling WordPress plugins or paying an agency, a volunteer can set up and run the whole
+site themselves — or hand the day-to-day to **Ansari**, the platform's AI assistant, and
+manage the masjid through chat.
+
+One platform can host **many masajid** — each with its own web address, branding, and
+content — so it works just as well for a single masjid as it does for an umbrella
+organization running several.
+
+It is designed from the ground up to be operated by AI agents: every collection sits
+behind a default-deny, capability-scoped API, so an agent can be handed exactly the
+permissions it needs (say, "create events and upload flyers") and nothing more. More on
+that [below](#built-for-ai-agents).
+
+Everything in this README is a real screenshot from the app.
+
+---
+
+## What your community sees
+
+### Prayer times that just work
+
+A full daily schedule with both **iqamah** (prayer start) and **adhan** (call to prayer)
+times side by side, multiple Jummah slots, Hijri dates, and seasonal rules — set up for
+the whole year in minutes. The next prayer also rides along the top of every page.
+
+![Prayer times page](docs/screenshots/tenant-prayer-times.png)
+
+### Events & programs
+
+A clean community calendar for halaqas, youth nights, Ramadan programs, and gatherings.
+Upload a flyer and OpenMasjid turns it into an event page — no design tools needed.
+
+![Events page](docs/screenshots/tenant-events.png)
+
+### Donations & memberships
+
+Collect one-time donations and recurring memberships through Stripe. Members manage their
+own subscriptions; the masjid sees who's signed up — no spreadsheets.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/tenant-donate.png" alt="Donations page" /></td>
+<td width="50%"><img src="docs/screenshots/tenant-membership.png" alt="Membership page" /></td>
+</tr>
+</table>
+
+### Lobby & display screens
+
+Drive a TV or monitor in the lobby with a full-screen prayer board that auto-rotates the
+next prayer, the Hijri date, and an Arabic ayah/hadith — in several built-in themes.
+
+![Prayer display screen](docs/screenshots/kiosk-prayer-display.png)
+
+When a prayer time arrives, the screen automatically takes over with a full-screen call to
+prayer — *"Salah is in progress, please silence your phone"* — and returns to the rotation
+afterward.
+
+![Salah-in-progress takeover screen](docs/screenshots/kiosk-salah-takeover.png)
+
+Between prayer boards, the display rotates a carousel of your own slides — event flyers,
+weekly schedules, and sponsor/advertiser cards with QR codes. Pair a screen in seconds with
+a 6-character code and push updates instantly from the admin.
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/kiosk-carousel-event.png" alt="Event flyer slide" /><br/><sub>Event flyer slide</sub></td>
+<td width="33%"><img src="docs/screenshots/kiosk-sponsor-slide.png" alt="Sponsor slide" /><br/><sub>Sponsor / advertiser slide</sub></td>
+<td width="33%"><img src="docs/screenshots/kiosk-weekly-events.png" alt="Weekly schedule slide" /><br/><sub>Weekly schedule slide</sub></td>
+</tr>
+</table>
+
+### Everything a masjid needs. Nothing it doesn't.
+
+A focused, opinionated feature set — prayer times, events, donations, branding, and
+security — without the 60,000-plugin universe of a typical website builder.
+
+![Features overview](docs/screenshots/marketing-features.png)
+
+---
+
+## What your volunteers manage
+
+Behind the public site is a friendly admin (built on Payload CMS). The dashboard surfaces
+the active prayer schedule, upcoming events, and live announcements at a glance.
+
+![Admin dashboard](docs/screenshots/admin-dashboard.png)
+
+Prayer schedules are date-ranged, so Ramadan, summer, and winter timings can all be set up
+in advance and the public site automatically shows the right one. A timeline makes it
+obvious which schedule is live today.
+
+![Admin — prayer schedules with timeline](docs/screenshots/admin-prayer-list.png)
+
+Events, announcements, pages, and hero slides all support scheduled publish/unpublish, so
+volunteers can queue everything ahead of time.
+
+![Admin — events](docs/screenshots/admin-events-list.png)
+
+---
+
+## Built for AI agents
+
+OpenMasjid treats AI agents as first-class operators, not an afterthought. The same actions
+a volunteer takes in the admin can be performed by an agent over the API — safely.
+
+### Ansari, the AI assistant
+
+**Ansari** ("the helper") is OpenMasjid's AI assistant. The idea is simple: run the masjid
+by chatting with it. *"Move Isha iqamah to 9:45 starting next week."* *"Turn this flyer
+into an event with an RSVP form."* *"How many people signed up for the dinner?"* Ansari
+makes the change after showing you exactly what it will do (a diff-then-confirm flow), so
+nothing happens behind your back.
+
+Ansari is delivered through **[Hermes](https://github.com/NousResearch/hermes-agent)**
+(Nous Research's open-source agent framework). The split is deliberate: OpenMasjid is the
+**brain** — it owns the data, the rules, and the permissioned API — while Hermes is the
+**mouth and ears**, owning the chat channel (e.g. Telegram), natural-language phrasing, and
+timing. Each masjid runs as its own Hermes profile with its own scoped API key, so one
+agent can never touch another masjid's data. The full design lives in
+[`docs/superpowers/specs/`](docs/superpowers/specs/) (capability surface, multi-tenant
+productization, and a proactive nudge engine).
+
+### The capability surface (available today)
+
+Any user can be issued an **API key** restricted to a set of **scopes**. Enforcement is
+**default-deny**: a scoped key can only perform the exact `(collection, operation)` pairs
+its scopes allow, and scopes can only *narrow* a role's permissions, never widen them.
+Tenant isolation and billing locks still apply on top. (Implemented in
+[`src/access/apiScoped.ts`](src/access/apiScoped.ts), with tenant scoping never applied to
+normal UI sessions.)
+
+| Scope | Grants |
+| --- | --- |
+| `prayer-times:read` / `:write` | Read or update prayer schedules and iqamah rules |
+| `events:read` / `:write` | List, create, reschedule, publish events |
+| `announcements:read` / `:write` | Read or post/edit/expire banner notices |
+| `forms:read` / `:write` | Read submissions/counts, or create & edit signup forms |
+| `members:read` | Look up and count members (read-only) |
+| `media:read` / `:write` | Read or upload images and flyers |
+
+### Skills
+
+A set of **agent skills** package these capabilities into natural-language workflows. Each
+skill knows which scopes it needs and walks the agent through calling the right endpoints
+with a confirm-before-write pattern:
+
+- **`flyer-to-event`** — parse an event flyer image into a titled, dated, located event, and
+  optionally spin up an RSVP/signup form (uses `media:write`, `events:write`, `forms:write`).
+- **`open-masjid-prayer-times`** — read or change adhan/iqamah times in plain language.
+- **`open-masjid-events`** — list, reschedule, edit, publish, or delete events.
+- **`open-masjid-announcements`** — post, edit, or take down banner notices.
+- **`open-masjid-forms`** — build signup/registration forms and read RSVP counts.
+- **`open-masjid-members`** — look up and count members (read-only).
+
+> Skills live as Claude Code skills (each a single prompt file backed by the scoped REST
+> API). They're the same workflows Ansari uses under the hood — and a human can run them
+> too, just by asking.
+
+---
+
+## Two ways to run it
+
+You can let OpenMasjid host your site, or run the exact same open-source code on your own
+server. Either way, you own your content.
+
+![Pricing — hosted or self-hosted](docs/screenshots/marketing-pricing.png)
+
+| | Hosted | Self-hosted |
+| --- | --- | --- |
+| **Best for** | Masajid who want a website, not a sysadmin job | Masajid with a tech volunteer who'd rather own the box |
+| **Setup** | Claim a subdomain, you're live | Follow the guide below |
+| **Cost** | A monthly fee | Free forever |
+| **Code** | Same open-source codebase | Same open-source codebase |
+
+The rest of this README is the technical guide for running OpenMasjid yourself.
+
+---
+
+## For developers — running it yourself
+
+OpenMasjid is a multi-tenant platform built with **Next.js 16** and **Payload CMS 3** on
+**Postgres**.
+
+### Prerequisites
 
 - **Node.js** ≥ 20.9.0
 - **Docker** (for the local Postgres container)
 - **npm**
 
-## Setup
+### Setup
 
 ```bash
 git clone https://github.com/majidtahir1/open-masjid.git
@@ -61,6 +262,9 @@ npm run dev
 ```
 
 Open http://localhost:3000 for the site and http://localhost:3000/admin for the Payload admin. Create the first admin user on first visit.
+
+> **Multi-tenant tip:** locally, each masjid lives at `<slug>.localhost:3000`
+> (e.g. `icp.localhost:3000`). The bare `localhost:3000` serves the marketing site.
 
 ### Scheduled publishing
 
@@ -384,3 +588,7 @@ Plan: `docs/superpowers/plans/2026-05-14-kiosk-integration.md`
 - **`ECONNREFUSED` on port 5432** — the `.env` `DATABASE_URI` must use port **5433** (the host-mapped port in `docker-compose.yml`).
 - **`payload-types.ts` missing** — run `npm run generate:types`. The file is gitignored and generated locally.
 - **Reset the DB** — `docker compose down -v` removes the `pgdata` volume. Next `up -d` starts fresh.
+
+## License
+
+MIT (see `package.json`) — free to use, modify, and self-host.
