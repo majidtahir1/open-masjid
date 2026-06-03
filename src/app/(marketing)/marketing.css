@@ -1554,10 +1554,27 @@
   max-width: 760px;
   margin: 0 auto;
 }
+/* Article detail layout: wide shell + full-width hero, readable text column. */
+.om-article-shell {
+  max-width: var(--om-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.om-article-col {
+  max-width: 760px;
+  margin: 0 auto;
+}
+/* Blog body copy: 20% larger than the base reading size (article pages only). */
+.om-article-col p,
+.om-article-col li,
+.om-article-col blockquote {
+  font-size: calc(var(--fs-base) * 1.2);
+}
 .om-blog-hero {
   width: 100%;
   border-radius: 18px;
-  margin: 28px 0;
+  margin: 24px 0 44px;
+  display: block;
 }
 .om-blog-tags {
   display: flex;

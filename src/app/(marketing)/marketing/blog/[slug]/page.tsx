@@ -18,13 +18,6 @@ interface PageProps {
   searchParams: Promise<{ draft?: string | string[] }>
 }
 
-function formatDate(iso?: string | null): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
 function absolute(origin: string, path: string | null): string | null {
   if (!path) return null
   if (path.startsWith('http')) return path
@@ -89,30 +82,31 @@ export default async function PostPage({ params, searchParams }: PageProps) {
         author={post.author ?? undefined}
       />
       <article className="om-section-lg">
-        <div className="om-container om-blog-article">
-          <p className="om-blog-meta">
-            <Link href="/blog" className="om-link-arrow">← Blog</Link>
-            <span>{formatDate(post.publishedAt)}</span>
-            {post.author ? <span>· {post.author}</span> : null}
-          </p>
-          <h1 className="om-h" style={{ marginTop: 12 }}>{post.title}</h1>
+        <div className="om-article-shell">
+          <div className="om-article-col">
+            <h1 className="font-display font-medium tracking-tight text-fg1 leading-[1.04] text-[clamp(2.4rem,5.5vw,4rem)]">
+              {post.title}
+            </h1>
+          </div>
 
           {heroSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img className="om-blog-hero" src={heroSrc} alt={mediaAlt(post.heroImage, post.title ?? '')} />
           ) : null}
 
-          <RichText data={post.content} className="om-prose" />
+          <div className="om-article-col">
+            <RichText data={post.content} />
 
-          {tags.length > 0 ? (
-            <div className="om-blog-tags" style={{ marginTop: 32 }}>
-              {tags.map((t) => (
-                <Link key={t} href={`/blog?tag=${encodeURIComponent(t)}`} className="om-tag-pill">
-                  #{t}
-                </Link>
-              ))}
-            </div>
-          ) : null}
+            {tags.length > 0 ? (
+              <div className="om-blog-tags" style={{ marginTop: 32 }}>
+                {tags.map((t) => (
+                  <Link key={t} href={`/blog?tag=${encodeURIComponent(t)}`} className="om-tag-pill">
+                    #{t}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       </article>
     </MarketingShell>
