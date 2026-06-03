@@ -23,7 +23,7 @@ export function MarketingFooter() {
               <li><Link href="/features">Features</Link></li>
               <li><Link href="/pricing">Pricing</Link></li>
               <li><Link href="/compare">Compare</Link></li>
-              <li><Link href="/blog">Changelog</Link></li>
+              <li><Link href="/changelog">Changelog</Link></li>
             </ul>
           </div>
 
