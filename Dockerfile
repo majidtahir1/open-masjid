@@ -81,6 +81,7 @@ RUN apk add --no-cache libc6-compat tini
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY src ./src
+COPY scripts ./scripts
 COPY tsconfig.json ./
 
 ENV NODE_ENV=production
