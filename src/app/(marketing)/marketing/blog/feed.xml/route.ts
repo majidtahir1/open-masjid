@@ -20,7 +20,8 @@ export async function GET() {
   const items = posts
     .map((p) => {
       const url = `${origin}/blog/${p.slug ?? ''}`
-      const date = p.publishedAt ? new Date(p.publishedAt).toUTCString() : ''
+      const parsed = p.publishedAt ? new Date(p.publishedAt) : null
+      const date = parsed && !Number.isNaN(parsed.getTime()) ? parsed.toUTCString() : ''
       return `    <item>
       <title>${escapeXml(p.title ?? '')}</title>
       <link>${escapeXml(url)}</link>
