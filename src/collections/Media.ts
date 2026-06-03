@@ -76,13 +76,15 @@ export const Media: CollectionConfig = {
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
-      required: true,
+      // Optional: platform-owned media (marketing/blog images) belongs to no
+      // tenant. For tenant users, setTenantFromUser still forces this on create.
+      required: false,
       index: true,
       label: 'Tenant',
       admin: {
         position: 'sidebar',
         description:
-          'Automatically set from your account for non-platform users. Only a Platform Owner can reassign media across tenants.',
+          'Automatically set from your account for non-platform users. Platform-owned media (e.g. marketing/blog images) can have no tenant. Only a Platform Owner can reassign media across tenants.',
         condition: (_, __, { user }) => {
           const u = user as { role?: string } | null | undefined
           return u?.role === 'platformOwner'
