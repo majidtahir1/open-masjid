@@ -106,3 +106,23 @@ export async function buildLivePreviewUrl(
 ): Promise<string> {
   return (await buildPreviewUrl(doc, req, path)) ?? ''
 }
+
+/**
+ * Preview URL for a platform-level marketing doc whose slug renders under a
+ * fixed path prefix on the marketing host (e.g. Posts → /blog/<slug>).
+ * Unlike `buildPreviewUrl`, this does not resolve a tenant.
+ */
+export function buildMarketingPreviewUrl(
+  doc: Record<string, unknown>,
+  pathPrefix: string,
+): string | null {
+  if (!doc?.id) return null
+  const slug = doc.slug as string | null | undefined
+  if (!slug) return null
+  const base =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : `https://${PLATFORM_DOMAIN}`
+  const prefix = `/${pathPrefix.replace(/^\/+|\/+$/g, '')}`
+  return `${base}${prefix}/${encodeURIComponent(String(slug))}?draft=1`
+}

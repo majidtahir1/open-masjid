@@ -1498,3 +1498,101 @@
 @media (max-width: 760px) {
   .oa-home-banner-inner { flex-wrap: wrap; gap: 14px; }
 }
+
+/* ── Blog & Changelog ──────────────────────────────────────────────── */
+.om-blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+  margin-top: 40px;
+}
+.om-blog-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--om-border, rgba(0, 0, 0, 0.08));
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--om-surface, #fff);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.om-blog-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+.om-blog-card-media {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  width: 100%;
+  background: var(--om-muted, #f2f2f2);
+}
+.om-blog-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px 24px;
+}
+.om-blog-card-title {
+  font-family: var(--om-font-display, inherit);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.om-blog-card-excerpt {
+  color: var(--om-fg-muted, #555);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.om-blog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--om-fg-muted, #666);
+}
+.om-blog-article {
+  max-width: 760px;
+  margin: 0 auto;
+}
+/* Article detail layout: wide shell + full-width hero, readable text column. */
+.om-article-shell {
+  max-width: var(--om-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.om-article-col {
+  max-width: 760px;
+  margin: 0 auto;
+}
+/* Blog body copy: 20% larger than the base reading size (article pages only). */
+.om-article-col p,
+.om-article-col li,
+.om-article-col blockquote {
+  font-size: calc(var(--fs-base) * 1.2);
+}
+.om-blog-hero {
+  width: 100%;
+  border-radius: 18px;
+  margin: 24px 0 44px;
+  display: block;
+}
+.om-blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.om-changelog-entry {
+  border-left: 3px solid var(--om-accent, #1f7a5a);
+  padding: 4px 0 24px 24px;
+  margin-left: 6px;
+}
+.om-changelog-ver {
+  font-family: var(--om-font-mono, monospace);
+  font-size: 0.8rem;
+  color: var(--om-accent, #1f7a5a);
+}
+.om-blog-empty {
+  text-align: center;
+  color: var(--om-fg-muted, #666);
+  padding: 48px 0;
+}
