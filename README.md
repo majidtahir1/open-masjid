@@ -1,14 +1,115 @@
-# OpenMasjid
+<div align="center">
 
-Multi-tenant platform for masjid websites, built with Next.js 15 and Payload CMS 3 on Postgres.
+# 🕌 OpenMasjid
 
-## Prerequisites
+### A modern website for your masjid — without the headaches.
+
+Prayer times, events, donations, memberships, and a kiosk display — all in one place,
+managed by your volunteers instead of your IT vendor.
+
+**Free to self-host. Open source. Built for community.**
+
+![OpenMasjid homepage](docs/screenshots/marketing-home.png)
+
+</div>
+
+---
+
+## What is OpenMasjid?
+
+OpenMasjid is a ready-to-go website platform built specifically for mosques. Instead of
+wrangling WordPress plugins or paying an agency, a volunteer can set up and run the whole
+site by themselves.
+
+One platform can host **many masajid** — each with its own web address, branding, and
+content — so it works just as well for a single masjid as it does for an umbrella
+organization running several.
+
+Everything below is a real screenshot from the app.
+
+---
+
+## 📸 What you get
+
+### A welcoming homepage with live prayer times
+
+Today's prayer schedule sits right at the top of every page. Announcements (like a
+prayer-time change) show up as a banner. The hero rotates through your community's story.
+
+![Masjid homepage with prayer time bar](docs/screenshots/tenant-home.png)
+
+### Prayer times that just work
+
+Full daily schedule with both **iqamah** (prayer start) and **adhan** (call to prayer)
+times side by side, multiple Jummah slots, Hijri dates, and seasonal rules — set up for
+the whole year in minutes.
+
+![Prayer times page](docs/screenshots/tenant-prayer-times.png)
+
+### Events & programs
+
+A clean community calendar for halaqas, youth nights, Ramadan programs, and gatherings.
+Upload a flyer and OpenMasjid turns it into an event page — no design tools needed.
+
+![Events page](docs/screenshots/tenant-events.png)
+
+### Donations & memberships
+
+Collect one-time donations and recurring memberships through Stripe. Members manage their
+own subscriptions; the masjid sees who's signed up — no spreadsheets.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/tenant-donate.png" alt="Donations page" /></td>
+<td width="50%"><img src="docs/screenshots/tenant-membership.png" alt="Membership page" /></td>
+</tr>
+</table>
+
+### Kiosk & display screens
+
+Drive a TV or monitor in the lobby with prayer times, sponsor slides, weekly events, and
+QR codes. Pair a screen in seconds with a 6-character code and push updates from the admin.
+
+### Everything a masjid needs. Nothing it doesn't.
+
+A focused feature set — prayer times, events, donations, branding, security, and an
+AI assistant ("Ansari") that lets volunteers run the masjid just by chatting — without the
+60,000-plugin universe of a typical website builder.
+
+![Features overview](docs/screenshots/marketing-features.png)
+
+---
+
+## Two ways to run it
+
+You can let OpenMasjid host your site, or run the exact same open-source code on your own
+server. Either way, you own your content.
+
+![Pricing — hosted or self-hosted](docs/screenshots/marketing-pricing.png)
+
+| | Hosted | Self-hosted |
+| --- | --- | --- |
+| **Best for** | Masajid who want a website, not a sysadmin job | Masajid with a tech volunteer who'd rather own the box |
+| **Setup** | Claim a subdomain, you're live | Follow the guide below |
+| **Cost** | A monthly fee | Free forever |
+| **Code** | Same open-source codebase | Same open-source codebase |
+
+The rest of this README is the technical guide for running OpenMasjid yourself.
+
+---
+
+## 🛠️ For developers — running it yourself
+
+OpenMasjid is a multi-tenant platform built with **Next.js 16** and **Payload CMS 3** on
+**Postgres**.
+
+### Prerequisites
 
 - **Node.js** ≥ 20.9.0
 - **Docker** (for the local Postgres container)
 - **npm**
 
-## Setup
+### Setup
 
 ```bash
 git clone https://github.com/majidtahir1/open-masjid.git
@@ -61,6 +162,9 @@ npm run dev
 ```
 
 Open http://localhost:3000 for the site and http://localhost:3000/admin for the Payload admin. Create the first admin user on first visit.
+
+> **Multi-tenant tip:** locally, each masjid lives at `<slug>.localhost:3000`
+> (e.g. `icp.localhost:3000`). The bare `localhost:3000` serves the marketing site.
 
 ### Scheduled publishing
 
@@ -384,3 +488,7 @@ Plan: `docs/superpowers/plans/2026-05-14-kiosk-integration.md`
 - **`ECONNREFUSED` on port 5432** — the `.env` `DATABASE_URI` must use port **5433** (the host-mapped port in `docker-compose.yml`).
 - **`payload-types.ts` missing** — run `npm run generate:types`. The file is gitignored and generated locally.
 - **Reset the DB** — `docker compose down -v` removes the `pgdata` volume. Next `up -d` starts fresh.
+
+## License
+
+MIT (see `package.json`) — free to use, modify, and self-host.
