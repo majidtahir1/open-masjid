@@ -22,6 +22,7 @@ import { Media } from './collections/Media'
 import { Forms } from './collections/Forms'
 import { FormSubmissions } from './collections/FormSubmissions'
 import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
 import { PrayerDisplayContent } from './collections/PrayerDisplayContent'
 import { PrayerSchedules } from './collections/PrayerSchedules'
 import { QRCodes } from './collections/QRCodes'
@@ -139,6 +140,7 @@ export default buildConfig({
     Announcements,
     Services,
     Pages,
+    Posts,
     Forms,
     FormSubmissions,
     DonationFunds,
