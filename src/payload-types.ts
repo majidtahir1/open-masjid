@@ -505,7 +505,7 @@ export interface Media {
    */
   alt?: string | null;
   /**
-   * Automatically set from your account for non-platform users. Only a Platform Owner can reassign media across tenants.
+   * Automatically set from your account for non-platform users. Platform-owned media (e.g. marketing/blog images) can have no tenant. Only a Platform Owner can reassign media across tenants.
    */
   tenant?: (number | null) | Tenant;
   updatedAt: string;
