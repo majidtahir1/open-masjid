@@ -1582,7 +1582,21 @@ export interface User {
   /**
    * Restricts what this user's API key can do. Leave empty to inherit the user's full role permissions. UI session permissions are never restricted by this field.
    */
-  apiScopes?: ('prayer-times:read' | 'prayer-times:write')[] | null;
+  apiScopes?:
+    | (
+        | 'prayer-times:read'
+        | 'prayer-times:write'
+        | 'announcements:read'
+        | 'announcements:write'
+        | 'forms:read'
+        | 'forms:write'
+        | 'events:read'
+        | 'events:write'
+        | 'members:read'
+        | 'media:read'
+        | 'media:write'
+      )[]
+    | null;
   /**
    * Set the first time this user sees the onboarding welcome dialog. Used to suppress re-showing it on subsequent logins.
    */

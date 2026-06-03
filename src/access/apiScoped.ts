@@ -31,6 +31,44 @@ const SCOPE_MAP: Record<string, Partial<Record<Op, string>>> = {
     update: 'prayer-times:write',
     delete: 'prayer-times:write',
   },
+  announcements: {
+    read: 'announcements:read',
+    create: 'announcements:write',
+    update: 'announcements:write',
+    delete: 'announcements:write',
+  },
+  forms: {
+    read: 'forms:read',
+    create: 'forms:write',
+    update: 'forms:write',
+    delete: 'forms:write',
+  },
+  // Signup counts + response summaries live here; read-only under forms:read.
+  // create/update/delete intentionally unmapped — submissions are written only
+  // by the public submit endpoint (role access is already () => false).
+  'form-submissions': {
+    read: 'forms:read',
+  },
+  events: {
+    read: 'events:read',
+    create: 'events:write',
+    update: 'events:write',
+    delete: 'events:write',
+  },
+  // Read-only in v1 — no members:write scope exists.
+  members: {
+    read: 'members:read',
+  },
+  // Flyer/image uploads (e.g. flyer-to-event) need to create media docs.
+  media: {
+    read: 'media:read',
+    create: 'media:write',
+    update: 'media:write',
+    delete: 'media:write',
+  },
+  // NOTE: donations / donation-funds are intentionally NOT mapped here.
+  // Donation Q&A (totals by fund/month) needs a custom sum endpoint that
+  // Payload REST can't provide — deferred to v1.1.
 }
 
 /**
