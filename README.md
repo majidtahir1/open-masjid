@@ -68,8 +68,28 @@ own subscriptions; the masjid sees who's signed up — no spreadsheets.
 
 ### Lobby & display screens
 
-Drive a TV or monitor in the lobby with prayer times, sponsor slides, weekly events, and
-QR codes. Pair a screen in seconds with a 6-character code and push updates from the admin.
+Drive a TV or monitor in the lobby with a full-screen prayer board that auto-rotates the
+next prayer, the Hijri date, and an Arabic ayah/hadith — in several built-in themes.
+
+![Prayer display screen](docs/screenshots/kiosk-prayer-display.png)
+
+When a prayer time arrives, the screen automatically takes over with a full-screen call to
+prayer — *"Salah is in progress, please silence your phone"* — and returns to the rotation
+afterward.
+
+![Salah-in-progress takeover screen](docs/screenshots/kiosk-salah-takeover.png)
+
+Between prayer boards, the display rotates a carousel of your own slides — event flyers,
+weekly schedules, and sponsor/advertiser cards with QR codes. Pair a screen in seconds with
+a 6-character code and push updates instantly from the admin.
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/kiosk-carousel-event.png" alt="Event flyer slide" /><br/><sub>Event flyer slide</sub></td>
+<td width="33%"><img src="docs/screenshots/kiosk-sponsor-slide.png" alt="Sponsor slide" /><br/><sub>Sponsor / advertiser slide</sub></td>
+<td width="33%"><img src="docs/screenshots/kiosk-weekly-events.png" alt="Weekly schedule slide" /><br/><sub>Weekly schedule slide</sub></td>
+</tr>
+</table>
 
 ### Everything a masjid needs. Nothing it doesn't.
 
