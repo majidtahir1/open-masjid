@@ -18,7 +18,8 @@ interface LexicalNode {
   fields?: { url?: string; newTab?: boolean }
   children?: LexicalNode[]
   listType?: 'number' | 'bullet' | 'check'
-  value?: { url?: string }
+  value?: { url?: string; alt?: string; width?: number; height?: number } | string | number
+  relationTo?: string
 }
 
 interface LexicalRoot {
@@ -106,9 +107,29 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
     case 'listitem':
       return <li key={key}>{renderChildren(node.children)}</li>
 
+    case 'upload': {
+      const media = node.value
+      // Unpopulated relationship (id only) — nothing to render.
+      if (!media || typeof media !== 'object') return null
+      const url = (media as { url?: string }).url
+      if (!url) return null
+      const alt = (media as { alt?: string }).alt ?? ''
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={key}
+          src={url}
+          alt={alt}
+          className="my-6 h-auto w-full rounded-lg"
+          loading="lazy"
+        />
+      )
+    }
+
     case 'link':
     case 'autolink': {
-      const href = node.fields?.url ?? node.url ?? node.value?.url ?? '#'
+      const valueUrl = typeof node.value === 'object' && node.value !== null ? (node.value as { url?: string }).url : undefined
+      const href = node.fields?.url ?? node.url ?? valueUrl ?? '#'
       const newTab = node.fields?.newTab
       return (
         <a
