@@ -1,0 +1,160 @@
+// tests/lib/demo-seed.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import {
+  ensureDemoTenant,
+  seedDemoContent,
+  resetDemoContent,
+} from '@/lib/demo/seedDemo'
+
+/**
+ * Collection-aware mock payload mirroring the style of
+ * membership-webhook.test.ts. `find`/`findByID`/`create`/`update`/`delete` are
+ * vi.fn()s branching on `collection`. Per-collection seed data can be injected
+ * via `over` to drive create-vs-update branches.
+ */
+function makePayload(
+  over: {
+    tenant?: { id: number } | null // tenant resolved by slug
+    tiers?: any[] // existing membership tiers (matched by name)
+    adminUser?: { id: number } | null // existing demo admin user
+  } = {},
+) {
+  const tenantDocs = over.tenant === undefined ? [{ id: 7 }] : over.tenant ? [over.tenant] : []
+  const tiers = over.tiers ?? []
+  const adminDocs = over.adminUser === undefined ? [] : over.adminUser ? [over.adminUser] : []
+
+  const find = vi.fn(async ({ collection, where }: any) => {
+    if (collection === 'tenants') return { docs: tenantDocs }
+    if (collection === 'membership-tiers') {
+      // Match the upsert lookup by name (where.and[1].name.equals).
+      const name = where?.and?.[1]?.name?.equals
+      const match = tiers.find((t) => t.name === name)
+      return { docs: match ? [match] : [] }
+    }
+    if (collection === 'users') return { docs: adminDocs }
+    return { docs: [] }
+  })
+  const findByID = vi.fn(async ({ id }: any) => ({ id }))
+  const create = vi.fn(async (a: any) => ({ id: 99, ...a.data }))
+  const update = vi.fn(async (a: any) => ({ id: a.id, ...a.data }))
+  const del = vi.fn(async () => ({ docs: [] }))
+
+  return { find, findByID, create, update, delete: del } as any
+}
+
+beforeEach(() => {
+  process.env.DEMO_STRIPE_ACCOUNT_ID = 'acct_test_dummy'
+  process.env.DEMO_ADMIN_PASSWORD = 'demo-pass-123'
+  delete process.env.DEMO_ADMIN_EMAIL
+})
+
+describe('ensureDemoTenant', () => {
+  it('creates the tenant when none exists', async () => {
+    const payload = makePayload({ tenant: null })
+    const id = await ensureDemoTenant(payload)
+    expect(payload.create).toHaveBeenCalledWith(
+      expect.objectContaining({ collection: 'tenants' }),
+    )
+    expect(payload.update).not.toHaveBeenCalled()
+    expect(id).toBe(99)
+  })
+
+  it('updates the tenant when it already exists', async () => {
+    const payload = makePayload({ tenant: { id: 42 } })
+    const id = await ensureDemoTenant(payload)
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({ collection: 'tenants', id: 42 }),
+    )
+    expect(payload.create).not.toHaveBeenCalled()
+    expect(id).toBe(42)
+  })
+
+  it('throws when DEMO_STRIPE_ACCOUNT_ID is unset', async () => {
+    delete process.env.DEMO_STRIPE_ACCOUNT_ID
+    const payload = makePayload({ tenant: null })
+    await expect(ensureDemoTenant(payload)).rejects.toThrow('DEMO_STRIPE_ACCOUNT_ID')
+  })
+})
+
+describe('seedDemoContent', () => {
+  it('bulk-deletes the wiped collections but NOT membership-tiers', async () => {
+    const payload = makePayload()
+    await seedDemoContent(payload, 7)
+    const deleted = payload.delete.mock.calls.map((c: any[]) => c[0].collection)
+    for (const c of [
+      'members',
+      'donations',
+      'form-submissions',
+      'announcements',
+      'events',
+      'forms',
+    ]) {
+      expect(deleted).toContain(c)
+    }
+    expect(deleted).not.toContain('membership-tiers')
+  })
+
+  it('upserts tiers — creates a tier that does not yet exist', async () => {
+    const payload = makePayload({ tiers: [] }) // no existing tiers
+    await seedDemoContent(payload, 7)
+    const tierCreates = payload.create.mock.calls.filter(
+      (c: any[]) => c[0].collection === 'membership-tiers',
+    )
+    expect(tierCreates).toHaveLength(3)
+    // Every tier create carries the tenant relationship.
+    for (const call of tierCreates) {
+      expect(call[0].data.tenant).toBe(7)
+    }
+  })
+
+  it('upserts tiers — updates an existing tier rather than creating', async () => {
+    const payload = makePayload({ tiers: [{ id: 500, name: 'Supporter' }] })
+    await seedDemoContent(payload, 7)
+    const tierUpdates = payload.update.mock.calls.filter(
+      (c: any[]) => c[0].collection === 'membership-tiers',
+    )
+    const tierCreates = payload.create.mock.calls.filter(
+      (c: any[]) => c[0].collection === 'membership-tiers',
+    )
+    // Supporter is updated; Family + Patron are created.
+    expect(tierUpdates).toHaveLength(1)
+    expect(tierUpdates[0][0].id).toBe(500)
+    expect(tierCreates).toHaveLength(2)
+  })
+
+  it('creates announcements, events (published), and the form', async () => {
+    const payload = makePayload()
+    await seedDemoContent(payload, 7)
+    const creates: any[] = payload.create.mock.calls.map((c: any[]) => c[0])
+    const events = creates.filter((c: any) => c.collection === 'events')
+    expect(events.length).toBeGreaterThan(0)
+    for (const e of events) {
+      expect(e.data._status).toBe('published')
+      expect(e.data.description).toBeDefined() // richText filled in
+    }
+    expect(creates.some((c: any) => c.collection === 'announcements')).toBe(true)
+    expect(creates.some((c: any) => c.collection === 'forms')).toBe(true)
+  })
+})
+
+describe('resetDemoContent', () => {
+  it('creates the tenant when find returns none, then seeds content', async () => {
+    const payload = makePayload({ tenant: null })
+    const { tenantId } = await resetDemoContent(payload)
+    expect(payload.create).toHaveBeenCalledWith(
+      expect.objectContaining({ collection: 'tenants' }),
+    )
+    expect(tenantId).toBe(99)
+    // Content wipe ran against the new tenant id.
+    expect(payload.delete).toHaveBeenCalled()
+  })
+
+  it('updates the tenant when it exists', async () => {
+    const payload = makePayload({ tenant: { id: 42 } })
+    const { tenantId } = await resetDemoContent(payload)
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({ collection: 'tenants', id: 42 }),
+    )
+    expect(tenantId).toBe(42)
+  })
+})
