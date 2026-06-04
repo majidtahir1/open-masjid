@@ -11,7 +11,7 @@
  */
 import { NextResponse } from 'next/server'
 import { getCurrentTenant } from '@/lib/tenant-server'
-import { stripeForAccount } from '@/lib/stripe-connect'
+import { getStripeForTenant } from '@/lib/stripe'
 import { verifyMembershipPortalToken } from '@/lib/membership-portal-token'
 
 /** Duck-type helper — resolves stripeAccountId from either the flat shape
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     req.headers.get('origin') ??
     `https://${(tenant as { slug?: string }).slug ?? ''}.openmasjid.app`
 
-  const stripe = stripeForAccount(stripeAccountId)
+  const stripe = getStripeForTenant(tenant as { demoMode?: boolean | null })
   const session = await stripe.billingPortal.sessions.create(
     {
       customer: decoded.customerId,
