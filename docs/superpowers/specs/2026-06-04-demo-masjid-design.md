@@ -105,7 +105,13 @@ signature against **both** secrets:
 
 - `STRIPE_CONNECT_WEBHOOK_SECRET` (live, existing)
 - `STRIPE_CONNECT_WEBHOOK_SECRET_TEST` (new) — register a **test-mode** webhook
-  endpoint in the Stripe test dashboard pointing at the same URL.
+  endpoint in the Stripe test dashboard pointing at the same public URL.
+
+**No Stripe CLI in the demo path.** `stripe listen` is a *local-dev* forwarder
+needed only because Stripe cannot POST to `localhost`. The demo runs on a
+publicly reachable host (`demo.openmasjid.app`), so Stripe delivers test events
+directly to the registered test-mode endpoint — same as the existing live
+endpoint. The CLI is not part of deployment.
 
 Verification tries one secret, falls back to the other; rejects if neither
 validates. Downstream handling (`handleMembershipEvent`, donations, form
@@ -140,21 +146,32 @@ tenant, and appears in the corresponding admin section.
 It does **not** delete the tenant itself, its `demoMode`/`grandfathered` status,
 its `donationConfig.stripeAccountId`, or the shared demo admin user.
 
-**Trigger:** Vercel Cron (matching the existing `/api/kiosk/cron` pattern in
-`vercel.json`). Add a protected route `/api/demo/reset` that invokes the reset and
-a cron entry:
+**Trigger — self-hosted `crond` sidecar (not Vercel).** The production stack is
+Docker Compose (`docker-compose.prod.yml`): app + Postgres + an Alpine `crond`
+sidecar that already POSTs to `/api/payload-jobs/run` every minute with
+`X-Cron-Secret: $CRON_SECRET`. (`vercel.json` is legacy for the hosted option and
+does nothing here. Payload `jobs` are used only for delayed one-shots like
+scheduled-publish, not recurring crons — so the reset gets its own route + cron
+line rather than riding the jobs queue.)
 
-```json
-{ "path": "/api/demo/reset", "schedule": "0 6 * * *" }
-```
+The reset mirrors that exact pattern:
 
-- Desired: **1:00 AM Central**. Vercel crons are **UTC-only and do not observe
-  DST**, so an exact 1am CT year-round is not possible with a single entry.
-  `0 6 * * *` = 06:00 UTC = **1:00 AM CDT** (correct as of this writing); it drifts
-  to 12:00 AM CST in winter. Reset timing is non-critical; this drift is accepted.
-- The route is protected the same way `/api/kiosk/cron` is (Vercel cron
-  secret / authorization header), and additionally no-ops unless the `demo` tenant
-  exists with `demoMode: true`.
+- **New route `/api/demo/reset`** that runs `scripts/reset-demo.ts`'s logic,
+  authed with the **same fail-closed `CRON_SECRET` check** used by
+  `jobs.access.run` / `/api/kiosk/cron` (constant-time compare; refuse if
+  `CRON_SECRET` is unset). It additionally no-ops unless the `demo` tenant exists
+  with `demoMode: true`.
+- **New crontab line in the `crond` sidecar** (`docker-compose.prod.yml`), daily:
+  ```
+  0 1 * * * curl -fsS -X POST http://app:3000/api/demo/reset -H "X-Cron-Secret: $CRON_SECRET" >> /proc/1/fd/1 2>&1
+  ```
+- **1am Central, DST-correct.** Because it's our own `crond`, set
+  `TZ=America/Chicago` on the **cron sidecar service** (and ensure `tzdata` is in
+  that image) so `0 1 * * *` resolves to 1:00 AM CT year-round, automatically
+  following CST/CDT. The every-minute jobs-drain line (`* * * * *`) is unaffected
+  by the timezone. Fallback if tzdata/TZ is undesirable: keep the sidecar UTC and
+  use `0 6 * * *` (1am CDT, drifts an hour in winter) — reset timing is
+  non-critical.
 
 ### 6. Shared-admin abuse hardening
 
@@ -224,8 +241,8 @@ operations on the demo tenant are rate-limited.
 
 ## Scope / YAGNI
 
-- No separate deployment or database — single live deployment, per-tenant key
-  selection.
+- No separate deployment or database — single self-hosted deployment, per-tenant
+  key selection.
 - No test-mode OAuth Connect UI — the demo's `acct_…` is seeded directly.
 - No general-purpose per-tenant key routing — only the `demoMode` branch.
 - No AI spend caps — the blog/AI-draft surface does not exist on tenants.
@@ -239,9 +256,11 @@ operations on the demo tenant are rate-limited.
 | --- | --- |
 | `STRIPE_SECRET_KEY_TEST` | Test platform key for demo Connect charges |
 | `STRIPE_CONNECT_WEBHOOK_SECRET_TEST` | Signing secret for the test-mode Connect webhook endpoint |
+| `CRON_SECRET` (existing) | Reused to auth the `/api/demo/reset` route |
 
-| Manual setup step | Where |
+| Manual / infra setup step | Where |
 | --- | --- |
 | Create test-mode Standard connected account; capture `acct_…` | Stripe test dashboard |
 | Register test-mode Connect webhook → `/api/stripe/connect/webhook` | Stripe test dashboard |
+| Add daily `/api/demo/reset` line + `TZ=America/Chicago` to cron sidecar | `docker-compose.prod.yml` |
 | Add `demo.openmasjid.app` subdomain routing | DNS / hosting (matches existing subdomain tenants) |
