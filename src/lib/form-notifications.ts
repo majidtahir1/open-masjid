@@ -159,6 +159,12 @@ async function loadTenant(form: Form): Promise<Tenant | null> {
   }
 }
 
+export function shouldSendForTenant(
+  tenant: { demoMode?: boolean | null } | null | undefined,
+): boolean {
+  return !tenant?.demoMode
+}
+
 export async function sendFormNotifications({
   form,
   submission,
@@ -175,6 +181,10 @@ export async function sendFormNotifications({
     .join('\n')
 
   const tenant = await loadTenant(form)
+  if (!shouldSendForTenant(tenant)) {
+    console.info('[form-notifications] demo tenant; suppressing outbound email')
+    return
+  }
   const tenantName = tenant?.name || process.env.EMAIL_FROM_NAME || 'OpenMasjid'
 
   const adminSubject = `New submission: ${form.title}`
