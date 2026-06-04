@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { getStripe } from '@/lib/stripe'
+import { verifyConnectEvent } from './verify'
 import { mapStripeEventToDonationAction } from '@/lib/donations-webhook'
 import { applyDonationAction } from '@/lib/donations-apply'
 import { handleMembershipEvent } from '@/lib/membership-webhook'
@@ -12,18 +12,18 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
   const sig = req.headers.get('stripe-signature')
-  const secret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET
-  if (!sig || !secret) {
-    return NextResponse.json({ error: 'missing signature or secret' }, { status: 400 })
+  if (!sig) {
+    return NextResponse.json({ error: 'missing signature' }, { status: 400 })
   }
   const raw = await req.text()
-  const stripe = getStripe()
-  let event
-  try {
-    event = stripe.webhooks.constructEvent(raw, sig, secret)
-  } catch {
+  const verified = verifyConnectEvent(raw, sig, {
+    liveSecret: process.env.STRIPE_CONNECT_WEBHOOK_SECRET,
+    testSecret: process.env.STRIPE_CONNECT_WEBHOOK_SECRET_TEST,
+  })
+  if (!verified) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 400 })
   }
+  const { event, stripe } = verified
 
   const payload = await getPayload({ config })
 
