@@ -78,12 +78,16 @@ Refactor `src/lib/stripe.ts`:
   - `tenant.demoMode === true` → cached client built from **`STRIPE_SECRET_KEY_TEST`**.
   - otherwise → the existing live client.
   - Cache both clients (keyed by mode) so we don't rebuild per request.
-- Thread the resolved tenant into the four Connect call sites that already call
-  `getCurrentTenant()`:
+- Thread the resolved tenant into **every** Connect call site (the platform key
+  drives all of them via the `stripeAccount` header):
   - `src/app/api/donations/checkout/route.ts`
   - `src/app/api/membership/checkout/route.ts`
   - `src/lib/form-checkout.ts` (form payment checkout)
   - `src/app/api/membership/portal/route.ts`
+  - `src/lib/membership-stripe.ts` (membership **tier sync** — creating a paid
+    tier creates a Stripe Product/Price on the connected account; this fires
+    during demo seeding, so it must use the test client)
+  - the Connect webhook's subscription-retrieve calls (handled in §4)
 
 **New env var:** `STRIPE_SECRET_KEY_TEST` (`sk_test_…`). Add to `.env.example`.
 
@@ -196,10 +200,12 @@ operations on the demo tenant are rate-limited.
   password resets, notifications) is routed to console/sandbox and **never** to
   real inboxes. Gated on `demoMode` in the email/notification layer
   (`src/lib/form-notifications.ts` and the Payload email adapter path).
-- **Reporting:** audit cross-tenant aggregates (platform MRR / subscription
-  metrics, platform-wide member counts, donation totals — e.g.
-  `src/lib/donations-aggregates.ts`) to **exclude `demoMode` tenants**, so demo
-  test-money never pollutes real metrics.
+- **Reporting:** the aggregate helpers (`donations-aggregates.ts`,
+  `membership-aggregates.ts`) are **pure reducers over already-fetched rows** —
+  they build no queries. So the `demoMode` exclusion belongs in the **callers**
+  that fetch rows for *cross-tenant* platform views (platform MRR, platform-wide
+  member/donation totals), not in the aggregate files. Per-tenant admin views
+  (scoped to one tenant) need no change.
 
 ## Data flow (membership, full loop)
 
