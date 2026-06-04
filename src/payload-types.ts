@@ -408,6 +408,10 @@ export interface Tenant {
    */
   status?: ('pending' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'offline' | 'grandfathered') | null;
   /**
+   * Public demo tenant. Routes Stripe to TEST mode, sandboxes email, and is wiped nightly. Never set on a real masjid.
+   */
+  demoMode?: boolean | null;
+  /**
    * Recorded at signup (now + 14 days). Not enforced yet — billing/paywall will read this when introduced.
    */
   trialEndsAt?: string | null;
@@ -1666,6 +1670,8 @@ export interface User {
         | 'members:read'
         | 'media:read'
         | 'media:write'
+        | 'blog:read'
+        | 'blog:write'
       )[]
     | null;
   /**
@@ -2644,6 +2650,7 @@ export interface TenantsSelect<T extends boolean = true> {
       };
   footerTagline?: T;
   status?: T;
+  demoMode?: T;
   trialEndsAt?: T;
   signupMetadata?: T;
   subscriptionPlan?: T;

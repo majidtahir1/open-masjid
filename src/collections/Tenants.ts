@@ -552,6 +552,18 @@ export const Tenants: CollectionConfig = {
               access: { update: platformOwnerFieldUpdate },
             },
             {
+              name: 'demoMode',
+              type: 'checkbox',
+              defaultValue: false,
+              label: 'Demo tenant',
+              admin: {
+                hidden: true,
+                description:
+                  'Public demo tenant. Routes Stripe to TEST mode, sandboxes email, and is wiped nightly. Never set on a real masjid.',
+              },
+              access: { update: platformOwnerFieldUpdate },
+            },
+            {
               name: 'trialEndsAt',
               type: 'date',
               label: 'Trial Ends At',
