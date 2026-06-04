@@ -250,6 +250,30 @@ operations on the demo tenant are rate-limited.
   rewriting it; factor shared demo content into a module used by both seed and
   reset.
 
+## Stripe test-mode setup (one-time, manual)
+
+All steps happen inside the **existing OpenMasjid platform Stripe account** with the
+dashboard flipped to **Test mode**. The Test/Live toggle is a view switch only —
+live transactions continue processing uninterrupted while you do this.
+
+1. **Get the test platform key.** Test mode → Developers → API keys → copy the
+   `sk_test_…` secret key → set as `STRIPE_SECRET_KEY_TEST`.
+2. **Create the fake connected account.** Test mode → Connect → Accounts → create a
+   connected account; complete onboarding with Stripe's test data (test bank
+   routing `110000000` / account `000123456789`, SSN `000-00-0000`, any business
+   details) until `charges_enabled` is true. Copy its `acct_…` ID.
+3. **Seed the `acct_…`** onto the demo tenant's `donationConfig.stripeAccountId`
+   (handled by the demo seed; the ID can come from an env var, e.g.
+   `DEMO_STRIPE_ACCOUNT_ID`, so it isn't committed).
+4. **Register the test webhook.** Test mode → Developers → Webhooks → add an
+   endpoint at `https://demo.openmasjid.app/api/stripe/connect/webhook` (Connect
+   events: `checkout.session.completed`, `customer.subscription.updated`,
+   `customer.subscription.deleted`, plus donation/form events the live endpoint
+   already subscribes to). Copy its signing secret → `STRIPE_CONNECT_WEBHOOK_SECRET_TEST`.
+
+These are throwaway test objects in the test universe; they never touch live data,
+live keys, or real money.
+
 ## New configuration summary
 
 | Env var | Purpose |
