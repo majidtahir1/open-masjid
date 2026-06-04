@@ -19,6 +19,17 @@ const platformOwnerFieldUpdate: FieldAccess = ({ req: { user } }) =>
   (user as { role?: string } | null)?.role === 'platformOwner'
 
 /**
+ * Field-update guard that is demo-aware: real tenants are unaffected (admins
+ * may still edit), but the shared public demo tenant is locked to platform
+ * owners. `doc` holds the original document on update (undefined on create),
+ * so this only ever denies an UPDATE to the demo tenant doc by a non-owner.
+ */
+const demoLockedFieldUpdate: FieldAccess = ({ req: { user }, doc }) => {
+  if ((user as { role?: string } | null)?.role === 'platformOwner') return true
+  return !(doc as { demoMode?: boolean | null } | undefined)?.demoMode
+}
+
+/**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
  *
  * Decision: SiteSettings-style fields (contactInfo, socialLinks, etc.) live
@@ -150,6 +161,9 @@ export const Tenants: CollectionConfig = {
                 singular: 'Custom Domain',
                 plural: 'Custom Domains',
               },
+              // Real tenants: admins may edit. Demo tenant: locked to platform
+              // owners so the shared public admin can't repoint demo domains.
+              access: { update: demoLockedFieldUpdate },
               admin: {
                 hidden: true,
                 description:
