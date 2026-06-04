@@ -7,7 +7,7 @@ const HEADER_NAV = [
   { label: 'Pricing', to: '/pricing' },
   { label: 'Self-Host', to: '/self-host' },
   { label: 'Compare', to: '/compare' },
-  { label: 'Blog', to: '/blog' },
+  { label: 'The Minbar', to: '/minbar' },
 ]
 
 const FEATURE_DROPDOWN = [

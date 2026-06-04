@@ -5,7 +5,7 @@ import { MarketingShell } from '../../_components/MarketingShell'
 import { fetchPosts, extractExcerpt, type PostRecord } from '@/lib/blog'
 import { mediaUrl, mediaAlt } from '@/components/types'
 
-const TITLE = 'Blog — OpenMasjid'
+const TITLE = 'The Minbar — OpenMasjid'
 const DESCRIPTION =
   'Product updates, migration playbooks, and notes on building open-source software for masajid.'
 
@@ -15,8 +15,8 @@ export const revalidate = 0
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: '/blog' },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: '/blog', type: 'website' },
+  alternates: { canonical: '/minbar' },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: '/minbar', type: 'website' },
   twitter: { title: TITLE, description: DESCRIPTION },
 }
 
@@ -39,17 +39,17 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const posts = await fetchPosts({ kind: 'article', tag })
 
   return (
-    <MarketingShell current="/blog">
+    <MarketingShell current="/minbar">
       <section className="om-section-lg">
         <div className="om-container">
-          <p className="om-eyebrow">Blog</p>
+          <p className="om-eyebrow">The Minbar</p>
           <h1 className="om-h">Building OpenMasjid in the open</h1>
           <p className="om-lede" style={{ maxWidth: 620 }}>{DESCRIPTION}</p>
 
           {tag ? (
             <p className="om-blog-meta" style={{ marginTop: 16 }}>
               Filtered by <span className="om-tag-pill">#{tag}</span>
-              <Link href="/blog" className="om-link-arrow">Clear filter</Link>
+              <Link href="/minbar" className="om-link-arrow">Clear filter</Link>
             </p>
           ) : null}
 
@@ -71,7 +71,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 }
 
 function PostCard({ post }: { post: PostRecord }) {
-  const href = `/blog/${post.slug ?? ''}`
+  const href = `/minbar/${post.slug ?? ''}`
   const img = mediaUrl(post.heroImage)
   const excerpt = extractExcerpt(post.content)
   return (

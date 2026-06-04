@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { path: '/compare', changeFrequency: 'monthly', priority: 0.7 },
       { path: '/get-started', changeFrequency: 'monthly', priority: 0.9 },
       { path: '/self-host', changeFrequency: 'monthly', priority: 0.7 },
-      { path: '/blog', changeFrequency: 'weekly', priority: 0.5 },
+      { path: '/minbar', changeFrequency: 'weekly', priority: 0.5 },
       { path: '/changelog', changeFrequency: 'weekly', priority: 0.5 },
       { path: '/docs', changeFrequency: 'weekly', priority: 0.6 },
     ]
@@ -63,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const doc of posts.docs as Array<{ slug?: string | null; updatedAt?: string | null }>) {
         if (!doc.slug) continue
         postEntries.push({
-          url: absoluteUrl(origin, `/blog/${doc.slug}`),
+          url: absoluteUrl(origin, `/minbar/${doc.slug}`),
           lastModified: doc.updatedAt ? new Date(doc.updatedAt) : now,
           changeFrequency: 'monthly',
           priority: 0.6,

@@ -19,7 +19,7 @@ export async function GET() {
 
   const items = posts
     .map((p) => {
-      const url = `${origin}/blog/${p.slug ?? ''}`
+      const url = `${origin}/minbar/${p.slug ?? ''}`
       const parsed = p.publishedAt ? new Date(p.publishedAt) : null
       const date = parsed && !Number.isNaN(parsed.getTime()) ? parsed.toUTCString() : ''
       return `    <item>
@@ -35,8 +35,8 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>OpenMasjid Blog</title>
-    <link>${escapeXml(`${origin}/blog`)}</link>
+    <title>The Minbar — OpenMasjid</title>
+    <link>${escapeXml(`${origin}/minbar`)}</link>
     <description>Product updates and notes on building open-source software for masajid.</description>
 ${items}
   </channel>

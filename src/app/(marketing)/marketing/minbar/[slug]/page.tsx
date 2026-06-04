@@ -34,7 +34,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const { origin } = await getRequestOrigin()
   const title = post.seo?.title?.trim() || post.title || slug
   const description = post.seo?.description?.trim() || extractExcerpt(post.content)
-  const url = `${origin}/blog/${slug}`
+  const url = `${origin}/minbar/${slug}`
   const imageUrl = absolute(origin, mediaUrl(post.seo?.ogImage) ?? mediaUrl(post.heroImage))
 
   return {
@@ -66,12 +66,12 @@ export default async function PostPage({ params, searchParams }: PageProps) {
 
   const { origin } = await getRequestOrigin()
   const heroSrc = mediaUrl(post.heroImage)
-  const url = `${origin}/blog/${slug}`
+  const url = `${origin}/minbar/${slug}`
   const description = post.seo?.description?.trim() || extractExcerpt(post.content)
   const tags = (post.tags ?? []).map((t) => t?.tag).filter((t): t is string => Boolean(t))
 
   return (
-    <MarketingShell current="/blog">
+    <MarketingShell current="/minbar">
       <PostJsonLd
         title={post.title ?? slug}
         description={description}
@@ -100,7 +100,7 @@ export default async function PostPage({ params, searchParams }: PageProps) {
             {tags.length > 0 ? (
               <div className="om-blog-tags" style={{ marginTop: 32 }}>
                 {tags.map((t) => (
-                  <Link key={t} href={`/blog?tag=${encodeURIComponent(t)}`} className="om-tag-pill">
+                  <Link key={t} href={`/minbar?tag=${encodeURIComponent(t)}`} className="om-tag-pill">
                     #{t}
                   </Link>
                 ))}

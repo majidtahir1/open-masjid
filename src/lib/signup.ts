@@ -18,6 +18,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   'marketing',
   'docs',
   'blog',
+  'minbar',
 ])
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/
