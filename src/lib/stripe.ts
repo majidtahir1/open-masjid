@@ -1,13 +1,39 @@
 import Stripe from 'stripe'
 
-let cached: Stripe | null = null
+const API_VERSION = '2025-02-24.acacia' as const
+
+let cachedLive: Stripe | null = null
+let cachedTest: Stripe | null = null
 
 export function getStripe(): Stripe {
-  if (cached) return cached
+  if (cachedLive) return cachedLive
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
-  cached = new Stripe(key, { apiVersion: '2025-02-24.acacia' })
-  return cached
+  cachedLive = new Stripe(key, { apiVersion: API_VERSION })
+  return cachedLive
+}
+
+export function getStripeTest(): Stripe {
+  if (cachedTest) return cachedTest
+  const key = process.env.STRIPE_SECRET_KEY_TEST
+  if (!key) throw new Error('STRIPE_SECRET_KEY_TEST is not set')
+  cachedTest = new Stripe(key, { apiVersion: API_VERSION })
+  return cachedTest
+}
+
+/** Connect calls route here: demo tenants use the TEST platform key, all
+ *  others the live key. The mode follows the platform key (Stripe forbids
+ *  mixing a live key with a test connected account and vice-versa). */
+export function getStripeForTenant(
+  tenant: { demoMode?: boolean | null } | null | undefined,
+): Stripe {
+  return tenant?.demoMode ? getStripeTest() : getStripe()
+}
+
+/** Test-only: clear cached clients so env changes take effect. */
+export function __resetStripeCache(): void {
+  cachedLive = null
+  cachedTest = null
 }
 
 export function getPriceId(plan: 'monthly' | 'annual'): string {
