@@ -206,3 +206,56 @@ export async function resetDemoContent(
   await seedDemoContent(payload, tenantId)
   return { tenantId }
 }
+
+/**
+ * Create or update the shared demo admin user scoped to the demo tenant.
+ * Idempotent. Password comes from `DEMO_ADMIN_PASSWORD` (throws if unset) so it
+ * is never committed. Email defaults to a stable demo address.
+ */
+export async function ensureDemoAdmin(
+  payload: Payload,
+  tenantId: string | number,
+): Promise<void> {
+  const email = process.env.DEMO_ADMIN_EMAIL || 'demo-admin@demo.openmasjid.app'
+  const password = process.env.DEMO_ADMIN_PASSWORD
+  if (!password) throw new Error('DEMO_ADMIN_PASSWORD is not set')
+
+  const existing = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: 'users' as any,
+    where: { email: { equals: email } },
+    limit: 1,
+    overrideAccess: true,
+  })
+
+  // firstName + lastName are required on Users; supply demo-appropriate values.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = {
+    email,
+    role: 'admin',
+    tenant: tenantId,
+    firstName: 'Demo',
+    lastName: 'Admin',
+    password,
+  }
+
+  const found = existing.docs[0] as { id: string | number } | undefined
+  if (found) {
+    await payload.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: 'users' as any,
+      id: found.id,
+      data,
+      overrideAccess: true,
+      req: seedReq,
+    })
+  } else {
+    await payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: 'users' as any,
+      data,
+      overrideAccess: true,
+      req: seedReq,
+    })
+  }
+}

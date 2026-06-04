@@ -4,6 +4,7 @@ import {
   ensureDemoTenant,
   seedDemoContent,
   resetDemoContent,
+  ensureDemoAdmin,
 } from '@/lib/demo/seedDemo'
 
 /**
@@ -156,5 +157,50 @@ describe('resetDemoContent', () => {
       expect.objectContaining({ collection: 'tenants', id: 42 }),
     )
     expect(tenantId).toBe(42)
+  })
+})
+
+describe('ensureDemoAdmin', () => {
+  it('creates the admin when none exists', async () => {
+    const payload = makePayload({ adminUser: null })
+    await ensureDemoAdmin(payload, 7)
+    expect(payload.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'users',
+        data: expect.objectContaining({
+          email: 'demo-admin@demo.openmasjid.app',
+          role: 'admin',
+          tenant: 7,
+          password: 'demo-pass-123',
+        }),
+      }),
+    )
+    expect(payload.update).not.toHaveBeenCalled()
+  })
+
+  it('updates the admin (incl. password) when it exists', async () => {
+    const payload = makePayload({ adminUser: { id: 88 } })
+    await ensureDemoAdmin(payload, 7)
+    expect(payload.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'users',
+        id: 88,
+        data: expect.objectContaining({ password: 'demo-pass-123', tenant: 7 }),
+      }),
+    )
+    expect(payload.create).not.toHaveBeenCalled()
+  })
+
+  it('honors DEMO_ADMIN_EMAIL override', async () => {
+    process.env.DEMO_ADMIN_EMAIL = 'custom@demo.test'
+    const payload = makePayload({ adminUser: null })
+    await ensureDemoAdmin(payload, 7)
+    expect(payload.create.mock.calls[0][0].data.email).toBe('custom@demo.test')
+  })
+
+  it('throws when DEMO_ADMIN_PASSWORD is unset', async () => {
+    delete process.env.DEMO_ADMIN_PASSWORD
+    const payload = makePayload({ adminUser: null })
+    await expect(ensureDemoAdmin(payload, 7)).rejects.toThrow('DEMO_ADMIN_PASSWORD')
   })
 })
