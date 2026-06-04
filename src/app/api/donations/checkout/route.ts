@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { headers } from 'next/headers'
 import type Stripe from 'stripe'
-import { getStripe } from '@/lib/stripe'
+import { getStripeForTenant } from '@/lib/stripe'
 import { getCurrentTenant } from '@/lib/tenant-server'
 
 export const runtime = 'nodejs'
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
   const tenantName = (tenant as { name?: string | null }).name ?? 'Masjid'
   const fundName = fundRec.name ?? 'Donation'
 
-  const stripe = getStripe()
+  const stripe = getStripeForTenant(tenant as { demoMode?: boolean | null })
   const params: Stripe.Checkout.SessionCreateParams = {
     mode: frequency === 'monthly' ? 'subscription' : 'payment',
     line_items: [
