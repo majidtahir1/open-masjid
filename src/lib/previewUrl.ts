@@ -109,7 +109,7 @@ export async function buildLivePreviewUrl(
 
 /**
  * Preview URL for a platform-level marketing doc whose slug renders under a
- * fixed path prefix on the marketing host (e.g. Posts → /blog/<slug>).
+ * fixed path prefix on the marketing host (e.g. Posts → /minbar/<slug>).
  * Unlike `buildPreviewUrl`, this does not resolve a tenant.
  */
 export function buildMarketingPreviewUrl(

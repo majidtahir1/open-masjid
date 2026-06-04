@@ -36,10 +36,10 @@ export const Posts: CollectionConfig = {
     // Platform-level content — only the platform owner manages it.
     hidden: ({ user }) => (user as { role?: string } | null)?.role !== 'platformOwner',
     description:
-      'Marketing blog articles and changelog entries for openmasjid.app. Articles render at /blog, changelog entries at /changelog.',
-    preview: (doc) => buildMarketingPreviewUrl(doc, 'blog'),
+      'Marketing articles (The Minbar) and changelog entries for openmasjid.app. Articles render at /minbar, changelog entries at /changelog.',
+    preview: (doc) => buildMarketingPreviewUrl(doc, 'minbar'),
     livePreview: {
-      url: ({ data }) => buildMarketingPreviewUrl(data, 'blog') ?? '',
+      url: ({ data }) => buildMarketingPreviewUrl(data, 'minbar') ?? '',
       breakpoints: [
         { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
         { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
@@ -78,7 +78,7 @@ export const Posts: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
-        description: 'Articles render at /blog; changelog entries at /changelog.',
+        description: 'Articles render at /minbar; changelog entries at /changelog.',
       },
     },
     {
@@ -137,7 +137,7 @@ export const Posts: CollectionConfig = {
       type: 'array',
       label: 'Tags',
       labels: { singular: 'Tag', plural: 'Tags' },
-      admin: { description: 'Free-form topic tags. Power filtering on /blog.' },
+      admin: { description: 'Free-form topic tags. Power filtering on /minbar.' },
       fields: [{ name: 'tag', type: 'text', required: true }],
     },
     {

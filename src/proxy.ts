@@ -66,6 +66,15 @@ export function proxy(request: NextRequest) {
   const treatAsMarketing =
     context.type === 'platform-marketing' || (context.type === 'localhost' && isBareLocalhost)
 
+  // The marketing blog was renamed to "The Minbar" (`/blog` → `/minbar`).
+  // 301 the old public paths — index entries, RSS subscribers, external
+  // links — to their new home, preserving the slug, feed, and query string.
+  if (treatAsMarketing && (pathname === '/blog' || pathname.startsWith('/blog/'))) {
+    const url = request.nextUrl.clone()
+    url.pathname = `/minbar${pathname.slice('/blog'.length)}`
+    return NextResponse.redirect(url, 301)
+  }
+
   if (
     treatAsMarketing &&
     !pathname.startsWith('/marketing') &&

@@ -41,7 +41,7 @@ export function MarketingFooter() {
             <h5>Resources</h5>
             <ul>
               <li><Link href="/docs">Docs</Link></li>
-              <li><Link href="/blog">Blog</Link></li>
+              <li><Link href="/minbar">The Minbar</Link></li>
               <li><a href="https://github.com/majidtahir1/open-masjid" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
             </ul>
           </div>

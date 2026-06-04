@@ -1224,7 +1224,7 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Marketing blog articles and changelog entries for openmasjid.app. Articles render at /blog, changelog entries at /changelog.
+ * Marketing articles (The Minbar) and changelog entries for openmasjid.app. Articles render at /minbar, changelog entries at /changelog.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
@@ -1233,7 +1233,7 @@ export interface Post {
   id: number;
   title: string;
   /**
-   * Articles render at /blog; changelog entries at /changelog.
+   * Articles render at /minbar; changelog entries at /changelog.
    */
   kind: 'article' | 'changelog';
   /**
@@ -1254,7 +1254,7 @@ export interface Post {
    */
   heroImage?: (number | null) | Media;
   /**
-   * Free-form topic tags. Power filtering on /blog.
+   * Free-form topic tags. Power filtering on /minbar.
    */
   tags?:
     | {
