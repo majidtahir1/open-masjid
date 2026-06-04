@@ -336,6 +336,8 @@ export const Users: CollectionConfig = {
         { label: 'Members — read', value: 'members:read' },
         { label: 'Media — read', value: 'media:read' },
         { label: 'Media — write', value: 'media:write' },
+        { label: 'Blog (The Minbar) — read', value: 'blog:read' },
+        { label: 'Blog (The Minbar) — write (drafts only)', value: 'blog:write' },
       ],
       admin: {
         description:

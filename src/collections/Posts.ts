@@ -1,5 +1,6 @@
-import type { CollectionConfig, FieldHook } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, FieldHook } from 'payload'
 
+import { isApiKeyAuth } from '../access/apiScoped'
 import { platformOwnerOnly } from '../access/tenantScoped'
 import { buildMarketingPreviewUrl } from '../lib/previewUrl'
 
@@ -26,6 +27,22 @@ const stampPublishedAt: FieldHook = ({ value, data }) => {
   return value
 }
 
+/**
+ * Scoped blog agents (API keys carrying `blog:write`) may draft posts but must
+ * never publish. Force `_status: 'draft'` on every write they make, even if the
+ * request explicitly asks to publish. platformOwner sessions and unscoped keys
+ * are untouched, so the admin UI keeps full publish control. This is the
+ * second of two guards — the `update` access filter already hides published
+ * posts from these keys.
+ */
+export const forceDraftForScopedAgents: CollectionBeforeChangeHook = ({ data, req }) => {
+  const user = req.user as { apiScopes?: string[] } | null
+  if (isApiKeyAuth(req) && (user?.apiScopes ?? []).includes('blog:write')) {
+    return { ...data, _status: 'draft' }
+  }
+  return data
+}
+
 export const Posts: CollectionConfig = {
   slug: 'posts',
   labels: { singular: 'Post', plural: 'Posts' },
@@ -50,14 +67,30 @@ export const Posts: CollectionConfig = {
     drafts: { schedulePublish: true },
   },
   access: {
-    // Public read of published; platform owner sees drafts too.
-    read: ({ req: { user } }) => {
-      if ((user as { role?: string } | null)?.role === 'platformOwner') return true
+    // platformOwner sees everything; a blog:read API key sees drafts too (the
+    // scope gate in apiScoped.ts already required blog:read to reach here).
+    // Everyone else — public, other roles — sees only published.
+    read: ({ req }) => {
+      if ((req.user as { role?: string } | null)?.role === 'platformOwner') return true
+      if (isApiKeyAuth(req)) return true
       return { _status: { equals: 'published' } }
     },
-    create: platformOwnerOnly,
-    update: platformOwnerOnly,
+    // platformOwner or a blog:write API key may create (the hook forces draft).
+    create: ({ req }) => {
+      if ((req.user as { role?: string } | null)?.role === 'platformOwner') return true
+      return isApiKeyAuth(req)
+    },
+    // platformOwner may update anything; a blog:write API key may update ONLY
+    // drafts — the filter hides published posts so they can't be edited.
+    update: ({ req }) => {
+      if ((req.user as { role?: string } | null)?.role === 'platformOwner') return true
+      if (isApiKeyAuth(req)) return { _status: { equals: 'draft' } }
+      return false
+    },
     delete: platformOwnerOnly,
+  },
+  hooks: {
+    beforeChange: [forceDraftForScopedAgents],
   },
   fields: [
     {

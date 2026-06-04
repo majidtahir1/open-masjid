@@ -66,6 +66,14 @@ const SCOPE_MAP: Record<string, Partial<Record<Op, string>>> = {
     update: 'media:write',
     delete: 'media:write',
   },
+  // The Minbar (platform-level blog). Agents may read + draft, never publish:
+  // delete is unmapped (denied), and Posts' access + a beforeChange hook keep
+  // scoped keys on drafts only. blog:write covers create + update.
+  posts: {
+    read: 'blog:read',
+    create: 'blog:write',
+    update: 'blog:write',
+  },
   // NOTE: donations / donation-funds are intentionally NOT mapped here.
   // Donation Q&A (totals by fund/month) needs a custom sum endpoint that
   // Payload REST can't provide — deferred to v1.1.
