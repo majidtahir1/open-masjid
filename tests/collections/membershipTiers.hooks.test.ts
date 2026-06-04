@@ -7,8 +7,8 @@ const stripeMock = {
   prices: { create: vi.fn(async () => ({ id: 'price_new' })), update: vi.fn(async () => ({})) },
 }
 
-vi.mock('@/lib/stripe-connect', () => ({
-  stripeForAccount: () => stripeMock,
+vi.mock('@/lib/stripe', () => ({
+  getStripeForTenant: () => stripeMock,
 }))
 
 const tenantWithConnect = { id: 7, stripeAccountId: 'acct_x', stripeChargesEnabled: true }
