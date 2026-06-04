@@ -1,4 +1,4 @@
-import { getStripe } from './stripe'
+import { getStripeForTenant } from './stripe'
 import type { Payload } from 'payload'
 
 interface Args {
@@ -8,6 +8,7 @@ interface Args {
     stripeAccountId?: string | null
     slug?: string | null
     customDomains?: Array<{ domain: string }> | null
+    demoMode?: boolean | null
   }
   form: { id: string | number; title: string; slug: string; payment?: any }
   submission: { id: string | number }
@@ -16,7 +17,7 @@ interface Args {
 
 export async function createFormCheckoutSession(args: Args) {
   const { tenant, form, submission, amountCents } = args
-  const stripe = getStripe()
+  const stripe = getStripeForTenant(tenant)
   const accountId = tenant.stripeAccountId
   if (!accountId) throw new Error('Tenant has no connected Stripe account')
 

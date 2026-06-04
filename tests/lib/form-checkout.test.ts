@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockSessionCreate = vi.fn()
 
 vi.mock('@/lib/stripe', () => ({
-  getStripe: () => ({
+  getStripeForTenant: () => ({
     checkout: {
       sessions: {
         create: mockSessionCreate,
@@ -19,6 +19,7 @@ const tenant = {
   stripeAccountId: 'acct_test123',
   slug: 'testmasjid',
   customDomains: null,
+  demoMode: false,
 }
 
 const form = {
