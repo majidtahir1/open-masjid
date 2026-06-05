@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { verifyState, exchangeCode, fetchAccount } from '@/lib/stripe-connect'
+import { isDemoTenant } from '@/lib/demo/guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -37,6 +38,18 @@ export async function GET(req: Request) {
   if (String(sessionTenantId) !== String(decoded.tenantId)) {
     return NextResponse.redirect(
       new URL('/admin/donations/connect?status=tenant_mismatch', url),
+    )
+  }
+  // Block Stripe Connect for the public demo tenant: the seeded TEST connected
+  // account must not be reconnected/overwritten from the shared demo admin.
+  const tenantDoc = await payload.findByID({
+    collection: 'tenants',
+    id: decoded.tenantId as string | number,
+    overrideAccess: true,
+  })
+  if (isDemoTenant(tenantDoc as { demoMode?: boolean | null })) {
+    return NextResponse.redirect(
+      new URL('/admin/donations/connect?status=demo_locked', url),
     )
   }
   const { stripeUserId } = await exchangeCode(code)

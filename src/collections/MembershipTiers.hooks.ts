@@ -1,7 +1,7 @@
 // src/collections/MembershipTiers.hooks.ts
 import type { CollectionAfterChangeHook } from 'payload'
 import type { Tenant } from '@/payload-types'
-import { stripeForAccount } from '@/lib/stripe-connect'
+import { getStripeForTenant } from '@/lib/stripe'
 import { ensureStripeProductAndPrice, archiveTierInStripe } from '@/lib/membership-stripe'
 
 interface TierDoc {
@@ -71,7 +71,7 @@ export const syncTierAfterChange: CollectionAfterChangeHook = async ({
     if (!stripeAccountId || !stripeChargesEnabled) {
       throw new Error('Stripe Connect not enabled for this tenant. Cannot sync tier to Stripe.')
     }
-    const stripe = stripeForAccount(stripeAccountId)
+    const stripe = getStripeForTenant(tenant)
 
     // Soft-delete path: active flipped false → archive everything in Stripe
     if (operation === 'update' && prev?.active === true && tier.active === false) {

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const sessionsCreate = vi.fn()
-vi.mock('@/lib/stripe-connect', () => ({
-  stripeForAccount: () => ({
+vi.mock('@/lib/stripe', () => ({
+  getStripeForTenant: () => ({
     billingPortal: { sessions: { create: sessionsCreate } },
   }),
 }))

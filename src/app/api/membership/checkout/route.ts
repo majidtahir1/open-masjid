@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
-import { stripeForAccount } from '@/lib/stripe-connect'
+import { getStripeForTenant } from '@/lib/stripe'
 import { buildCheckoutSessionArgs } from '@/lib/membership-checkout'
 
 export async function POST(req: Request) {
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       tenantAny.stripeAccountId ??
       tenantAny.donationConfig?.stripeAccountId
 
-    const stripe = stripeForAccount(stripeAccountId)
+    const stripe = getStripeForTenant(tenant as { demoMode?: boolean | null })
     const session = await stripe.checkout.sessions.create(args, {
       stripeAccount: stripeAccountId,
     })

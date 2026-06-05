@@ -17,11 +17,15 @@ export const seedPrayerDisplayContent: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') return doc
+  // Pass `req` so these inserts join the tenant-create transaction (otherwise a
+  // separate transaction can't see the uncommitted tenant → FK violation on the
+  // first fresh tenant create).
   for (const row of prayerContentSeedRows(doc.id)) {
     await req.payload.create({
       collection: 'prayer-display-content',
       data: row,
       overrideAccess: true,
+      req,
     })
   }
   return doc

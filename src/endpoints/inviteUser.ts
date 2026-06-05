@@ -2,6 +2,8 @@ import crypto from 'node:crypto'
 
 import type { Endpoint, PayloadHandler } from 'payload'
 
+import { isDemoTenant } from '../lib/demo/guard'
+
 type InviteBody = {
   email?: string
   role?: 'platformOwner' | 'admin' | 'staff' | 'kioskManager'
@@ -58,6 +60,19 @@ const handler: PayloadHandler = async (req) => {
       return Response.json(
         { error: 'Your account has no tenant; cannot invite.' },
         { status: 400 },
+      )
+    }
+    // Block invites initiated by the shared public demo admin: a demo-tenant
+    // admin must not be able to provision new accounts into the demo tenant.
+    const actingTenant = await payload.findByID({
+      collection: 'tenants',
+      id: targetTenant,
+      overrideAccess: true,
+    })
+    if (isDemoTenant(actingTenant as { demoMode?: boolean | null })) {
+      return Response.json(
+        { error: 'Invites are disabled for the demo tenant.' },
+        { status: 403 },
       )
     }
   }

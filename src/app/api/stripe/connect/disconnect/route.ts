@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { disconnectAccount } from '@/lib/stripe-connect'
+import { isDemoTenant } from '@/lib/demo/guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -25,6 +26,11 @@ export async function POST() {
     id: tenantId,
     overrideAccess: true,
   })
+  // Block disconnect for the public demo tenant: the seeded TEST connected
+  // account must stay attached from the shared demo admin.
+  if (isDemoTenant(tenant as { demoMode?: boolean | null } | null)) {
+    return NextResponse.json({ error: 'demo_locked' }, { status: 403 })
+  }
   const acct = (tenant as { donationConfig?: { stripeAccountId?: string | null } } | null)
     ?.donationConfig?.stripeAccountId
   if (acct) {

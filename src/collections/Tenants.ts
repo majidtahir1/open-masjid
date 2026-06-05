@@ -19,6 +19,17 @@ const platformOwnerFieldUpdate: FieldAccess = ({ req: { user } }) =>
   (user as { role?: string } | null)?.role === 'platformOwner'
 
 /**
+ * Field-update guard that is demo-aware: real tenants are unaffected (admins
+ * may still edit), but the shared public demo tenant is locked to platform
+ * owners. `doc` holds the original document on update (undefined on create),
+ * so this only ever denies an UPDATE to the demo tenant doc by a non-owner.
+ */
+const demoLockedFieldUpdate: FieldAccess = ({ req: { user }, doc }) => {
+  if ((user as { role?: string } | null)?.role === 'platformOwner') return true
+  return !(doc as { demoMode?: boolean | null } | undefined)?.demoMode
+}
+
+/**
  * Tenants — each masjid (and the ICPC umbrella) is a tenant.
  *
  * Decision: SiteSettings-style fields (contactInfo, socialLinks, etc.) live
@@ -115,6 +126,10 @@ export const Tenants: CollectionConfig = {
                   Field: '/src/fields/TextField#default',
                 },
               },
+              // Demo tenants are located by slug for nightly reset; a shared
+              // demo admin must not be able to change it (would orphan the old
+              // demo tenant + its connected account). Real tenants unaffected.
+              access: { update: demoLockedFieldUpdate },
             },
             {
               name: 'siteType',
@@ -150,6 +165,9 @@ export const Tenants: CollectionConfig = {
                 singular: 'Custom Domain',
                 plural: 'Custom Domains',
               },
+              // Real tenants: admins may edit. Demo tenant: locked to platform
+              // owners so the shared public admin can't repoint demo domains.
+              access: { update: demoLockedFieldUpdate },
               admin: {
                 hidden: true,
                 description:
@@ -552,6 +570,18 @@ export const Tenants: CollectionConfig = {
               access: { update: platformOwnerFieldUpdate },
             },
             {
+              name: 'demoMode',
+              type: 'checkbox',
+              defaultValue: false,
+              label: 'Demo tenant',
+              admin: {
+                hidden: true,
+                description:
+                  'Public demo tenant. Routes Stripe to TEST mode, sandboxes email, and is wiped nightly. Never set on a real masjid.',
+              },
+              access: { update: platformOwnerFieldUpdate },
+            },
+            {
               name: 'trialEndsAt',
               type: 'date',
               label: 'Trial Ends At',
@@ -682,6 +712,9 @@ export const Tenants: CollectionConfig = {
                       Field: '/src/fields/SelectField#default',
                     },
                   },
+                  // Demo tenant's donate button is locked to its seeded Connect
+                  // test config; a shared demo admin can't repoint it.
+                  access: { update: demoLockedFieldUpdate },
                 },
                 {
                   name: 'externalUrl',
@@ -696,6 +729,7 @@ export const Tenants: CollectionConfig = {
                       Field: '/src/fields/TextField#default',
                     },
                   },
+                  access: { update: demoLockedFieldUpdate },
                 },
                 {
                   name: 'stripeAccountId',

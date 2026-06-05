@@ -29,6 +29,8 @@ import * as migration_20260528_143426 from './20260528_143426';
 import * as migration_20260601_200031_api_scopes_capability_surface from './20260601_200031_api_scopes_capability_surface';
 import * as migration_20260601_205903_media_api_scopes from './20260601_205903_media_api_scopes';
 import * as migration_20260603_163728_blog_posts from './20260603_163728_blog_posts';
+import * as migration_20260604_090000_blog_api_scopes from './20260604_090000_blog_api_scopes';
+import * as migration_20260604_205205_demo_mode from './20260604_205205_demo_mode';
 
 export const migrations = [
   {
@@ -184,6 +186,16 @@ export const migrations = [
   {
     up: migration_20260603_163728_blog_posts.up,
     down: migration_20260603_163728_blog_posts.down,
-    name: '20260603_163728_blog_posts'
+    name: '20260603_163728_blog_posts',
+  },
+  {
+    up: migration_20260604_090000_blog_api_scopes.up,
+    down: migration_20260604_090000_blog_api_scopes.down,
+    name: '20260604_090000_blog_api_scopes',
+  },
+  {
+    up: migration_20260604_205205_demo_mode.up,
+    down: migration_20260604_205205_demo_mode.down,
+    name: '20260604_205205_demo_mode'
   },
 ];
