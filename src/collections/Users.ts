@@ -1,6 +1,27 @@
 import type { CollectionConfig, Where } from 'payload'
 import { withBillingLock } from '../access/billingLocked'
+import { actingUserInDemoTenant } from '../access/demoTenant'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+
+/**
+ * Block non-platformOwner users from granting platform-level (blog) API scopes.
+ * `blog:read` / `blog:write` reach the platform-global Posts collection, so a
+ * tenant admin (including the shared public demo admin) must not be able to
+ * self-assign them and write to the marketing blog. Tenant-scoped scopes
+ * (prayer-times, announcements, etc.) remain grantable by tenant admins.
+ */
+export function validateApiScopes(
+  value: unknown,
+  user: { role?: string } | null | undefined,
+): true | string {
+  const scopes = Array.isArray(value) ? (value as string[]) : []
+  const platformScopes = ['blog:read', 'blog:write']
+  const grantsPlatform = scopes.some((s) => platformScopes.includes(s))
+  if (grantsPlatform && user?.role !== 'platformOwner') {
+    return 'Only a platform owner can grant blog (platform-level) API scopes.'
+  }
+  return true
+}
 
 /**
  * Users — extends Payload's built-in auth.
@@ -162,11 +183,16 @@ export const Users: CollectionConfig = {
   },
   access: {
     // Who can create a new user?
-    create: withBillingLock(({ req: { user } }) => {
+    create: withBillingLock(async ({ req }) => {
+      const user = req.user
       if (!user) return false
       if (user.role === 'platformOwner') return true
+      if (user.role !== 'admin') return false
+      // The shared, publicly-credentialed demo admin must not create users
+      // (they would persist past the nightly reset). Other tenants unaffected.
+      if (await actingUserInDemoTenant(req)) return false
       // Admins can create users in their own tenant (hook will force tenant).
-      return user.role === 'admin'
+      return true
     }),
     // Who can read users?
     read: ({ req: { user } }) => {
@@ -193,7 +219,8 @@ export const Users: CollectionConfig = {
       return false
     },
     // Who can update a user?
-    update: withBillingLock(({ req: { user } }) => {
+    update: withBillingLock(async ({ req }) => {
+      const user = req.user
       if (!user) return false
       if (user.role === 'platformOwner') return true
 
@@ -202,6 +229,8 @@ export const Users: CollectionConfig = {
         return where
       }
       if (user.role === 'admin') {
+        // Demo admin cannot modify users (e.g. escalate roles / grant scopes).
+        if (await actingUserInDemoTenant(req)) return false
         const tenant = (user as { tenant?: unknown }).tenant
         const tenantId =
           typeof tenant === 'object' && tenant !== null && 'id' in tenant
@@ -214,10 +243,12 @@ export const Users: CollectionConfig = {
       return false
     }),
     // Who can delete a user?
-    delete: withBillingLock(({ req: { user } }) => {
+    delete: withBillingLock(async ({ req }) => {
+      const user = req.user
       if (!user) return false
       if (user.role === 'platformOwner') return true
       if (user.role !== 'admin') return false
+      if (await actingUserInDemoTenant(req)) return false
       const tenant = (user as { tenant?: unknown }).tenant
       const tenantId =
         typeof tenant === 'object' && tenant !== null && 'id' in tenant
@@ -344,6 +375,8 @@ export const Users: CollectionConfig = {
           "Restricts what this user's API key can do. Leave empty to inherit the user's full role permissions. UI session permissions are never restricted by this field.",
         condition: (data) => Boolean(data?.enableAPIKey),
       },
+      validate: (value: unknown, { req }: { req: { user?: { role?: string } | null } }) =>
+        validateApiScopes(value, req?.user ?? null),
     },
     {
       name: 'onboardingWelcomeSeenAt',

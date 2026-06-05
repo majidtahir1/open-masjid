@@ -140,6 +140,20 @@ export async function seedDemoContent(
     await deleteAllForTenant(payload, c, tenantId)
   }
 
+  // Purge any users created in the demo tenant beyond the canonical shared
+  // admin (defence-in-depth alongside the demo user-write guard) so a visitor
+  // can't leave behind accounts that survive the nightly reset.
+  const demoAdminEmail = process.env.DEMO_ADMIN_EMAIL || 'demo-admin@demo.openmasjid.app'
+  await payload.delete({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: 'users' as any,
+    where: {
+      and: [{ tenant: { equals: tenantId } }, { email: { not_equals: demoAdminEmail } }],
+    },
+    overrideAccess: true,
+    req: seedReq(),
+  })
+
   // Upsert tiers by (tenant, name). Creating/updating a paid tier triggers
   // syncTierAfterChange → Stripe (test) Product/Price.
   for (const t of demoMembershipTiers) {

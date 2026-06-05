@@ -126,6 +126,10 @@ export const Tenants: CollectionConfig = {
                   Field: '/src/fields/TextField#default',
                 },
               },
+              // Demo tenants are located by slug for nightly reset; a shared
+              // demo admin must not be able to change it (would orphan the old
+              // demo tenant + its connected account). Real tenants unaffected.
+              access: { update: demoLockedFieldUpdate },
             },
             {
               name: 'siteType',
@@ -708,6 +712,9 @@ export const Tenants: CollectionConfig = {
                       Field: '/src/fields/SelectField#default',
                     },
                   },
+                  // Demo tenant's donate button is locked to its seeded Connect
+                  // test config; a shared demo admin can't repoint it.
+                  access: { update: demoLockedFieldUpdate },
                 },
                 {
                   name: 'externalUrl',
@@ -722,6 +729,7 @@ export const Tenants: CollectionConfig = {
                       Field: '/src/fields/TextField#default',
                     },
                   },
+                  access: { update: demoLockedFieldUpdate },
                 },
                 {
                   name: 'stripeAccountId',
