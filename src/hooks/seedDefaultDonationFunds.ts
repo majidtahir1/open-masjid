@@ -14,6 +14,10 @@ export const seedDefaultDonationFunds: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') return doc
+  // Pass `req` so these inserts join the tenant-create transaction. Without it
+  // they run in a separate transaction that cannot see the not-yet-committed
+  // tenant row, producing a foreign-key violation on the first fresh tenant
+  // create. (Latent until now because the existing seed only updates ICP.)
   await req.payload.create({
     collection: 'donation-funds',
     data: {
@@ -26,6 +30,7 @@ export const seedDefaultDonationFunds: CollectionAfterChangeHook = async ({
       suggestedAmounts: [{ amount: 25 }, { amount: 50 }, { amount: 100 }, { amount: 250 }],
     },
     overrideAccess: true,
+    req,
   })
   await req.payload.create({
     collection: 'donation-funds',
@@ -39,6 +44,7 @@ export const seedDefaultDonationFunds: CollectionAfterChangeHook = async ({
       suggestedAmounts: [{ amount: 100 }, { amount: 250 }, { amount: 500 }],
     },
     overrideAccess: true,
+    req,
   })
   return doc
 }

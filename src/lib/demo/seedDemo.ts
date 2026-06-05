@@ -29,8 +29,13 @@ import {
  */
 
 // Fake req.user so validate hooks that gate on platformOwner succeed during seed.
+// IMPORTANT: this returns a FRESH object every call. A single shared req object
+// is mutated by Payload (it stamps `transactionID` onto it after the first
+// operation), so reusing one across creates makes later operations ride a
+// stale/committed transaction — which silently breaks transactional afterChange
+// writebacks (e.g. the tier→Stripe sync saving stripePriceId for tiers 2+).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const seedReq: any = { user: { id: 0, role: 'platformOwner', email: 'demo-seed@seed' } }
+const seedReq = (): any => ({ user: { id: 0, role: 'platformOwner', email: 'demo-seed@seed' } })
 
 /** Minimal Lexical richText document wrapping a single paragraph of text. */
 const richText = (text: string) => ({
@@ -74,7 +79,7 @@ async function deleteAllForTenant(
     collection: collection as any,
     where: { tenant: { equals: tenantId } },
     overrideAccess: true,
-    req: seedReq,
+    req: seedReq(),
   })
 }
 
@@ -90,7 +95,7 @@ export async function ensureDemoTenant(payload: Payload): Promise<string | numbe
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: data as any,
       overrideAccess: true,
-      req: seedReq,
+      req: seedReq(),
     })
     return existing.id
   }
@@ -100,7 +105,7 @@ export async function ensureDemoTenant(payload: Payload): Promise<string | numbe
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: data as any,
     overrideAccess: true,
-    req: seedReq,
+    req: seedReq(),
   })) as { id: string | number }
   return created.id
 }
@@ -147,7 +152,7 @@ export async function seedDemoContent(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: { ...t } as any,
         overrideAccess: true,
-        req: seedReq,
+        req: seedReq(),
       })
     } else {
       await payload.create({
@@ -156,7 +161,7 @@ export async function seedDemoContent(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: { ...t, tenant: tenantId } as any,
         overrideAccess: true,
-        req: seedReq,
+        req: seedReq(),
       })
     }
   }
@@ -168,7 +173,7 @@ export async function seedDemoContent(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: { ...a, body: richText(a.title), tenant: tenantId } as any,
       overrideAccess: true,
-      req: seedReq,
+      req: seedReq(),
     })
   }
 
@@ -184,7 +189,7 @@ export async function seedDemoContent(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       overrideAccess: true,
-      req: seedReq,
+      req: seedReq(),
     })
   }
 
@@ -194,7 +199,7 @@ export async function seedDemoContent(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: { ...demoForm, tenant: tenantId } as any,
     overrideAccess: true,
-    req: seedReq,
+    req: seedReq(),
   })
 }
 
@@ -247,7 +252,7 @@ export async function ensureDemoAdmin(
       id: found.id,
       data,
       overrideAccess: true,
-      req: seedReq,
+      req: seedReq(),
     })
   } else {
     await payload.create({
@@ -255,7 +260,7 @@ export async function ensureDemoAdmin(
       collection: 'users' as any,
       data,
       overrideAccess: true,
-      req: seedReq,
+      req: seedReq(),
     })
   }
 }
