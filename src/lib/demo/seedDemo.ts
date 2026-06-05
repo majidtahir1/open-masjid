@@ -223,6 +223,11 @@ export async function resetDemoContent(
 ): Promise<{ tenantId: string | number }> {
   const tenantId = await ensureDemoTenant(payload)
   await seedDemoContent(payload, tenantId)
+  // Ensure the shared admin here too (not just in the seed script) so that the
+  // `/api/demo/reset` endpoint and the nightly cron fully provision the demo —
+  // the prod image has no `tsx`, so the TS seed script can't run there and the
+  // endpoint is the only provisioning path.
+  await ensureDemoAdmin(payload, tenantId)
   return { tenantId }
 }
 
