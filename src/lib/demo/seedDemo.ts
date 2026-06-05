@@ -4,9 +4,6 @@ import {
   demoTenantData,
   demoDonationConfig,
   demoMembershipTiers,
-  demoAnnouncements,
-  demoEvents,
-  demoForm,
 } from './demoContent'
 
 /**
@@ -17,9 +14,10 @@ import {
  * payload, `overrideAccess`, a fake platformOwner req so validate hooks pass).
  *
  * Reset policy:
- *  - WIPE visitor-generated / editable content (members, donations,
- *    form-submissions, announcements, events, forms) and recreate the canonical
- *    set.
+ *  - WIPE visitor-generated transactional data only (members, donations,
+ *    form-submissions). Website content (services, hero-slides, events, forms,
+ *    announcements) is imported once from ICP via `import:demo` and PERSISTS
+ *    across resets — it is no longer wiped/recreated here.
  *  - UPSERT membership tiers by (tenant, name) — never delete. Creating a paid
  *    tier fires `syncTierAfterChange` which provisions a Stripe (test)
  *    Product/Price on the connected account; wiping + recreating nightly would
@@ -36,27 +34,6 @@ import {
 // writebacks (e.g. the tier→Stripe sync saving stripePriceId for tiers 2+).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const seedReq = (): any => ({ user: { id: 0, role: 'platformOwner', email: 'demo-seed@seed' } })
-
-/** Minimal Lexical richText document wrapping a single paragraph of text. */
-const richText = (text: string) => ({
-  root: {
-    type: 'root',
-    children: [
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text, version: 1 }],
-        direction: null,
-        format: '',
-        indent: 0,
-        version: 1,
-      },
-    ],
-    direction: null,
-    format: '' as const,
-    indent: 0,
-    version: 1,
-  },
-})
 
 async function findTenant(payload: Payload): Promise<{ id: string | number } | undefined> {
   const res = await payload.find({
@@ -131,12 +108,14 @@ export async function seedDemoContent(
   payload: Payload,
   tenantId: string | number,
 ): Promise<void> {
-  // Visitor-generated (members/donations/form-submissions) plus editable
-  // website content (announcements/events/forms) are wiped and recreated.
+  // Wipe only visitor-generated transactional data (members/donations/
+  // form-submissions). Website content (services/hero-slides/events/forms/
+  // announcements) is now imported once from ICP via `import:demo` and must
+  // PERSIST across resets, so it is no longer wiped/recreated here.
   // membership-tiers are deliberately NOT wiped — they are upserted below to
   // keep their Stripe test Product/Price ids stable. donation-funds are
   // auto-seeded by the tenant hook and never touched here.
-  for (const c of ['members', 'donations', 'form-submissions', 'announcements', 'events', 'forms']) {
+  for (const c of ['members', 'donations', 'form-submissions']) {
     await deleteAllForTenant(payload, c, tenantId)
   }
 
@@ -179,42 +158,6 @@ export async function seedDemoContent(
       })
     }
   }
-
-  for (const a of demoAnnouncements) {
-    await payload.create({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: 'announcements' as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: { ...a, body: richText(a.title), tenant: tenantId } as any,
-      overrideAccess: true,
-      req: seedReq(),
-    })
-  }
-
-  for (const e of demoEvents) {
-    await payload.create({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: 'events' as any,
-      data: {
-        ...e,
-        description: richText(e.shortDescription),
-        _status: 'published',
-        tenant: tenantId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-      overrideAccess: true,
-      req: seedReq(),
-    })
-  }
-
-  await payload.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: 'forms' as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { ...demoForm, tenant: tenantId } as any,
-    overrideAccess: true,
-    req: seedReq(),
-  })
 }
 
 /** Full reset: ensure the tenant exists, then rebuild its content. */
@@ -223,6 +166,11 @@ export async function resetDemoContent(
 ): Promise<{ tenantId: string | number }> {
   const tenantId = await ensureDemoTenant(payload)
   await seedDemoContent(payload, tenantId)
+  // Ensure the shared admin here too (not just in the seed script) so that the
+  // `/api/demo/reset` endpoint and the nightly cron fully provision the demo —
+  // the prod image has no `tsx`, so the TS seed script can't run there and the
+  // endpoint is the only provisioning path.
+  await ensureDemoAdmin(payload, tenantId)
   return { tenantId }
 }
 

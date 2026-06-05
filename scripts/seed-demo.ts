@@ -1,6 +1,6 @@
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
-import { resetDemoContent, ensureDemoAdmin } from '@/lib/demo/seedDemo'
+import { resetDemoContent } from '@/lib/demo/seedDemo'
 
 /**
  * Provision (or refresh) the public demo tenant: tenant doc + donation config,
@@ -11,7 +11,6 @@ import { resetDemoContent, ensureDemoAdmin } from '@/lib/demo/seedDemo'
 async function main() {
   const payload = await getPayload({ config })
   const { tenantId } = await resetDemoContent(payload)
-  await ensureDemoAdmin(payload, tenantId)
   console.log('✓ Demo tenant provisioned:', tenantId)
   process.exit(0)
 }
