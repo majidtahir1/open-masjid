@@ -78,19 +78,16 @@ describe('ensureDemoTenant', () => {
 })
 
 describe('seedDemoContent', () => {
-  it('bulk-deletes the wiped collections but NOT membership-tiers', async () => {
+  it('bulk-deletes only transactional data, NOT imported content or membership-tiers', async () => {
     const payload = makePayload()
     await seedDemoContent(payload, 7)
     const deleted = payload.delete.mock.calls.map((c: any[]) => c[0].collection)
-    for (const c of [
-      'members',
-      'donations',
-      'form-submissions',
-      'announcements',
-      'events',
-      'forms',
-    ]) {
+    for (const c of ['members', 'donations', 'form-submissions']) {
       expect(deleted).toContain(c)
+    }
+    // Imported website content is no longer wiped (it persists across resets).
+    for (const c of ['announcements', 'events', 'forms', 'services', 'hero-slides']) {
+      expect(deleted).not.toContain(c)
     }
     expect(deleted).not.toContain('membership-tiers')
   })
@@ -123,18 +120,13 @@ describe('seedDemoContent', () => {
     expect(tierCreates).toHaveLength(2)
   })
 
-  it('creates announcements, events (published), and the form', async () => {
+  it('does NOT recreate imported content (announcements/events/forms)', async () => {
     const payload = makePayload()
     await seedDemoContent(payload, 7)
-    const creates: any[] = payload.create.mock.calls.map((c: any[]) => c[0])
-    const events = creates.filter((c: any) => c.collection === 'events')
-    expect(events.length).toBeGreaterThan(0)
-    for (const e of events) {
-      expect(e.data._status).toBe('published')
-      expect(e.data.description).toBeDefined() // richText filled in
-    }
-    expect(creates.some((c: any) => c.collection === 'announcements')).toBe(true)
-    expect(creates.some((c: any) => c.collection === 'forms')).toBe(true)
+    const created = payload.create.mock.calls.map((c: any[]) => c[0].collection)
+    expect(created).not.toContain('announcements')
+    expect(created).not.toContain('events')
+    expect(created).not.toContain('forms')
   })
 })
 
