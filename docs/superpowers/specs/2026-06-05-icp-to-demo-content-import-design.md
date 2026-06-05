@@ -35,10 +35,16 @@ nightly reset.
 
 `cloneTenantContent(payload, srcTenantId, destTenantId): Promise<CloneReport>`
 
-- **Collection allow-list** (content only; PII excluded):
-  `services`, `hero-slides`, `events`, `forms`, `announcements`,
-  `membership-tiers`, `donation-funds`.
-  Never touches `members`, `donations`, `form-submissions`, `users`, `tenants`.
+- **Collection allow-list** (visible site content only):
+  `services`, `hero-slides`, `events`, `forms`, `announcements`.
+  Known upload-field paths: events → `flyerImage`; hero-slides →
+  `splitFields.image`, `photoFields.image`. (services/forms/announcements have no
+  uploads.)
+  **Excluded:** `membership-tiers` and `donation-funds` stay demo-owned — the
+  demo's tiers already sync to **test** Stripe and power the working checkout
+  loop; ICP has none, so importing would break payments. Also never touches
+  `members`, `donations`, `form-submissions`, `users`, `tenants`, `media` (cloned
+  separately, below).
 - **Media first:** clone every `media` doc owned by the source tenant into the
   dest tenant — read each source file from the media volume and `payload.create`
   a new media doc (Payload writes a fresh file). Build a `mediaIdMap`
@@ -69,16 +75,19 @@ nightly reset.
 
 ### 3. Reset change — `src/lib/demo/seedDemo.ts`
 
-- `seedDemoContent` **stops seeding and wiping the rich content collections.** It
-  retains only: wipe **visitor transactional data** (`members`, `donations`,
-  `form-submissions`) and **non-canonical demo users**; everything content-related
-  is left intact so the imported snapshot persists.
+- `seedDemoContent` **stops wiping and recreating** the imported content
+  (`announcements`, `events`, `forms`; it never touched `services`/`hero-slides`).
+  It retains: wipe **visitor transactional data** (`members`, `donations`,
+  `form-submissions`), purge **non-canonical demo users**, and **keep the
+  membership-tier upsert** (tiers stay synced to test Stripe) — so the payment
+  loop keeps working while the imported site content persists.
 - `ensureDemoTenant` and `ensureDemoAdmin` are unchanged; `resetDemoContent` still
   ensures tenant + admin.
-- The hardcoded content constants in `demoContent.ts` (events/announcements/forms/
-  tiers) become unused by the reset; `demoTenantData` + `demoDonationConfig` are
-  retained (tenant doc + admin still come from there). Remove the now-dead content
-  constants, or keep them only if a test references them.
+- `demoContent.ts`: `demoEvents` / `demoAnnouncements` / `demoForm` (+ the
+  `richText` helper if now unused) become dead and are removed;
+  `demoMembershipTiers`, `demoTenantData`, `demoDonationConfig`, `DEMO_SLUG` are
+  retained. Update `tests/lib/demo-seed.test.ts` accordingly (the wipe set no
+  longer includes announcements/events/forms).
 
 ## Data flow (import)
 
