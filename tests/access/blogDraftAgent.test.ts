@@ -109,6 +109,31 @@ describe('Posts.access.delete', () => {
   })
 })
 
+// Regression: an UNSCOPED API key (empty apiScopes) is deferred by the central
+// scope gate (back-compat), so Posts' OWN access must still deny it — being an
+// API key is not enough to touch platform-global Posts.
+describe('Posts.access denies unscoped / wrong-scope API keys', () => {
+  const read = Posts.access!.read!
+  const create = Posts.access!.create!
+  const update = Posts.access!.update!
+
+  it('read: unscoped key sees only published', () => {
+    expect(read(apiKeyReq([]))).toEqual({ _status: { equals: 'published' } })
+  })
+  it('read: key with only a non-blog scope sees only published', () => {
+    expect(read(apiKeyReq(['prayer-times:read']))).toEqual({ _status: { equals: 'published' } })
+  })
+  it('create: unscoped key cannot create', () => {
+    expect(create(apiKeyReq([]))).toBe(false)
+  })
+  it('create: blog:read-only key cannot create', () => {
+    expect(create(apiKeyReq(['blog:read']))).toBe(false)
+  })
+  it('update: unscoped key cannot update', () => {
+    expect(update(apiKeyReq([]))).toBe(false)
+  })
+})
+
 describe('forceDraftForScopedAgents (beforeChange)', () => {
   it('coerces an explicit published status to draft for a blog:write api key', () => {
     const data = { title: 'X', _status: 'published' }

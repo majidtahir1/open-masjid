@@ -1,8 +1,21 @@
-import type { CollectionBeforeChangeHook, CollectionConfig, FieldHook } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, FieldHook, PayloadRequest } from 'payload'
 
 import { isApiKeyAuth } from '../access/apiScoped'
 import { platformOwnerOnly } from '../access/tenantScoped'
 import { buildMarketingPreviewUrl } from '../lib/previewUrl'
+
+/**
+ * Posts is platform-global content. An API key may touch it ONLY if it carries
+ * the explicit blog scope — being an API key is not enough. This closes the
+ * gap where an UNSCOPED key (empty `apiScopes`) is deferred by the central
+ * scope gate (back-compat) and would otherwise inherit Posts' API-key access
+ * and create/publish platform posts.
+ */
+function apiKeyHasBlogScope(req: PayloadRequest, scope: 'blog:read' | 'blog:write'): boolean {
+  if (!isApiKeyAuth(req)) return false
+  const scopes = (req.user as { apiScopes?: string[] } | null)?.apiScopes ?? []
+  return scopes.includes(scope)
+}
 
 const slugify = (value: string): string =>
   value
@@ -67,24 +80,24 @@ export const Posts: CollectionConfig = {
     drafts: { schedulePublish: true },
   },
   access: {
-    // platformOwner sees everything; a blog:read API key sees drafts too (the
-    // scope gate in apiScoped.ts already required blog:read to reach here).
-    // Everyone else — public, other roles — sees only published.
+    // platformOwner sees everything; a blog:read API key sees drafts too.
+    // Everyone else — public, unscoped keys, other roles — sees only published.
     read: ({ req }) => {
       if ((req.user as { role?: string } | null)?.role === 'platformOwner') return true
-      if (isApiKeyAuth(req)) return true
+      if (apiKeyHasBlogScope(req, 'blog:read')) return true
       return { _status: { equals: 'published' } }
     },
-    // platformOwner or a blog:write API key may create (the hook forces draft).
+    // platformOwner, or an API key carrying blog:write, may create (the hook
+    // forces draft for the key). An unscoped key cannot.
     create: ({ req }) => {
       if ((req.user as { role?: string } | null)?.role === 'platformOwner') return true
-      return isApiKeyAuth(req)
+      return apiKeyHasBlogScope(req, 'blog:write')
     },
     // platformOwner may update anything; a blog:write API key may update ONLY
     // drafts — the filter hides published posts so they can't be edited.
     update: ({ req }) => {
       if ((req.user as { role?: string } | null)?.role === 'platformOwner') return true
-      if (isApiKeyAuth(req)) return { _status: { equals: 'draft' } }
+      if (apiKeyHasBlogScope(req, 'blog:write')) return { _status: { equals: 'draft' } }
       return false
     },
     delete: platformOwnerOnly,
