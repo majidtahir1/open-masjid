@@ -164,7 +164,27 @@ export function PublicFormClient({ form, closed }: Props) {
     }
     if (res.status === 422) {
       const j = await res.json().catch(() => ({}))
-      setErrors(j.fieldErrors ?? { _form: 'Please check the fields above.' })
+      const fieldErrors = (j.fieldErrors ?? {}) as Record<string, string>
+      const firstName = Object.keys(fieldErrors)[0]
+      if (!firstName) {
+        setErrors({ _form: 'Please check the fields above.' })
+        return
+      }
+      setErrors(fieldErrors)
+      // The failing field may live on an earlier step than the one the user
+      // submitted from — jump there so the inline error is actually visible.
+      const targetStep = effectiveSchema.steps.findIndex((s) =>
+        s.fields.some((f) => f.type !== 'page-break' && f.name === firstName),
+      )
+      if (targetStep >= 0 && targetStep !== step) setStep(targetStep)
+      const targetField = effectiveSchema.steps[targetStep]?.fields.find((f) => f.name === firstName)
+      if (targetField) {
+        setTimeout(() => document.getElementById(`f-${targetField.id}`)?.focus(), 0)
+      }
+      return
+    }
+    if (res.status === 502) {
+      setErrors({ _form: 'Payment could not be started. Please try again in a moment.' })
       return
     }
     if (!res.ok) {
