@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { OMLogo } from './Logo'
-import { ArrowRight, ChevronDown, Sunrise, Calendar, ClipboardList, Heart, Monitor, Palette, Shield, Sparkles } from './Icons'
+import { ArrowRight, ChevronDown, Menu, X, Sunrise, Calendar, ClipboardList, Heart, Monitor, Palette, Shield, Sparkles } from './Icons'
 
-const HEADER_NAV = [
+const HEADER_NAV: Array<{ label: string; to: string; hasDropdown?: boolean; external?: boolean }> = [
   { label: 'Features', to: '/features', hasDropdown: true },
   { label: 'Pricing', to: '/pricing' },
-  { label: 'Self-Host', to: '/self-host' },
   { label: 'Compare', to: '/compare' },
+  { label: 'Demo', to: 'https://demo.openmasjid.app', external: true },
   { label: 'The Minbar', to: '/minbar' },
 ]
 
@@ -26,13 +26,22 @@ function HeaderLink({
   label,
   current,
   hasDropdown,
+  external,
 }: {
   to: string
   label: string
   current: string
   hasDropdown?: boolean
+  external?: boolean
 }) {
-  const isActive = current === to || (to !== '/' && current.startsWith(to))
+  const isActive = !external && (current === to || (to !== '/' && current.startsWith(to)))
+  if (external) {
+    return (
+      <a href={to} target="_blank" rel="noopener">
+        {label}
+      </a>
+    )
+  }
   if (hasDropdown) {
     return (
       <div className="om-dropdown">
@@ -79,6 +88,48 @@ export function MarketingHeader({ current = '/' }: { current?: string }) {
             <ArrowRight />
           </Link>
         </div>
+
+        {/* Mobile menu — JS-free disclosure; each link is a full navigation, so it resets closed on route change. */}
+        <details className="om-mobile">
+          <summary className="om-mobile-trigger" aria-label="Menu">
+            <Menu className="om-mobile-open-icon" aria-hidden="true" />
+            <X className="om-mobile-close-icon" aria-hidden="true" />
+          </summary>
+          <div className="om-mobile-panel">
+            <nav className="om-mobile-nav" aria-label="Mobile">
+              {HEADER_NAV.map((n) =>
+                n.external ? (
+                  <a key={n.to} href={n.to} target="_blank" rel="noopener">
+                    {n.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={n.to}
+                    href={n.to}
+                    className={current === n.to || (n.to !== '/' && current.startsWith(n.to)) ? 'is-active' : ''}
+                  >
+                    {n.label}
+                  </Link>
+                ),
+              )}
+            </nav>
+            <div className="om-mobile-features">
+              {FEATURE_DROPDOWN.map(({ to, Icon, title }) => (
+                <Link key={to} href={to} className="om-mobile-feature">
+                  <span className="om-di-icon"><Icon width={16} height={16} /></span>
+                  {title}
+                </Link>
+              ))}
+            </div>
+            <div className="om-mobile-actions">
+              <a className="signin" href="/admin" aria-label="Sign in to admin">Sign in</a>
+              <Link className="om-btn om-btn-primary" href="/get-started">
+                Get started
+                <ArrowRight />
+              </Link>
+            </div>
+          </div>
+        </details>
       </div>
     </header>
   )

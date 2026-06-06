@@ -119,9 +119,78 @@
 .om-nav-end { display: flex; align-items: center; gap: 16px; }
 .om-nav-end a.signin { font-size: 14px; font-weight: 500; color: var(--fg2); }
 .om-nav-end a.signin:hover { color: var(--om-brand); }
+
+/* Mobile menu (JS-free <details> disclosure) — hidden on desktop. */
+.om-mobile { display: none; margin-left: auto; }
+.om-mobile-trigger {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border: 1px solid var(--om-border);
+  border-radius: 10px;
+  color: var(--fg1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.om-mobile-trigger::-webkit-details-marker { display: none; }
+.om-mobile-trigger::marker { content: ""; }
+.om-mobile-trigger:hover { background: var(--om-brand-soft); color: var(--om-brand); }
+.om-mobile-close-icon { display: none; }
+.om-mobile[open] .om-mobile-open-icon { display: none; }
+.om-mobile[open] .om-mobile-close-icon { display: inline-flex; }
+.om-mobile-panel {
+  position: absolute;
+  left: 0; right: 0;
+  top: var(--om-nav-h);
+  background: white;
+  border-bottom: 1px solid var(--om-border);
+  box-shadow: 0 14px 32px rgba(19, 46, 48, 0.10);
+  padding: 12px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - var(--om-nav-h));
+  overflow-y: auto;
+}
+.om-mobile-nav { display: flex; flex-direction: column; }
+.om-mobile-nav a {
+  padding: 12px 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg1);
+  border-radius: 8px;
+}
+.om-mobile-nav a:hover, .om-mobile-nav a.is-active { color: var(--om-brand); background: var(--om-brand-soft); }
+.om-mobile-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin: 12px 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--om-border);
+  border-bottom: 1px solid var(--om-border);
+}
+.om-mobile-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg2);
+  border-radius: 8px;
+}
+.om-mobile-feature:hover { background: var(--om-brand-soft); color: var(--om-brand); }
+.om-mobile-feature .om-di-icon { color: var(--om-brand); flex-shrink: 0; }
+.om-mobile-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.om-mobile-actions .signin { font-size: 15px; font-weight: 500; color: var(--fg2); }
+
 @media (max-width: 920px) {
   .om-header-inner { padding: 0 20px; gap: 16px; }
   .om-nav { display: none; }
+  .om-nav-end { display: none; }
+  .om-mobile { display: block; }
 }
 
 .om-dropdown { position: relative; }
@@ -1450,7 +1519,7 @@
 }
 .oa-home-banner-inner {
   display: flex; align-items: center; gap: 24px;
-  padding: 16px 0;
+  padding-top: 16px; padding-bottom: 16px;
 }
 .oa-home-banner-new {
   flex-shrink: 0;
@@ -1460,13 +1529,24 @@
 }
 .oa-home-banner-text {
   font-size: 15.5px; line-height: 1.45; margin: 0; color: var(--om-fg-on-night);
-  display: flex; align-items: center; gap: 9px; flex: 1;
+  flex: 1;
 }
 .oa-home-banner-text b { color: #fff; font-weight: 600; }
-.oa-home-banner-text .oa-bspark { color: var(--icp-gold-300); flex-shrink: 0; }
+.oa-home-banner-text .oa-bspark {
+  color: var(--icp-gold-300);
+  display: inline-block;
+  vertical-align: -3px;
+  margin-right: 7px;
+}
 .oa-home-banner .om-btn { flex-shrink: 0; }
 @media (max-width: 760px) {
-  .oa-home-banner-inner { flex-wrap: wrap; gap: 14px; }
+  .oa-home-banner-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-top: 14px; padding-bottom: 14px;
+  }
+  .oa-home-banner-text { flex: none; }
 }
 
 /* ── Blog & Changelog ──────────────────────────────────────────────── */
