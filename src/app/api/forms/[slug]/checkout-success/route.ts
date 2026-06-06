@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { getStripeForTenant, connectedAccountId } from '@/lib/stripe'
+import { getRequestOrigin } from '@/lib/seo'
 import { relationshipId } from '@/lib/stripe-connect-binding'
 import type Stripe from 'stripe'
 
@@ -57,5 +58,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       overrideAccess: true,
     })
   }
-  return NextResponse.redirect(`${url.origin}/forms/${slug}/thanks?s=${submissionId}`, 303)
+  // Build the redirect from the public host (x-forwarded-host / canonical
+  // tenant domain), not url.origin — behind the proxy req.url is the internal
+  // 0.0.0.0:3000 bind, which the browser can't reach.
+  const { origin } = await getRequestOrigin(tenant)
+  return NextResponse.redirect(`${origin}/forms/${slug}/thanks?s=${submissionId}`, 303)
 }

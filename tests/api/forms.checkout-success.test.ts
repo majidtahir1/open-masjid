@@ -37,6 +37,17 @@ vi.mock('@/lib/tenant-server', () => ({
   getCurrentTenant: async () => currentTenant,
 }))
 
+// Public origin comes from the proxy host, NOT the internal request URL.
+// Return a host different from the request URL (example.com) to prove the
+// redirect is built from the public origin rather than url.origin.
+vi.mock('@/lib/seo', () => ({
+  getRequestOrigin: async () => ({
+    host: 'demo.openmasjid.app',
+    protocol: 'https',
+    origin: 'https://demo.openmasjid.app',
+  }),
+}))
+
 // ---- Imports under test (after mocks) ------------------------------------
 
 import { GET } from '@/app/api/forms/[slug]/checkout-success/route'
@@ -88,7 +99,7 @@ describe('GET /api/forms/[slug]/checkout-success', () => {
     const res = await GET(makeReq('my-form', 'cs_test'), makeParams('my-form'))
     expect(res.status).toBe(303)
     expect(res.headers.get('location')).toBe(
-      'https://example.com/forms/my-form/thanks?s=sub_abc',
+      'https://demo.openmasjid.app/forms/my-form/thanks?s=sub_abc',
     )
   })
 
@@ -173,7 +184,7 @@ describe('GET /api/forms/[slug]/checkout-success', () => {
     // Still redirects
     expect(res.status).toBe(303)
     expect(res.headers.get('location')).toBe(
-      'https://example.com/forms/my-form/thanks?s=sub_abc',
+      'https://demo.openmasjid.app/forms/my-form/thanks?s=sub_abc',
     )
   })
 
