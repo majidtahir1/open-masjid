@@ -80,37 +80,7 @@
   .om-section-lg { padding: 80px 0; }
 }
 
-/* ---------- Header / Prayer strip ---------- */
-.om-prayer-strip {
-  background: var(--om-bg-night);
-  color: var(--om-fg-on-night);
-  font-family: var(--font-body);
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  gap: 24px;
-  overflow: hidden;
-}
-.om-prayer-strip .om-pst-tag {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--icp-teal-300);
-}
-.om-prayer-strip .om-pst-times { display: flex; gap: 20px; align-items: baseline; white-space: nowrap; }
-.om-prayer-strip .om-pst-times span { display: inline-flex; gap: 6px; align-items: baseline; color: var(--om-fg-on-night-soft); }
-.om-prayer-strip .om-pst-times span b { color: white; font-weight: 600; letter-spacing: 0.02em; }
-.om-prayer-strip .om-pst-meta { color: var(--om-fg-on-night-soft); font-size: 12px; }
-@media (max-width: 880px) {
-  .om-prayer-strip { font-size: 12px; gap: 12px; }
-  .om-prayer-strip .om-pst-tag, .om-prayer-strip .om-pst-meta { display: none; }
-  .om-prayer-strip .om-pst-times { gap: 12px; }
-}
-
+/* ---------- Header ---------- */
 .om-header {
   position: sticky;
   top: 0;

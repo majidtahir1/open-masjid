@@ -37,7 +37,7 @@ export async function GET() {
   <channel>
     <title>The Minbar — OpenMasjid</title>
     <link>${escapeXml(`${origin}/minbar`)}</link>
-    <description>Product updates and notes on building open-source software for masajid.</description>
+    <description>Thoughts on OpenMasjid, tech, and the Ummah.</description>
 ${items}
   </channel>
 </rss>`

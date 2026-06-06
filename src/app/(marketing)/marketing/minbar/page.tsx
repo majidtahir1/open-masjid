@@ -6,8 +6,7 @@ import { fetchPosts, extractExcerpt, type PostRecord } from '@/lib/blog'
 import { mediaUrl, mediaAlt } from '@/components/types'
 
 const TITLE = 'The Minbar — OpenMasjid'
-const DESCRIPTION =
-  'Product updates, migration playbooks, and notes on building open-source software for masajid.'
+const DESCRIPTION = 'Thoughts on OpenMasjid, tech, and the Ummah.'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

@@ -21,28 +21,6 @@ const FEATURE_DROPDOWN = [
   { to: '/features/security', Icon: Shield, title: 'Security', desc: 'No plugins. No attack surface.' },
 ]
 
-const PRAYER_TIMES = [
-  { name: 'Fajr', time: '5:18' },
-  { name: 'Dhuhr', time: '1:30' },
-  { name: 'Asr', time: '5:42' },
-  { name: 'Maghrib', time: '7:55' },
-  { name: 'Isha', time: '9:25' },
-]
-
-export function MarketingPrayerStrip() {
-  return (
-    <div className="om-prayer-strip" role="status" aria-label="Today's prayer times">
-      <span className="om-pst-tag">Today · 19 Shawwal</span>
-      <div className="om-pst-times">
-        {PRAYER_TIMES.map((p) => (
-          <span key={p.name}>{p.name} <b>{p.time}</b></span>
-        ))}
-      </div>
-      <span className="om-pst-meta">live demo</span>
-    </div>
-  )
-}
-
 function HeaderLink({
   to,
   label,
@@ -84,27 +62,24 @@ function HeaderLink({
 
 export function MarketingHeader({ current = '/' }: { current?: string }) {
   return (
-    <>
-      <MarketingPrayerStrip />
-      <header className="om-header">
-        <div className="om-header-inner">
-          <Link href="/" aria-label="OpenMasjid home">
-            <OMLogo variant="stack" size={36} />
+    <header className="om-header">
+      <div className="om-header-inner">
+        <Link href="/" aria-label="OpenMasjid home">
+          <OMLogo variant="stack" size={36} />
+        </Link>
+        <nav className="om-nav" aria-label="Main">
+          {HEADER_NAV.map((n) => (
+            <HeaderLink key={n.to} {...n} current={current} />
+          ))}
+        </nav>
+        <div className="om-nav-end">
+          <a className="signin" href="/admin" aria-label="Sign in to admin">Sign in</a>
+          <Link className="om-btn om-btn-primary" href="/get-started">
+            Get started
+            <ArrowRight />
           </Link>
-          <nav className="om-nav" aria-label="Main">
-            {HEADER_NAV.map((n) => (
-              <HeaderLink key={n.to} {...n} current={current} />
-            ))}
-          </nav>
-          <div className="om-nav-end">
-            <a className="signin" href="https://admin.openmasjid.app" aria-label="Sign in to admin">Sign in</a>
-            <Link className="om-btn om-btn-primary" href="/get-started">
-              Get started
-              <ArrowRight />
-            </Link>
-          </div>
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   )
 }
