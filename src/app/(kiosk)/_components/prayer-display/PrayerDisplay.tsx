@@ -3,7 +3,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { PrayerVariant } from '@/lib/kiosk/prayerDisplaySelection'
 import type { ContentEntry } from '@/lib/kiosk/prayerContentSeeds'
-import { buildTimetable, parseTimeToMinutes, type DayData } from '@/lib/kiosk/prayerTimetable'
+import { buildTimetable, parseTimeToMinutes, type DayData, type DaybreakRow } from '@/lib/kiosk/prayerTimetable'
 import { formatHijri } from '@/lib/hijri'
 import PrayerStage from './PrayerStage'
 
@@ -42,6 +42,32 @@ export interface PrayerDisplayProps {
   jummahTimes: string[]
 }
 
+/**
+ * Recessed "daybreak" inset shown between Fajr and Dhuhr: sunrise (shurūq) and
+ * ishrāq. Subordinate to the five fard prayers — name + time only. Mihrab wraps
+ * the rows in `.pd-daybreak-inner` (full-width dividers, top-aligned card);
+ * cream/night render the rows as direct flex children so `gap` and the narrow
+ * dividers apply as designed.
+ */
+function Daybreak({ rows, variant }: { rows: DaybreakRow[]; variant: PrayerVariant }) {
+  const body = (
+    <>
+      <div className="pd-daybreak-tag">Daybreak</div>
+      {rows.map((r) => (
+        <div key={r.en} className="pd-daybreak-row">
+          <div className="pd-daybreak-name">{r.en}</div>
+          <div className="pd-daybreak-time">{r.time.hm}<sup>{r.time.ampm}</sup></div>
+        </div>
+      ))}
+    </>
+  )
+  return (
+    <div className="pd-daybreak">
+      {variant === 'mihrab' ? <div className="pd-daybreak-inner">{body}</div> : body}
+    </div>
+  )
+}
+
 export default function PrayerDisplay({
   variant, content, day, venueName, displayCity, timezone, jummahTimes,
 }: PrayerDisplayProps) {
@@ -53,7 +79,7 @@ export default function PrayerDisplay({
 
   const isFriday = now.getDay() === 5
   const timetable = useMemo(
-    () => (day ? buildTimetable({ day, now, isFriday, jummahTimes }) : { entries: [], nextKey: null }),
+    () => (day ? buildTimetable({ day, now, isFriday, jummahTimes }) : { entries: [], nextKey: null, daybreak: null }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [day, now, isFriday, jummahTimes],
   )
@@ -129,8 +155,8 @@ export default function PrayerDisplay({
         )}
       </div>
 
-      <div className="pd-timetable">
-        {timetable.entries.map((p) => {
+      <div className={`pd-timetable${timetable.daybreak ? ' has-daybreak' : ''}`}>
+        {timetable.entries.map((p, idx) => {
           const isNext = p.key === timetable.nextKey
           // Iqamah (jamaa) is the focal time, so it fills the large slot
           // (`.pd-prayer-adhan`, which carries the large styling); adhan is
@@ -140,13 +166,20 @@ export default function PrayerDisplay({
           const iqamahHM = p.iqamah ? p.iqamah.replace(/\s*[ap]m$/i, '') : '—'
           const adhanHM = p.adhan ? p.adhan.replace(/\s*[ap]m$/i, '') : '—'
           return (
-            <div key={p.key} className={`pd-prayer${isNext ? ' is-next' : ''}`}>
-              {isNext && <div className="pd-next-tag">Next</div>}
-              <div className="pd-prayer-ar">{p.ar}</div>
-              <div className="pd-prayer-name">{p.en}</div>
-              <div className="pd-prayer-adhan">{iqamahHM}<sup>{iqamahAmpm}</sup></div>
-              <div className="pd-prayer-iqamah">Adhan · {adhanHM}</div>
-            </div>
+            // The daybreak inset (sunrise + ishrāq) sits between Fajr and Dhuhr,
+            // matching the `.pd-timetable.has-daybreak` grid (1fr 0.62fr …).
+            <React.Fragment key={p.key}>
+              <div className={`pd-prayer${isNext ? ' is-next' : ''}`}>
+                {isNext && <div className="pd-next-tag">Next</div>}
+                <div className="pd-prayer-ar">{p.ar}</div>
+                <div className="pd-prayer-name">{p.en}</div>
+                <div className="pd-prayer-adhan">{iqamahHM}<sup>{iqamahAmpm}</sup></div>
+                <div className="pd-prayer-iqamah">Adhan · {adhanHM}</div>
+              </div>
+              {idx === 0 && timetable.daybreak && (
+                <Daybreak rows={timetable.daybreak} variant={variant} />
+              )}
+            </React.Fragment>
           )
         })}
       </div>
