@@ -65,6 +65,11 @@ export const X = (p: IconProps) => (
     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
   </svg>
 )
+export const Menu = (p: IconProps) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" {...base} strokeWidth={2} {...p}>
+    <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
+  </svg>
+)
 export const ChevronDown = (p: IconProps) => (
   <svg width="14" height="14" viewBox="0 0 24 24" {...base} strokeWidth={2.25} {...p}>
     <path d="m6 9 6 6 6-6" />
@@ -167,7 +172,7 @@ export const Bell = (p: IconProps) => (
 )
 
 export const Icons = {
-  Sunrise, Calendar, Heart, Palette, Shield, Code, Github, ArrowRight, Check, X, ChevronDown,
+  Sunrise, Calendar, Heart, Palette, Shield, Code, Github, ArrowRight, Check, X, Menu, ChevronDown,
   MoonStar, Mail, Twitter, Linkedin, Server, Sparkles, Globe, Lock, Database, Layers, ClipboardList,
   Monitor, MessageCircle, GitCompare, ArrowUp, Bell,
 }

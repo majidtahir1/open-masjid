@@ -80,13 +80,18 @@ export default function MarketingHome() {
             </p>
             <div className="om-hero-ctas">
               <Link className="om-btn om-btn-primary om-btn-lg" href="/get-started">
-                Claim your <code>.openmasjid.app</code>
+                Get Started
                 <ArrowRight />
               </Link>
-              <Link className="om-btn om-btn-secondary om-btn-lg" href="/self-host">
-                <Github width={16} height={16} />
-                Self-host on GitHub
-              </Link>
+              <a
+                className="om-btn om-btn-secondary om-btn-lg"
+                href="https://demo.openmasjid.app"
+                target="_blank"
+                rel="noopener"
+              >
+                Explore the live demo
+                <ArrowRight />
+              </a>
             </div>
             <p className="om-hero-trust">
               <Check width={14} height={14} /> 14-day trial, no card
@@ -246,7 +251,7 @@ export default function MarketingHome() {
       >
         <div className="om-narrow on-dark">
           <p className="om-h3" style={{ color: 'white', fontStyle: 'italic', fontWeight: 400 }}>
-            "Open-source, and built by Muslims who attend masjid like you do."
+            "AI-native software for the masjid. Modern, fast, and open-source."
           </p>
         </div>
       </section>

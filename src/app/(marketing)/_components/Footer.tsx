@@ -23,6 +23,7 @@ export function MarketingFooter() {
               <li><Link href="/features">Features</Link></li>
               <li><Link href="/pricing">Pricing</Link></li>
               <li><Link href="/compare">Compare</Link></li>
+              <li><a href="https://demo.openmasjid.app" target="_blank" rel="noopener">Live demo ↗</a></li>
               <li><Link href="/changelog">Changelog</Link></li>
             </ul>
           </div>
