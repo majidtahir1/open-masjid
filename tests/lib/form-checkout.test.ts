@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockSessionCreate = vi.fn()
 
-vi.mock('@/lib/stripe', () => ({
+vi.mock('@/lib/stripe', async (importActual) => ({
+  ...(await importActual<typeof import('@/lib/stripe')>()),
+  // Override only the client factory; keep the real connectedAccountId resolver.
   getStripeForTenant: () => ({
     checkout: {
       sessions: {

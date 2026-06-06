@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCurrentTenant } from '@/lib/tenant-server'
-import { getStripe } from '@/lib/stripe'
+import { getStripeForTenant, connectedAccountId } from '@/lib/stripe'
 import { relationshipId } from '@/lib/stripe-connect-binding'
 import type Stripe from 'stripe'
 
@@ -16,10 +16,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (!sessionId) return NextResponse.json({ error: 'missing_sid' }, { status: 400 })
 
   const tenant = await getCurrentTenant()
-  const stripeAccountId = typeof tenant?.stripeAccountId === 'string' ? tenant.stripeAccountId : null
+  const stripeAccountId = connectedAccountId(
+    tenant as { stripeAccountId?: string | null; donationConfig?: { stripeAccountId?: string | null } | null } | null,
+  )
   if (!stripeAccountId) return NextResponse.json({ error: 'no_account' }, { status: 404 })
 
-  const stripe = getStripe()
+  // Demo tenants checkout against the TEST connected account, so retrieve the
+  // session with the matching platform key (live key + test session 404s).
+  const stripe = getStripeForTenant(tenant as { demoMode?: boolean | null } | null)
   const requestOptions: Stripe.RequestOptions = { stripeAccount: stripeAccountId }
   const session = await stripe.checkout.sessions.retrieve(sessionId, requestOptions)
   const submissionId = session.metadata?.submissionId

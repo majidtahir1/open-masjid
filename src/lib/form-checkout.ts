@@ -1,4 +1,4 @@
-import { getStripeForTenant } from './stripe'
+import { getStripeForTenant, connectedAccountId } from './stripe'
 import type { Payload } from 'payload'
 
 interface Args {
@@ -19,9 +19,7 @@ interface Args {
 export async function createFormCheckoutSession(args: Args) {
   const { tenant, form, submission, amountCents } = args
   const stripe = getStripeForTenant(tenant)
-  // The connected account id lives at tenant.donationConfig.stripeAccountId
-  // (written by the Connect OAuth callback); fall back to the flat shape for safety.
-  const accountId = tenant.donationConfig?.stripeAccountId ?? tenant.stripeAccountId
+  const accountId = connectedAccountId(tenant)
   if (!accountId) throw new Error('Tenant has no connected Stripe account')
 
   const origin = pickTenantOrigin(tenant)
