@@ -1,7 +1,15 @@
 import { describe, it, expect } from 'vitest'
-import { parseTimeToMinutes, buildTimetable, type DayData } from '@/lib/kiosk/prayerTimetable'
+import {
+  parseTimeToMinutes,
+  buildTimetable,
+  buildDaybreak,
+  formatClock,
+  ISHRAQ_OFFSET_MIN,
+  type DayData,
+} from '@/lib/kiosk/prayerTimetable'
 
 const day: DayData = {
+  sunrise: '6:14 AM',
   fajr: { adhan: '5:01 AM', iqamah: '5:45 AM' },
   zuhr: { adhan: '1:25 PM', iqamah: '2:00 PM' },
   asr: { adhan: '5:08 PM', iqamah: '6:20 PM' },
@@ -36,5 +44,31 @@ describe('buildTimetable', () => {
     const t = buildTimetable({ day, now: new Date(2026, 4, 29, 11, 0), isFriday: true, jummahTimes: ['1:30 PM'] })
     const zuhr = t.entries.find((e) => e.key === 'zuhr')!
     expect(zuhr.iqamah).toBe('1:30 PM')
+  })
+  it('attaches the daybreak inset when sunrise is present', () => {
+    const t = buildTimetable({ day, now: new Date(2026, 4, 26, 14, 30), isFriday: false, jummahTimes: [] })
+    expect(t.daybreak?.map((r) => r.en)).toEqual(['Sunrise', 'Ishrāq'])
+  })
+})
+
+describe('formatClock', () => {
+  it('renders 12h clock with a lowercase meridiem', () => {
+    expect(formatClock(6 * 60 + 14)).toEqual({ hm: '6:14', ampm: 'am' })
+    expect(formatClock(0)).toEqual({ hm: '12:00', ampm: 'am' })
+    expect(formatClock(12 * 60)).toEqual({ hm: '12:00', ampm: 'pm' })
+    expect(formatClock(13 * 60 + 5)).toEqual({ hm: '1:05', ampm: 'pm' })
+  })
+})
+
+describe('buildDaybreak', () => {
+  it('derives ishrāq as sunrise + the configured offset', () => {
+    const rows = buildDaybreak(day)!
+    expect(rows[0]).toEqual({ en: 'Sunrise', time: { hm: '6:14', ampm: 'am' } })
+    const expected = formatClock(6 * 60 + 14 + ISHRAQ_OFFSET_MIN)
+    expect(rows[1]).toEqual({ en: 'Ishrāq', time: expected })
+  })
+  it('returns null when sunrise is missing or unparseable', () => {
+    expect(buildDaybreak({ ...day, sunrise: undefined })).toBeNull()
+    expect(buildDaybreak({ ...day, sunrise: 'n/a' })).toBeNull()
   })
 })

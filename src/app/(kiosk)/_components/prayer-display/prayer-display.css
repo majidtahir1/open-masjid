@@ -757,3 +757,100 @@
   height: 1px;
   background: rgba(154,116,40,0.4);
 }
+
+/* ============================================================
+   DAYBREAK INSET — Sunrise (Shurūq) + Ishrāq, wedged between
+   Fajr and Dhuhr. Recessed and subordinate to the five fard
+   prayers. Palette-aware across all three variants.
+
+   Placed after the variant timetable rules so `.pd-timetable.has-daybreak`
+   wins the 6-column override at equal specificity (source order).
+   ============================================================ */
+.pd-timetable.has-daybreak {
+  grid-template-columns: 1fr 0.62fr repeat(4, 1fr);
+}
+.pd-daybreak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 12px;
+  position: relative;
+}
+.pd-daybreak-tag {
+  font-family: var(--pd-inter);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.pd-daybreak-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.pd-daybreak-row + .pd-daybreak-row {
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.pd-daybreak-name {
+  font-family: var(--pd-fraunces);
+  font-size: 23px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+.pd-daybreak-time {
+  font-family: var(--pd-fraunces);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.01em;
+}
+.pd-daybreak-time sup {
+  font-size: 0.45em;
+  margin-left: 2px;
+  vertical-align: top;
+  text-transform: lowercase;
+}
+
+/* Cream palette */
+.pd-cream .pd-daybreak {
+  background:
+    repeating-linear-gradient(135deg, rgba(15,30,74,0.018) 0 8px, transparent 8px 16px),
+    rgba(15,30,74,0.025);
+  border-right: 1px solid rgba(15,30,74,0.08);
+}
+.pd-cream .pd-daybreak-tag { color: rgba(15,30,74,0.4); }
+.pd-cream .pd-daybreak-row + .pd-daybreak-row { border-top: 1px solid rgba(15,30,74,0.1); }
+.pd-cream .pd-daybreak-name { color: rgba(15,30,74,0.62); }
+.pd-cream .pd-daybreak-time { color: rgba(15,30,74,0.85); }
+.pd-cream .pd-daybreak-time sup { color: rgba(15,30,74,0.45); }
+
+/* Night palette */
+.pd-night .pd-daybreak {
+  background:
+    repeating-linear-gradient(135deg, rgba(240,239,232,0.022) 0 8px, transparent 8px 16px),
+    rgba(240,239,232,0.03);
+}
+.pd-night .pd-daybreak-tag { color: rgba(92,184,195,0.75); }
+.pd-night .pd-daybreak-row + .pd-daybreak-row { border-top: 1px solid rgba(240,239,232,0.14); }
+.pd-night .pd-daybreak-name { color: rgba(240,239,232,0.55); }
+.pd-night .pd-daybreak-time { color: rgba(240,239,232,0.85); }
+.pd-night .pd-daybreak-time sup { color: rgba(240,239,232,0.45); }
+
+/* Mihrab palette — a recessed card, top-aligned to match its cells */
+.pd-mihrab .pd-daybreak {
+  justify-content: flex-start;
+  padding: 8px 12px 0;
+}
+.pd-mihrab .pd-daybreak-inner {
+  width: 100%;
+}
+.pd-mihrab .pd-daybreak-tag { color: rgba(15,30,74,0.4); margin-bottom: 6px; }
+.pd-mihrab .pd-daybreak-row + .pd-daybreak-row { border-top: 1px solid rgba(15,30,74,0.12); }
+.pd-mihrab .pd-daybreak-name { color: rgba(15,30,74,0.6); font-size: 20px; }
+.pd-mihrab .pd-daybreak-time { color: rgba(15,30,74,0.82); font-size: 26px; }
+.pd-mihrab .pd-daybreak-time sup { color: rgba(15,30,74,0.45); }
