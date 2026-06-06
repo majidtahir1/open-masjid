@@ -5,13 +5,15 @@ import { isValidPairingCode, normalizePairingCode } from '../lib/kiosk/pairingCo
  * When admin types a pairing code into a Kiosks record, normalize it and
  * stamp a 15-minute expiry. The deviceId + secret are minted server-side
  * in `/api/kiosk/claim` when the physical kiosk polls in with the matching code.
+ *
+ * Runs on both create and update so pairing works whether the admin types the
+ * code while first creating the kiosk or later when editing it.
  */
 export const pairKioskOnSave: CollectionBeforeChangeHook = async ({
   data,
   originalDoc,
-  operation,
 }) => {
-  if (operation === 'create' || !data?.pairingCode) return data
+  if (!data?.pairingCode) return data
 
   const raw = String(data.pairingCode).trim()
   if (!raw) {
@@ -32,5 +34,13 @@ export const pairKioskOnSave: CollectionBeforeChangeHook = async ({
     ...data,
     pairingCode: normalized,
     pairingCodeExpiresAt: expiresAt.toISOString(),
+    // Issuing a new pairing code re-opens the slot. Drop any credentials from a
+    // prior pairing so an already-paired kiosk can claim a fresh device —
+    // otherwise `/api/kiosk/claim` sees the old deviceId/secretHash and refuses
+    // with `already-paired`, leaving the screen stuck on the code. The claiming
+    // device mints new credentials on its next poll.
+    deviceId: null,
+    secretHash: null,
+    status: 'UNPAIRED',
   }
 }
