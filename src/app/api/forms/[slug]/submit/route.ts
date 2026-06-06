@@ -60,13 +60,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     overrideAccess: true,
   })
   const amount = Number(body._amount_cents) || (form as any).payment?.priceCents || 0
-  const checkout = await createFormCheckoutSession({
-    payload,
-    tenant: tenant as any,
-    form: form as any,
-    submission: submission as any,
-    amountCents: amount,
-  })
+  let checkout
+  try {
+    checkout = await createFormCheckoutSession({
+      payload,
+      tenant: tenant as any,
+      form: form as any,
+      submission: submission as any,
+      amountCents: amount,
+    })
+  } catch (err) {
+    payload.logger.error({ err, formId: form.id, submissionId: result.submissionId }, 'form checkout session failed')
+    return NextResponse.json({ error: 'payment_unavailable' }, { status: 502 })
+  }
   await payload.update({
     collection: 'form-submissions',
     id: result.submissionId,

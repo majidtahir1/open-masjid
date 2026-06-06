@@ -97,6 +97,14 @@ describe('createFormCheckoutSession', () => {
     ).rejects.toThrow('Tenant has no connected Stripe account')
   })
 
+  it('resolves the connected account from tenant.donationConfig.stripeAccountId (production shape)', async () => {
+    // Real tenants store the Connect account id nested under donationConfig, not at the top level.
+    const nestedTenant = { ...tenant, stripeAccountId: undefined, donationConfig: { stripeAccountId: 'acct_nested456' } }
+    await createFormCheckoutSession({ payload: mockPayload, tenant: nestedTenant, form, submission, amountCents })
+    const [, options] = mockSessionCreate.mock.calls[0]
+    expect(options).toMatchObject({ stripeAccount: 'acct_nested456' })
+  })
+
   it('uses payment mode', async () => {
     await createFormCheckoutSession({ payload: mockPayload, tenant, form, submission, amountCents })
     const [params] = mockSessionCreate.mock.calls[0]

@@ -6,6 +6,7 @@ interface Args {
   tenant: {
     id: string | number
     stripeAccountId?: string | null
+    donationConfig?: { stripeAccountId?: string | null } | null
     slug?: string | null
     customDomains?: Array<{ domain: string }> | null
     demoMode?: boolean | null
@@ -18,7 +19,9 @@ interface Args {
 export async function createFormCheckoutSession(args: Args) {
   const { tenant, form, submission, amountCents } = args
   const stripe = getStripeForTenant(tenant)
-  const accountId = tenant.stripeAccountId
+  // The connected account id lives at tenant.donationConfig.stripeAccountId
+  // (written by the Connect OAuth callback); fall back to the flat shape for safety.
+  const accountId = tenant.donationConfig?.stripeAccountId ?? tenant.stripeAccountId
   if (!accountId) throw new Error('Tenant has no connected Stripe account')
 
   const origin = pickTenantOrigin(tenant)
