@@ -30,6 +30,19 @@ export function getStripeForTenant(
   return tenant?.demoMode ? getStripeTest() : getStripe()
 }
 
+/** Resolve a tenant's connected Stripe account id. The Connect OAuth callback
+ *  stores it nested under `donationConfig`; tolerate a flat shape too. Returns
+ *  null when no account is connected. */
+export function connectedAccountId(
+  tenant:
+    | { stripeAccountId?: string | null; donationConfig?: { stripeAccountId?: string | null } | null }
+    | null
+    | undefined,
+): string | null {
+  const id = tenant?.donationConfig?.stripeAccountId ?? tenant?.stripeAccountId
+  return typeof id === 'string' && id.length > 0 ? id : null
+}
+
 /** Test-only: clear cached clients so env changes take effect. */
 export function __resetStripeCache(): void {
   cachedLive = null

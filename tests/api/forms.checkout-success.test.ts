@@ -4,8 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const sessionsRetrieve = vi.fn()
 
-vi.mock('@/lib/stripe', () => ({
-  getStripe: () => ({
+vi.mock('@/lib/stripe', async (importActual) => ({
+  ...(await importActual<typeof import('@/lib/stripe')>()),
+  // Override only the client factory; keep the real connectedAccountId resolver.
+  getStripeForTenant: () => ({
     checkout: { sessions: { retrieve: sessionsRetrieve } },
   }),
 }))
@@ -22,7 +24,14 @@ vi.mock('payload', () => ({
 
 vi.mock('@payload-config', () => ({ default: {} }))
 
-let currentTenant: { id: number | string; stripeAccountId?: string | null } | null = null
+let currentTenant:
+  | {
+      id: number | string
+      stripeAccountId?: string | null
+      donationConfig?: { stripeAccountId?: string | null } | null
+      demoMode?: boolean | null
+    }
+  | null = null
 
 vi.mock('@/lib/tenant-server', () => ({
   getCurrentTenant: async () => currentTenant,
@@ -126,6 +135,14 @@ describe('GET /api/forms/[slug]/checkout-success', () => {
     expect(res.status).toBe(404)
     const body = await res.json()
     expect(body.error).toBe('no_account')
+  })
+
+  it('resolves the connected account from nested donationConfig (production shape)', async () => {
+    // Real tenants store the Connect account id under donationConfig, not flat.
+    currentTenant = { id: 7, stripeAccountId: null, donationConfig: { stripeAccountId: 'acct_nested' } }
+    const res = await GET(makeReq('my-form', 'cs_test'), makeParams('my-form'))
+    expect(res.status).toBe(303)
+    expect(sessionsRetrieve).toHaveBeenCalledWith('cs_test', { stripeAccount: 'acct_nested' })
   })
 
   it('returns 400 when session metadata has no submissionId', async () => {
