@@ -413,6 +413,21 @@ untouched. On startup the new app container runs `payload migrate` before
 serving, so schema changes apply automatically. Recreate is a clean swap —
 ~5–10s of request drop while the new container replaces the old.
 
+> **Two operational caveats.**
+> 1. **`[fast-ship]` skips ALL tests**, not just the wait — no `tsc --noEmit`
+>    and no `npm test` run on a fast-shipped commit (only the Docker `next
+>    build` still gates it). Use it for genuinely cosmetic changes only; a type
+>    or behavior regression can ship straight to `:latest`.
+> 2. **A failed migration is a crash loop, not a clean failure.** Because the
+>    app container is `restart: unless-stopped`, a migration that throws will
+>    exit, restart, and fail again — the app never serves. Watchtower does not
+>    auto-roll-back. Pinning `APP_IMAGE` to the previous `sha-` tag only helps
+>    if the migration didn't already mutate the schema; a half-applied or
+>    forward-only migration needs manual DB intervention (inspect
+>    `docker compose -f docker-compose.prod.yml logs app`, fix the DB or the
+>    migration, then redeploy). Test migrations against a staging copy before
+>    relying on unattended deploys.
+
 **Manual operations.**
 
 ```bash

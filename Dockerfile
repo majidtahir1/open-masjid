@@ -81,9 +81,14 @@ EXPOSE 3000
 ENTRYPOINT ["/sbin/tini", "--", "/app/docker-entrypoint.sh"]
 
 # -----------------------------------------------------------------------------
-# Stage 4 — migrator: tiny image for running Payload migrations against the DB
-# before the app boots. Uses full node_modules (payload CLI + tsx) so it can
-# evaluate the TypeScript config + migration files directly.
+# Stage 4 — migrator: standalone image for running Payload migrations against
+# the DB. Uses full node_modules (payload CLI + tsx) so it can evaluate the
+# TypeScript config + migration files directly.
+#
+# NOTE: the production app now self-migrates on startup (see docker-entrypoint.sh
+# in the runner stage), so this stage is NOT part of the deploy path. It is kept
+# only for ad-hoc manual use: `docker build --target migrator -t om-migrator .`
+# then `docker run --rm --env-file .env om-migrator`.
 # -----------------------------------------------------------------------------
 FROM node:20-alpine AS migrator
 WORKDIR /app
