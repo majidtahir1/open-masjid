@@ -144,6 +144,11 @@ jobs:
           BUILD: ${{ needs.build.result }}
           REPO: ${{ github.repository }}
           SHA: ${{ github.sha }}
+          REF: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          # Passed via env (NOT interpolated into the script) to avoid shell
+          # injection from crafted commit messages.
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$TG_TOKEN" ] || [ -z "$TG_CHAT" ]; then
@@ -151,17 +156,19 @@ jobs:
             exit 0
           fi
           if [ "$PUBLISH" = "success" ]; then
-            STATUS="✅ OpenMasjid: image published to GHCR — deploying shortly"
+            STATUS="✅ OpenMasjid · image published to GHCR — deploying shortly"
           elif [ "$TEST" = "failure" ] || [ "$BUILD" = "failure" ]; then
-            STATUS="❌ OpenMasjid: CI gate failed (test=$TEST, build=$BUILD) — nothing published"
+            STATUS="❌ OpenMasjid · CI gate failed (test=$TEST, build=$BUILD) — nothing published"
           elif [ "$PUBLISH" = "failure" ]; then
-            STATUS="❌ OpenMasjid: image build/push to GHCR failed"
+            STATUS="❌ OpenMasjid · image build/push to GHCR failed"
           else
-            STATUS="⚠️ OpenMasjid: pipeline finished (publish=$PUBLISH, test=$TEST, build=$BUILD)"
+            STATUS="⚠️ OpenMasjid · pipeline finished (publish=$PUBLISH, test=$TEST, build=$BUILD)"
           fi
-          # Commit message is intentionally NOT interpolated into the shell to
-          # avoid injection; we send repo + short SHA + the run URL only.
-          TEXT="$(printf '%s\nrepo: %s\ncommit: %s\n%s' "$STATUS" "$REPO" "${SHA:0:7}" "$RUN_URL")"
+          # First line of the commit message (read from env — never interpolated
+          # into the script — to avoid injection from crafted commit messages).
+          SUBJECT="$(printf '%s' "$COMMIT_MSG" | head -n1)"
+          TEXT="$(printf '%s\n\n%s\n%s @ %s · %s · %s\nrun: %s' \
+            "$STATUS" "$SUBJECT" "$REPO" "$REF" "${SHA:0:7}" "$ACTOR" "$RUN_URL")"
           # A failed notification must NOT fail the pipeline (the deploy already
           # happened). Capture the API response, surface it as a warning if
           # Telegram rejected it, and always exit 0.

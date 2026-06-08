@@ -82,12 +82,25 @@ services:
       # shoutrrr ignores an empty URL. Get the chat id via @userinfobot or the
       # bot's getUpdates. See README "Deploy notifications".
       WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS:-}
-      WATCHTOWER_NOTIFICATION_URL: ${TELEGRAM_BOT_TOKEN:+telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}}
+      # preview=false stops Telegram expanding the ghcr.io link into a big card.
+      WATCHTOWER_NOTIFICATION_URL: ${TELEGRAM_BOT_TOKEN:+telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}&preview=false}
       # Report mode: send ONE templated message per session, and only when a
       # container was actually updated or failed — not on every 5-min poll.
       # (Without this, info-level notifications fire on every "Session done".)
       WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATIONS_LEVEL: info
+      # Don't send the boot log as a message every time Watchtower (re)starts.
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      # Custom deploy message. Mirrors Watchtower's default template accessors
+      # (.Report/.Updated/.Failed/.Name/.ImageName/.*ImageID.ShortID) so it's
+      # known-good; only the text differs. Explicit {{ "\n" }} keeps newlines
+      # YAML-safe. The host "web03 (prod)" is hardcoded — Watchtower only knows
+      # its own container hostname, not the docker host's.
+      WATCHTOWER_NOTIFICATION_TEMPLATE: |
+        {{- if .Report -}}{{- with .Report -}}
+        {{- if .Updated -}}🚀 OpenMasjid deployed to web03 (prod){{ range .Updated }}{{ "\n" }}{{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .CurrentImageID.ShortID }} → {{ .LatestImageID.ShortID }}{{ end }}{{- end -}}
+        {{- if .Failed -}}{{ if .Updated }}{{ "\n" }}{{ end }}❌ OpenMasjid deploy FAILED on web03 (prod){{ range .Failed }}{{ "\n" }}{{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .Error }}{{ end }}{{- end -}}
+        {{- end -}}{{- end -}}
     command: ["--label-enable"]
 
   cron:
