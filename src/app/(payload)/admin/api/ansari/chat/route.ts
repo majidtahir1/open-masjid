@@ -59,6 +59,8 @@ export async function POST(req: Request) {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
       Connection: 'keep-alive',
+      // Prevent a front proxy (Caddy/Nginx) from buffering the stream.
+      'X-Accel-Buffering': 'no',
     },
   })
 }
