@@ -122,3 +122,47 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Telegram notification of the pipeline outcome on main (and manual runs).
+  # Runs always() so it reports failures too — including a test/build gate
+  # failure that skipped publish. No-ops if the TELEGRAM_* secrets are unset.
+  notify:
+    name: Notify (Telegram)
+    needs: [test, build, publish]
+    runs-on: ubuntu-latest
+    if: >
+      always()
+      && ((github.event_name == 'push' && github.ref == 'refs/heads/main')
+          || github.event_name == 'workflow_dispatch')
+    steps:
+      - name: Send Telegram message
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PUBLISH: ${{ needs.publish.result }}
+          TEST: ${{ needs.test.result }}
+          BUILD: ${{ needs.build.result }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TG_TOKEN" ] || [ -z "$TG_CHAT" ]; then
+            echo "TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — skipping notification."
+            exit 0
+          fi
+          if [ "$PUBLISH" = "success" ]; then
+            STATUS="✅ OpenMasjid: image published to GHCR — deploying shortly"
+          elif [ "$TEST" = "failure" ] || [ "$BUILD" = "failure" ]; then
+            STATUS="❌ OpenMasjid: CI gate failed (test=$TEST, build=$BUILD) — nothing published"
+          elif [ "$PUBLISH" = "failure" ]; then
+            STATUS="❌ OpenMasjid: image build/push to GHCR failed"
+          else
+            STATUS="⚠️ OpenMasjid: pipeline finished (publish=$PUBLISH, test=$TEST, build=$BUILD)"
+          fi
+          # Commit message is intentionally NOT interpolated into the shell to
+          # avoid injection; we send repo + short SHA + the run URL only.
+          TEXT="$(printf '%s\nrepo: %s\ncommit: %s\n%s' "$STATUS" "$REPO" "${SHA:0:7}" "$RUN_URL")"
+          curl -fsS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -d chat_id="$TG_CHAT" \
+            --data-urlencode "text=$TEXT" >/dev/null
+          echo "Notified: $STATUS"

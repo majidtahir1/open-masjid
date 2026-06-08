@@ -428,6 +428,34 @@ serving, so schema changes apply automatically. Recreate is a clean swap —
 >    migration, then redeploy). Test migrations against a staging copy before
 >    relying on unattended deploys.
 
+#### Deploy notifications (Telegram)
+
+You get a Telegram message at each point a deploy can succeed or break:
+
+| Stage | Sender | Message |
+| --- | --- | --- |
+| Build/push | GitHub Actions `notify` job | ✅ image published, or ❌ which CI stage failed |
+| Deploy | Watchtower | image pulled + `app` recreated (or failure) |
+| Startup migration | the app's `docker-entrypoint.sh` | ❌ migration failed, app not serving (the crash-loop case) |
+
+A successful boot isn't double-reported — Watchtower's "updated" message is the
+success signal; the app only pings on migration **failure**.
+
+**Setup (one-time):**
+
+1. Message **@BotFather** → `/newbot` → copy the **bot token**.
+2. Message **@userinfobot** (or your bot, then read `getUpdates`) → copy your
+   numeric **chat id**. Start a chat with your bot so it can DM you.
+3. **GitHub** → repo **Settings → Secrets and variables → Actions** → add
+   `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (used by the `notify` job).
+4. **Server `.env`** → set the same `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`,
+   and `WATCHTOWER_NOTIFICATIONS=shoutrrr` to turn on Watchtower's alerts, then
+   `docker compose -f docker-compose.prod.yml up -d watchtower app`.
+
+Leave any of these unset and that layer simply stays silent — nothing breaks.
+A failed-to-start app is also visible without Telegram via the new healthcheck:
+`docker compose -f docker-compose.prod.yml ps` shows `app` as `(unhealthy)`.
+
 **Manual operations.**
 
 ```bash
