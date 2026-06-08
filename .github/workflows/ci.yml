@@ -174,6 +174,7 @@ jobs:
           # Telegram rejected it, and always exit 0.
           RESP="$(curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
             -d chat_id="$TG_CHAT" \
+            -d disable_web_page_preview=true \
             --data-urlencode "text=$TEXT" 2>&1)" || true
           echo "Telegram response: $RESP"
           if printf '%s' "$RESP" | grep -q '"ok":true'; then
