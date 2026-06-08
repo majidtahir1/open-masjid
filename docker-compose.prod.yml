@@ -98,8 +98,8 @@ services:
       # its own container hostname, not the docker host's.
       WATCHTOWER_NOTIFICATION_TEMPLATE: |
         {{- if .Report -}}{{- with .Report -}}
-        {{- if .Updated -}}OpenMasjid deployed to web03 (prod){{ range .Updated }} {{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .CurrentImageID.ShortID }} → {{ .LatestImageID.ShortID }}{{ end }}{{- end -}}
-        {{- if .Failed -}}{{ if .Updated }}{{ "\n" }}{{ end }}❌ OpenMasjid deploy FAILED on web03 (prod){{ range .Failed }}{{ "\n" }}   {{ .Name }} ({{ .ImageName }}): {{ .Error }}{{ end }}{{- end -}}
+        {{- if .Updated -}}🚀 OpenMasjid deployed to web03 (prod){{ range .Updated }}{{ "\n" }}{{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .CurrentImageID.ShortID }} → {{ .LatestImageID.ShortID }}{{ end }}{{- end -}}
+        {{- if .Failed -}}{{ if .Updated }}{{ "\n" }}{{ end }}❌ OpenMasjid deploy FAILED on web03 (prod){{ range .Failed }}{{ "\n" }}{{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .Error }}{{ end }}{{- end -}}
         {{- end -}}{{- end -}}
     command: ["--label-enable"]
 
