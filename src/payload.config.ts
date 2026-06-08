@@ -117,6 +117,7 @@ export default buildConfig({
         // the cleanest way to keep the built-in admin shell intact while
         // fully owning the login UI.
       },
+      providers: ['/src/admin/ansari/AnsariProvider#default'],
     },
   },
   // Order matters — Payload renders sidebar groups in the order their first
