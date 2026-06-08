@@ -1,8 +1,26 @@
 # Ansari Web Chat for Tenant Admins — Design
 
 **Date:** 2026-06-08
-**Status:** Approved (pending spec review)
+**Status:** Approved — building POC first
 **Author:** Majid Tahir (with Claude)
+
+## POC scope (build first)
+
+Before the full v1, build a **proof-of-concept** proving the end-to-end path:
+**an admin types a message in a web UI → OpenMasjid relays it → Hermes responds
+back, streamed into the UI.** Everything else (image upload, polished UX, role
+gating refinements, provisioning automation, secret-store hardening) is deferred
+until the POC works.
+
+**POC transport decision:** keep web03 (OpenMasjid) and Hermes on the **same
+tailnet for now**. The "don't put web03 on a foreign tailnet" concern is real and
+will be revisited before multi-tenant rollout (candidate: outbound HTTPS to a
+TLS/mTLS-fronted Hermes endpoint, so web03 only makes one authenticated outbound
+call and joins no foreign network). Not a POC blocker.
+
+**POC done = ** a logged-in admin sends a text message from `/admin/ansari`, and
+the agent's reply streams back in the browser, hitting a real Hermes profile's
+API server over the tailnet.
 
 ## Problem
 
