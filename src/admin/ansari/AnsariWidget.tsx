@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import styles from './AnsariWidget.module.css'
+import { parseSseContentDelta } from '@/lib/ansari'
 
 type Msg = { role: 'user' | 'assistant'; content: string }
 type View = 'closed' | 'docked' | 'expanded'
@@ -65,27 +66,27 @@ export default function AnsariWidget() {
         buffer = lines.pop() ?? ''
         for (const raw of lines) {
           const line = raw.trimStart()
-          if (!line.startsWith('data:')) continue
-          const payload = line.slice('data:'.length).trim()
-          if (payload === '' || payload === '[DONE]') continue
-          try {
-            const json = JSON.parse(payload) as {
-              choices?: Array<{ delta?: { content?: string } }>
-              hermes?: { tool?: { progress?: string } }
-              type?: string
+          const delta = parseSseContentDelta(line)
+          if (delta) {
+            setTool(null)
+            assistant += delta
+            setMessages([...history, { role: 'assistant', content: assistant }])
+            continue
+          }
+          // Best-effort tool-progress chip (Hermes-specific; payload shape
+          // unverified — confirm against the live stream in Task 5a).
+          if (line.startsWith('data:')) {
+            const payload = line.slice('data:'.length).trim()
+            if (payload && payload !== '[DONE]') {
+              try {
+                const progress = (
+                  JSON.parse(payload) as { hermes?: { tool?: { progress?: string } } }
+                ).hermes?.tool?.progress
+                if (typeof progress === 'string') setTool(progress)
+              } catch {
+                // ignore keepalive / non-JSON lines
+              }
             }
-            const delta = json.choices?.[0]?.delta?.content
-            const progress = json.hermes?.tool?.progress
-            if (typeof progress === 'string') {
-              setTool(progress)
-            }
-            if (typeof delta === 'string' && delta.length > 0) {
-              setTool(null)
-              assistant += delta
-              setMessages([...history, { role: 'assistant', content: assistant }])
-            }
-          } catch {
-            // ignore keepalive / non-JSON lines
           }
         }
       }
