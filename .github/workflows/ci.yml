@@ -5,6 +5,7 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch: {}
 
 # Cancel in-flight runs for the same branch when a new commit is pushed.
 # Saves CI minutes and gets you faster signal on the latest commit.
@@ -15,6 +16,7 @@ concurrency:
 jobs:
   # Fast gate (~1 min): typecheck + unit tests in parallel with the build.
   test:
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[fast-ship]')) }}
     name: Type check + tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -33,6 +35,7 @@ jobs:
   # alone misses (Next regenerates Payload types). Caching .next/cache cuts
   # repeat builds to ~half the cold time.
   build:
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[fast-ship]')) }}
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -67,3 +70,55 @@ jobs:
           STRIPE_BILLING_PORTAL_RETURN_URL: https://example.com/admin/billing
           BILLING_SWEEP_TOKEN: ci-stub-token
         run: npm run build
+
+  # Build the prod app image and push to GHCR. Runs only on merges to main
+  # (or manual dispatch). Gated on test+build passing, UNLESS the commit
+  # message contains [fast-ship] (cosmetic changes) or it's a manual dispatch.
+  publish:
+    name: Build & push image
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    if: >
+      always()
+      && ((github.event_name == 'push' && github.ref == 'refs/heads/main')
+          || github.event_name == 'workflow_dispatch')
+      && (
+        (needs.test.result == 'success' && needs.build.result == 'success')
+        || contains(github.event.head_commit.message, '[fast-ship]')
+        || github.event_name == 'workflow_dispatch'
+      )
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Derive image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/majidtahir1/open-masjid
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push runner image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runner
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
