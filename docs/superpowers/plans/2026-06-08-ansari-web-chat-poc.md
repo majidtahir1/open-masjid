@@ -2,23 +2,25 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** A logged-in tenant admin types a message at `/admin/ansari`, OpenMasjid relays it to a Hermes profile's HTTP API server over the tailnet, and the agent's reply streams back into the browser.
+**Goal:** A logged-in tenant admin opens a docked IM-style chat widget (bottom-right of any admin page, expandable to a full modal), types a message, OpenMasjid relays it to a Hermes profile's HTTP API server over the tailnet, and the agent's reply streams back into the widget.
 
-**Architecture:** A new custom admin page (server component + client chat UI) posts to an OpenMasjid relay route. The relay authenticates the Payload admin session, gates on `role === 'admin'`, and proxies to Hermes `POST /v1/chat/completions` with `stream: true`, piping the SSE body straight back to the browser. The browser holds the message history (stateless relay, multi-turn context for free). For the POC the Hermes endpoint comes from env vars (`HERMES_API_BASE_URL`, `HERMES_API_KEY`); per-tenant routing via `AnsariSettings` is deferred to v1.
+**Architecture:** A floating chat **widget** is mounted app-wide via Payload's `admin.components.providers`, so it persists across admin navigation. The widget (client component) posts to an OpenMasjid relay route. The relay authenticates the Payload admin session, gates on `role === 'admin'`, and proxies to Hermes `POST /v1/chat/completions` with `stream: true`, piping the SSE body straight back to the browser. The browser holds the message history (stateless relay, multi-turn context for free). For the POC the Hermes endpoint comes from env vars (`HERMES_API_BASE_URL`, `HERMES_API_KEY`); per-tenant routing via `AnsariSettings` is deferred to v1.
 
-**Tech Stack:** Next.js 16 App Router, Payload CMS 3, TypeScript, Tailwind (project CSS vars), Vitest, Hermes-agent OpenAI-compatible API.
+**UI:** Ports the approved mockup (`docs/superpowers/specs/ansari-chat-mockup.html`) — navy/gold launcher bubble → docked 392×560 IM window → expand-to-centered-modal. POC includes: streaming markdown replies, typing indicator, and live tool/skill progress chips from Hermes `hermes.tool.progress` events. The structured confirm-before-write card (with Yes/Cancel buttons) and image-upload wiring are shown in the mockup but **deferred to v1** — in the POC, Ansari's confirmations arrive as normal streamed text.
+
+**Tech Stack:** Next.js 16 App Router, Payload CMS 3, TypeScript, Tailwind (project CSS vars), `react-markdown`, Vitest, Hermes-agent OpenAI-compatible API.
 
 ---
 
 ## File structure
 
-- `src/lib/ansari.ts` — pure helpers: build the Hermes upstream request; authorize an admin user; parse an SSE `data:` line into a content delta. The only logic-bearing unit → fully unit-tested.
+- `src/lib/ansari.ts` — pure helpers: build the Hermes upstream request; authorize an admin user; parse an SSE `data:` line into a content delta. The only logic-bearing unit → fully unit-tested. (Tool-progress chips are handled best-effort in the widget and confirmed against the live stream in Task 5, since Hermes' `hermes.tool.progress` payload shape isn't documented.)
 - `src/lib/ansari.test.ts` — Vitest unit tests for the helpers.
 - `src/app/(payload)/admin/api/ansari/chat/route.ts` — the relay POST handler (thin wiring over `src/lib/ansari.ts`).
-- `src/admin/AnsariNavLink.tsx` — sidebar link (mirrors `src/admin/BillingNavLink.tsx`).
-- `src/payload.config.ts` — register the nav link in `beforeNavLinks`.
-- `src/app/(payload)/admin/ansari/page.tsx` — server component (mirrors `admin/billing/page.tsx`).
-- `src/app/(payload)/admin/ansari/AnsariChatClient.tsx` — client chat UI with streaming fetch.
+- `src/admin/ansari/AnsariProvider.tsx` — Payload `providers` entry: renders `{children}` plus the widget, app-wide.
+- `src/admin/ansari/AnsariWidget.tsx` — the floating widget (launcher → docked panel → expanded modal), streaming chat client. Ports the mockup.
+- `src/admin/ansari/AnsariWidget.module.css` — widget styles ported from the mockup (or Tailwind classes; CSS module keeps the large block out of the TSX).
+- `src/payload.config.ts` — register `AnsariProvider` in `admin.components.providers`.
 - `.env` (local, not committed) — `HERMES_API_BASE_URL`, `HERMES_API_KEY`.
 
 ---
@@ -320,145 +322,126 @@ git commit -m "feat(ansari): add streaming chat relay route"
 
 ---
 
-## Task 3: Sidebar nav link
+## Task 3: Mount the widget app-wide (Payload provider)
 
 **Files:**
-- Create: `src/admin/AnsariNavLink.tsx`
-- Modify: `src/payload.config.ts` (`beforeNavLinks` array, ~line 87)
+- Create: `src/admin/ansari/AnsariProvider.tsx`
+- Modify: `src/payload.config.ts` (add `admin.components.providers`)
 
-- [ ] **Step 1: Create the nav link** (mirrors `src/admin/BillingNavLink.tsx`)
+The `providers` array wraps the whole admin app, so a component placed here renders
+on every admin page and persists across navigation — the correct host for a
+floating widget. The provider renders `{children}` (the admin app) plus the widget.
+
+- [ ] **Step 1: Create the provider** (renders the real admin app untouched, plus the widget)
 
 ```tsx
-// src/admin/AnsariNavLink.tsx
-import Link from 'next/link'
+// src/admin/ansari/AnsariProvider.tsx
 import React from 'react'
+import AnsariWidget from './AnsariWidget'
 
-import { getAdminUser } from '@/lib/admin-context'
-
-export default async function AnsariNavLink() {
-  try {
-    const { user } = await getAdminUser()
-    if (!user) return null
-    // Tenant admins only — not platform owners, not congregants.
-    if ((user as { role?: string }).role !== 'admin') return null
-
-    return (
-      <Link className="nav__link" href="/admin/ansari">
-        Ansari
-      </Link>
-    )
-  } catch {
-    return null
-  }
-}
-```
-
-- [ ] **Step 2: Register it** — add the component path to the `beforeNavLinks` array in `src/payload.config.ts`:
-
-```ts
-      beforeNavLinks: [
-        '/src/admin/BillingBanner#default',
-        '/src/admin/onboarding/OnboardingBanner#default',
-        '/src/admin/DashboardLink#default',
-        '/src/admin/donations/DonationsNav#default',
-        '/src/admin/membership/MembershipNav#default',
-        '/src/admin/AnsariNavLink#default',
-      ],
-```
-
-- [ ] **Step 3: Regenerate the import map** (Payload needs custom components in the import map):
-
-Run: `npx payload generate:importmap`
-Expected: `src/app/(payload)/admin/importMap.js` updated to include `AnsariNavLink`.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/admin/AnsariNavLink.tsx src/payload.config.ts "src/app/(payload)/admin/importMap.js"
-git commit -m "feat(ansari): add sidebar nav link"
-```
-
----
-
-## Task 4: Chat page (server) + chat UI (client)
-
-**Files:**
-- Create: `src/app/(payload)/admin/ansari/page.tsx`
-- Create: `src/app/(payload)/admin/ansari/AnsariChatClient.tsx`
-
-- [ ] **Step 1: Create the server page** (mirrors `admin/billing/page.tsx`)
-
-```tsx
-// src/app/(payload)/admin/ansari/page.tsx
-import { redirect } from 'next/navigation'
-import {
-  createLocalReq,
-  getPayload,
-  isEntityHidden,
-  type SanitizedPermissions,
-  type VisibleEntities,
-} from 'payload'
-import { DefaultTemplate } from '@payloadcms/next/templates'
-import config from '@payload-config'
-import { getAdminUser } from '@/lib/admin-context'
-import { importMap } from '../importMap'
-import AnsariChatClient from './AnsariChatClient'
-
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
-
-export default async function AnsariPage() {
-  const { user, permissions } = await getAdminUser()
-  if (!user) redirect('/admin/login')
-  if ((user as { role?: string }).role !== 'admin') {
-    redirect('/admin')
-  }
-
-  const payload = await getPayload({ config, importMap })
-  const req = await createLocalReq({ user }, payload)
-
-  const visibleEntities: VisibleEntities = {
-    collections: payload.config.collections
-      .filter(({ admin }) => !isEntityHidden({ hidden: admin?.hidden, user }))
-      .map(({ slug }) => slug),
-    globals: payload.config.globals
-      .filter(({ admin }) => !isEntityHidden({ hidden: admin?.hidden, user }))
-      .map(({ slug }) => slug),
-  }
-
+// Server component: passes through children, mounts the client widget alongside.
+// The widget self-gates to tenant admins (fetches /api/users/me) and the relay
+// enforces role server-side, so it is safe to render here unconditionally.
+export default function AnsariProvider({ children }: { children: React.ReactNode }) {
   return (
-    <DefaultTemplate
-      i18n={req.i18n}
-      params={{}}
-      payload={payload}
-      permissions={permissions as SanitizedPermissions}
-      req={req}
-      searchParams={{}}
-      user={user}
-      visibleEntities={visibleEntities}
-    >
-      <AnsariChatClient />
-    </DefaultTemplate>
+    <>
+      {children}
+      <AnsariWidget />
+    </>
   )
 }
 ```
 
-- [ ] **Step 2: Create the client chat UI**
+- [ ] **Step 2: Register it** — add `providers` under `admin.components` in `src/payload.config.ts` (sibling of the existing `beforeNavLinks`/`afterNavLinks`/`header` keys):
+
+```ts
+    components: {
+      // ...existing beforeNavLinks / afterNavLinks / header / graphics ...
+      providers: ['/src/admin/ansari/AnsariProvider#default'],
+    },
+```
+
+- [ ] **Step 3: Regenerate the import map**
+
+Run: `npx payload generate:importmap`
+Expected: `src/app/(payload)/admin/importMap.js` updated to include `AnsariProvider`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/admin/ansari/AnsariProvider.tsx src/payload.config.ts "src/app/(payload)/admin/importMap.js"
+git commit -m "feat(ansari): mount chat widget app-wide via admin provider"
+```
+
+---
+
+## Task 4: The chat widget (client)
+
+**Files:**
+- Create: `src/admin/ansari/AnsariWidget.tsx`
+- Create: `src/admin/ansari/AnsariWidget.module.css`
+
+Port the approved mockup (`docs/superpowers/specs/ansari-chat-mockup.html`) into a
+React client component: a launcher bubble, a docked 392×560 IM panel, and an
+expand-to-centered-modal toggle, with navy/gold styling from the project palette.
+Streaming and markdown are wired to the relay. POC subset of the mockup: launcher,
+docked + expanded states, streaming **markdown** replies, typing indicator,
+text composer. Deferred to v1 (present in mockup, not wired here): structured
+confirm-card buttons and image upload — the attach button renders but is disabled
+with a "coming soon" title.
+
+- [ ] **Step 1: Install the markdown renderer**
+
+Run: `npm install react-markdown`
+Expected: `react-markdown` added to `dependencies`.
+
+- [ ] **Step 2: Create the widget styles** — copy the CSS from the mockup's
+`<style>` block (the launcher / panel / hdr / msgs / bubble / typing / composer
+rules) into `src/admin/ansari/AnsariWidget.module.css`, prefixing class usage via
+the CSS module. Keep the palette values (`--navy-700:#0F1E4A`, `--gold:#F0C88C`,
+etc.) defined at the top of the module so the widget matches the mockup exactly.
+(The mockup file is the source of truth for the visual spec — replicate it.)
+
+- [ ] **Step 3: Create the widget component**
 
 ```tsx
-// src/app/(payload)/admin/ansari/AnsariChatClient.tsx
+// src/admin/ansari/AnsariWidget.tsx
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import styles from './AnsariWidget.module.css'
 
 type Msg = { role: 'user' | 'assistant'; content: string }
+type View = 'closed' | 'docked' | 'expanded'
 
-export default function AnsariChatClient() {
+export default function AnsariWidget() {
+  const [allowed, setAllowed] = useState(false)
+  const [view, setView] = useState<View>('closed')
   const [messages, setMessages] = useState<Msg[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
+  const [tool, setTool] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Self-gate: only render the launcher for tenant admins.
+  useEffect(() => {
+    let on = true
+    fetch('/api/users/me', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (on && d?.user?.role === 'admin') setAllowed(true)
+      })
+      .catch(() => {})
+    return () => {
+      on = false
+    }
+  }, [])
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
+  }, [messages, tool])
 
   async function send() {
     const text = input.trim()
@@ -466,7 +449,6 @@ export default function AnsariChatClient() {
     setError(null)
     setInput('')
     const history: Msg[] = [...messages, { role: 'user', content: text }]
-    // Optimistically render the user message + an empty assistant bubble.
     setMessages([...history, { role: 'assistant', content: '' }])
     setBusy(true)
 
@@ -476,17 +458,13 @@ export default function AnsariChatClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history }),
       })
-      if (!res.ok || !res.body) {
-        throw new Error(`relay ${res.status}`)
-      }
+      if (!res.ok || !res.body) throw new Error(`relay ${res.status}`)
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
       let assistant = ''
 
-      // Read SSE: split on blank-line-delimited events, parse `data:` lines.
-      // (Parsing mirrors parseSseContentDelta in src/lib/ansari.ts.)
       for (;;) {
         const { done, value } = await reader.read()
         if (done) break
@@ -501,97 +479,149 @@ export default function AnsariChatClient() {
           try {
             const json = JSON.parse(payload) as {
               choices?: Array<{ delta?: { content?: string } }>
+              // best-effort: Hermes tool-progress events (shape verified in Task 5)
+              hermes?: { tool?: { progress?: string } }
+              type?: string
             }
             const delta = json.choices?.[0]?.delta?.content
+            const progress = json.hermes?.tool?.progress
+            if (typeof progress === 'string') {
+              setTool(progress)
+            }
             if (typeof delta === 'string' && delta.length > 0) {
+              setTool(null)
               assistant += delta
               setMessages([...history, { role: 'assistant', content: assistant }])
-              scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
             }
           } catch {
-            // ignore non-JSON / keepalive lines
+            // ignore keepalive / non-JSON lines
           }
         }
       }
     } catch {
       setError('Ansari is unreachable right now. Try again in a moment.')
-      setMessages(history) // drop the empty assistant bubble
+      setMessages(history)
     } finally {
       setBusy(false)
+      setTool(null)
     }
   }
 
+  if (!allowed) return null
+
+  if (view === 'closed') {
+    return (
+      <button
+        className={styles.launcher}
+        onClick={() => setView('docked')}
+        title="Chat with Ansari"
+        aria-label="Chat with Ansari"
+      >
+        <span className={styles.dot} />
+        {/* chat icon — same path as the mockup */}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="28" height="28"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </button>
+    )
+  }
+
+  const expanded = view === 'expanded'
+
   return (
-    <main className="mx-auto flex h-[calc(100vh-80px)] max-w-[880px] flex-col px-6 py-8">
-      <h1 className="font-display mb-4 text-3xl text-[var(--icp-navy-700)]">Ansari</h1>
-
-      <div
-        ref={scrollRef}
-        className="flex-1 space-y-4 overflow-y-auto rounded-lg border border-[var(--theme-elevation-100)] p-4"
-      >
-        {messages.length === 0 && (
-          <p className="text-[var(--icp-gray-700)]">
-            Ask Ansari to update prayer times, post an announcement, manage events, and more.
-          </p>
-        )}
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={m.role === 'user' ? 'text-right' : 'text-left'}
-          >
-            <span
-              className={
-                'inline-block whitespace-pre-wrap rounded-2xl px-4 py-2 ' +
-                (m.role === 'user'
-                  ? 'bg-[var(--icp-navy-700)] text-white'
-                  : 'bg-[var(--theme-elevation-100)] text-[var(--icp-navy-700)]')
-              }
-            >
-              {m.content || (busy ? '…' : '')}
-            </span>
+    <>
+      {expanded && <div className={styles.backdrop} onClick={() => setView('docked')} />}
+      <section className={expanded ? `${styles.panel} ${styles.expanded}` : styles.panel}>
+        <header className={styles.hdr}>
+          <div className={styles.avatar}>A</div>
+          <div className={styles.meta}>
+            <div className={styles.name}>Ansari</div>
+            <div className={styles.status}>Online</div>
           </div>
-        ))}
-      </div>
+          <button onClick={() => setView(expanded ? 'docked' : 'expanded')} title={expanded ? 'Restore' : 'Expand'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+          <button onClick={() => setView('closed')} title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </header>
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <div className={styles.msgs} ref={scrollRef}>
+          {messages.length === 0 && (
+            <div className={`${styles.row} ${styles.bot}`}>
+              <div className={styles.bubble}>
+                Assalamu alaikum 👋 I'm Ansari. Ask me to update prayer times, post an
+                announcement, manage events, or build a signup form.
+              </div>
+            </div>
+          )}
+          {messages.map((m, i) => (
+            <div key={i} className={`${styles.row} ${m.role === 'user' ? styles.user : styles.bot}`}>
+              <div className={styles.bubble}>
+                {m.role === 'assistant' ? (
+                  <ReactMarkdown>{m.content || '…'}</ReactMarkdown>
+                ) : (
+                  m.content
+                )}
+              </div>
+            </div>
+          ))}
+          {tool && (
+            <div className={styles.tool}>
+              <span className={styles.spin} /> {tool}
+            </div>
+          )}
+          {busy && !tool && (
+            <div className={`${styles.row} ${styles.bot}`}>
+              <div className={styles.typing}><span /><span /><span /></div>
+            </div>
+          )}
+        </div>
 
-      <form
-        className="mt-4 flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault()
-          void send()
-        }}
-      >
-        <input
-          className="flex-1 rounded-lg border border-[var(--theme-elevation-150)] px-4 py-2"
-          placeholder="Message Ansari…"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={busy}
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-[var(--icp-navy-700)] px-5 py-2 text-white disabled:opacity-50"
-          disabled={busy || input.trim() === ''}
+        {error && <p className={styles.error}>{error}</p>}
+
+        <form
+          className={styles.composer}
+          onSubmit={(e) => {
+            e.preventDefault()
+            void send()
+          }}
         >
-          Send
-        </button>
-      </form>
-    </main>
+          <button type="button" className={styles.attach} disabled title="Flyer upload — coming soon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <textarea
+            className={styles.textarea}
+            rows={1}
+            placeholder="Message Ansari…"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                void send()
+              }
+            }}
+            disabled={busy}
+          />
+          <button type="submit" className={styles.send} disabled={busy || input.trim() === ''} title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </form>
+      </section>
+    </>
   )
 }
 ```
 
-- [ ] **Step 3: Type-check**
+- [ ] **Step 4: Type-check**
 
 Run: `npx tsc --noEmit`
-Expected: no errors. (If `--icp-*` CSS vars differ in your theme, swap for the nearest existing token — grep `src/admin` for `var(--icp` to confirm names.)
+Expected: no errors. (Ensure the CSS module class names referenced in the TSX exist in `AnsariWidget.module.css`.)
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add "src/app/(payload)/admin/ansari/page.tsx" "src/app/(payload)/admin/ansari/AnsariChatClient.tsx"
-git commit -m "feat(ansari): add admin chat page and streaming UI"
+git add src/admin/ansari/AnsariWidget.tsx src/admin/ansari/AnsariWidget.module.css package.json package-lock.json
+git commit -m "feat(ansari): add floating IM chat widget with streaming + markdown"
 ```
 
 ---
@@ -600,10 +630,11 @@ git commit -m "feat(ansari): add admin chat page and streaming UI"
 
 - [ ] **Step 1:** Ensure local `.env` has `HERMES_API_BASE_URL` / `HERMES_API_KEY` (Task 0) and the dev machine is on the tailnet.
 - [ ] **Step 2:** Run `npm run dev`. Log in to `/admin` as a tenant admin (role `admin`).
-- [ ] **Step 3:** Confirm the **Ansari** link appears in the sidebar; open `/admin/ansari`.
-- [ ] **Step 4:** Send "What time is Fajr today?" Confirm the reply **streams in** token-by-token and is correct for the tenant.
+- [ ] **Step 3:** Confirm the **launcher bubble** appears bottom-right on every admin page; click it to open the docked IM window; click expand to confirm the modal state and backdrop.
+- [ ] **Step 4:** Send "What time is Fajr today?" Confirm the reply **streams in** token-by-token, renders markdown, and is correct for the tenant.
 - [ ] **Step 5:** Send a follow-up ("and Isha?") and confirm multi-turn context works (browser-held history).
-- [ ] **Step 6:** Negative checks: log in as a `platformOwner` → no Ansari link, `/admin/ansari` redirects; stop the Hermes gateway → the UI shows the "unreachable" error gracefully.
+- [ ] **Step 5a:** Inspect the live SSE in DevTools → confirm the actual `hermes.tool.progress` payload shape and adjust the widget's progress parsing if it differs from the best-effort `json.hermes.tool.progress` guess; confirm the tool chip appears during a write action (e.g. "change Fajr iqamah to 6:15").
+- [ ] **Step 6:** Negative checks: log in as a `platformOwner` → no launcher appears; stop the Hermes gateway → the widget shows the "unreachable" error gracefully.
 - [ ] **Step 7:** Run the full test + type-check gate:
 
 Run: `npx vitest run && npx tsc --noEmit`
@@ -613,4 +644,4 @@ Expected: PASS, no type errors.
 
 ## Out of scope (deferred to v1, per the design doc)
 
-Image upload (flyer-to-event), per-tenant `AnsariSettings` routing + secret store, server-side state via `/v1/responses`, persisted history, inline nudges, web03 network-posture hardening (move off the shared tailnet to outbound-only HTTPS).
+Image upload (flyer-to-event) + the structured confirm-before-write card with Yes/Cancel buttons (both shown in the mockup but text-only in the POC), per-tenant `AnsariSettings` routing + secret store, server-side state via `/v1/responses`, persisted history, inline nudges, web03 network-posture hardening (move off the shared tailnet to outbound-only HTTPS).
