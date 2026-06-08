@@ -83,6 +83,10 @@ services:
       # bot's getUpdates. See README "Deploy notifications".
       WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS:-}
       WATCHTOWER_NOTIFICATION_URL: ${TELEGRAM_BOT_TOKEN:+telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}}
+      # Report mode: send ONE templated message per session, and only when a
+      # container was actually updated or failed — not on every 5-min poll.
+      # (Without this, info-level notifications fire on every "Session done".)
+      WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATIONS_LEVEL: info
     command: ["--label-enable"]
 
