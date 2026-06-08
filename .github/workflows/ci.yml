@@ -162,7 +162,15 @@ jobs:
           # Commit message is intentionally NOT interpolated into the shell to
           # avoid injection; we send repo + short SHA + the run URL only.
           TEXT="$(printf '%s\nrepo: %s\ncommit: %s\n%s' "$STATUS" "$REPO" "${SHA:0:7}" "$RUN_URL")"
-          curl -fsS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+          # A failed notification must NOT fail the pipeline (the deploy already
+          # happened). Capture the API response, surface it as a warning if
+          # Telegram rejected it, and always exit 0.
+          RESP="$(curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
             -d chat_id="$TG_CHAT" \
-            --data-urlencode "text=$TEXT" >/dev/null
-          echo "Notified: $STATUS"
+            --data-urlencode "text=$TEXT" 2>&1)" || true
+          echo "Telegram response: $RESP"
+          if printf '%s' "$RESP" | grep -q '"ok":true'; then
+            echo "Notified: $STATUS"
+          else
+            echo "::warning title=Telegram notification failed::$RESP — check TELEGRAM_CHAT_ID and that you've sent your bot a message (bots can't DM users who haven't started them)."
+          fi
