@@ -40,6 +40,16 @@ services:
     labels:
       # Only this container is auto-updated by Watchtower (label-scoped below).
       com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      # Marks the container unhealthy if the server isn't accepting requests —
+      # e.g. a failed startup migration that never reaches `node server.js`.
+      # Host-agnostic: any HTTP response <500 counts as up (redirects/404 are
+      # fine). start_period covers migrate + cold boot before failures count.
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       # Publish on the LAN so an off-box NPM can proxy to
       # http://<host-ip>:${APP_HOST_PORT}. Use APP_BIND=127.0.0.1 to restrict
@@ -67,6 +77,13 @@ services:
       WATCHTOWER_POLL_INTERVAL: "300"
       # Remove the old image after a successful update.
       WATCHTOWER_CLEANUP: "true"
+      # Telegram notifications for deploy events (image pulled, container
+      # recreated, failures). Only active when TELEGRAM_* are set in .env;
+      # shoutrrr ignores an empty URL. Get the chat id via @userinfobot or the
+      # bot's getUpdates. See README "Deploy notifications".
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS:-}
+      WATCHTOWER_NOTIFICATION_URL: ${TELEGRAM_BOT_TOKEN:+telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}}
+      WATCHTOWER_NOTIFICATIONS_LEVEL: info
     command: ["--label-enable"]
 
   cron:
