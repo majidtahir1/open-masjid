@@ -404,8 +404,8 @@ passing. For cosmetic changes that don't need the full gate, include
 `[fast-ship]` in the commit message to skip the test/build wait, or trigger the
 workflow manually from the repo's **Actions** tab ("Run workflow").
 
-On the host, the **watchtower** service polls GHCR every 5 minutes
-(`WATCHTOWER_POLL_INTERVAL=300`). When a new `:latest` image is available it
+On the host, the **watchtower** service polls GHCR every 60 seconds
+(`WATCHTOWER_POLL_INTERVAL=60`). When a new `:latest` image is available it
 pulls it, recreates the **app** container, and prunes the old image
 (`WATCHTOWER_CLEANUP=true`). Only **app** is watched — it carries the
 `com.centurylinklabs.watchtower.enable=true` label; `db` and `cron` are left

@@ -73,8 +73,8 @@ services:
     environment:
       # Only watch containers explicitly labelled enable=true (the app).
       WATCHTOWER_LABEL_ENABLE: "true"
-      # Poll the registry every 5 minutes.
-      WATCHTOWER_POLL_INTERVAL: "300"
+      # Poll the registry every 60 seconds.
+      WATCHTOWER_POLL_INTERVAL: "60"
       # Remove the old image after a successful update.
       WATCHTOWER_CLEANUP: "true"
       # Telegram notifications for deploy events (image pulled, container
