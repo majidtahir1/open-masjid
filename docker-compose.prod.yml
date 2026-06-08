@@ -91,13 +91,16 @@ services:
       WATCHTOWER_NOTIFICATIONS_LEVEL: info
       # Don't send the boot log as a message every time Watchtower (re)starts.
       WATCHTOWER_NO_STARTUP_MESSAGE: "true"
-      # Custom deploy message. Mirrors Watchtower's default template structure
-      # (same .Report/.Updated/.Failed accessors) so it's known-good; only the
-      # text is friendlier. Explicit {{ "\n" }} keeps newlines YAML-safe.
+      # Custom deploy message. Mirrors Watchtower's default template accessors
+      # (.Report/.Updated/.Failed/.Name/.ImageName/.*ImageID.ShortID) so it's
+      # known-good; only the text differs. Explicit {{ "\n" }} keeps newlines
+      # YAML-safe. The host "web03 (prod)" is hardcoded — Watchtower only knows
+      # its own container hostname, not the docker host's.
       WATCHTOWER_NOTIFICATION_TEMPLATE: |
-        {{- if .Report -}}{{- with .Report -}}{{- if ( or .Updated .Failed ) -}}
-        🚀 OpenMasjid deploy{{ "\n" }}{{ len .Updated }} updated, {{ len .Failed }} failed (of {{ len .Scanned }} scanned){{ range .Updated }}{{ "\n" }}✅ {{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .CurrentImageID.ShortID }} → {{ .LatestImageID.ShortID }}{{ end }}{{ range .Failed }}{{ "\n" }}❌ {{ .Name }} ({{ .ImageName }}): {{ .Error }}{{ end }}
-        {{- end -}}{{- end -}}{{- end -}}
+        {{- if .Report -}}{{- with .Report -}}
+        {{- if .Updated -}}OpenMasjid deployed to web03 (prod){{ range .Updated }} {{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .CurrentImageID.ShortID }} → {{ .LatestImageID.ShortID }}{{ end }}{{- end -}}
+        {{- if .Failed -}}{{ if .Updated }}{{ "\n" }}{{ end }}❌ OpenMasjid deploy FAILED on web03 (prod){{ range .Failed }}{{ "\n" }}   {{ .Name }} ({{ .ImageName }}): {{ .Error }}{{ end }}{{- end -}}
+        {{- end -}}{{- end -}}
     command: ["--label-enable"]
 
   cron:
