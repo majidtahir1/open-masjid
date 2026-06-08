@@ -214,7 +214,7 @@ export default function Footer({ tenant }: FooterProps) {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-fs-sm text-white/60 md:flex-row md:items-center">
           <p className="m-0">
-            &copy; {year} {tenant.name}. All rights reserved. &middot; 🚀 Auto-deploy live
+            &copy; {year} {tenant.name}. All rights reserved.
           </p>
           <p className="m-0 text-[12px] text-white/45">
             Powered by{' '}
