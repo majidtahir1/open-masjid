@@ -3,6 +3,7 @@ import {
   authorizeAnsari,
   buildHermesChatRequest,
   parseSseContentDelta,
+  getHermesConfig,
   type ChatMessage,
 } from './ansari'
 
@@ -37,11 +38,26 @@ describe('buildHermesChatRequest', () => {
     const body = JSON.parse(init.body as string)
     expect(body.stream).toBe(true)
     expect(body.messages).toEqual(msgs)
-    expect(typeof body.model).toBe('string')
+    expect(body.model).toBe('hermes-agent')
   })
   it('trims a trailing slash on the base URL', () => {
     const { url } = buildHermesChatRequest(msgs, { baseUrl: 'http://host:8642/', apiKey: 'k' })
     expect(url).toBe('http://host:8642/v1/chat/completions')
+  })
+})
+
+describe('getHermesConfig', () => {
+  it('throws when env vars are absent', () => {
+    delete process.env.HERMES_API_BASE_URL
+    delete process.env.HERMES_API_KEY
+    expect(() => getHermesConfig()).toThrow('must be set')
+  })
+  it('returns config from env', () => {
+    process.env.HERMES_API_BASE_URL = 'http://h'
+    process.env.HERMES_API_KEY = 'k'
+    expect(getHermesConfig()).toEqual({ baseUrl: 'http://h', apiKey: 'k' })
+    delete process.env.HERMES_API_BASE_URL
+    delete process.env.HERMES_API_KEY
   })
 })
 

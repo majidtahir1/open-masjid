@@ -42,9 +42,8 @@ export function buildHermesChatRequest(
  * lines, and chunks without content (role-only chunks, tool-progress events).
  */
 export function parseSseContentDelta(line: string): string | null {
-  const trimmed = line.trimStart()
-  if (!trimmed.startsWith('data:')) return null
-  const payload = trimmed.slice('data:'.length).trim()
+  if (!line.startsWith('data:')) return null
+  const payload = line.slice('data:'.length).trim()
   if (payload === '' || payload === '[DONE]') return null
   try {
     const json = JSON.parse(payload) as {
