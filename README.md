@@ -295,11 +295,12 @@ npm run seed
 
 ## Deploying with Docker (recommended)
 
-The production stack is three containers defined in `docker-compose.prod.yml`:
+The production stack is four containers defined in `docker-compose.prod.yml`:
 
-- **app** — Next.js + Payload, built from `Dockerfile` (multi-stage, standalone output, non-root, ~150 MB).
+- **app** — Next.js + Payload, pulled from GHCR (`ghcr.io/majidtahir1/open-masjid`). Runs pending Payload migrations on startup, then serves. The image is built automatically by GitHub Actions on every merge to `main`.
 - **db** — Postgres 16 with a persistent `pgdata` volume.
 - **cron** — Alpine crond sidecar that hits `/api/payload-jobs/run` every minute (scheduled-publish queue drain).
+- **watchtower** — polls GHCR and auto-updates the **app** container when a new image is published (see [Deploy updates](#6-deploy-updates-automated-via-ghcr--watchtower)).
 
 The stack sits behind an external reverse proxy — **Nginx Proxy Manager** typically running on a different host on your LAN. The app container publishes port 3000 on the host's LAN interface; NPM proxies to `http://<openmasjid-host-ip>:3000`.
 
@@ -308,6 +309,13 @@ The stack sits behind an external reverse proxy — **Nginx Proxy Manager** typi
 - Docker 24+ and Docker Compose v2 (`docker compose version`).
 - An NFS mount from your TrueNAS (or any durable volume) for media uploads (optional but strongly recommended — container filesystems are ephemeral).
 - Nginx Proxy Manager reachable on your LAN, already running.
+- **GHCR pull auth.** The app image is published to GitHub Container Registry as a **private** package, so the host must be logged in before it can pull. Create a GitHub Personal Access Token (classic) with the **`read:packages`** scope, then:
+
+  ```bash
+  echo "<YOUR_PAT>" | docker login ghcr.io -u <your-github-username> --password-stdin
+  ```
+
+  This writes `~/.docker/config.json`, which both `docker compose pull` and the Watchtower sidecar use. (Watchtower mounts it read-only; override its path with `DOCKER_CONFIG_PATH` in `.env` if it lives elsewhere.)
 
 ### 2. Clone + configure
 
@@ -386,16 +394,48 @@ In the NPM UI → **Proxy Hosts → Add Proxy Host**:
 
 The Host header is non-negotiable — middleware reads it for tenant resolution.
 
-### 6. Deploy updates
+### 6. Deploy updates (automated via GHCR + Watchtower)
+
+Deploys are automatic. On every merge to `main`, GitHub Actions (the `publish`
+job in `.github/workflows/ci.yml`) builds the production app image and pushes it
+to GHCR as `ghcr.io/majidtahir1/open-masjid:latest` (plus a `sha-<short>` tag for
+the exact commit). The publish step is gated on the `test` + `build` jobs
+passing. For cosmetic changes that don't need the full gate, include
+`[fast-ship]` in the commit message to skip the test/build wait, or trigger the
+workflow manually from the repo's **Actions** tab ("Run workflow").
+
+On the host, the **watchtower** service polls GHCR every 5 minutes
+(`WATCHTOWER_POLL_INTERVAL=300`). When a new `:latest` image is available it
+pulls it, recreates the **app** container, and prunes the old image
+(`WATCHTOWER_CLEANUP=true`). Only **app** is watched — it carries the
+`com.centurylinklabs.watchtower.enable=true` label; `db` and `cron` are left
+untouched. On startup the new app container runs `payload migrate` before
+serving, so schema changes apply automatically. Recreate is a clean swap —
+~5–10s of request drop while the new container replaces the old.
+
+**Manual operations.**
 
 ```bash
 cd /opt/openmasjid
-git pull
-docker compose -f docker-compose.prod.yml build app
-docker compose -f docker-compose.prod.yml up -d app cron
+
+# Force an immediate pull + restart of the app (don't wait for the poll):
+docker compose -f docker-compose.prod.yml pull app
+docker compose -f docker-compose.prod.yml up -d app
+
+# Roll back to a specific build (e.g. a migration broke): pin APP_IMAGE to a
+# known-good sha tag and bring it up. The tag is shown in the Actions run and
+# on the GHCR package page. The sha tag is immutable, so Watchtower won't
+# overwrite the pin.
+APP_IMAGE=ghcr.io/majidtahir1/open-masjid:sha-<short> \
+  docker compose -f docker-compose.prod.yml up -d app
+
+# Return to auto-updates once a fixed :latest is published:
+docker compose -f docker-compose.prod.yml up -d app
 ```
 
-The rebuild is a clean image swap — no downtime for db/cron, ~5–10s of request drop while the new app container replaces the old. For true zero-downtime swap later, add a second app replica + loadbalance via NPM (or switch the compose to a rolling update pattern).
+> `app.image` defaults to `:latest` via `${APP_IMAGE:-…}`, so a bare
+> `docker compose up -d app` always tracks the auto-updated image. For a true
+> zero-downtime swap later, add a second app replica + load-balance via NPM.
 
 ### 7. Backups
 

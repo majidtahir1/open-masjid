@@ -28,7 +28,10 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/majidtahir1/open-masjid:latest
+    # Defaults to :latest (what Watchtower auto-updates). Pin APP_IMAGE to a
+    # ghcr.io/majidtahir1/open-masjid:sha-<short> tag to roll back to a specific
+    # build — that sha tag is immutable, so Watchtower won't clobber the pin.
+    image: ${APP_IMAGE:-ghcr.io/majidtahir1/open-masjid:latest}
     restart: unless-stopped
     depends_on:
       db:
