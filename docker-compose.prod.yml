@@ -91,6 +91,9 @@ services:
       WATCHTOWER_NOTIFICATIONS_LEVEL: info
       # Don't send the boot log as a message every time Watchtower (re)starts.
       WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      # Drop the auto-title ("Watchtower updates on <container-id>") so the
+      # message is just our template body.
+      WATCHTOWER_NOTIFICATION_SKIP_TITLE: "true"
       # Custom deploy message. Mirrors Watchtower's default template accessors
       # (.Report/.Updated/.Failed/.Name/.ImageName/.*ImageID.ShortID) so it's
       # known-good; only the text differs. Explicit {{ "\n" }} keeps newlines
