@@ -82,12 +82,22 @@ services:
       # shoutrrr ignores an empty URL. Get the chat id via @userinfobot or the
       # bot's getUpdates. See README "Deploy notifications".
       WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS:-}
-      WATCHTOWER_NOTIFICATION_URL: ${TELEGRAM_BOT_TOKEN:+telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}}
+      # preview=false stops Telegram expanding the ghcr.io link into a big card.
+      WATCHTOWER_NOTIFICATION_URL: ${TELEGRAM_BOT_TOKEN:+telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}&preview=false}
       # Report mode: send ONE templated message per session, and only when a
       # container was actually updated or failed — not on every 5-min poll.
       # (Without this, info-level notifications fire on every "Session done".)
       WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATIONS_LEVEL: info
+      # Don't send the boot log as a message every time Watchtower (re)starts.
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      # Custom deploy message. Mirrors Watchtower's default template structure
+      # (same .Report/.Updated/.Failed accessors) so it's known-good; only the
+      # text is friendlier. Explicit {{ "\n" }} keeps newlines YAML-safe.
+      WATCHTOWER_NOTIFICATION_TEMPLATE: |
+        {{- if .Report -}}{{- with .Report -}}{{- if ( or .Updated .Failed ) -}}
+        🚀 OpenMasjid deploy{{ "\n" }}{{ len .Updated }} updated, {{ len .Failed }} failed (of {{ len .Scanned }} scanned){{ range .Updated }}{{ "\n" }}✅ {{ .Name }} ({{ .ImageName }}){{ "\n" }}   {{ .CurrentImageID.ShortID }} → {{ .LatestImageID.ShortID }}{{ end }}{{ range .Failed }}{{ "\n" }}❌ {{ .Name }} ({{ .ImageName }}): {{ .Error }}{{ end }}
+        {{- end -}}{{- end -}}{{- end -}}
     command: ["--label-enable"]
 
   cron:
