@@ -27,31 +27,16 @@ services:
       timeout: 5s
       retries: 5
 
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: migrator
-    image: openmasjid/migrator:latest
-    restart: "no"
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file: ${ENV_FILE:-.env}
-
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: runner
-    image: openmasjid/app:latest
+    image: ghcr.io/majidtahir1/open-masjid:latest
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     env_file: ${ENV_FILE:-.env}
+    labels:
+      # Only this container is auto-updated by Watchtower (label-scoped below).
+      com.centurylinklabs.watchtower.enable: "true"
     ports:
       # Publish on the LAN so an off-box NPM can proxy to
       # http://<host-ip>:${APP_HOST_PORT}. Use APP_BIND=127.0.0.1 to restrict
@@ -63,6 +48,23 @@ services:
       # Host/TrueNAS mount for uploaded media. Point MEDIA_PATH at a local
       # directory OR an NFS-mounted share. Default: ./media (host).
       - ${MEDIA_PATH:-./media}:/app/public/media
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # GHCR auth so Watchtower can pull the private image. Create this on the
+      # host with `docker login ghcr.io` using a read:packages PAT (see README).
+      - ${DOCKER_CONFIG_PATH:-~/.docker/config.json}:/config.json:ro
+    environment:
+      # Only watch containers explicitly labelled enable=true (the app).
+      WATCHTOWER_LABEL_ENABLE: "true"
+      # Poll the registry every 5 minutes.
+      WATCHTOWER_POLL_INTERVAL: "300"
+      # Remove the old image after a successful update.
+      WATCHTOWER_CLEANUP: "true"
+    command: ["--label-enable"]
 
   cron:
     image: alpine:3.20
