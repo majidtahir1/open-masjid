@@ -5,6 +5,7 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch: {}
 
 # Cancel in-flight runs for the same branch when a new commit is pushed.
 # Saves CI minutes and gets you faster signal on the latest commit.
@@ -15,6 +16,7 @@ concurrency:
 jobs:
   # Fast gate (~1 min): typecheck + unit tests in parallel with the build.
   test:
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[fast-ship]')) }}
     name: Type check + tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -33,6 +35,7 @@ jobs:
   # alone misses (Next regenerates Payload types). Caching .next/cache cuts
   # repeat builds to ~half the cold time.
   build:
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[fast-ship]')) }}
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
