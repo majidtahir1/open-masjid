@@ -196,6 +196,46 @@ persisted in OpenMasjid in v1.
 - Optional (nice-to-have, not v1-blocking): basic per-user rate limiting on the
   relay.
 
+## Authorization model — two layers (and per-user scoping, deferred)
+
+There are **two independent auth layers** in this feature, and API scopes live on
+only one of them:
+
+1. **Who may use the chat** — the logged-in admin's **session** (relay calls
+   `payload.auth()` and requires `role === 'admin'` via `authorizeAnsari`). UI
+   sessions are **never** scope-gated; only API keys are.
+2. **What Ansari may do** — every backend write the agent performs uses the
+   **profile's scoped `OPENMASJID_API_KEY`** (one per masjid), enforced by
+   `gateByApiKeyScope`. This is keyed to the *masjid*, **not** the individual
+   admin who is chatting.
+
+Consequences (true for both web and Telegram today):
+- All tenant admins at a masjid share the **same** Ansari capabilities (whatever
+  the profile key's `apiScopes` grant). No per-admin differentiation.
+- Tenant isolation still holds — the profile key is bound to one tenant.
+- **Attribution gap:** a change Ansari makes is recorded as the API-key (Ansari
+  service) user, not the human who asked.
+
+### Why "pass an API key in the chat request" doesn't work
+
+Telegram users can't supply a key (no session/header — just text), and routing a
+per-user secret through Hermes (which keeps session state + memory) risks leaking
+it into the agent/LLM layer. The thing available on **both** channels is an
+**identity**, not a key: web has the authenticated session; Telegram has the
+`telegramUserId`, and OpenMasjid already holds the authoritative
+`telegramUserId → user` binding.
+
+### Future direction (deferred — exploring only, 2026-06-08)
+
+If per-user scoping or real attribution is ever wanted: make the profile key an
+**act-on-behalf-of service key**. Each backend call carries a trusted
+`X-On-Behalf-Of: <userId>` (injected by the relay for web; asserted by Hermes
+against OpenMasjid's binding for Telegram), and OpenMasjid resolves and enforces
+*that user's* scopes — keeping secrets out of the agent and unifying both channels.
+This needs (1) an impersonation/trust mechanism in OpenMasjid's access layer,
+(2) skills passing the header on every call, (3) Telegram identity assertion. Not
+built; revisit if the goal becomes per-admin capability limits or audit.
+
 ## Testing
 
 - **Relay unit tests:** rejects unauthenticated; rejects non-admin role; resolves
