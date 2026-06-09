@@ -128,6 +128,12 @@
   .switcher button{border:none;background:transparent;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer}
   .switcher button.on{background:var(--navy-700);color:#fff}
   .switcher .lbl{font-size:11px;color:var(--gray-300);align-self:center;padding:0 8px 0 4px}
+
+  /* mobile: docked + expanded panels go near-fullscreen (narrow the browser to preview) */
+  @media (max-width:480px){
+    .panel,.panel.expanded{inset:8px;right:8px;bottom:8px;width:auto;height:auto;max-height:none;transform:none;border-radius:12px}
+    .row{max-width:92%}
+  }
 </style>
 </head>
 <body>

@@ -373,3 +373,23 @@
   background: #fdf0ef;
   border-top: 1px solid #f5c6c3;
 }
+
+/* ---- mobile: docked and expanded panels go near-fullscreen ---- */
+@media (max-width: 480px) {
+  .panel,
+  .expanded {
+    inset: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    height: auto;
+    max-height: none;
+    transform: none;
+    border-radius: 12px;
+  }
+
+  /* let bubbles use more of the narrow width */
+  .row {
+    max-width: 92%;
+  }
+}
