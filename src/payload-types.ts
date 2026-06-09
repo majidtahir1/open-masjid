@@ -895,15 +895,15 @@ export interface QrCode {
    */
   targetUrl: string;
   /**
-   * Auto-generated. Refresh after save to see the PNG.
+   * Auto-generated (512px, for kiosk display). Refresh after save to see the PNG.
    */
   generatedImage?: (number | null) | Media;
   /**
-   * Hex format: #RRGGBB
+   * The QR pattern color. Pick a color or enter a hex value.
    */
   fgColor?: string | null;
   /**
-   * Hex format: #RRGGBB
+   * The QR background color. Pick a color or enter a hex value.
    */
   bgColor?: string | null;
   tenant?: (number | null) | Tenant;

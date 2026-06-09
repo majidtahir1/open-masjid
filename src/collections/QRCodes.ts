@@ -63,7 +63,17 @@ export const QRCodes: CollectionConfig = {
               name: 'generatedImage',
               type: 'upload',
               relationTo: 'media',
-              admin: { readOnly: true, description: 'Auto-generated. Refresh after save to see the PNG.' },
+              admin: { readOnly: true, description: 'Auto-generated (512px, for kiosk display). Refresh after save to see the PNG.' },
+            },
+            {
+              name: 'downloadHiRes',
+              type: 'ui',
+              label: 'Download',
+              admin: {
+                components: {
+                  Field: '/src/admin/QRDownloadButton#default',
+                },
+              },
             },
           ],
         },
@@ -79,7 +89,11 @@ export const QRCodes: CollectionConfig = {
                   type: 'text',
                   defaultValue: '#000000',
                   label: 'Foreground',
-                  admin: { description: 'Hex format: #RRGGBB', width: '50%' },
+                  admin: {
+                    description: 'The QR pattern color. Pick a color or enter a hex value.',
+                    width: '50%',
+                    components: { Field: '/src/admin/forms/fields/ColorField#default' },
+                  },
                   validate: (v: unknown) =>
                     !v || (typeof v === 'string' && HEX_COLOR.test(v)) || 'Must be #RRGGBB',
                 },
@@ -88,7 +102,11 @@ export const QRCodes: CollectionConfig = {
                   type: 'text',
                   defaultValue: '#FFFFFF',
                   label: 'Background',
-                  admin: { description: 'Hex format: #RRGGBB', width: '50%' },
+                  admin: {
+                    description: 'The QR background color. Pick a color or enter a hex value.',
+                    width: '50%',
+                    components: { Field: '/src/admin/forms/fields/ColorField#default' },
+                  },
                   validate: (v: unknown) =>
                     !v || (typeof v === 'string' && HEX_COLOR.test(v)) || 'Must be #RRGGBB',
                 },
