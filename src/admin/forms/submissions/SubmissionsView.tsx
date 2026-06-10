@@ -95,8 +95,10 @@ export default function SubmissionsView() {
           const res = await fetch(`/api/form-submissions?${qs.toString()}`, { credentials: 'include' })
           if (!res.ok) throw new Error(`Failed to load submissions (HTTP ${res.status})`)
           const data = (await res.json()) as { docs?: SubmissionRowData[]; hasNextPage?: boolean }
-          all.push(...(data.docs ?? []))
-          hasMore = !!data.hasNextPage
+          const docs = data.docs ?? []
+          all.push(...docs)
+          // An empty page means no progress — stop even if hasNextPage lies.
+          hasMore = !!data.hasNextPage && docs.length > 0
           if (!hasMore || all.length >= ROW_CAP) break
           page += 1
         }
