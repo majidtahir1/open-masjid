@@ -2,19 +2,12 @@ import { NextResponse } from 'next/server'
 import { headers as getHeaders } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import {
-  authorizeAnsari,
-  buildHermesChatRequest,
-  getHermesConfig,
-  trimChatHistory,
-  ANSARI_MAX_HISTORY_MESSAGES,
-  type ChatMessage,
-} from '@/lib/ansari'
+import { authorizeAnsari, buildHermesResponsesRequest, getHermesConfig } from '@/lib/ansari'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-type Body = { messages?: ChatMessage[] }
+type Body = { message?: string; previousResponseId?: string | null }
 
 export async function POST(req: Request) {
   const payload = await getPayload({ config })
@@ -31,10 +24,14 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: 'bad-json' }, { status: 400 })
   }
-  const messages = body.messages
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: 'messages-required' }, { status: 400 })
+  const message = typeof body.message === 'string' ? body.message.trim() : ''
+  if (message === '') {
+    return NextResponse.json({ error: 'message-required' }, { status: 400 })
   }
+  const previousResponseId =
+    typeof body.previousResponseId === 'string' && body.previousResponseId !== ''
+      ? body.previousResponseId
+      : null
 
   let cfg
   try {
@@ -43,10 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'ansari-not-configured' }, { status: 503 })
   }
 
-  const { url, init } = buildHermesChatRequest(
-    trimChatHistory(messages, ANSARI_MAX_HISTORY_MESSAGES),
-    cfg,
-  )
+  const { url, init } = buildHermesResponsesRequest(message, previousResponseId, cfg)
 
   let upstream: Response
   try {
