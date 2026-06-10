@@ -15,7 +15,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Download, Search, X } from 'lucide-react'
+import { Download, Inbox, Search, X } from 'lucide-react'
 import type { FormSchema } from '@/lib/form-schema'
 import {
   buildColumnSpecs,
@@ -126,6 +126,10 @@ export default function SubmissionsView() {
   return (
     <div className="sv-root">
       <div className="sv-toolbar">
+        <div className="sv-count">
+          <span className="sv-count__num">{rows.length}</span>
+          <span>submission{rows.length === 1 ? '' : 's'}</span>
+        </div>
         <div className="sv-search">
           <Search size={14} strokeWidth={1.75} aria-hidden />
           <input
@@ -158,8 +162,10 @@ export default function SubmissionsView() {
       )}
 
       {rows.length === 0 ? (
-        <div className="sv-state">
-          No submissions yet. Once people fill out the form, they&rsquo;ll appear here.
+        <div className="sv-state sv-state--empty">
+          <Inbox size={30} strokeWidth={1.5} aria-hidden />
+          <p className="sv-state__title">No submissions yet</p>
+          <p>Once people fill out the form, they&rsquo;ll appear here.</p>
         </div>
       ) : (
         <SubmissionsTable
