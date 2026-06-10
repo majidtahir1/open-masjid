@@ -27,7 +27,7 @@ interface SubmissionDoc {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   // 1. Auth: load Payload, verify a valid session exists
@@ -64,11 +64,13 @@ export async function GET(
     return NextResponse.json({ error: 'form not found' }, { status: 404 })
   }
 
-  // 4. Query all submissions for this form
+  // 4. Query submissions for this form (?id=<submissionId> narrows to one row)
+  const id = new URL(req.url).searchParams.get('id')
   const submissions = (await payload.find({
     collection: 'form-submissions' as never,
     where: {
       form: { equals: form.id },
+      ...(id ? { id: { equals: id } } : {}),
     },
     limit: 10000,
     overrideAccess: false,
