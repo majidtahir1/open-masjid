@@ -74,6 +74,9 @@ export default function SubmissionsTable({
     [filters, specById],
   )
 
+  // No onColumnFiltersChange on purpose: columnFilters is fully controlled by
+  // the parent's `filters` prop (derived in the memo above). Adding a handler
+  // would create a second source of truth.
   // eslint-disable-next-line react-hooks/incompatible-library -- useReactTable is a known incompatible library with React Compiler; safe here as we don't pass memoized values from it to other memoized components
   const table = useReactTable({
     data: rows,
