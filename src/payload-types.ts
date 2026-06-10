@@ -1481,6 +1481,7 @@ export interface FormSubmission {
   ipHash?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Categories donors can give toward (Sadaqah, Zakat, Building Fund, etc.).
@@ -2417,6 +2418,7 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
   ipHash?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -6,6 +6,12 @@ import { denyKioskManager } from '../access/kioskRoles'
 export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
   labels: { singular: 'Submission', plural: 'Submissions' },
+  // Soft delete: deleting sets `deletedAt` instead of removing the row, and
+  // every default query (spreadsheet, counts, CSV, capacity checks) excludes
+  // trashed docs automatically. Deletion happens only via the dedicated
+  // DELETE /api/forms/submissions/[id] route — collection update/delete
+  // access stays locked down, so payment-linked records are never lost.
+  trash: true,
   admin: {
     // No admin UI of its own — submissions are viewed via the spreadsheet
     // "Submissions" tab on each form (src/admin/forms/submissions/). The

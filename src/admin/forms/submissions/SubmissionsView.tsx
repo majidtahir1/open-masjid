@@ -215,6 +215,10 @@ export default function SubmissionsView() {
           schema={form.schema ?? null}
           formRef={String(form.id)}
           onClose={() => setOpenRowId(null)}
+          onDeleted={(id) => {
+            setRows((prev) => prev.filter((r) => r.id !== id))
+            setOpenRowId(null)
+          }}
         />
       )}
     </div>

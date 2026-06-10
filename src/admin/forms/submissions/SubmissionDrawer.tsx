@@ -3,11 +3,11 @@
 /**
  * SubmissionDrawer — slide-over detail for one submission.
  * Answers in schema order, payment details, reply mailto,
- * single-row CSV export.
+ * single-row CSV export, soft delete with confirm step.
  */
 
-import { useEffect } from 'react'
-import { CreditCard, Download, ExternalLink, Mail, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { CreditCard, Download, ExternalLink, Mail, Trash2, X } from 'lucide-react'
 import type { FormSchema } from '@/lib/form-schema'
 import {
   formatCellValue,
@@ -21,6 +21,8 @@ export interface SubmissionDrawerProps {
   /** Form id (or slug) for building the CSV export URL. */
   formRef: string | null
   onClose: () => void
+  /** Called after a successful delete so the parent can drop the row. */
+  onDeleted: (id: string | number) => void
 }
 
 function formatAmount(cents: number, currency: string | null | undefined): string {
@@ -35,7 +37,12 @@ export default function SubmissionDrawer({
   schema,
   formRef,
   onClose,
+  onDeleted,
 }: SubmissionDrawerProps) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -43,6 +50,24 @@ export default function SubmissionDrawer({
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  const handleDelete = useCallback(async () => {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      const res = await fetch(`/api/forms/submissions/${row.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string }
+        setDeleteError(body.error ?? 'Failed to delete submission')
+        return
+      }
+      onDeleted(row.id)
+    } catch {
+      setDeleteError('Network error — try again')
+    } finally {
+      setDeleting(false)
+    }
+  }, [row.id, onDeleted])
 
   const fields = (schema?.steps ?? [])
     .flatMap((s) => s.fields)
@@ -135,7 +160,42 @@ export default function SubmissionDrawer({
               Export row
             </a>
           )}
+          <span className="svd-actions__spacer" />
+          {confirmingDelete ? (
+            <>
+              <button
+                type="button"
+                className="svd-btn svd-btn--danger"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                <Trash2 size={14} aria-hidden />
+                {deleting ? 'Deleting…' : 'Confirm delete'}
+              </button>
+              <button
+                type="button"
+                className="svd-btn"
+                onClick={() => {
+                  setConfirmingDelete(false)
+                  setDeleteError(null)
+                }}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="svd-btn svd-btn--danger-ghost"
+              onClick={() => setConfirmingDelete(true)}
+            >
+              <Trash2 size={14} aria-hidden />
+              Delete
+            </button>
+          )}
         </div>
+        {deleteError && <p className="svd-delete-error">{deleteError}</p>}
       </aside>
     </div>
   )
