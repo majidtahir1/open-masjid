@@ -14,6 +14,7 @@ interface FormDoc {
   slug: string
   schema: FormSchema
   tenant: { id: string | number } | string | number
+  payment?: { enabled?: boolean | null } | null
 }
 
 interface SubmissionDoc {
@@ -77,8 +78,10 @@ export async function GET(
     user,
   } as never)) as unknown as { docs: SubmissionDoc[] }
 
-  // 5. Generate CSV
-  const csv = submissionsToCsv(form.schema, submissions.docs)
+  // 5. Generate CSV (payment columns only for payment-enabled forms)
+  const csv = submissionsToCsv(form.schema, submissions.docs, {
+    includePayment: !!form.payment?.enabled,
+  })
 
   // 6. Build filename with today's date
   const today = new Date().toISOString().slice(0, 10)
