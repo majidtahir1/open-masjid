@@ -31,7 +31,7 @@ export const Forms: CollectionConfig = {
     group: 'Forms',
     hidden: hideForKioskManager,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
+    defaultColumns: ['title', 'status', 'submissionsCount', 'lastSubmission', 'updatedAt'],
     components: {
       views: {
         edit: {
@@ -84,6 +84,28 @@ export const Forms: CollectionConfig = {
         { label: 'Closed', value: 'closed' },
       ],
       admin: { position: 'sidebar' },
+    },
+    {
+      name: 'submissionsCount',
+      type: 'ui',
+      label: 'Submissions',
+      admin: {
+        components: {
+          Field: '/src/admin/forms/cells/EmptyField#default',
+          Cell: '/src/admin/forms/cells/SubmissionsCountCell#default',
+        },
+      },
+    },
+    {
+      name: 'lastSubmission',
+      type: 'ui',
+      label: 'Last submission',
+      admin: {
+        components: {
+          Field: '/src/admin/forms/cells/EmptyField#default',
+          Cell: '/src/admin/forms/cells/LastSubmissionCell#default',
+        },
+      },
     },
     {
       name: 'description',
