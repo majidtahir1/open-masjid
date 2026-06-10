@@ -188,6 +188,39 @@ export function matchesGlobal(row: SubmissionRowData, specs: ColumnSpec[], query
   })
 }
 
+export type SummaryKind = 'none' | 'sum' | 'avg' | 'empty' | 'filled'
+
+export const SUMMARY_LABELS: Record<SummaryKind, string> = {
+  none: 'None',
+  sum: 'Sum',
+  avg: 'Avg',
+  empty: 'Empty',
+  filled: 'Filled',
+}
+
+/** Sum/Avg only make sense for numeric columns; Empty/Filled work everywhere. */
+export function summaryOptionsFor(spec: ColumnSpec): SummaryKind[] {
+  return spec.kind === 'numberRange'
+    ? ['none', 'sum', 'avg', 'empty', 'filled']
+    : ['none', 'empty', 'filled']
+}
+
+export function computeSummary(values: unknown[], kind: SummaryKind): string {
+  if (kind === 'none') return ''
+  if (kind === 'empty') return String(values.filter((v) => isEmpty(v)).length)
+  if (kind === 'filled') return String(values.filter((v) => !isEmpty(v)).length)
+  const nums: number[] = []
+  for (const v of values) {
+    if (isEmpty(v)) continue
+    const n = typeof v === 'number' ? v : Number(v)
+    if (!Number.isNaN(n)) nums.push(n)
+  }
+  if (nums.length === 0) return '—'
+  const sum = nums.reduce((a, b) => a + b, 0)
+  const result = kind === 'sum' ? sum : sum / nums.length
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(result)
+}
+
 /** Sort comparator. Empty values always sort last (regardless of direction). */
 export function compareValues(a: unknown, b: unknown, spec: ColumnSpec): number {
   const aEmpty = isEmpty(a)

@@ -18,6 +18,7 @@ import {
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import {
   compareValues,
+  computeSummary,
   formatCellValue,
   formatSubmittedAt,
   getCellValue,
@@ -27,8 +28,10 @@ import {
   type ColumnFilterState,
   type ColumnSpec,
   type SubmissionRowData,
+  type SummaryKind,
 } from '@/lib/submissions-table'
 import ColumnMenu from './ColumnMenu'
+import SummaryMenu from './SummaryMenu'
 
 export interface SubmissionsTableProps {
   rows: SubmissionRowData[]
@@ -36,6 +39,8 @@ export interface SubmissionsTableProps {
   globalQuery: string
   filters: Record<string, ColumnFilterState>
   onFiltersChange: (next: Record<string, ColumnFilterState>) => void
+  summaries: Record<string, SummaryKind>
+  onSummariesChange: (next: Record<string, SummaryKind>) => void
   onRowClick: (row: SubmissionRowData) => void
 }
 
@@ -45,6 +50,8 @@ export default function SubmissionsTable({
   globalQuery,
   filters,
   onFiltersChange,
+  summaries,
+  onSummariesChange,
   onRowClick,
 }: SubmissionsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'submittedAt', desc: true }])
@@ -157,6 +164,35 @@ export default function SubmissionsTable({
             </tr>
           )}
         </tbody>
+        <tfoot>
+          <tr>
+            {specs.map((spec, i) => {
+              if (i === 0) {
+                return (
+                  <td key={spec.id} className="sv-foot__total">
+                    Total {visibleRows.length}
+                    {visibleRows.length !== rows.length ? ` of ${rows.length}` : ''}
+                  </td>
+                )
+              }
+              const kind = summaries[spec.id] ?? 'none'
+              const display =
+                kind === 'none'
+                  ? ''
+                  : computeSummary(visibleRows.map((r) => getCellValue(r.original, spec)), kind)
+              return (
+                <td key={spec.id}>
+                  <SummaryMenu
+                    spec={spec}
+                    value={kind}
+                    display={display}
+                    onChange={(k) => onSummariesChange({ ...summaries, [spec.id]: k })}
+                  />
+                </td>
+              )
+            })}
+          </tr>
+        </tfoot>
       </table>
     </div>
   )

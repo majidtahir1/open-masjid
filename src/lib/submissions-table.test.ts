@@ -3,6 +3,8 @@ import type { FormSchema } from './form-schema'
 import {
   buildColumnSpecs,
   compareValues,
+  computeSummary,
+  summaryOptionsFor,
   formatCellValue,
   formatSubmittedAt,
   getCellValue,
@@ -181,6 +183,40 @@ describe('matchesGlobal', () => {
     expect(matchesGlobal(row, specs, 'sat, sun')).toBe(true)
     expect(matchesGlobal(row, specs, 'zzz')).toBe(false)
     expect(matchesGlobal(row, specs, '')).toBe(true)
+  })
+})
+
+describe('summaries', () => {
+  const num: ColumnSpec = { id: 'n', label: 'N', kind: 'numberRange' }
+  const text: ColumnSpec = { id: 't', label: 'T', kind: 'text' }
+
+  it('offers sum/avg only for numeric columns', () => {
+    expect(summaryOptionsFor(num)).toEqual(['none', 'sum', 'avg', 'empty', 'filled'])
+    expect(summaryOptionsFor(text)).toEqual(['none', 'empty', 'filled'])
+  })
+
+  it('sums numeric values, coercing strings and skipping empties', () => {
+    expect(computeSummary([1, 2, 4, '3', null, ''], 'sum')).toBe('10')
+  })
+
+  it('averages numeric values', () => {
+    expect(computeSummary([2, 4], 'avg')).toBe('3')
+    expect(computeSummary([1, 1, 5], 'avg')).toBe('2.33')
+  })
+
+  it('dashes sum/avg when no numeric values exist', () => {
+    expect(computeSummary([null, '', undefined], 'sum')).toBe('—')
+    expect(computeSummary([], 'avg')).toBe('—')
+  })
+
+  it('counts empty and filled values for any column', () => {
+    const values = ['a', '', null, ['x'], [], undefined, 0]
+    expect(computeSummary(values, 'empty')).toBe('4')
+    expect(computeSummary(values, 'filled')).toBe('3')
+  })
+
+  it('returns empty string for none', () => {
+    expect(computeSummary([1, 2], 'none')).toBe('')
   })
 })
 

@@ -290,6 +290,77 @@
   cursor: default;
 }
 
+/* --- Summary footer ------------------------------------------------------- */
+
+.sv-table tfoot td {
+  border-top: 2px solid var(--sv-navy-700);
+  border-bottom: none;
+  background: var(--theme-elevation-50);
+  padding: 6px 10px;
+  height: 36px;
+}
+
+.sv-foot__total {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--theme-elevation-500);
+  padding: 6px 14px !important;
+}
+
+.sv-sum {
+  display: flex;
+}
+
+.sv-sum__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--theme-text);
+  transition: background 0.12s ease, opacity 0.12s ease;
+}
+
+.sv-sum__trigger:hover {
+  background: var(--sv-teal-wash);
+}
+
+.sv-sum__trigger--empty {
+  opacity: 0.35;
+  color: var(--theme-elevation-500);
+}
+
+.sv-sum__trigger--empty:hover {
+  opacity: 1;
+  color: var(--sv-teal-600);
+}
+
+.sv-sum__kind {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--sv-gold-700);
+}
+
+.sv-sum__value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sv-teal-600);
+}
+
+.sv-sum__trigger svg {
+  color: var(--theme-elevation-400);
+  flex: none;
+}
+
 /* --- Column menu ---------------------------------------------------------- */
 
 .sv-menu {
@@ -341,6 +412,23 @@
   from {
     opacity: 0;
     transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Footer summary menus open upward. */
+.sv-menu__pop--up {
+  transform-origin: bottom right;
+  animation-name: sv-pop-in-up;
+}
+
+@keyframes sv-pop-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
   }
   to {
     opacity: 1;

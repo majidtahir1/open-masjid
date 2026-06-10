@@ -13,15 +13,17 @@
  * Spec: docs/superpowers/specs/2026-06-10-submissions-spreadsheet-design.md
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Download, Inbox, Search, X } from 'lucide-react'
 import type { FormSchema } from '@/lib/form-schema'
 import {
   buildColumnSpecs,
   isFilterActive,
+  SUMMARY_LABELS,
   type ColumnFilterState,
   type SubmissionRowData,
+  type SummaryKind,
 } from '@/lib/submissions-table'
 import SubmissionsTable from './SubmissionsTable'
 import SubmissionDrawer from './SubmissionDrawer'
@@ -57,6 +59,33 @@ export default function SubmissionsView() {
   const [globalQuery, setGlobalQuery] = useState('')
   const [filters, setFilters] = useState<Record<string, ColumnFilterState>>({})
   const [openRowId, setOpenRowId] = useState<string | number | null>(null)
+
+  // Per-column summary picks, remembered per form across visits.
+  const summaryStorageKey = formId ? `om-submissions-summaries-${formId}` : null
+  const [summaries, setSummaries] = useState<Record<string, SummaryKind>>(() => {
+    if (!summaryStorageKey || typeof window === 'undefined') return {}
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(summaryStorageKey) ?? '{}') as Record<string, string>
+      return Object.fromEntries(
+        Object.entries(parsed).filter(([, v]) => v in SUMMARY_LABELS && v !== 'none'),
+      ) as Record<string, SummaryKind>
+    } catch {
+      return {}
+    }
+  })
+
+  const handleSummariesChange = useCallback(
+    (next: Record<string, SummaryKind>) => {
+      setSummaries(next)
+      if (!summaryStorageKey) return
+      try {
+        window.localStorage.setItem(summaryStorageKey, JSON.stringify(next))
+      } catch {
+        /* private mode etc. — picks just won't persist */
+      }
+    },
+    [summaryStorageKey],
+  )
 
   useEffect(() => {
     if (!formId) {
@@ -174,6 +203,8 @@ export default function SubmissionsView() {
           globalQuery={globalQuery}
           filters={filters}
           onFiltersChange={setFilters}
+          summaries={summaries}
+          onSummariesChange={handleSummariesChange}
           onRowClick={(r) => setOpenRowId(r.id)}
         />
       )}
