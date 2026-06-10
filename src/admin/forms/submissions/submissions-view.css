@@ -1,0 +1,508 @@
+/* ==========================================================================
+   SubmissionsView — spreadsheet tab styles (sv-*) + drawer (svd-*)
+   Uses Payload theme variables so dark/light both work.
+   ========================================================================== */
+
+.sv-root {
+  padding: 16px 24px 40px;
+}
+
+.sv-state {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--theme-elevation-500);
+}
+
+.sv-state--error {
+  color: var(--theme-error-500, #d4584c);
+}
+
+/* --- Toolbar ------------------------------------------------------------ */
+
+.sv-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sv-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 32px;
+  min-width: 220px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 6px;
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-elevation-500);
+}
+
+.sv-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--theme-text);
+  width: 180px;
+}
+
+.sv-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.sv-pill {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-elevation-650);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.sv-pill--active {
+  background: var(--theme-elevation-800);
+  border-color: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+}
+
+.sv-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px dashed var(--theme-elevation-250);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-elevation-650);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sv-spacer {
+  flex: 1;
+}
+
+.sv-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.sv-export:hover {
+  background: var(--theme-elevation-50);
+}
+
+.sv-capped {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--theme-warning-100, #fdf4e3);
+  color: var(--theme-warning-750, #8a6116);
+  font-size: 12.5px;
+}
+
+/* --- Table -------------------------------------------------------------- */
+
+.sv-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--theme-elevation-100);
+  border-radius: 8px;
+}
+
+.sv-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.sv-table th,
+.sv-table td {
+  border-bottom: 1px solid var(--theme-elevation-100);
+  border-right: 1px solid var(--theme-elevation-50);
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-table th {
+  background: var(--theme-elevation-50);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--theme-elevation-650);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sv-table tbody tr {
+  cursor: pointer;
+}
+
+.sv-table tbody tr:hover {
+  background: var(--theme-elevation-50);
+}
+
+.sv-th {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sv-th__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-th__filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--theme-success-500, #2e7d4f);
+  flex: none;
+}
+
+.sv-td--truncate {
+  max-width: 240px;
+}
+
+.sv-empty {
+  text-align: center;
+  color: var(--theme-elevation-500);
+  padding: 24px !important;
+  cursor: default;
+}
+
+/* --- Status / payment pills --------------------------------------------- */
+
+.sv-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  text-transform: capitalize;
+}
+
+.sv-status--new {
+  background: rgba(45, 156, 145, 0.14);
+  color: #2d9c91;
+}
+
+.sv-status--reviewed {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-650);
+}
+
+.sv-status--archived {
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-450);
+}
+
+/* --- Column menu ---------------------------------------------------------- */
+
+.sv-menu {
+  position: relative;
+  margin-left: auto;
+  flex: none;
+}
+
+.sv-menu__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-elevation-450);
+  cursor: pointer;
+}
+
+.sv-menu__trigger:hover {
+  background: var(--theme-elevation-100);
+  color: var(--theme-text);
+}
+
+.sv-menu__pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  min-width: 200px;
+  padding: 6px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  font-weight: 400;
+  text-transform: none;
+}
+
+.sv-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--theme-text);
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sv-menu__item:hover {
+  background: var(--theme-elevation-50);
+}
+
+.sv-menu__item--active {
+  background: var(--theme-elevation-100);
+}
+
+.sv-menu__divider {
+  height: 1px;
+  margin: 6px 2px;
+  background: var(--theme-elevation-100);
+}
+
+.sv-menu__filter {
+  padding: 4px 8px 8px;
+}
+
+.sv-menu__filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--theme-elevation-450);
+  margin-bottom: 6px;
+}
+
+.sv-menu__filter input[type='text'],
+.sv-menu__filter input[type='number'],
+.sv-menu__filter input[type='date'] {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 5px;
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-text);
+  font-size: 12.5px;
+}
+
+.sv-menu__options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.sv-menu__option {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--theme-text);
+  cursor: pointer;
+  white-space: normal;
+}
+
+.sv-menu__range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sv-menu__range span {
+  color: var(--theme-elevation-450);
+}
+
+/* --- Slide-over drawer ---------------------------------------------------- */
+
+.svd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.svd-panel {
+  width: min(440px, 92vw);
+  height: 100%;
+  overflow-y: auto;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.22);
+  padding: 20px 22px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.svd-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.svd-header__text h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.svd-header__meta {
+  font-size: 12px;
+  color: var(--theme-elevation-500);
+}
+
+.svd-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--theme-elevation-500);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 5px;
+}
+
+.svd-close:hover {
+  background: var(--theme-elevation-100);
+}
+
+.svd-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.svd-error {
+  font-size: 12px;
+  color: var(--theme-error-500, #d4584c);
+}
+
+.svd-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--theme-elevation-450);
+  margin: 0 0 8px;
+}
+
+.svd-answers {
+  display: grid;
+  grid-template-columns: minmax(110px, 38%) 1fr;
+  gap: 0;
+  border: 1px solid var(--theme-elevation-100);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.svd-answers dt,
+.svd-answers dd {
+  margin: 0;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.svd-answers dt {
+  color: var(--theme-elevation-500);
+  background: var(--theme-elevation-50);
+}
+
+.svd-answers dd {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Each dt/dd pair sits in a display:contents wrapper div. */
+.svd-answers > div:last-child dt,
+.svd-answers > div:last-child dd {
+  border-bottom: none;
+}
+
+.svd-payment {
+  border: 1px solid var(--theme-elevation-100);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+}
+
+.svd-payment__amount {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.svd-payment a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  color: var(--theme-text);
+  font-size: 12px;
+}
+
+.svd-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.svd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 13px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--theme-text);
+  font-size: 12.5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.svd-btn:hover {
+  background: var(--theme-elevation-50);
+}
+
+.svd-btn--primary {
+  background: var(--theme-elevation-800);
+  border-color: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+}
+
+.svd-btn--primary:hover {
+  background: var(--theme-elevation-700);
+}
+
+.svd-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}

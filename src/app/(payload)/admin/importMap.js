@@ -51,6 +51,7 @@ import { default as default_2eb70bbc45e395636d6cbbacc6547709 } from '../../../..
 import { default as default_3ac7f872b9b24ddaa58b8ab08cc811ff } from '../../../../src/admin/forms/fields/ColorField'
 import { QRCodesBanner as QRCodesBanner_2db377ce76905e597f005b9f590842db } from '../../../../src/admin/KioskContentBanner'
 import { FormBuilderFieldClient as FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078 } from '../../../../src/admin/forms/FormBuilderField.client'
+import { default as default_860e8a42638911b606d28103e4da5caf } from '../../../../src/admin/forms/submissions/SubmissionsView'
 import { default as default_0803508a87a40ac89eba101ebb83fff7 } from '../../../../src/admin/forms/cells/StatusCell'
 import { default as default_fb11782db8353d6b3128f638b2c4f9bb } from '../../../../src/admin/forms/cells/PaymentStatusCell'
 import { default as default_3675cf05180d34c2b9887f83fd76cf74 } from '../../../../src/admin/forms/SubmissionsList'
@@ -142,6 +143,7 @@ export const importMap = {
   "/src/admin/forms/fields/ColorField#default": default_3ac7f872b9b24ddaa58b8ab08cc811ff,
   "/src/admin/KioskContentBanner#QRCodesBanner": QRCodesBanner_2db377ce76905e597f005b9f590842db,
   "/src/admin/forms/FormBuilderField.client#FormBuilderFieldClient": FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078,
+  "/src/admin/forms/submissions/SubmissionsView#default": default_860e8a42638911b606d28103e4da5caf,
   "/src/admin/forms/cells/StatusCell#default": default_0803508a87a40ac89eba101ebb83fff7,
   "/src/admin/forms/cells/PaymentStatusCell#default": default_fb11782db8353d6b3128f638b2c4f9bb,
   "/src/admin/forms/SubmissionsList#default": default_3675cf05180d34c2b9887f83fd76cf74,
