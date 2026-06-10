@@ -241,11 +241,11 @@
   color: var(--theme-text);
 }
 
+/* Rendered in a body-level portal (fixed, anchored to the trigger) so the
+   table's scroll container and the sticky header can't clip it. */
 .sv-menu__pop {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
-  z-index: 20;
+  position: fixed;
+  z-index: 60;
   min-width: 200px;
   padding: 6px;
   border: 1px solid var(--theme-elevation-150);
