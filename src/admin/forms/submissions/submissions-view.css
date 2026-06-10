@@ -738,6 +738,45 @@
   cursor: default;
 }
 
+.svd-actions__spacer {
+  flex: 1;
+}
+
+.svd-btn--danger-ghost {
+  color: #b2493c;
+  border-color: rgba(178, 73, 60, 0.4);
+}
+
+.svd-btn--danger-ghost svg {
+  color: #b2493c;
+}
+
+.svd-btn--danger-ghost:hover {
+  border-color: #b2493c;
+  background: rgba(178, 73, 60, 0.08);
+}
+
+.svd-btn--danger {
+  background: #b2493c;
+  border-color: #b2493c;
+  color: #fff;
+}
+
+.svd-btn--danger svg {
+  color: #fff;
+}
+
+.svd-btn--danger:hover {
+  background: #9a3e33;
+}
+
+.svd-delete-error {
+  margin: -8px 22px 0;
+  font-size: 13px;
+  color: var(--theme-error-500, #d4584c);
+  text-align: right;
+}
+
 /* Respect reduced-motion preferences. */
 @media (prefers-reduced-motion: reduce) {
   .sv-menu__pop,

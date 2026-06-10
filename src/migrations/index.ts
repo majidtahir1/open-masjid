@@ -31,6 +31,7 @@ import * as migration_20260601_205903_media_api_scopes from './20260601_205903_m
 import * as migration_20260603_163728_blog_posts from './20260603_163728_blog_posts';
 import * as migration_20260604_090000_blog_api_scopes from './20260604_090000_blog_api_scopes';
 import * as migration_20260604_205205_demo_mode from './20260604_205205_demo_mode';
+import * as migration_20260610_174850_form_submissions_trash from './20260610_174850_form_submissions_trash';
 
 export const migrations = [
   {
@@ -196,6 +197,11 @@ export const migrations = [
   {
     up: migration_20260604_205205_demo_mode.up,
     down: migration_20260604_205205_demo_mode.down,
-    name: '20260604_205205_demo_mode'
+    name: '20260604_205205_demo_mode',
+  },
+  {
+    up: migration_20260610_174850_form_submissions_trash.up,
+    down: migration_20260610_174850_form_submissions_trash.down,
+    name: '20260610_174850_form_submissions_trash'
   },
 ];
