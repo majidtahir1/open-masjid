@@ -176,8 +176,8 @@ export default function SubmissionsView() {
           </button>
         )}
         <span className="sv-spacer" />
-        {form?.slug && rows.length > 0 && (
-          <a className="sv-export" href={`/api/forms/${form.slug}/submissions.csv`} download>
+        {form && rows.length > 0 && (
+          <a className="sv-export" href={`/api/forms/${form.id}/submissions.csv`} download>
             <Download size={13} strokeWidth={1.75} aria-hidden />
             Download CSV
           </a>
@@ -213,7 +213,7 @@ export default function SubmissionsView() {
         <SubmissionDrawer
           row={openRow}
           schema={form.schema ?? null}
-          formSlug={form.slug ?? null}
+          formRef={String(form.id)}
           onClose={() => setOpenRowId(null)}
         />
       )}

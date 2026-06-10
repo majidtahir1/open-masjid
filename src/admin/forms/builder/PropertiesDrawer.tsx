@@ -207,7 +207,8 @@ function GeneralTab({ field, onChange }: GeneralTabProps) {
         />
         {showNameWarning && (
           <p className="fb-drawer-warning">
-            Changing the field name may break webhooks/CSV exports for existing submissions.
+            On save, existing submission answers are moved to the new field name automatically.
+            External webhooks that reference the old name will need updating.
           </p>
         )}
       </div>

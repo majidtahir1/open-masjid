@@ -9,6 +9,7 @@ import { withBillingLock } from '../access/billingLocked'
 import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateSchema } from '../lib/form-schema'
+import { applyRenames, detectFieldRenames } from '../lib/form-schema-migrate'
 
 const slugify = (v: string): string =>
   v.toLowerCase().trim()
@@ -63,6 +64,46 @@ export const Forms: CollectionConfig = {
       }
       return data
     }],
+    afterChange: [
+      // Submission answers are keyed by field `name`. When a field is renamed
+      // (matched by its stable `id`), re-key existing submissions so old
+      // answers keep showing up in the spreadsheet, drawer, and CSV.
+      async ({ doc, previousDoc, operation, req }) => {
+        if (operation !== 'update') return doc
+        const renames = detectFieldRenames(previousDoc?.schema, doc?.schema)
+        if (renames.length === 0) return doc
+        try {
+          let page = 1
+          for (;;) {
+            const batch = await req.payload.find({
+              collection: 'form-submissions',
+              where: { form: { equals: doc.id } },
+              limit: 200,
+              page,
+              depth: 0,
+              overrideAccess: true,
+            })
+            for (const sub of batch.docs as Array<{ id: string | number; data?: Record<string, unknown> | null }>) {
+              const result = applyRenames(sub.data ?? {}, renames)
+              if (!result.changed) continue
+              await req.payload.update({
+                collection: 'form-submissions',
+                id: sub.id,
+                data: { data: result.data },
+                overrideAccess: true,
+              })
+            }
+            if (!batch.hasNextPage) break
+            page += 1
+          }
+        } catch (err) {
+          // Best effort: the form save itself must not fail. Re-running the
+          // rename (back and forth) re-triggers the migration.
+          req.payload.logger.error({ err, formId: doc.id, renames }, 'form field rename migration failed')
+        }
+        return doc
+      },
+    ],
   },
   fields: [
     { name: 'title', type: 'text', required: true, label: 'Form title' },

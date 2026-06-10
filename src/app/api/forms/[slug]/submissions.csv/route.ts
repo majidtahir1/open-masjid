@@ -17,6 +17,15 @@ interface FormDoc {
   payment?: { enabled?: boolean | null } | null
 }
 
+/**
+ * The [slug] segment accepts either a form id or a slug. Ids are globally
+ * unique, so id-based lookups work from any admin host — including the
+ * platform admin host, where no tenant can be derived from the hostname.
+ * Slug lookups need the host tenant to disambiguate (slugs are per-tenant).
+ * Access control (`overrideAccess: false` + user) enforces tenant scoping
+ * either way.
+ */
+
 interface SubmissionDoc {
   submittedAt: string | Date
   status: string
@@ -40,27 +49,46 @@ export async function GET(
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  // 2. Resolve tenant from request context
-  const tenant = await getCurrentTenant()
-  if (!tenant) {
-    return NextResponse.json({ error: 'no tenant' }, { status: 401 })
+  // 2. Look up the form — by id when the segment is numeric, else by
+  //    slug scoped to the host tenant.
+  const { slug } = await params
+  let form: FormDoc | undefined
+
+  if (/^\d+$/.test(slug)) {
+    try {
+      const byId = (await payload.find({
+        collection: 'forms' as never,
+        where: { id: { equals: slug } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: false,
+        user,
+      } as never)) as unknown as { docs: FormDoc[] }
+      form = byId.docs[0]
+    } catch {
+      // Not a valid id for this database — fall through to the slug lookup.
+    }
   }
 
-  // 3. Look up the form by slug + tenant
-  const { slug } = await params
-  const formsResult = (await payload.find({
-    collection: 'forms' as never,
-    where: {
-      slug: { equals: slug },
-      tenant: { equals: tenant.id },
-    },
-    limit: 1,
-    depth: 0,
-    overrideAccess: false,
-    user,
-  } as never)) as unknown as { docs: FormDoc[] }
+  if (!form) {
+    const tenant = await getCurrentTenant()
+    if (!tenant) {
+      return NextResponse.json({ error: 'no tenant' }, { status: 401 })
+    }
+    const bySlug = (await payload.find({
+      collection: 'forms' as never,
+      where: {
+        slug: { equals: slug },
+        tenant: { equals: tenant.id },
+      },
+      limit: 1,
+      depth: 0,
+      overrideAccess: false,
+      user,
+    } as never)) as unknown as { docs: FormDoc[] }
+    form = bySlug.docs[0]
+  }
 
-  const form = formsResult.docs[0]
   if (!form) {
     return NextResponse.json({ error: 'form not found' }, { status: 404 })
   }
@@ -83,9 +111,10 @@ export async function GET(
     includePayment: !!form.payment?.enabled,
   })
 
-  // 6. Build filename with today's date
+  // 6. Build filename with today's date (always use the slug, even when the
+  //    request came in by id)
   const today = new Date().toISOString().slice(0, 10)
-  const filename = `${slug}-submissions-${today}.csv`
+  const filename = `${form.slug || slug}-submissions-${today}.csv`
 
   return new NextResponse(csv, {
     status: 200,

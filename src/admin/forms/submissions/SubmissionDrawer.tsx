@@ -18,7 +18,8 @@ import {
 export interface SubmissionDrawerProps {
   row: SubmissionRowData
   schema: FormSchema | null
-  formSlug: string | null
+  /** Form id (or slug) for building the CSV export URL. */
+  formRef: string | null
   onClose: () => void
 }
 
@@ -32,7 +33,7 @@ function formatAmount(cents: number, currency: string | null | undefined): strin
 export default function SubmissionDrawer({
   row,
   schema,
-  formSlug,
+  formRef,
   onClose,
 }: SubmissionDrawerProps) {
   useEffect(() => {
@@ -124,10 +125,10 @@ export default function SubmissionDrawer({
               Reply
             </a>
           )}
-          {formSlug && (
+          {formRef && (
             <a
               className="svd-btn"
-              href={`/api/forms/${formSlug}/submissions.csv?id=${row.id}`}
+              href={`/api/forms/${formRef}/submissions.csv?id=${row.id}`}
               download
             >
               <Download size={14} aria-hidden />
