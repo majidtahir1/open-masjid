@@ -30,7 +30,10 @@ field, and sort/filter columns like a spreadsheet.
 - The **Forms list** becomes the landing page. Two new columns:
   - **Submissions** — total count, with a badge showing the count of `status: new`.
   - **Last submission** — most recent `submittedAt`, or "—".
-  - Implemented as virtual (non-stored) fields populated on read for list requests.
+  - Implemented as `ui` fields with custom Cell components that fetch stats
+    client-side (shared per-form request cache). Virtual fields with afterRead
+    hooks were rejected: they would run count queries on every form read,
+    including public form-page renders.
 - A **Submissions tab** is registered as a Payload custom edit-view tab on the Forms
   collection at `/admin/collections/forms/:id/submissions`, alongside the existing
   form editor. Tenant scoping is inherited from existing access control: staff can
