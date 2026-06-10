@@ -91,7 +91,10 @@ export default function SummaryMenu({ spec, value, display, onChange }: Props) {
         }}
       >
         {value === 'none' ? (
-          <Plus size={12} strokeWidth={1.75} aria-hidden />
+          <>
+            <Plus size={15} strokeWidth={2} aria-hidden />
+            <span className="sv-sum__add">Summary</span>
+          </>
         ) : (
           <>
             <span className="sv-sum__kind">{SUMMARY_LABELS[value]}</span>
