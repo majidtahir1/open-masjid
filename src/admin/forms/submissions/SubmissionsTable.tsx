@@ -1,6 +1,34 @@
 'use client'
 
-import type { ColumnFilterState, ColumnSpec, SubmissionRowData } from '@/lib/submissions-table'
+/**
+ * SubmissionsTable — TanStack-powered spreadsheet body.
+ * Sorting/filtering logic comes from src/lib/submissions-table.ts;
+ * TanStack provides the row models and state plumbing.
+ */
+
+import { useMemo, useState } from 'react'
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type ColumnDef,
+  type SortingState,
+} from '@tanstack/react-table'
+import { ArrowDown, ArrowUp } from 'lucide-react'
+import {
+  compareValues,
+  formatCellValue,
+  formatSubmittedAt,
+  getCellValue,
+  isFilterActive,
+  matchesFilter,
+  matchesGlobal,
+  type ColumnFilterState,
+  type ColumnSpec,
+  type SubmissionRowData,
+} from '@/lib/submissions-table'
+import ColumnMenu from './ColumnMenu'
 
 export interface SubmissionsTableProps {
   rows: SubmissionRowData[]
@@ -11,6 +39,131 @@ export interface SubmissionsTableProps {
   onRowClick: (row: SubmissionRowData) => void
 }
 
-export default function SubmissionsTable({ rows }: SubmissionsTableProps) {
-  return <div className="sv-state">Table coming in Task 4 — {rows.length} submissions loaded.</div>
+export default function SubmissionsTable({
+  rows,
+  specs,
+  globalQuery,
+  filters,
+  onFiltersChange,
+  onRowClick,
+}: SubmissionsTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'submittedAt', desc: true }])
+
+  const specById = useMemo(() => new Map(specs.map((s) => [s.id, s])), [specs])
+
+  const columns = useMemo<ColumnDef<SubmissionRowData>[]>(
+    () =>
+      specs.map((spec) => ({
+        id: spec.id,
+        accessorFn: (row) => getCellValue(row, spec),
+        filterFn: (tableRow, columnId, filterValue) =>
+          matchesFilter(tableRow.getValue(columnId), spec, filterValue as ColumnFilterState),
+        sortingFn: (a, b, columnId) => compareValues(a.getValue(columnId), b.getValue(columnId), spec),
+      })),
+    [specs],
+  )
+
+  const columnFilters = useMemo(
+    () =>
+      Object.entries(filters)
+        .filter(([id, state]) => {
+          const spec = specById.get(id)
+          return spec ? isFilterActive(spec, state) : false
+        })
+        .map(([id, state]) => ({ id, value: state })),
+    [filters, specById],
+  )
+
+  // eslint-disable-next-line react-hooks/incompatible-library -- useReactTable is a known incompatible library with React Compiler; safe here as we don't pass memoized values from it to other memoized components
+  const table = useReactTable({
+    data: rows,
+    columns,
+    state: { sorting, columnFilters, globalFilter: globalQuery },
+    onSortingChange: setSorting,
+    globalFilterFn: (tableRow, _columnId, q) => matchesGlobal(tableRow.original, specs, String(q ?? '')),
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  })
+
+  const sortFor = (id: string): 'asc' | 'desc' | null => {
+    const s = sorting.find((x) => x.id === id)
+    return s ? (s.desc ? 'desc' : 'asc') : null
+  }
+
+  const visibleRows = table.getRowModel().rows
+
+  return (
+    <div className="sv-table-wrap">
+      <table className="sv-table">
+        <thead>
+          <tr>
+            {specs.map((spec) => {
+              const dir = sortFor(spec.id)
+              return (
+                <th
+                  key={spec.id}
+                  aria-sort={dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : undefined}
+                >
+                  <div className="sv-th">
+                    <span className="sv-th__label">{spec.label}</span>
+                    {dir === 'asc' && <ArrowUp size={12} aria-hidden />}
+                    {dir === 'desc' && <ArrowDown size={12} aria-hidden />}
+                    {isFilterActive(spec, filters[spec.id]) && (
+                      <span className="sv-th__filter-dot" title="Filter active" />
+                    )}
+                    <ColumnMenu
+                      spec={spec}
+                      sortDir={dir}
+                      onSort={(d) => setSorting([{ id: spec.id, desc: d === 'desc' }])}
+                      filter={filters[spec.id]}
+                      onFilterChange={(state) => onFiltersChange({ ...filters, [spec.id]: state })}
+                    />
+                  </div>
+                </th>
+              )
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {visibleRows.map((tableRow) => (
+            <tr key={String(tableRow.original.id)} onClick={() => onRowClick(tableRow.original)}>
+              {tableRow.getVisibleCells().map((cell) => {
+                const spec = specById.get(cell.column.id)
+                if (!spec) return <td key={cell.id} />
+                const value = cell.getValue()
+                if (spec.id === 'status') {
+                  return (
+                    <td key={cell.id}>
+                      <span className={`sv-status sv-status--${String(value ?? 'new')}`}>
+                        {formatCellValue(value)}
+                      </span>
+                    </td>
+                  )
+                }
+                const text =
+                  spec.id === 'submittedAt' ? formatSubmittedAt(value) : formatCellValue(value)
+                return (
+                  <td
+                    key={cell.id}
+                    className={spec.fieldType === 'long-text' ? 'sv-td--truncate' : undefined}
+                    title={text === '—' ? undefined : text}
+                  >
+                    {text}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+          {visibleRows.length === 0 && (
+            <tr>
+              <td colSpan={specs.length} className="sv-empty">
+                No submissions match the current filters.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
 }
