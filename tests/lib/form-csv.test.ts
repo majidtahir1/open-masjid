@@ -17,7 +17,6 @@ const makeSchema = (fields: Array<{ type: string; name: string; label: string }>
 
 const baseSubmission = {
   submittedAt: '2024-01-15T10:00:00.000Z',
-  status: 'complete',
   paymentStatus: 'paid',
   submitterEmail: 'test@example.com',
   data: {} as Record<string, unknown>,
@@ -31,10 +30,15 @@ describe('submissionsToCsv', () => {
     const cols = header.split(',')
     expect(cols[0]).toBe('Submitted at')
     expect(cols[1]).toBe('Email')
-    expect(cols[2]).toBe('Status')
-    expect(cols[3]).toBe('Payment')
-    expect(cols[4]).toBe('Amount')
-    expect(cols[5]).toBe('Currency')
+    expect(cols[2]).toBe('Payment')
+    expect(cols[3]).toBe('Amount')
+    expect(cols[4]).toBe('Currency')
+  })
+
+  it('omits payment columns when includePayment is false', () => {
+    const schema = makeSchema([{ type: 'short-text', name: 'name', label: 'Name' }])
+    const csv = submissionsToCsv(schema, [], { includePayment: false })
+    expect(csv.split('\n')[0].split(',')).toEqual(['Submitted at', 'Email', 'Name'])
   })
 
   it('column order matches schema field order', () => {
@@ -46,10 +50,10 @@ describe('submissionsToCsv', () => {
     const csv = submissionsToCsv(schema, [])
     const header = csv.split('\n')[0]
     const cols = header.split(',')
-    // Fixed cols: 0-5, then field cols starting at 6
-    expect(cols[6]).toBe('First Name')
-    expect(cols[7]).toBe('Last Name')
-    expect(cols[8]).toBe('Email Address')
+    // Fixed cols: 0-4, then field cols starting at 5
+    expect(cols[5]).toBe('First Name')
+    expect(cols[6]).toBe('Last Name')
+    expect(cols[7]).toBe('Email Address')
   })
 
   it('page-break fields are skipped in column generation', () => {
@@ -71,8 +75,8 @@ describe('submissionsToCsv', () => {
     expect(header).toContain('Field B')
     // page-break has no label in base fields but let's just confirm col count
     const cols = header.split(',')
-    // 6 fixed + 2 fields (page-break skipped)
-    expect(cols).toHaveLength(8)
+    // 5 fixed + 2 fields (page-break skipped)
+    expect(cols).toHaveLength(7)
   })
 
   it('arrays render as semicolon-space joined', () => {
@@ -117,9 +121,9 @@ describe('submissionsToCsv', () => {
     const csv = submissionsToCsv(schema, [submission])
     const dataRow = csv.split('\n')[1]
     const cols = dataRow.split(',')
-    // consented is col 6, opted_out is col 7
-    expect(cols[6]).toBe('yes')
-    expect(cols[7]).toBe('')
+    // consented is col 5, opted_out is col 6
+    expect(cols[5]).toBe('yes')
+    expect(cols[6]).toBe('')
   })
 
   it('empty, null and undefined cells render as empty string', () => {
@@ -135,9 +139,9 @@ describe('submissionsToCsv', () => {
     const csv = submissionsToCsv(schema, [submission])
     const dataRow = csv.split('\n')[1]
     const cols = dataRow.split(',')
+    expect(cols[5]).toBe('')
     expect(cols[6]).toBe('')
     expect(cols[7]).toBe('')
-    expect(cols[8]).toBe('')
   })
 
   it('amountCents is formatted as decimal and currency included', () => {
@@ -151,8 +155,8 @@ describe('submissionsToCsv', () => {
     const csv = submissionsToCsv(schema, [submission])
     const dataRow = csv.split('\n')[1]
     const cols = dataRow.split(',')
-    expect(cols[4]).toBe('15.00')
-    expect(cols[5]).toBe('usd')
+    expect(cols[3]).toBe('15.00')
+    expect(cols[4]).toBe('usd')
   })
 
   it('null amountCents and currency render as empty string', () => {
@@ -166,7 +170,7 @@ describe('submissionsToCsv', () => {
     const csv = submissionsToCsv(schema, [submission])
     const dataRow = csv.split('\n')[1]
     const cols = dataRow.split(',')
+    expect(cols[3]).toBe('')
     expect(cols[4]).toBe('')
-    expect(cols[5]).toBe('')
   })
 })

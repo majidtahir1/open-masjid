@@ -31,7 +31,23 @@ export const Forms: CollectionConfig = {
     group: 'Forms',
     hidden: hideForKioskManager,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'submissionsCount', 'updatedAt'],
+    defaultColumns: ['title', 'status', 'submissionsCount', 'lastSubmission', 'updatedAt'],
+    components: {
+      views: {
+        edit: {
+          // Spreadsheet of this form's submissions.
+          // Spec: docs/superpowers/specs/2026-06-10-submissions-spreadsheet-design.md
+          submissions: {
+            Component: '/src/admin/forms/submissions/SubmissionsView#default',
+            path: '/submissions',
+            tab: {
+              label: 'Submissions',
+              href: '/submissions',
+            },
+          },
+        },
+      },
+    },
   },
   access: {
     read: denyKioskManager(tenantScopedRead),
@@ -68,6 +84,28 @@ export const Forms: CollectionConfig = {
         { label: 'Closed', value: 'closed' },
       ],
       admin: { position: 'sidebar' },
+    },
+    {
+      name: 'submissionsCount',
+      type: 'ui',
+      label: 'Submissions',
+      admin: {
+        components: {
+          Field: '/src/admin/forms/cells/EmptyField#default',
+          Cell: '/src/admin/forms/cells/SubmissionsCountCell#default',
+        },
+      },
+    },
+    {
+      name: 'lastSubmission',
+      type: 'ui',
+      label: 'Last submission',
+      admin: {
+        components: {
+          Field: '/src/admin/forms/cells/EmptyField#default',
+          Cell: '/src/admin/forms/cells/LastSubmissionCell#default',
+        },
+      },
     },
     {
       name: 'description',

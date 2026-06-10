@@ -1,0 +1,12 @@
+/* Cells for the Forms list view: submission count + last submission date. */
+
+.sc-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.sc-cell--muted {
+  color: var(--theme-elevation-450);
+}
