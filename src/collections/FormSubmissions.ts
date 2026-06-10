@@ -1,30 +1,18 @@
 // src/collections/FormSubmissions.ts
 import type { CollectionConfig } from 'payload'
 import { tenantScopedRead } from '../access/tenantScoped'
-import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
+import { denyKioskManager } from '../access/kioskRoles'
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
   labels: { singular: 'Submission', plural: 'Submissions' },
   admin: {
-    enableListViewSelectAPI: true,
-    group: 'Forms',
-    hidden: hideForKioskManager,
+    // No admin UI of its own — submissions are viewed via the spreadsheet
+    // "Submissions" tab on each form (src/admin/forms/submissions/). The
+    // REST API and access control below are unaffected by `hidden`.
+    hidden: true,
     useAsTitle: 'submitterEmail',
-    defaultColumns: ['submittedAt', 'submitterEmail', 'form', 'status', 'paymentStatus'],
     description: 'Form submissions. Read-only — created by the public submit endpoint.',
-    components: {
-      beforeListTable: ['/src/admin/forms/SubmissionsList#default'],
-      views: {
-        edit: {
-          // Replace the default edit view with a bespoke submission-detail layout.
-          // Artboard ref: 4.2 sub-detail
-          default: {
-            Component: '/src/admin/forms/SubmissionDetail#default',
-          },
-        },
-      },
-    },
   },
   access: {
     create: denyKioskManager(() => false),
@@ -50,11 +38,6 @@ export const FormSubmissions: CollectionConfig = {
         { label: 'Reviewed', value: 'reviewed' },
         { label: 'Archived', value: 'archived' },
       ],
-      admin: {
-        components: {
-          Cell: '/src/admin/forms/cells/StatusCell#default',
-        },
-      },
     },
     {
       name: 'paymentStatus',
@@ -66,12 +49,7 @@ export const FormSubmissions: CollectionConfig = {
         { label: 'Expired', value: 'expired' },
       ],
       defaultValue: 'na',
-      admin: {
-        readOnly: true,
-        components: {
-          Cell: '/src/admin/forms/cells/PaymentStatusCell#default',
-        },
-      },
+      admin: { readOnly: true },
     },
     { name: 'amountCents', type: 'number', admin: { readOnly: true } },
     { name: 'currency', type: 'text', admin: { readOnly: true } },
