@@ -1,5 +1,3 @@
-export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string }
-
 export type AuthzResult =
   | { ok: true }
   | { ok: false; status: 401 | 403; error: string }
@@ -13,14 +11,19 @@ export function authorizeAnsari(user: { role?: string } | null): AuthzResult {
 
 export type HermesConfig = { baseUrl: string; apiKey: string }
 
-/** Build the upstream request to a Hermes profile's OpenAI-compatible chat endpoint. */
-export function buildHermesChatRequest(
-  messages: ChatMessage[],
+/**
+ * Build the upstream request to a Hermes profile's OpenAI-style Responses API.
+ * Hermes holds conversation state server-side (reasoning, tool calls); each
+ * turn sends only the new user message plus the previous response id to chain.
+ */
+export function buildHermesResponsesRequest(
+  message: string,
+  previousResponseId: string | null,
   cfg: HermesConfig,
 ): { url: string; init: RequestInit } {
   const base = cfg.baseUrl.replace(/\/+$/, '')
   return {
-    url: `${base}/v1/chat/completions`,
+    url: `${base}/v1/responses`,
     init: {
       method: 'POST',
       headers: {
@@ -28,29 +31,40 @@ export function buildHermesChatRequest(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'hermes-agent',
-        messages,
+        input: message,
         stream: true,
+        ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
       }),
     },
   }
 }
 
+export type ResponsesSseEvent =
+  | { kind: 'delta'; text: string }
+  | { kind: 'completed'; responseId: string }
+
 /**
- * Parse one SSE line from /v1/chat/completions stream into an assistant text
- * delta. Returns the text fragment, or null for [DONE], comments, non-data
- * lines, and chunks without content (role-only chunks, tool-progress events).
+ * Parse one SSE line from a /v1/responses stream. Returns a text delta, the
+ * completed event carrying the response id to chain the next turn, or null
+ * for everything else ([DONE], comments, event-name lines, lifecycle events).
  */
-export function parseSseContentDelta(line: string): string | null {
+export function parseResponsesSseEvent(line: string): ResponsesSseEvent | null {
   if (!line.startsWith('data:')) return null
   const payload = line.slice('data:'.length).trim()
   if (payload === '' || payload === '[DONE]') return null
   try {
     const json = JSON.parse(payload) as {
-      choices?: Array<{ delta?: { content?: string } }>
+      type?: string
+      delta?: string
+      response?: { id?: string }
     }
-    const content = json.choices?.[0]?.delta?.content
-    return typeof content === 'string' && content.length > 0 ? content : null
+    if (json.type === 'response.output_text.delta' && typeof json.delta === 'string') {
+      return { kind: 'delta', text: json.delta }
+    }
+    if (json.type === 'response.completed' && typeof json.response?.id === 'string') {
+      return { kind: 'completed', responseId: json.response.id }
+    }
+    return null
   } catch {
     return null
   }

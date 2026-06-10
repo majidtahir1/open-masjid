@@ -158,6 +158,12 @@
   color: #fff;
 }
 
+.hdr button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+}
+
 /* ---- messages area ---- */
 .msgs {
   flex: 1;
