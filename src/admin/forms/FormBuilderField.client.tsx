@@ -24,6 +24,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { Field, FieldTypeId, FormSchema } from '@/lib/form-schema'
 import { FIELD_TYPES } from '@/lib/form-schema'
+import { PLATFORM_DOMAIN } from '@/lib/tenant-parse'
 import FieldCard from './builder/FieldCard'
 import AddFieldPopover from './builder/AddFieldPopover'
 import PropertiesDrawer from './builder/PropertiesDrawer'
@@ -176,27 +177,41 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
     tenantField && typeof tenantField === 'object' && 'id' in tenantField
       ? tenantField.id
       : (tenantField as string | number | null)
-  const [tenantSlug, setTenantSlug] = useState<string | null>(null)
+  const [tenantInfo, setTenantInfo] = useState<{ slug: string; customDomain: string | null } | null>(null)
   useEffect(() => {
     if (!tenantId) return
     let cancelled = false
     fetch(`/api/tenants/${tenantId}?depth=0`, { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!cancelled && d?.slug) setTenantSlug(d.slug) })
+      .then((d: { slug?: string; customDomains?: Array<{ domain?: string | null }> } | null) => {
+        if (cancelled || !d?.slug) return
+        setTenantInfo({
+          slug: d.slug,
+          customDomain: d.customDomains?.find((c) => c?.domain)?.domain ?? null,
+        })
+      })
       .catch(() => { /* fall back */ })
     return () => { cancelled = true }
   }, [tenantId])
+  // Build an absolute public-form URL the same way ViewPublicSiteLink does:
+  // the tenant's custom domain when set, otherwise the platform subdomain.
+  // The current host can't be used as a base — on the platform admin host
+  // (admin.<domain>) prefixing the slug would produce a dead hostname.
   const publicHref = (() => {
     if (!slugValue) return null
-    if (typeof window === 'undefined') return `/forms/${slugValue}`
-    const host = window.location.host
-    const firstLabel = host.split(':')[0].split('.')[0].toLowerCase()
-    const isBareLocal = firstLabel === 'localhost' || firstLabel === '127' || firstLabel === '0'
-    const isAdminHost = firstLabel === 'admin'
-    if ((isBareLocal || isAdminHost) && tenantSlug) {
-      return `${window.location.protocol}//${tenantSlug}.${host}/forms/${slugValue}`
+    const path = `/forms/${slugValue}`
+    if (typeof window === 'undefined' || !tenantInfo) return path
+    if (tenantInfo.customDomain) return `https://${tenantInfo.customDomain}${path}`
+    const [hostname, port] = window.location.host.split(':')
+    const isLocal =
+      hostname === 'localhost' ||
+      hostname.endsWith('.localhost') ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0'
+    if (isLocal) {
+      return `${window.location.protocol}//${tenantInfo.slug}.localhost${port ? `:${port}` : ''}${path}`
     }
-    return `/forms/${slugValue}`
+    return `https://${tenantInfo.slug}.${PLATFORM_DOMAIN}${path}`
   })()
 
   // Normalise: Payload may store raw JSON as a string or as null
