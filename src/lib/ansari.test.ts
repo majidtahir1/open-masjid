@@ -4,6 +4,8 @@ import {
   buildHermesChatRequest,
   parseSseContentDelta,
   getHermesConfig,
+  trimChatHistory,
+  ANSARI_MAX_HISTORY_MESSAGES,
   type ChatMessage,
 } from './ansari'
 
@@ -58,6 +60,38 @@ describe('getHermesConfig', () => {
     expect(getHermesConfig()).toEqual({ baseUrl: 'http://h', apiKey: 'k' })
     delete process.env.HERMES_API_BASE_URL
     delete process.env.HERMES_API_KEY
+  })
+})
+
+describe('trimChatHistory', () => {
+  const turn = (i: number): ChatMessage[] => [
+    { role: 'user', content: `q${i}` },
+    { role: 'assistant', content: `a${i}` },
+  ]
+
+  it('returns short histories unchanged', () => {
+    const msgs = [...turn(1), ...turn(2), { role: 'user' as const, content: 'q3' }]
+    expect(trimChatHistory(msgs, 6)).toEqual(msgs)
+  })
+
+  it('keeps only the most recent messages when over the cap', () => {
+    const msgs = [...turn(1), ...turn(2), ...turn(3), { role: 'user' as const, content: 'q4' }]
+    expect(trimChatHistory(msgs, 3)).toEqual([
+      { role: 'user', content: 'q3' },
+      { role: 'assistant', content: 'a3' },
+      { role: 'user', content: 'q4' },
+    ])
+  })
+
+  it('drops a leading orphaned assistant message after trimming', () => {
+    const msgs = [...turn(1), ...turn(2), { role: 'user' as const, content: 'q3' }]
+    // cap of 2 would start the window on a2 (assistant) — drop it so the
+    // history opens with a user turn
+    expect(trimChatHistory(msgs, 2)).toEqual([{ role: 'user', content: 'q3' }])
+  })
+
+  it('exports a sane default cap', () => {
+    expect(ANSARI_MAX_HISTORY_MESSAGES).toBeGreaterThanOrEqual(10)
   })
 })
 

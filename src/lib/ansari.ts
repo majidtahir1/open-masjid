@@ -11,6 +11,25 @@ export function authorizeAnsari(user: { role?: string } | null): AuthzResult {
   return { ok: true }
 }
 
+/**
+ * Cap on messages replayed upstream per request. The browser resends history
+ * as plain text (reasoning/tool state is lost), so long threads drift away
+ * from the SOUL.md persona; a bounded window keeps it dominant.
+ */
+export const ANSARI_MAX_HISTORY_MESSAGES = 20
+
+/**
+ * Keep only the most recent `max` messages, then drop any leading assistant
+ * messages so the window always opens with a user turn.
+ */
+export function trimChatHistory(messages: ChatMessage[], max: number): ChatMessage[] {
+  let window = messages.slice(-max)
+  while (window.length > 0 && window[0].role === 'assistant') {
+    window = window.slice(1)
+  }
+  return window
+}
+
 export type HermesConfig = { baseUrl: string; apiKey: string }
 
 /** Build the upstream request to a Hermes profile's OpenAI-compatible chat endpoint. */

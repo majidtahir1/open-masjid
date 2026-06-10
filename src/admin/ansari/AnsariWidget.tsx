@@ -127,6 +127,18 @@ export default function AnsariWidget() {
             <div className={styles.name}>Ansari</div>
             <div className={styles.status}>Online</div>
           </div>
+          <button
+            onClick={() => {
+              setMessages([])
+              setError(null)
+              setTool(null)
+            }}
+            disabled={busy || messages.length === 0}
+            title="New chat"
+            aria-label="Start a new chat"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
           <button onClick={() => setView(expanded ? 'docked' : 'expanded')} title={expanded ? 'Restore' : 'Expand'}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
           </button>

@@ -6,6 +6,8 @@ import {
   authorizeAnsari,
   buildHermesChatRequest,
   getHermesConfig,
+  trimChatHistory,
+  ANSARI_MAX_HISTORY_MESSAGES,
   type ChatMessage,
 } from '@/lib/ansari'
 
@@ -41,7 +43,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'ansari-not-configured' }, { status: 503 })
   }
 
-  const { url, init } = buildHermesChatRequest(messages, cfg)
+  const { url, init } = buildHermesChatRequest(
+    trimChatHistory(messages, ANSARI_MAX_HISTORY_MESSAGES),
+    cfg,
+  )
 
   let upstream: Response
   try {
