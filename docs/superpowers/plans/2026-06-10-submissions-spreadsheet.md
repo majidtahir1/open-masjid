@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the Payload-default submissions list with a JotForm-style spreadsheet: a "Submissions" tab on each form showing one column per form field, with per-column sort/filter, global search, and a slide-over detail panel.
+**Goal:** Replace the Payload-default submissions list with a spreadsheet view: a "Submissions" tab on each form showing one column per form field, with per-column sort/filter, global search, and a slide-over detail panel.
 
 **Architecture:** A Payload custom document-tab view on the `forms` collection (`admin.components.views.edit.submissions`) renders a client component that fetches the form + all its submissions via the existing tenant-scoped REST API, then sorts/filters client-side with TanStack Table. All pure logic (schema → column specs, value formatting, filter predicates, comparators) lives in `src/lib/submissions-table.ts` and is unit-tested. The Forms list gains "Submissions" and "Last submission" columns via `ui` fields with custom Cell components. The old top-level Form Submissions UI is retired (`admin.hidden: true`; old components deleted).
 
@@ -1365,7 +1365,7 @@ with:
     components: {
       views: {
         edit: {
-          // JotForm-style spreadsheet of this form's submissions.
+          // Spreadsheet of this form's submissions.
           // Spec: docs/superpowers/specs/2026-06-10-submissions-spreadsheet-design.md
           submissions: {
             Component: '/src/admin/forms/submissions/SubmissionsView#default',

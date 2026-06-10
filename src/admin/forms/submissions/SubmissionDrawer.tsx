@@ -2,12 +2,12 @@
 
 /**
  * SubmissionDrawer — slide-over detail for one submission.
- * Answers in schema order, status toggle (existing PATCH endpoint),
- * payment details, reply mailto, single-row CSV export.
+ * Answers in schema order, payment details, reply mailto,
+ * single-row CSV export.
  */
 
-import { useCallback, useEffect, useState } from 'react'
-import { CheckCircle, CreditCard, Download, ExternalLink, Mail, X } from 'lucide-react'
+import { useEffect } from 'react'
+import { CreditCard, Download, ExternalLink, Mail, X } from 'lucide-react'
 import type { FormSchema } from '@/lib/form-schema'
 import {
   formatCellValue,
@@ -20,7 +20,6 @@ export interface SubmissionDrawerProps {
   schema: FormSchema | null
   formSlug: string | null
   onClose: () => void
-  onStatusChange: (id: string | number, status: string) => void
 }
 
 function formatAmount(cents: number, currency: string | null | undefined): string {
@@ -35,11 +34,7 @@ export default function SubmissionDrawer({
   schema,
   formSlug,
   onClose,
-  onStatusChange,
 }: SubmissionDrawerProps) {
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -52,32 +47,8 @@ export default function SubmissionDrawer({
     .flatMap((s) => s.fields)
     .filter((f) => f.type !== 'page-break')
 
-  const status = row.status ?? 'new'
   const displayName = row.submitterName || row.submitterEmail || 'Submission'
   const pi = row.stripePaymentIntentId
-
-  const toggleStatus = useCallback(async () => {
-    const next = status === 'reviewed' ? 'new' : 'reviewed'
-    setSaving(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/forms/submissions/${row.id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: next }),
-      })
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string }
-        setError(body.error ?? 'Failed to update status')
-        return
-      }
-      onStatusChange(row.id, next)
-    } catch {
-      setError('Network error — try again')
-    } finally {
-      setSaving(false)
-    }
-  }, [row.id, status, onStatusChange])
 
   return (
     <div className="svd-overlay" onClick={onClose}>
@@ -99,20 +70,6 @@ export default function SubmissionDrawer({
           <button type="button" className="svd-close" aria-label="Close" onClick={onClose}>
             <X size={16} />
           </button>
-        </div>
-
-        <div className="svd-status-row">
-          <span className={`sv-status sv-status--${status}`}>{status}</span>
-          <button
-            type="button"
-            className={`svd-btn${status === 'reviewed' ? '' : ' svd-btn--primary'}`}
-            onClick={toggleStatus}
-            disabled={saving}
-          >
-            <CheckCircle size={14} aria-hidden />
-            {saving ? 'Saving…' : status === 'reviewed' ? 'Mark as new' : 'Mark reviewed'}
-          </button>
-          {error && <span className="svd-error">{error}</span>}
         </div>
 
         <div>

@@ -4,8 +4,8 @@
  * SubmissionsView — the "Submissions" document tab on a form's edit view.
  *
  * Spreadsheet-style table of all submissions for this form: one column per
- * schema field, client-side sort/filter (TanStack), global search, status
- * pills, CSV export, slide-over row detail.
+ * schema field, client-side sort/filter (TanStack), global search,
+ * CSV export, slide-over row detail.
  *
  * Registered in src/collections/Forms.ts under
  * admin.components.views.edit.submissions (path: '/submissions').
@@ -13,7 +13,7 @@
  * Spec: docs/superpowers/specs/2026-06-10-submissions-spreadsheet-design.md
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Download, Search, X } from 'lucide-react'
 import type { FormSchema } from '@/lib/form-schema'
@@ -35,17 +35,8 @@ interface FormDoc {
   payment?: { enabled?: boolean | null } | null
 }
 
-type StatusPill = 'all' | 'new' | 'reviewed' | 'archived'
-
 const PAGE_SIZE = 500
 const ROW_CAP = 2000
-
-const STATUS_PILLS: Array<{ id: StatusPill; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'new', label: 'New' },
-  { id: 'reviewed', label: 'Reviewed' },
-  { id: 'archived', label: 'Archived' },
-]
 
 export default function SubmissionsView() {
   // The view renders at /admin/collections/forms/<id>/submissions — the doc
@@ -64,7 +55,6 @@ export default function SubmissionsView() {
   const [error, setError] = useState<string | null>(null)
 
   const [globalQuery, setGlobalQuery] = useState('')
-  const [statusPill, setStatusPill] = useState<StatusPill>('all')
   const [filters, setFilters] = useState<Record<string, ColumnFilterState>>({})
   const [openRowId, setOpenRowId] = useState<string | number | null>(null)
 
@@ -123,19 +113,10 @@ export default function SubmissionsView() {
     [form],
   )
 
-  const pillRows = useMemo(
-    () => (statusPill === 'all' ? rows : rows.filter((r) => r.status === statusPill)),
-    [rows, statusPill],
-  )
-
   const openRow = useMemo(
     () => (openRowId === null ? null : rows.find((r) => r.id === openRowId) ?? null),
     [rows, openRowId],
   )
-
-  const handleStatusChange = useCallback((id: string | number, status: string) => {
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)))
-  }, [])
 
   const activeFilterCount = specs.filter((s) => isFilterActive(s, filters[s.id])).length
 
@@ -154,19 +135,6 @@ export default function SubmissionsView() {
             placeholder="Search submissions…"
             aria-label="Search submissions"
           />
-        </div>
-        <div className="sv-pills" role="group" aria-label="Filter by status">
-          {STATUS_PILLS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`sv-pill${statusPill === p.id ? ' sv-pill--active' : ''}`}
-              aria-pressed={statusPill === p.id}
-              onClick={() => setStatusPill(p.id)}
-            >
-              {p.label}
-            </button>
-          ))}
         </div>
         {activeFilterCount > 0 && (
           <button type="button" className="sv-clear" onClick={() => setFilters({})}>
@@ -195,7 +163,7 @@ export default function SubmissionsView() {
         </div>
       ) : (
         <SubmissionsTable
-          rows={pillRows}
+          rows={rows}
           specs={specs}
           globalQuery={globalQuery}
           filters={filters}
@@ -210,7 +178,6 @@ export default function SubmissionsView() {
           schema={form.schema ?? null}
           formSlug={form.slug ?? null}
           onClose={() => setOpenRowId(null)}
-          onStatusChange={handleStatusChange}
         />
       )}
     </div>

@@ -13,7 +13,6 @@ export function submissionsToCsv(
   schema: FormSchema,
   submissions: Array<{
     submittedAt: string | Date
-    status: string
     paymentStatus: string
     submitterEmail: string
     data: Record<string, unknown>
@@ -30,11 +29,10 @@ export function submissionsToCsv(
     fieldCols.push({ name: f.name, label: f.label })
   }
   const paymentHeader = includePayment ? ['Payment', 'Amount', 'Currency'] : []
-  const header = ['Submitted at', 'Email', 'Status', ...paymentHeader, ...fieldCols.map((c) => c.label)]
+  const header = ['Submitted at', 'Email', ...paymentHeader, ...fieldCols.map((c) => c.label)]
   const rows = submissions.map((s) => [
     escape(new Date(s.submittedAt).toISOString()),
     escape(s.submitterEmail),
-    escape(s.status),
     ...(includePayment
       ? [
           escape(s.paymentStatus),

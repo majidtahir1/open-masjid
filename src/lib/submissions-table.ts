@@ -15,7 +15,7 @@ export interface ColumnOption {
 }
 
 export interface ColumnSpec {
-  /** 'submittedAt' | 'status' | 'payment' | 'field:<name>' */
+  /** 'submittedAt' | 'payment' | 'field:<name>' */
   id: string
   label: string
   kind: FilterKind
@@ -37,7 +37,6 @@ export interface ColumnFilterState {
 export interface SubmissionRowData {
   id: string | number
   submittedAt?: string | null
-  status?: string | null
   paymentStatus?: string | null
   submitterEmail?: string | null
   submitterName?: string | null
@@ -46,12 +45,6 @@ export interface SubmissionRowData {
   stripePaymentIntentId?: string | null
   data?: Record<string, unknown> | null
 }
-
-export const STATUS_OPTIONS: ColumnOption[] = [
-  { value: 'new', label: 'New' },
-  { value: 'reviewed', label: 'Reviewed' },
-  { value: 'archived', label: 'Archived' },
-]
 
 export const PAYMENT_OPTIONS: ColumnOption[] = [
   { value: 'paid', label: 'Paid' },
@@ -89,7 +82,6 @@ export function buildColumnSpecs(
     }
   }
 
-  specs.push({ id: 'status', label: 'Status', kind: 'options', options: STATUS_OPTIONS })
   if (opts.paymentEnabled) {
     specs.push({ id: 'payment', label: 'Payment', kind: 'options', options: PAYMENT_OPTIONS })
   }
@@ -98,7 +90,6 @@ export function buildColumnSpecs(
 
 export function getCellValue(row: SubmissionRowData, spec: ColumnSpec): unknown {
   if (spec.fieldName) return row.data?.[spec.fieldName]
-  if (spec.id === 'status') return row.status
   if (spec.id === 'payment') return row.paymentStatus
   return row.submittedAt
 }

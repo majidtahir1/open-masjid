@@ -10,12 +10,3 @@
 .sc-cell--muted {
   color: var(--theme-elevation-450);
 }
-
-.sc-cell__badge {
-  display: inline-block;
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: rgba(45, 156, 145, 0.14);
-  color: #2d9c91;
-}

@@ -29,10 +29,5 @@ export default function SubmissionsCountCell({ rowData }: CellProps) {
 
   if (id == null) return <span className="sc-cell sc-cell--muted">—</span>
   if (!stats) return <span className="sc-cell sc-cell--muted">…</span>
-  return (
-    <span className="sc-cell">
-      {stats.total}
-      {stats.newCount > 0 && <span className="sc-cell__badge">{stats.newCount} new</span>}
-    </span>
-  )
+  return <span className="sc-cell">{stats.total}</span>
 }

@@ -8,7 +8,7 @@
 Viewing form submissions today means using Payload's default list table (meta columns
 only — submitter, status, payment) with a filter toolbar bolted on top. You can't see
 the actual answers without opening each submission one by one. The desired experience
-is JotForm Tables: pick a form, see every submission as a row with one column per form
+is a spreadsheet: pick a form, see every submission as a row with one column per form
 field, and sort/filter columns like a spreadsheet.
 
 ## Decisions (from brainstorming)
@@ -90,9 +90,17 @@ Clicking a row opens a right-hand drawer over the table:
 - Unit tests for the pure logic: schema → column definitions, value formatting, and
   the type-aware filter predicates. Existing CSV and status-endpoint tests unchanged.
 
+## Amendment (2026-06-10, pre-merge)
+
+Status is not displayed anywhere in the UI (no Status column, no status filter
+pills, no "N new" badge, no Mark-reviewed toggle in the drawer, no Status column
+in the CSV). The `status` field, its default on submit, and the
+`PATCH /api/forms/submissions/[id]/status` endpoint are all retained unchanged
+for backward compatibility — only the presentation was dropped.
+
 ## Out of scope
 
-- Column hide/reorder/resize/freeze, summaries, charts (JotForm features the user
+- Column hide/reorder/resize/freeze, summaries, charts (spreadsheet features the user
   explicitly doesn't need).
 - Server-side pagination/sorting (revisit if a form ever exceeds the 2,000-row cap).
 - Editing submission answers (submissions remain read-only by design).

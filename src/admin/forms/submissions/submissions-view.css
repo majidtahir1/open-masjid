@@ -50,28 +50,6 @@
   width: 180px;
 }
 
-.sv-pills {
-  display: flex;
-  gap: 4px;
-}
-
-.sv-pill {
-  height: 28px;
-  padding: 0 12px;
-  border: 1px solid var(--theme-elevation-150);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--theme-elevation-650);
-  font-size: 12.5px;
-  cursor: pointer;
-}
-
-.sv-pill--active {
-  background: var(--theme-elevation-800);
-  border-color: var(--theme-elevation-800);
-  color: var(--theme-elevation-0);
-}
-
 .sv-clear {
   display: inline-flex;
   align-items: center;
@@ -188,31 +166,6 @@
   color: var(--theme-elevation-500);
   padding: 24px !important;
   cursor: default;
-}
-
-/* --- Status / payment pills --------------------------------------------- */
-
-.sv-status {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  text-transform: capitalize;
-}
-
-.sv-status--new {
-  background: rgba(45, 156, 145, 0.14);
-  color: #2d9c91;
-}
-
-.sv-status--reviewed {
-  background: var(--theme-elevation-100);
-  color: var(--theme-elevation-650);
-}
-
-.sv-status--archived {
-  background: var(--theme-elevation-50);
-  color: var(--theme-elevation-450);
 }
 
 /* --- Column menu ---------------------------------------------------------- */
@@ -390,18 +343,6 @@
 
 .svd-close:hover {
   background: var(--theme-elevation-100);
-}
-
-.svd-status-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.svd-error {
-  font-size: 12px;
-  color: var(--theme-error-500, #d4584c);
 }
 
 .svd-section-title {

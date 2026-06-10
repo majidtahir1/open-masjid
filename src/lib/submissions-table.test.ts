@@ -43,7 +43,6 @@ const schema: FormSchema = {
 const row: SubmissionRowData = {
   id: 'sub1',
   submittedAt: '2026-05-01T14:30:00.000Z',
-  status: 'new',
   paymentStatus: 'paid',
   submitterEmail: 'a@b.com',
   submitterName: 'Aisha',
@@ -51,11 +50,11 @@ const row: SubmissionRowData = {
 }
 
 describe('buildColumnSpecs', () => {
-  it('maps schema fields in order, excluding page breaks, bracketed by submittedAt and status', () => {
+  it('maps schema fields in order after submittedAt, excluding page breaks', () => {
     const specs = buildColumnSpecs(schema, { paymentEnabled: false })
     expect(specs.map((s) => s.id)).toEqual([
       'submittedAt', 'field:full_name', 'field:email', 'field:guests',
-      'field:meal', 'field:days', 'field:arrival', 'field:consent', 'status',
+      'field:meal', 'field:days', 'field:arrival', 'field:consent',
     ])
   })
 
@@ -68,7 +67,6 @@ describe('buildColumnSpecs', () => {
     expect(kind('field:meal')).toBe('options')
     expect(kind('field:days')).toBe('options')
     expect(kind('field:arrival')).toBe('dateRange')
-    expect(kind('status')).toBe('options')
   })
 
   it('gives consent columns Yes/No options', () => {
@@ -85,7 +83,7 @@ describe('buildColumnSpecs', () => {
   })
 
   it('handles a null schema (meta columns only)', () => {
-    expect(buildColumnSpecs(null, { paymentEnabled: false }).map((s) => s.id)).toEqual(['submittedAt', 'status'])
+    expect(buildColumnSpecs(null, { paymentEnabled: false }).map((s) => s.id)).toEqual(['submittedAt'])
   })
 })
 
@@ -95,7 +93,6 @@ describe('getCellValue', () => {
   it('reads field columns from data, meta columns from the row', () => {
     expect(getCellValue(row, spec('field:full_name'))).toBe('Aisha Khan')
     expect(getCellValue(row, spec('submittedAt'))).toBe('2026-05-01T14:30:00.000Z')
-    expect(getCellValue(row, spec('status'))).toBe('new')
     expect(getCellValue(row, spec('payment'))).toBe('paid')
   })
   it('returns undefined for missing answers', () => {

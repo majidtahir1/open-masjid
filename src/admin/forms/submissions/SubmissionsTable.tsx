@@ -135,15 +135,6 @@ export default function SubmissionsTable({
                 const spec = specById.get(cell.column.id)
                 if (!spec) return <td key={cell.id} />
                 const value = cell.getValue()
-                if (spec.id === 'status') {
-                  return (
-                    <td key={cell.id}>
-                      <span className={`sv-status sv-status--${String(value ?? 'new')}`}>
-                        {formatCellValue(value)}
-                      </span>
-                    </td>
-                  )
-                }
                 const text =
                   spec.id === 'submittedAt' ? formatSubmittedAt(value) : formatCellValue(value)
                 return (

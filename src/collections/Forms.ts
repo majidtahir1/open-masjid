@@ -35,7 +35,7 @@ export const Forms: CollectionConfig = {
     components: {
       views: {
         edit: {
-          // JotForm-style spreadsheet of this form's submissions.
+          // Spreadsheet of this form's submissions.
           // Spec: docs/superpowers/specs/2026-06-10-submissions-spreadsheet-design.md
           submissions: {
             Component: '/src/admin/forms/submissions/SubmissionsView#default',
