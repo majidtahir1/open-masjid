@@ -207,13 +207,27 @@
   text-transform: lowercase;
 }
 .pd-cream .pd-prayer-iqamah {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+.pd-cream .pd-adhan-label {
   font-family: var(--pd-inter);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(15,30,74,0.45);
-  margin-top: 18px;
+}
+.pd-cream .pd-adhan-time {
+  font-family: var(--pd-fraunces);
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: rgba(15,30,74,0.65);
   font-feature-settings: "tnum";
 }
 
@@ -223,7 +237,8 @@
 }
 .pd-cream .pd-prayer.is-next .pd-prayer-name,
 .pd-cream .pd-prayer.is-next .pd-prayer-adhan { color: #0F1E4A; }
-.pd-cream .pd-prayer.is-next .pd-prayer-iqamah { color: #9A7428; }
+.pd-cream .pd-prayer.is-next .pd-adhan-label { color: #9A7428; }
+.pd-cream .pd-prayer.is-next .pd-adhan-time { color: #0F1E4A; }
 .pd-cream .pd-prayer.is-next::before {
   content: "";
   position: absolute;
@@ -334,7 +349,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 56px 24px;
+  padding: 40px 24px;
   position: relative;
   text-align: center;
 }
@@ -372,13 +387,27 @@
   text-transform: lowercase;
 }
 .pd-night .pd-prayer-iqamah {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.pd-night .pd-adhan-label {
   font-family: var(--pd-inter);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(240,239,232,0.4);
-  margin-top: 16px;
+}
+.pd-night .pd-adhan-time {
+  font-family: var(--pd-fraunces);
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: rgba(240,239,232,0.75);
   font-feature-settings: "tnum";
 }
 
@@ -389,7 +418,8 @@
   color: #F6E6BF;
   text-shadow: 0 0 60px rgba(217,168,78,0.4);
 }
-.pd-night .pd-prayer.is-next .pd-prayer-iqamah { color: rgba(217,168,78,0.7); }
+.pd-night .pd-prayer.is-next .pd-adhan-label { color: rgba(217,168,78,0.7); }
+.pd-night .pd-prayer.is-next .pd-adhan-time { color: #F6E6BF; }
 .pd-night .pd-prayer.is-next .pd-prayer-ar { color: #D9A84E; }
 .pd-night .pd-next-tag {
   position: absolute;
@@ -533,13 +563,27 @@
   vertical-align: middle;
 }
 .pd-mihrab .pd-prayer-iqamah {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.pd-mihrab .pd-adhan-label {
   font-family: var(--pd-inter);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(15,30,74,0.45);
-  margin-top: 12px;
+}
+.pd-mihrab .pd-adhan-time {
+  font-family: var(--pd-fraunces);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: rgba(15,30,74,0.65);
   font-feature-settings: "tnum";
 }
 .pd-mihrab .pd-prayer.is-next::before {
@@ -553,7 +597,8 @@
 }
 .pd-mihrab .pd-prayer.is-next .pd-prayer-name { color: #0F1E4A; }
 .pd-mihrab .pd-prayer.is-next .pd-prayer-adhan { color: #0F1E4A; }
-.pd-mihrab .pd-prayer.is-next .pd-prayer-iqamah { color: #9A7428; }
+.pd-mihrab .pd-prayer.is-next .pd-adhan-label { color: #9A7428; }
+.pd-mihrab .pd-prayer.is-next .pd-adhan-time { color: #0F1E4A; }
 
 /* ============================================================
    V4 — SALAH IN PROGRESS (takeover state)

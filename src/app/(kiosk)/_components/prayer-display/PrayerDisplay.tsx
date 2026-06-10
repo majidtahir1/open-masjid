@@ -174,7 +174,10 @@ export default function PrayerDisplay({
                 <div className="pd-prayer-ar">{p.ar}</div>
                 <div className="pd-prayer-name">{p.en}</div>
                 <div className="pd-prayer-adhan">{iqamahHM}<sup>{iqamahAmpm}</sup></div>
-                <div className="pd-prayer-iqamah">Adhan · {adhanHM}</div>
+                <div className="pd-prayer-iqamah">
+                  <span className="pd-adhan-label">Adhan</span>
+                  <span className="pd-adhan-time">{adhanHM}</span>
+                </div>
               </div>
               {idx === 0 && timetable.daybreak && (
                 <Daybreak rows={timetable.daybreak} variant={variant} />
