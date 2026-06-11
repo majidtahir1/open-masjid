@@ -29,15 +29,11 @@ export const formsCapacity: Rule = {
       const capacity = doc.settings?.capacity
       if (!capacity || capacity <= 0) continue
 
-      const count = (
-        await payload.find({
-          collection: 'form-submissions',
-          where: { form: { equals: doc.id } },
-          limit: 1,
-          depth: 0,
-          overrideAccess: true,
-        })
-      ).totalDocs
+      const { totalDocs: count } = await payload.count({
+        collection: 'form-submissions',
+        where: { and: [{ form: { equals: doc.id } }, { paymentStatus: { not_in: ['expired'] } }] },
+        overrideAccess: true,
+      })
 
       const base = {
         rule: 'forms.capacity',
@@ -54,7 +50,7 @@ export const formsCapacity: Rule = {
             kind: 'direct',
             op: 'closeForm',
             params: { formId: doc.id },
-            summary: `Close "${doc.title ?? 'the form'}" — it is full (${count}/${capacity})`,
+            summary: `Close "${doc.title ?? 'the form'}" — it is full`,
           },
         })
       } else if (count >= Math.ceil(capacity * NEAR_RATIO)) {
@@ -66,7 +62,7 @@ export const formsCapacity: Rule = {
             kind: 'direct',
             op: 'raiseFormCapacity',
             params: { formId: doc.id, newCapacity },
-            summary: `Raise "${doc.title ?? 'the form'}" capacity to ${newCapacity} (${count}/${capacity} filled)`,
+            summary: `Raise "${doc.title ?? 'the form'}" capacity to ${newCapacity}`,
           },
         })
       }

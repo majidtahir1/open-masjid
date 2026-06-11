@@ -16,6 +16,7 @@ export const announcementsExpiring: Rule = {
       collection: 'announcements',
       where: {
         tenant: { equals: tenant.id },
+        _status: { equals: 'published' },
         active: { equals: true },
         expiresAt: { greater_than: now.toISOString(), less_than_equal: addDays(now, 1).toISOString() },
       },

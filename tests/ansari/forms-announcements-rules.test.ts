@@ -7,13 +7,13 @@ import { makeCtx, makePayload } from './helpers'
 
 function formsPayload(forms: object[], countsByFormId: Record<number, number>) {
   return makePayload({
-    find: vi.fn(async ({ collection, where }: { collection: string; where?: unknown }) => {
+    find: vi.fn(async ({ collection }: { collection: string }) => {
       if (collection === 'forms') return { docs: forms, totalDocs: forms.length }
-      if (collection === 'form-submissions') {
-        const formId = (where as { form?: { equals?: number } } | undefined)?.form?.equals ?? -1
-        return { docs: [], totalDocs: countsByFormId[formId] ?? 0 }
-      }
       return { docs: [], totalDocs: 0 }
+    }),
+    count: vi.fn(async ({ where }: { where?: { and?: Array<{ form?: { equals?: number } }> } }) => {
+      const formId = where?.and?.[0]?.form?.equals ?? -1
+      return { totalDocs: countsByFormId[formId] ?? 0 }
     }),
   })
 }
@@ -43,6 +43,33 @@ describe('forms.capacity', () => {
   it('skips forms without a capacity', async () => {
     const payload = formsPayload([form(1, null)], { 1: 500 })
     expect(await formsCapacity.evaluate(makeCtx(payload))).toEqual([])
+  })
+
+  it('action summaries are stable (no live counts embedded)', async () => {
+    const payload = formsPayload([form(1, 100), form(2, 100)], { 1: 100, 2: 92 })
+    const findings = await formsCapacity.evaluate(makeCtx(payload))
+    const full = findings.find((f) => f.dedupKey === 'formcap:1:full')!
+    expect(full.action.summary).toBe('Close "Form 1" — it is full')
+    const near = findings.find((f) => f.dedupKey === 'formcap:2:near')!
+    expect(near.action.summary).toBe('Raise "Form 2" capacity to 125')
+  })
+
+  it('fires "near" at exact 90% boundary (capacity 100, count 90)', async () => {
+    const payload = formsPayload([form(1, 100)], { 1: 90 })
+    const findings = await formsCapacity.evaluate(makeCtx(payload))
+    expect(findings).toHaveLength(1)
+    expect(findings[0].dedupKey).toBe('formcap:1:near')
+  })
+
+  it('execute throws on unknown op', async () => {
+    const ctx = makeCtx(makePayload())
+    await expect(
+      formsCapacity.execute!(ctx, {
+        dedupKey: 'formcap:1:x',
+        intent: {},
+        action: { kind: 'direct', op: 'nope', params: {}, summary: '' },
+      }),
+    ).rejects.toThrow()
   })
 
   it('execute closes a form / raises capacity', async () => {
@@ -85,6 +112,17 @@ describe('announcements.expiring', () => {
       op: 'extendAnnouncement',
       params: { announcementId: 5, newExpiresAt: '2026-06-19T03:00:00.000Z' },
     })
+  })
+
+  it('queries only published announcements', async () => {
+    const payload = makePayload()
+    await announcementsExpiring.evaluate(makeCtx(payload))
+    expect(payload.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'announcements',
+        where: expect.objectContaining({ _status: { equals: 'published' } }),
+      }),
+    )
   })
 
   it('execute pushes the expiry out', async () => {

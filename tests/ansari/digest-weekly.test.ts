@@ -9,11 +9,7 @@ import { makeCtx, makePayload } from './helpers'
 describe('digest.weekly', () => {
   it('rolls up member stats, upcoming events, and unresolved immediates', async () => {
     const payload = makePayload({
-      find: vi.fn(async ({ collection, where }: { collection: string; where?: Record<string, unknown> }) => {
-        if (collection === 'members') {
-          const isNewQuery = JSON.stringify(where).includes('createdAt')
-          return { docs: [], totalDocs: isNewQuery ? 4 : 120 }
-        }
+      find: vi.fn(async ({ collection }: { collection: string }) => {
         if (collection === 'events') {
           return {
             docs: [{ id: 1, title: 'Halaqa', startDate: '2026-06-15T00:00:00.000Z', flyerImage: null }],
@@ -28,6 +24,11 @@ describe('digest.weekly', () => {
         }
         return { docs: [], totalDocs: 0 }
       }),
+      count: vi.fn(async ({ where }: { where?: Record<string, unknown> }) => {
+        // member count: total=120, new-this-month=4 (keyed by presence of createdAt filter)
+        const isNewQuery = JSON.stringify(where).includes('createdAt')
+        return { totalDocs: isNewQuery ? 4 : 120 }
+      }),
     })
     const findings = await digestWeekly.evaluate(makeCtx(payload)) // 2026-06-11 → ISO week 24
     expect(findings).toHaveLength(1)
@@ -38,6 +39,17 @@ describe('digest.weekly', () => {
     expect((findings[0].intent.upcomingEvents as unknown[]).length).toBe(1)
     expect((findings[0].intent.unresolved as unknown[]).length).toBe(1)
     expect(findings[0].action.kind).toBe('conversation-starter')
+  })
+
+  it('queries only published events', async () => {
+    const payload = makePayload()
+    await digestWeekly.evaluate(makeCtx(payload))
+    expect(payload.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'events',
+        where: expect.objectContaining({ _status: { equals: 'published' } }),
+      }),
+    )
   })
 })
 

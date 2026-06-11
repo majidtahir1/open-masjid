@@ -89,6 +89,8 @@ export interface Config {
     media: Media;
     users: User;
     tenants: Tenant;
+    'ansari-settings': AnsariSetting;
+    'nudge-states': NudgeState;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +121,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
+    'ansari-settings': AnsariSettingsSelect<false> | AnsariSettingsSelect<true>;
+    'nudge-states': NudgeStatesSelect<false> | NudgeStatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -193,26 +197,31 @@ export interface PrayerSchedule {
       mode: 'absolute' | 'offset';
       absoluteValue?: string | null;
       offsetMinutes?: number | null;
+      gapAtCreation?: number | null;
     };
     zuhr: {
       mode: 'absolute' | 'offset';
       absoluteValue?: string | null;
       offsetMinutes?: number | null;
+      gapAtCreation?: number | null;
     };
     asr: {
       mode: 'absolute' | 'offset';
       absoluteValue?: string | null;
       offsetMinutes?: number | null;
+      gapAtCreation?: number | null;
     };
     maghrib: {
       mode: 'absolute' | 'offset';
       absoluteValue?: string | null;
       offsetMinutes?: number | null;
+      gapAtCreation?: number | null;
     };
     isha: {
       mode: 'absolute' | 'offset';
       absoluteValue?: string | null;
       offsetMinutes?: number | null;
+      gapAtCreation?: number | null;
     };
   };
   /**
@@ -669,6 +678,10 @@ export interface Event {
    */
   heroAccent?: ('cream' | 'teal' | 'navy' | 'gold') | null;
   /**
+   * Optional — link the RSVP form for this event so signup counts can be tracked (used by Ansari nudges).
+   */
+  signupForm?: (number | null) | Form;
+  /**
    * Auto-generated from the title (e.g. "evidences-of-islam"). Edit only if you need a custom URL.
    */
   slug?: string | null;
@@ -679,6 +692,158 @@ export interface Event {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: number;
+  title: string;
+  /**
+   * URL slug. /forms/<slug>.
+   */
+  slug?: string | null;
+  status: 'draft' | 'published' | 'closed';
+  /**
+   * Shown above the form on the public page.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * The form definition. Drag, drop, and edit fields below.
+   */
+  schema:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  settings?: {
+    submitButtonLabel?: string | null;
+    successMessage?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Max submissions before the form closes. Leave blank for no limit.
+     */
+    capacity?: number | null;
+    closedMessage?: string | null;
+    notificationEmails?:
+      | {
+          email: string;
+          id?: string | null;
+        }[]
+      | null;
+    sendConfirmation?: boolean | null;
+    confirmationSubject?: string | null;
+    /**
+     * Plain text body. {{name}} interpolates the submitter name field if present.
+     */
+    confirmationBody?: string | null;
+  };
+  appearance?: {
+    /**
+     * How visitors progress through the form.
+     */
+    displayMode?: ('all-at-once' | 'one-per-page') | null;
+    /**
+     * Optional message shown above the first field.
+     */
+    introMessage?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Shown after a successful submission. If left blank, falls back to Settings → Confirmation.
+     */
+    submissionMessage?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Solid background color shown behind the form card. Ignored if a gradient is set below.
+     */
+    backgroundColor?: string | null;
+    /**
+     * Optional gradient. When the start color is set, the gradient overrides the solid color above.
+     */
+    backgroundGradient?: {
+      from?: string | null;
+      to?: string | null;
+      direction?: ('vertical' | 'horizontal' | 'diagonal') | null;
+    };
+  };
+  payment?: {
+    enabled?: boolean | null;
+    mode?: ('fixed' | 'suggested') | null;
+    priceCents?: number | null;
+    suggestedAmountsCents?:
+      | {
+          amount: number;
+          id?: string | null;
+        }[]
+      | null;
+    allowCustomAmount?: boolean | null;
+    currency?: ('usd' | 'cad' | 'gbp') | null;
+    /**
+     * Shown on the Stripe checkout page.
+     */
+    description?: string | null;
+  };
+  tenant: number | Tenant;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Slides for the homepage hero slider. Use these for mission statements, donation pushes, or general announcements. Featured events from the Events collection are auto-added at render time.
@@ -1297,158 +1462,6 @@ export interface Post {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
-  id: number;
-  title: string;
-  /**
-   * URL slug. /forms/<slug>.
-   */
-  slug?: string | null;
-  status: 'draft' | 'published' | 'closed';
-  /**
-   * Shown above the form on the public page.
-   */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * The form definition. Drag, drop, and edit fields below.
-   */
-  schema:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  settings?: {
-    submitButtonLabel?: string | null;
-    successMessage?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    /**
-     * Max submissions before the form closes. Leave blank for no limit.
-     */
-    capacity?: number | null;
-    closedMessage?: string | null;
-    notificationEmails?:
-      | {
-          email: string;
-          id?: string | null;
-        }[]
-      | null;
-    sendConfirmation?: boolean | null;
-    confirmationSubject?: string | null;
-    /**
-     * Plain text body. {{name}} interpolates the submitter name field if present.
-     */
-    confirmationBody?: string | null;
-  };
-  appearance?: {
-    /**
-     * How visitors progress through the form.
-     */
-    displayMode?: ('all-at-once' | 'one-per-page') | null;
-    /**
-     * Optional message shown above the first field.
-     */
-    introMessage?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    /**
-     * Shown after a successful submission. If left blank, falls back to Settings → Confirmation.
-     */
-    submissionMessage?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    /**
-     * Solid background color shown behind the form card. Ignored if a gradient is set below.
-     */
-    backgroundColor?: string | null;
-    /**
-     * Optional gradient. When the start color is set, the gradient overrides the solid color above.
-     */
-    backgroundGradient?: {
-      from?: string | null;
-      to?: string | null;
-      direction?: ('vertical' | 'horizontal' | 'diagonal') | null;
-    };
-  };
-  payment?: {
-    enabled?: boolean | null;
-    mode?: ('fixed' | 'suggested') | null;
-    priceCents?: number | null;
-    suggestedAmountsCents?:
-      | {
-          amount: number;
-          id?: string | null;
-        }[]
-      | null;
-    allowCustomAmount?: boolean | null;
-    currency?: ('usd' | 'cad' | 'gbp') | null;
-    /**
-     * Shown on the Stripe checkout page.
-     */
-    description?: string | null;
-  };
-  tenant: number | Tenant;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Form submissions. Read-only — created by the public submit endpoint.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1669,6 +1682,7 @@ export interface User {
         | 'events:read'
         | 'events:write'
         | 'members:read'
+        | 'ansari:nudges'
         | 'media:read'
         | 'media:write'
         | 'blog:read'
@@ -1700,6 +1714,87 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * Proactive nudge preferences for this masjid: which nudges are on, quiet hours, and the weekly digest slot.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ansari-settings".
+ */
+export interface AnsariSetting {
+  id: number;
+  tenant: number | Tenant;
+  enabled?: boolean | null;
+  /**
+   * Nudge types Ansari will stay silent about ("Stop these" also lands here).
+   */
+  disabledRules?:
+    | (
+        | 'prayer.coverage_gap'
+        | 'prayer.iqamah_drift'
+        | 'calendar.dst'
+        | 'calendar.ramadan'
+        | 'forms.capacity'
+        | 'announcements.expiring'
+        | 'events.low_rsvp'
+        | 'events.missing_flyer'
+        | 'digest.weekly'
+      )[]
+    | null;
+  /**
+   * No immediate nudges from this local hour…
+   */
+  quietHoursStart?: number | null;
+  /**
+   * …until this local hour.
+   */
+  quietHoursEnd?: number | null;
+  digestDay?: ('0' | '1' | '2' | '3' | '4' | '5' | '6') | null;
+  digestHour?: number | null;
+  /**
+   * Set when Hermes binds a Telegram chat to this masjid.
+   */
+  telegramConnected?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Dedup + lifecycle bookkeeping for proactive nudges. Managed by the engine.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nudge-states".
+ */
+export interface NudgeState {
+  id: number;
+  tenant: number | Tenant;
+  rule: string;
+  dedupKey: string;
+  tier: 'immediate' | 'digest';
+  status: 'emitted' | 'delivered' | 'applied' | 'dismissed' | 'snoozed' | 'resolved';
+  intent?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  action?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  emittedAt?: string | null;
+  deliveredAt?: string | null;
+  snoozedAt?: string | null;
+  resolvedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1904,6 +1999,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tenants';
         value: number | Tenant;
+      } | null)
+    | ({
+        relationTo: 'ansari-settings';
+        value: number | AnsariSetting;
+      } | null)
+    | ({
+        relationTo: 'nudge-states';
+        value: number | NudgeState;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1964,6 +2067,7 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
               mode?: T;
               absoluteValue?: T;
               offsetMinutes?: T;
+              gapAtCreation?: T;
             };
         zuhr?:
           | T
@@ -1971,6 +2075,7 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
               mode?: T;
               absoluteValue?: T;
               offsetMinutes?: T;
+              gapAtCreation?: T;
             };
         asr?:
           | T
@@ -1978,6 +2083,7 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
               mode?: T;
               absoluteValue?: T;
               offsetMinutes?: T;
+              gapAtCreation?: T;
             };
         maghrib?:
           | T
@@ -1985,6 +2091,7 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
               mode?: T;
               absoluteValue?: T;
               offsetMinutes?: T;
+              gapAtCreation?: T;
             };
         isha?:
           | T
@@ -1992,6 +2099,7 @@ export interface PrayerSchedulesSelect<T extends boolean = true> {
               mode?: T;
               absoluteValue?: T;
               offsetMinutes?: T;
+              gapAtCreation?: T;
             };
       };
   jummahTimes?:
@@ -2077,6 +2185,7 @@ export interface EventsSelect<T extends boolean = true> {
   templateVariant?: T;
   featured?: T;
   heroAccent?: T;
+  signupForm?: T;
   slug?: T;
   tenant?: T;
   updatedAt?: T;
@@ -2683,6 +2792,41 @@ export interface TenantsSelect<T extends boolean = true> {
       };
   onboardingCompletedAt?: T;
   kioskBroadcastAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ansari-settings_select".
+ */
+export interface AnsariSettingsSelect<T extends boolean = true> {
+  tenant?: T;
+  enabled?: T;
+  disabledRules?: T;
+  quietHoursStart?: T;
+  quietHoursEnd?: T;
+  digestDay?: T;
+  digestHour?: T;
+  telegramConnected?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nudge-states_select".
+ */
+export interface NudgeStatesSelect<T extends boolean = true> {
+  tenant?: T;
+  rule?: T;
+  dedupKey?: T;
+  tier?: T;
+  status?: T;
+  intent?: T;
+  action?: T;
+  emittedAt?: T;
+  deliveredAt?: T;
+  snoozedAt?: T;
+  resolvedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

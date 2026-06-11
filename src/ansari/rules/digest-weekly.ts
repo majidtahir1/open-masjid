@@ -11,32 +11,27 @@ export const digestWeekly: Rule = {
     const { payload, tenant, now } = ctx
     const week = isoWeekKey(now, tenant.timezone)
     const p = localParts(now, tenant.timezone)
+    // UTC midnight of the 1st is used as an approximation of the tenant-local month start;
+    // off by the tz offset (up to ±14 h) — acceptable for a digest stat.
     const monthStartUTC = `${p.year}-${String(p.month).padStart(2, '0')}-01T00:00:00.000Z`
 
-    const membersTotal = (
-      await payload.find({
-        collection: 'members',
-        where: { tenant: { equals: tenant.id } },
-        limit: 1,
-        depth: 0,
-        overrideAccess: true,
-      })
-    ).totalDocs
+    const { totalDocs: membersTotal } = await payload.count({
+      collection: 'members',
+      where: { tenant: { equals: tenant.id } },
+      overrideAccess: true,
+    })
 
-    const membersNewThisMonth = (
-      await payload.find({
-        collection: 'members',
-        where: { tenant: { equals: tenant.id }, createdAt: { greater_than_equal: monthStartUTC } },
-        limit: 1,
-        depth: 0,
-        overrideAccess: true,
-      })
-    ).totalDocs
+    const { totalDocs: membersNewThisMonth } = await payload.count({
+      collection: 'members',
+      where: { tenant: { equals: tenant.id }, createdAt: { greater_than_equal: monthStartUTC } },
+      overrideAccess: true,
+    })
 
     const eventsRes = await payload.find({
       collection: 'events',
       where: {
         tenant: { equals: tenant.id },
+        _status: { equals: 'published' },
         startDate: { greater_than: now.toISOString(), less_than_equal: addDays(now, 7).toISOString() },
       },
       limit: 20,
@@ -48,8 +43,7 @@ export const digestWeekly: Rule = {
     )
 
     // The safety net: unresolved immediate-tier items resurface here.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unresolvedRes = await (payload.find as any)({
+    const unresolvedRes = await payload.find({
       collection: 'nudge-states',
       where: {
         tenant: { equals: tenant.id },

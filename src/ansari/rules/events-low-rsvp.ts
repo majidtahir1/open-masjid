@@ -24,6 +24,7 @@ export const eventsLowRsvp: Rule = {
       collection: 'events',
       where: {
         tenant: { equals: tenant.id },
+        _status: { equals: 'published' },
         startDate: { greater_than: now.toISOString(), less_than_equal: addDays(now, LEAD_DAYS).toISOString() },
       },
       limit: 50,
@@ -61,15 +62,11 @@ export const eventsLowRsvp: Rule = {
         continue
       }
 
-      const count = (
-        await payload.find({
-          collection: 'form-submissions',
-          where: { form: { equals: formId } },
-          limit: 1,
-          depth: 0,
-          overrideAccess: true,
-        })
-      ).totalDocs
+      const { totalDocs: count } = await payload.count({
+        collection: 'form-submissions',
+        where: { and: [{ form: { equals: formId } }, { paymentStatus: { not_in: ['expired'] } }] },
+        overrideAccess: true,
+      })
 
       const low = capacity && capacity > 0 ? count < capacity * LOW_RATIO : count < LOW_ABSOLUTE
       if (!low) continue
@@ -95,6 +92,8 @@ export const eventsLowRsvp: Rule = {
     return findings
   },
 
+  // Non-idempotent direct action: creates a doc. The apply handler marks state
+  // terminal before returning, so a second tap never reaches execute again.
   async execute(ctx, finding) {
     if (finding.action.kind !== 'direct') throw new Error('events.low_rsvp action must be direct')
     const { eventId } = finding.action.params as { eventId: string | number }
@@ -112,6 +111,7 @@ export const eventsLowRsvp: Rule = {
       data: {
         tenant: (extractId(event.tenant) ?? ctx.tenant.id) as number,
         title: `Reminder: ${event.title ?? 'Upcoming event'}${when}`,
+        _status: 'published',
         active: true,
         priority: 'normal',
         ...(event.startDate ? { expiresAt: event.startDate } : {}),

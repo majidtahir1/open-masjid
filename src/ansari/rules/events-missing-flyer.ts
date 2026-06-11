@@ -16,6 +16,7 @@ export const eventsMissingFlyer: Rule = {
       collection: 'events',
       where: {
         tenant: { equals: tenant.id },
+        _status: { equals: 'published' },
         startDate: { greater_than: now.toISOString(), less_than_equal: addDays(now, LEAD_DAYS).toISOString() },
       },
       limit: 50,

@@ -12,10 +12,10 @@ describe('events.low_rsvp', () => {
     return makePayload({
       find: vi.fn(async ({ collection }: { collection: string }) => {
         if (collection === 'events') return { docs: events, totalDocs: events.length }
-        if (collection === 'form-submissions') return { docs: [], totalDocs: submissions }
         return { docs: [], totalDocs: 0 }
       }),
       findByID: vi.fn(async () => ({ id: 30, settings: { capacity: formCapacity } })),
+      count: vi.fn(async () => ({ totalDocs: submissions })),
     })
   }
   const event = (signupForm: number | null) => ({
@@ -48,13 +48,24 @@ describe('events.low_rsvp', () => {
     const payload = makePayload({
       find: vi.fn(async ({ collection }: { collection: string }) => {
         if (collection === 'events') return { docs: [event(30)], totalDocs: 1 }
-        if (collection === 'form-submissions') return { docs: [], totalDocs: 0 }
         return { docs: [], totalDocs: 0 }
       }),
       // findByID returns a form that belongs to tenant 999, not tenant 7
       findByID: vi.fn(async () => ({ id: 30, tenant: 999, settings: { capacity: 100 } })),
+      count: vi.fn(async () => ({ totalDocs: 0 })),
     })
     expect(await eventsLowRsvp.evaluate(makeCtx(payload, { now: NOW }))).toEqual([])
+  })
+
+  it('queries only published events', async () => {
+    const payload = payloadFor([], 100, 0)
+    await eventsLowRsvp.evaluate(makeCtx(payload, { now: NOW }))
+    expect(payload.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'events',
+        where: expect.objectContaining({ _status: { equals: 'published' } }),
+      }),
+    )
   })
 
   it('execute posts a reminder announcement expiring at the event start', async () => {
@@ -68,7 +79,7 @@ describe('events.low_rsvp', () => {
     })
     const call = payload.create.mock.calls[0][0]
     expect(call.collection).toBe('announcements')
-    expect(call.data).toMatchObject({ tenant: 7, active: true, expiresAt: '2026-06-13T23:00:00.000Z' })
+    expect(call.data).toMatchObject({ tenant: 7, active: true, _status: 'published', expiresAt: '2026-06-13T23:00:00.000Z' })
     expect(call.data.title).toContain('Eid Dinner')
   })
 })
@@ -88,5 +99,16 @@ describe('events.missing_flyer', () => {
     expect(findings).toHaveLength(1)
     expect(findings[0].dedupKey).toBe('flyer:21')
     expect(findings[0].action).toMatchObject({ kind: 'conversation-starter', topic: 'generate-flyer' })
+  })
+
+  it('queries only published events', async () => {
+    const payload = makePayload()
+    await eventsMissingFlyer.evaluate(makeCtx(payload, { now: NOW }))
+    expect(payload.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'events',
+        where: expect.objectContaining({ _status: { equals: 'published' } }),
+      }),
+    )
   })
 })
