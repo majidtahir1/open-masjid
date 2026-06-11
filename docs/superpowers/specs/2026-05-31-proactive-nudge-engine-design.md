@@ -164,7 +164,7 @@ Watches **absolute-mode** iqamah rules only (offset mode self-corrects). Reuses 
 
 The proposed fix preserves the **gap the admin originally intended** (when they set the time) — `adhan + originalGap` — so there's no universal "target gap" constant and Maghrib-short vs Fajr-long sorts itself out. It can also offer the *permanent* fix: convert the rule to offset mode so it never drifts again.
 
-**Where `originalGap` comes from:** a `gapAtCreation` snapshot written by a save hook whenever an absolute iqamah time is set or changed — `iqamah − adhan` on the rule's effective date at save time. Existing absolute rules without a snapshot fall back to the gap on the first day of the lookahead window (the rule's `evaluate` stays pure — no writes); they get a real snapshot on their next save. Fallback rules only catch drift *within* the 14-day window, which is the honest baseline.
+**Where `originalGap` comes from:** a `gapAtCreation` snapshot written by a save hook whenever an absolute iqamah time is set or changed — `iqamah − adhan` on the rule's effective date at save time. Existing absolute rules without a snapshot fall back to the gap on the **schedule's first day** (stable across runs, so the proposed action stays deterministic for the apply comparison; the rule's `evaluate` stays pure — no writes); they get a real snapshot on their next save.
 
 ## Thresholds & tunability
 
