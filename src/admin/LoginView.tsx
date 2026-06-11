@@ -6,7 +6,9 @@
  *
  * This is a Client Component because it holds form state and handles the
  * POST to `/api/users/login` directly. On success, Payload sets an httpOnly
- * auth cookie and returns `{ user, token, exp }`; we then navigate to /admin.
+ * auth cookie and returns `{ user, token, exp }`; we then navigate to the
+ * page the visitor was originally heading for (the `redirect` query param,
+ * validated by `safeLoginRedirect`), falling back to /admin.
  * On failure the API returns 401 with `{ errors: [{ message }] }`.
  *
  * Tailwind + ICP tokens reach this view via src/app/(payload)/custom.scss,
@@ -21,6 +23,7 @@ import Link from 'next/link'
 import { LogIn } from 'lucide-react'
 
 import OpenMasjidWordmark from './OpenMasjidWordmark'
+import { safeLoginRedirect } from '@/lib/login-redirect'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -35,7 +38,7 @@ type PayloadLoginResponse = {
   message?: string
 }
 
-export default function LoginView() {
+export default function LoginView({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -67,8 +70,9 @@ export default function LoginView() {
         return
       }
 
-      // Success — Payload set the cookie; land on the dashboard.
-      router.push('/admin')
+      // Success — Payload set the cookie; return to where the visitor was
+      // headed, or the dashboard.
+      router.push(safeLoginRedirect(redirectTo))
       router.refresh()
     } catch {
       setError('Could not reach the server. Please try again.')

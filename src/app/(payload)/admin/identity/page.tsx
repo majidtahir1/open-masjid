@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
+import { loginUrl } from '@/lib/login-redirect'
 import IdentityStandalone from '@/admin/onboarding/steps/IdentityStandalone'
 
 // Hits Postgres on every render; never pre-render at build time.
@@ -19,7 +20,7 @@ export default async function IdentityPage() {
   const { user } = await getAdminUser()
 
   if (!user) {
-    redirect('/admin/login')
+    redirect(loginUrl('/admin/identity'))
   }
 
   const u = user as { tenant?: TenantRef; role?: string }

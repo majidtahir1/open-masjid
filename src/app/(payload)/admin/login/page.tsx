@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   description: 'Sign in to manage your masjid',
 }
 
-export default function Page() {
-  return <LoginView />
+type PageProps = {
+  searchParams: Promise<{ redirect?: string | string[] }>
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const { redirect } = await searchParams
+  return <LoginView redirectTo={typeof redirect === 'string' ? redirect : undefined} />
 }
