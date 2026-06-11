@@ -9,6 +9,7 @@ import {
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
+import { loginUrl } from '@/lib/login-redirect'
 import { importMap } from '../../importMap'
 import OverviewClient from './OverviewClient'
 import { buildAggregates, type MemberRow, type TierRow } from '@/lib/membership-aggregates'
@@ -52,7 +53,7 @@ function toTierRow(d: TierDoc): TierRow {
 
 export default async function MembershipOverviewPage() {
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect('/admin/login')
+  if (!user) redirect(loginUrl('/admin/membership/overview'))
 
   const payload = await getPayload({ config, importMap })
 

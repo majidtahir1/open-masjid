@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { getAdminUser, getAdminTenantWithRelations } from '@/lib/admin-context'
+import { loginUrl } from '@/lib/login-redirect'
 import BrandingStandalone from '@/admin/onboarding/steps/BrandingStandalone'
 
 // Hits Postgres on every render; never pre-render at build time.
@@ -19,7 +20,7 @@ export default async function BrandingPage() {
   const { user } = await getAdminUser()
 
   if (!user) {
-    redirect('/admin/login')
+    redirect(loginUrl('/admin/branding'))
   }
 
   const u = user as { tenant?: TenantRef; role?: string; name?: string | null; email?: string }

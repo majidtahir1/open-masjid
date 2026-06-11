@@ -9,6 +9,7 @@ import {
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
+import { loginUrl } from '@/lib/login-redirect'
 import { getTenantBillingState, type BillingTenantFields } from '@/lib/billing'
 import { importMap } from '../importMap'
 import BillingClient from './BillingClient'
@@ -18,7 +19,7 @@ export const runtime = 'nodejs'
 
 export default async function BillingPage() {
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect('/admin/login')
+  if (!user) redirect(loginUrl('/admin/billing'))
 
   // Pass importMap so DefaultTemplate's nested RenderServerComponent calls work.
   const payload = await getPayload({ config, importMap })
