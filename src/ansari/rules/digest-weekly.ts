@@ -2,6 +2,11 @@
 import { addDays, isoWeekKey, localParts } from '@/ansari/time'
 import type { Rule } from '@/ansari/types'
 
+/** Canonical dedup key for the current week's digest. Used by the rule AND the pipeline stale-digest check. */
+export function digestDedupKey(now: Date, timezone: string): string {
+  return `digest:${isoWeekKey(now, timezone)}`
+}
+
 export const digestWeekly: Rule = {
   id: 'digest.weekly',
   category: 'digest',
@@ -60,7 +65,7 @@ export const digestWeekly: Rule = {
 
     return [
       {
-        dedupKey: `digest:${week}`,
+        dedupKey: digestDedupKey(now, tenant.timezone),
         // Exact figures travel in the intent — Hermes templates them verbatim,
         // the LLM writes only connective prose (hard guard, see spec).
         intent: {
