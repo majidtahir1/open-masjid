@@ -28,6 +28,20 @@ describe('calendar.dst', () => {
     const ctx = makeCtx(makePayload(), { now: '2026-06-11T17:00:00Z' })
     expect(await calendarDst.evaluate(ctx)).toEqual([])
   })
+
+  it('yields the same dedupKey regardless of poll hour (06:00Z vs 17:00Z)', async () => {
+    // US DST ends Sun 2026-11-01. Both scans from Oct 28 should yield dst:2026-11-01.
+    const earlyCtx = makeCtx(makePayload(), { now: '2026-10-28T06:00:00Z' })
+    const lateCtx = makeCtx(makePayload(), { now: '2026-10-28T17:00:00Z' })
+    const [earlyFindings, lateFindings] = await Promise.all([
+      calendarDst.evaluate(earlyCtx),
+      calendarDst.evaluate(lateCtx),
+    ])
+    expect(earlyFindings).toHaveLength(1)
+    expect(lateFindings).toHaveLength(1)
+    expect(earlyFindings[0].dedupKey).toBe('dst:2026-11-01')
+    expect(lateFindings[0].dedupKey).toBe('dst:2026-11-01')
+  })
 })
 
 describe('calendar.ramadan', () => {

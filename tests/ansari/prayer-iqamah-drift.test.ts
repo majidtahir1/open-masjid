@@ -54,6 +54,7 @@ describe('prayer.iqamah_drift', () => {
     // adhan starts 5:00 AM advancing 3 min/day; iqamah fixed 5:10 AM, intended gap 10.
     // Day 2: adhan 5:06 → gap 4 (< 5) → floor breach fires BEFORE the ±10 drift
     // tolerance would (day 4) — intended gap must be small for floor to win.
+    // proposed = adhan(day2) + max(intendedGap, FLOOR_MIN) = 5:06 + 10 = 5:16 AM
     const payload = makePayload({
       find: vi.fn(async () => schedule({ absolute: '5:10 AM', gapAtCreation: 10, advanceMinPerDay: 3 })),
     })
@@ -61,8 +62,8 @@ describe('prayer.iqamah_drift', () => {
     expect(findings).toHaveLength(1)
     expect(findings[0].dedupKey).toBe('iqamah:fajr:floor')
     expect(findings[0].intent).toMatchObject({ prayer: 'fajr', breach: 'floor' })
-    // proposed = breach-day adhan + intended gap (>= floor)
     expect(findings[0].action).toMatchObject({ kind: 'direct', op: 'setAbsoluteIqamah' })
+    expect((findings[0].action as { params?: { value?: string } }).params?.value).toBe('5:16 AM')
   })
 
   it('fires a drift breach when the gap strays more than ±10 min from gapAtCreation', async () => {
@@ -76,8 +77,9 @@ describe('prayer.iqamah_drift', () => {
     expect(findings[0].dedupKey).toBe('iqamah:fajr:drift')
   })
 
-  it('falls back to the first lookahead day gap when no snapshot exists', async () => {
-    // No gapAtCreation: intended = day-0 gap. Constant adhan → no drift, no floor → silent.
+  it('falls back to the schedule first day gap when no snapshot exists (constant adhan → silent)', async () => {
+    // No gapAtCreation: intended = schedule day-0 gap (stable anchor).
+    // Constant adhan → gap never drifts, no floor → silent.
     const payload = makePayload({
       find: vi.fn(async () => schedule({ absolute: '5:45 AM', gapAtCreation: null, advanceMinPerDay: 0 })),
     })
@@ -106,6 +108,43 @@ describe('prayer.iqamah_drift', () => {
     expect(call.id).toBe(9)
     expect(call.data.iqamahRules.fajr.mode).toBe('absolute')
     expect(call.data.iqamahRules.fajr.absoluteValue).toMatch(/^\d{1,2}:\d{2} (AM|PM)$/)
+  })
+
+  it('same-day floor-beats-drift: gapAtCreation 20, adhan 5:00 AM, iqamah 5:02 AM → gap 2 → floor wins', async () => {
+    // gap = 2 < FLOOR_MIN(5) → floor breach on day 0.
+    // Also: |2 − 20| = 18 > TOLERANCE(10) → drift would also fire, but floor is checked first.
+    // proposed = 5:00 AM adhan (300 min) + max(20, 5) = 320 min = 5:20 AM
+    const days = Array.from({ length: 20 }, (_, i) => ({
+      date: new Date(Date.UTC(2026, 5, 11 + i)).toISOString(),
+      fajr: { adhan: '5:00 AM', iqamah: '5:02 AM' },
+      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
+      asr: { adhan: '5:00 PM', iqamah: '5:15 PM' },
+      maghrib: { adhan: '8:30 PM', iqamah: '8:35 PM' },
+      isha: { adhan: '10:00 PM', iqamah: '10:15 PM' },
+    }))
+    const sched = {
+      docs: [
+        {
+          id: 77,
+          startDate: '2026-06-01T00:00:00.000Z',
+          endDate: '2026-07-15T00:00:00.000Z',
+          iqamahRules: {
+            fajr: { mode: 'absolute', absoluteValue: '5:02 AM', gapAtCreation: 20 },
+            zuhr: { mode: 'offset', offsetMinutes: 15 },
+            asr: { mode: 'offset', offsetMinutes: 15 },
+            maghrib: { mode: 'offset', offsetMinutes: 5 },
+            isha: { mode: 'offset', offsetMinutes: 15 },
+          },
+          days,
+        },
+      ],
+      totalDocs: 1,
+    }
+    const payload = makePayload({ find: vi.fn(async () => sched) })
+    const findings = await prayerIqamahDrift.evaluate(makeCtx(payload))
+    expect(findings).toHaveLength(1)
+    expect(findings[0].dedupKey).toBe('iqamah:fajr:floor')
+    expect((findings[0].action as { params?: { value?: string } }).params?.value).toBe('5:20 AM')
   })
 
   it('midnight-crossing iqamah: isha adhan 11:45 PM, iqamah 12:15 AM reads +30, no breach', async () => {

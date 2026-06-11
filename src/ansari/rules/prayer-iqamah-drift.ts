@@ -44,8 +44,6 @@ function prayerGap(day: DayRow, prayer: string): number | null {
   const adhan = parseTime(cell?.adhan ?? '')
   const iqamah = parseTime(cell?.iqamah ?? '')
   if (adhan == null || iqamah == null) return null
-  // Centered to [-720, 720): a midnight-crossing 30-min gap reads +30, while an
-  // iqamah a few minutes BEFORE adhan reads slightly negative (floor breach).
   return ((((iqamah - adhan + 720) % 1440) + 1440) % 1440) - 720
 }
 
@@ -62,10 +60,16 @@ export const prayerIqamahDrift: Rule = {
 
     const todayKey = localDateISO(now, tenant.timezone)
     const horizonKey = localDateISO(addDays(now, LOOKAHEAD_DAYS), tenant.timezone)
-    const windowDays = (schedule.days ?? []).filter((d) => {
-      const key = typeof d.date === 'string' ? d.date.slice(0, 10) : ''
-      return key >= todayKey && key <= horizonKey
-    })
+    const windowDays = (schedule.days ?? [])
+      .filter((d) => {
+        const key = typeof d.date === 'string' ? d.date.slice(0, 10) : ''
+        return key >= todayKey && key <= horizonKey
+      })
+      .sort((a, b) => {
+        const ka = typeof a.date === 'string' ? a.date.slice(0, 10) : ''
+        const kb = typeof b.date === 'string' ? b.date.slice(0, 10) : ''
+        return ka < kb ? -1 : ka > kb ? 1 : 0
+      })
     if (windowDays.length === 0) return []
 
     const findings: Finding[] = []
@@ -73,9 +77,10 @@ export const prayerIqamahDrift: Rule = {
       const rule = schedule.iqamahRules?.[prayer]
       if (rule?.mode !== 'absolute' || !rule.absoluteValue) continue
 
-      // Intended gap: the snapshot if present, else the gap on the first
-      // lookahead day (pure fallback for pre-snapshot rules — see spec).
-      const intendedGap = rule.gapAtCreation ?? prayerGap(windowDays[0], prayer)
+      // Intended gap: the snapshot if present, else the gap on the schedule's
+      // first day — stable across runs, mirrors snapshotIqamahGaps semantics
+      // for pre-snapshot rules (fallback for legacy schedule docs).
+      const intendedGap = rule.gapAtCreation ?? prayerGap((schedule.days ?? [])[0], prayer)
       if (intendedGap == null) continue
 
       for (const d of windowDays) {

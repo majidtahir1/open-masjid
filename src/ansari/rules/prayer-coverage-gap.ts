@@ -1,5 +1,5 @@
 // src/ansari/rules/prayer-coverage-gap.ts
-import { addDays, endOfNextMonthISO, localDateISO } from '@/ansari/time'
+import { addDays } from '@/ansari/time'
 import type { Rule } from '@/ansari/types'
 
 const LEAD_DAYS = 7
@@ -26,8 +26,10 @@ export const prayerCoverageGap: Rule = {
     const end = new Date(latest.endDate)
     if (end.getTime() >= addDays(now, LEAD_DAYS).getTime()) return []
 
-    const uncoveredFrom = localDateISO(addDays(end, 1), tenant.timezone)
-    const newEndDate = endOfNextMonthISO(end, tenant.timezone)
+    // Schedule dates use UTC labels; compute directly from UTC parts (no timezone conversion).
+    const uncoveredFrom = addDays(end, 1).toISOString().slice(0, 10)
+    // Last day of the month after the one containing `end`, by UTC parts.
+    const newEndDate = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 2, 0)).toISOString().slice(0, 10)
     return [
       {
         dedupKey: `coverage:${uncoveredFrom.slice(0, 7)}`,
