@@ -43,7 +43,7 @@ function req(over: { state?: object | null; schedules?: object; scopes?: string[
       if (collection === 'ansari-settings') return { docs: over.settings ?? [], totalDocs: 0 }
       return { docs: [], totalDocs: 0 }
     }),
-    update: vi.fn(async (a: { data: object }) => a.data),
+    update: vi.fn(async (a: { collection?: string; id?: unknown; data: Record<string, unknown> }) => a.data),
     create: vi.fn(async (a: { data: object }) => ({ id: 2, ...a.data })),
     count: vi.fn(async () => ({ totalDocs: 0 })),
     logger: { error: vi.fn(), warn: vi.fn() },

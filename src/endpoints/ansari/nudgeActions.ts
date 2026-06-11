@@ -3,6 +3,7 @@ import type { Endpoint, PayloadRequest } from 'payload'
 
 import { tenantTimezone } from '@/ansari/pipeline'
 import { ruleById } from '@/ansari/registry'
+import type { RuleId } from '@/ansari/ruleIds'
 import type { NudgeContext } from '@/ansari/types'
 import { authorizeAnsari, hasApiScope, loadOwnState, type NudgeStateDoc } from './shared'
 
@@ -125,7 +126,7 @@ export const ansariNudgeMuteEndpoint: Endpoint = {
     })
     const settings = res.docs[0] as { id: string | number; disabledRules?: string[] | null } | undefined
     if (settings) {
-      const merged = Array.from(new Set([...(settings.disabledRules ?? []), state.rule]))
+      const merged = Array.from(new Set([...(settings.disabledRules ?? []), state.rule])) as RuleId[]
       await req.payload.update({
         collection: 'ansari-settings',
         id: settings.id,
@@ -135,7 +136,7 @@ export const ansariNudgeMuteEndpoint: Endpoint = {
     } else {
       await req.payload.create({
         collection: 'ansari-settings',
-        data: { tenant: tenantId, disabledRules: [state.rule] },
+        data: { tenant: Number(tenantId), disabledRules: [state.rule as RuleId] },
         overrideAccess: true,
       })
     }
