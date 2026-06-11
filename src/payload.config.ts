@@ -7,10 +7,12 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { AnsariSettings } from './collections/AnsariSettings'
 import { Announcements } from './collections/Announcements'
 import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
+import { NudgeStates } from './collections/NudgeStates'
 import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
@@ -151,6 +153,8 @@ export default buildConfig({
     Media,
     Users,
     Tenants,
+    AnsariSettings,
+    NudgeStates,
   ].map(withApiKeyScopeEnforcement),
   endpoints: [
     generatePrayerTimesEndpoint,
