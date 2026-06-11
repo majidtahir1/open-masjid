@@ -185,11 +185,15 @@ export async function runNudgePipeline(
     }
   }
   // Heal duplicates immediately before any other updates.
+  // When the discarded duplicate is already terminal (dismissed/applied),
+  // preserve its status and only stamp resolvedAt — same rule as the sweep below.
   for (const id of healIds) {
+    const discarded = rawOpen.find((st) => st.id === id)!
+    const isTerminal = discarded.status === 'dismissed' || discarded.status === 'applied'
     await payload.update({
       collection: 'nudge-states',
       id,
-      data: { status: 'resolved', resolvedAt: now.toISOString() },
+      data: isTerminal ? { resolvedAt: now.toISOString() } : { status: 'resolved', resolvedAt: now.toISOString() },
       overrideAccess: true,
     })
   }

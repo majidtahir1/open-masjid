@@ -12,6 +12,10 @@ export function extractId(rel: unknown): string | number | null {
 /**
  * All /api/ansari/* endpoints: session admins/platformOwners pass; API keys
  * must carry the ansari:nudges scope. Returns the caller's tenant id.
+ *
+ * Note: unlike gateByApiKeyScope's legacy-key leniency (which tolerates empty
+ * apiScopes for backward-compat), empty apiScopes is rejected here by design —
+ * Ansari nudges are a sensitive write surface and we require an explicit grant.
  */
 export function authorizeAnsari(req: PayloadRequest): { tenantId: string | number } | Response {
   const user = req.user as
@@ -52,7 +56,7 @@ export async function loadOwnState(
   req: PayloadRequest,
   tenantId: string | number,
   id: unknown,
-): Promise<NudgeStateDoc | 'missing' | 'foreign'> {
+): Promise<NudgeStateDoc | 'missing' | 'foreign' | 'error'> {
   try {
     const doc = (await req.payload.findByID({
       collection: 'nudge-states',
@@ -63,7 +67,11 @@ export async function loadOwnState(
     if (!doc) return 'missing'
     if (String(extractId(doc.tenant)) !== String(tenantId)) return 'foreign'
     return doc
-  } catch {
-    return 'missing'
+  } catch (err) {
+    // Only treat a genuine Not Found (404) as missing; all other errors
+    // (DB down, network timeout, etc.) bubble up as 'error' so callers
+    // can return a 500 instead of silently answering 200 already-handled.
+    if ((err as { status?: number })?.status === 404) return 'missing'
+    return 'error'
   }
 }

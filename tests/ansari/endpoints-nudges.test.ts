@@ -53,19 +53,37 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
     expect(res.status).toBe(200)
+    // uses state.id (not raw routeParams string) and returns 'delivered'
     expect(payload.update).toHaveBeenCalledWith(
       expect.objectContaining({
         collection: 'nudge-states',
-        id: '55',
+        id: 55,
         data: expect.objectContaining({ status: 'delivered' }),
       }),
     )
+    expect((await res.json()).status).toBe('delivered')
   })
 
-  it('is idempotent for unknown ids', async () => {
+  it('returns the truthful status for an already-delivered state (no double-update)', async () => {
+    const payload = {
+      findByID: vi.fn(async () => ({ id: 55, tenant: 7, status: 'delivered' })),
+      update: vi.fn(async (a: { data: object }) => a.data),
+      find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
+      create: vi.fn(),
+      count: vi.fn(async () => ({ totalDocs: 0 })),
+      logger: { error: vi.fn(), warn: vi.fn() },
+    }
+    const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
+    expect(res.status).toBe(200)
+    // update must NOT be called — state already delivered
+    expect(payload.update).not.toHaveBeenCalled()
+    expect((await res.json()).status).toBe('delivered')
+  })
+
+  it('is idempotent for unknown ids (404 from Payload → graceful unknown)', async () => {
     const payload = {
       findByID: vi.fn(async () => {
-        throw new Error('NotFound')
+        throw Object.assign(new Error('NotFound'), { status: 404 })
       }),
       update: vi.fn(),
       find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
@@ -78,7 +96,23 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
     expect((await res.json()).status).toBe('unknown')
   })
 
-  it('rejects a state belonging to another tenant', async () => {
+  it('returns 500 when findByID throws a non-404 error (infrastructure error ≠ missing)', async () => {
+    const payload = {
+      findByID: vi.fn(async () => {
+        throw Object.assign(new Error('boom'), { status: 500 })
+      }),
+      update: vi.fn(),
+      find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
+      create: vi.fn(),
+      count: vi.fn(async () => ({ totalDocs: 0 })),
+      logger: { error: vi.fn(), warn: vi.fn() },
+    }
+    const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
+    expect(res.status).toBe(500)
+    expect((await res.json()).status).toBe('error')
+  })
+
+  it('is graceful (not 404) for a state belonging to another tenant (existence oracle closed)', async () => {
     const payload = {
       findByID: vi.fn(async () => ({ id: 55, tenant: 999, status: 'emitted' })),
       update: vi.fn(),
@@ -88,7 +122,9 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
       logger: { error: vi.fn(), warn: vi.fn() },
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
-    expect(res.status).toBe(404)
+    // Must NOT be 404 — that would reveal the id exists on another tenant
+    expect(res.status).toBe(200)
+    expect((await res.json()).status).toBe('unknown')
     expect(payload.update).not.toHaveBeenCalled()
   })
 })

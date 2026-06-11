@@ -21,18 +21,21 @@ export const ansariNudgeAckEndpoint: Endpoint = {
   handler: async (req) => {
     const auth = authorizeAnsari(req)
     if (auth instanceof Response) return auth
-    const id = req.routeParams?.id
-    const state = await loadOwnState(req, auth.tenantId, id)
+    const state = await loadOwnState(req, auth.tenantId, req.routeParams?.id)
     if (state === 'missing') return Response.json({ ok: true, status: 'unknown' })
-    if (state === 'foreign') return Response.json({ error: 'Not found' }, { status: 404 })
+    // Treat foreign exactly like missing — don't reveal existence via 404 vs 200
+    if (state === 'foreign') return Response.json({ ok: true, status: 'unknown' })
+    if (state === 'error') {
+      return Response.json({ status: 'error', message: 'Temporary failure — try again' }, { status: 500 })
+    }
     if (state.status === 'emitted') {
       await req.payload.update({
         collection: 'nudge-states',
-        id: id as string,
+        id: state.id,
         data: { status: 'delivered', deliveredAt: new Date().toISOString() },
         overrideAccess: true,
       })
     }
-    return Response.json({ ok: true, status: 'delivered' })
+    return Response.json({ ok: true, status: state.status === 'emitted' ? 'delivered' : state.status })
   },
 }

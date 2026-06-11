@@ -9,6 +9,18 @@ import { authorizeAnsari, hasApiScope, loadOwnState, type NudgeStateDoc } from '
 
 const TERMINAL = ['applied', 'dismissed', 'resolved']
 
+/** Key-order-independent serialization — stored actions round-trip through jsonb, which reorders keys. */
+function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value as Record<string, unknown>)
+      .sort()
+      .map((k) => `${JSON.stringify(k)}:${canonical((value as Record<string, unknown>)[k])}`)
+      .join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
 async function setStatus(
   req: PayloadRequest,
   id: string | number,
@@ -17,6 +29,8 @@ async function setStatus(
   await req.payload.update({ collection: 'nudge-states', id, data, overrideAccess: true })
 }
 
+const INFRA_ERROR = Response.json({ status: 'error', message: 'Temporary failure — try again' }, { status: 500 })
+
 type Loaded = { tenantId: string | number; state: NudgeStateDoc }
 
 async function loadForAction(req: PayloadRequest): Promise<Loaded | Response | 'gone'> {
@@ -24,7 +38,11 @@ async function loadForAction(req: PayloadRequest): Promise<Loaded | Response | '
   if (auth instanceof Response) return auth
   const state = await loadOwnState(req, auth.tenantId, req.routeParams?.id)
   if (state === 'missing') return 'gone'
-  if (state === 'foreign') return Response.json({ error: 'Not found' }, { status: 404 })
+  // Treat foreign exactly like missing — don't reveal existence via 404 vs 200
+  if (state === 'foreign') return 'gone'
+  if (state === 'error') {
+    return Response.json({ status: 'error', message: 'Temporary failure — try again' }, { status: 500 })
+  }
   return { tenantId: auth.tenantId, state }
 }
 
@@ -54,14 +72,22 @@ export const ansariNudgeApplyEndpoint: Endpoint = {
     }
 
     // Re-validation reuses evaluate() — discovery and apply share one source of truth.
-    const fresh = (await rule.evaluate(ctx)).find((f) => f.dedupKey === state.dedupKey)
+    let fresh: Awaited<ReturnType<typeof rule.evaluate>>[number] | undefined
+    try {
+      fresh = (await rule.evaluate(ctx)).find((f) => f.dedupKey === state.dedupKey)
+    } catch (err) {
+      req.payload.logger.error({ err, rule: state.rule, tenant: tenantId }, 'nudge evaluate failed on apply')
+      return Response.json({ status: 'error', message: 'Temporary failure — try again' }, { status: 500 })
+    }
+
     if (!fresh) {
       await setStatus(req, state.id, { status: 'resolved', resolvedAt: ctx.now.toISOString() })
       return Response.json({ status: 'already-handled' })
     }
 
-    // The admin only ever gets what they actually confirmed.
-    if (JSON.stringify(fresh.action) !== JSON.stringify(state.action)) {
+    // Use key-order-independent comparison — stored actions round-trip through
+    // Postgres jsonb which does NOT preserve key order.
+    if (canonical(fresh.action) !== canonical(state.action)) {
       await setStatus(req, state.id, { action: fresh.action, intent: fresh.intent, status: 'emitted' })
       return Response.json({
         status: 'changed',
@@ -70,7 +96,14 @@ export const ansariNudgeApplyEndpoint: Endpoint = {
     }
 
     if (fresh.action.kind === 'conversation-starter' || !rule.execute) {
-      await setStatus(req, state.id, { status: 'applied' })
+      // Claim before returning handoff — marks state terminal before any side-effects.
+      const claim = await req.payload.update({
+        collection: 'nudge-states',
+        where: { id: { equals: state.id }, status: { not_in: ['applied', 'dismissed', 'resolved'] } },
+        data: { status: 'applied' },
+        overrideAccess: true,
+      })
+      if ((claim as { docs: unknown[] }).docs.length === 0) return Response.json({ status: 'already-handled' })
       return Response.json({
         status: 'handoff',
         intent: fresh.intent,
@@ -78,9 +111,33 @@ export const ansariNudgeApplyEndpoint: Endpoint = {
       })
     }
 
-    const result = await rule.execute(ctx, fresh)
-    await setStatus(req, state.id, { status: 'applied' })
-    return Response.json({ status: 'applied', detail: result.detail })
+    // Claim before execute — marks state terminal before any side-effects so
+    // concurrent taps cannot both run execute (e.g. events.low_rsvp creates an
+    // announcement). If the claim races and loses, bail out gracefully.
+    const claim = await req.payload.update({
+      collection: 'nudge-states',
+      where: { id: { equals: state.id }, status: { not_in: ['applied', 'dismissed', 'resolved'] } },
+      data: { status: 'applied' },
+      overrideAccess: true,
+    })
+    if ((claim as { docs: unknown[] }).docs.length === 0) return Response.json({ status: 'already-handled' })
+
+    try {
+      const result = await rule.execute(ctx, fresh)
+      return Response.json({ status: 'applied', detail: result.detail })
+    } catch (err) {
+      req.payload.logger.error({ err, rule: state.rule, tenant: tenantId }, 'nudge execute failed on apply')
+      // Best-effort revert so the admin can retry; cast to avoid exhaustive status enum check
+      await req.payload
+        .update({
+          collection: 'nudge-states',
+          id: state.id,
+          data: { status: state.status as 'emitted' | 'delivered' | 'snoozed' },
+          overrideAccess: true,
+        })
+        .catch(() => undefined)
+      return Response.json({ status: 'error', message: 'Temporary failure — try again' }, { status: 500 })
+    }
   },
 }
 
@@ -141,6 +198,31 @@ export const ansariNudgeMuteEndpoint: Endpoint = {
       })
     }
     await setStatus(req, state.id, { status: 'dismissed' })
+
+    // Stamp resolvedAt on all un-stamped nudge-states for this rule+tenant so
+    // muted rules' states drop out of the open set and don't occupy suppression
+    // queries forever.
+    const openStates = await req.payload.find({
+      collection: 'nudge-states',
+      where: {
+        tenant: { equals: tenantId },
+        rule: { equals: state.rule },
+        resolvedAt: { exists: false },
+      },
+      limit: 500,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const nowIso = new Date().toISOString()
+    for (const st of openStates.docs as Array<{ id: string | number }>) {
+      await req.payload.update({
+        collection: 'nudge-states',
+        id: st.id,
+        data: { resolvedAt: nowIso },
+        overrideAccess: true,
+      })
+    }
+
     return Response.json({ ok: true, status: 'muted', rule: state.rule })
   },
 }

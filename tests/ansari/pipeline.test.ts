@@ -253,4 +253,21 @@ describe('runNudgePipeline', () => {
     const healUpdate = updated.find((u) => u.id === 56)
     expect(healUpdate?.data).toMatchObject({ status: 'resolved' })
   })
+
+  // Fix 7: heal preserves terminal status — discarded dismissed duplicate gets only resolvedAt
+  it('heal preserves terminal status: dismissed duplicate gets resolvedAt only, no status overwrite', async () => {
+    const { payload, updated } = db({
+      schedules: FIRING_SCHEDULE,
+      states: [
+        { id: 55, rule: 'prayer.coverage_gap', dedupKey: 'coverage:2026-06', status: 'emitted', tier: 'immediate' },
+        { id: 56, rule: 'prayer.coverage_gap', dedupKey: 'coverage:2026-06', status: 'dismissed', tier: 'immediate' },
+      ],
+    })
+    await runNudgePipeline(payload, 7, NOON)
+    // id 56 is the larger id — it gets discarded; it's dismissed, so only resolvedAt
+    const healUpdate = updated.find((u) => u.id === 56)
+    expect(healUpdate).toBeDefined()
+    expect(healUpdate?.data).toHaveProperty('resolvedAt')
+    expect(healUpdate?.data).not.toHaveProperty('status')
+  })
 })
