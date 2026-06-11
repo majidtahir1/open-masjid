@@ -29,8 +29,6 @@ async function setStatus(
   await req.payload.update({ collection: 'nudge-states', id, data, overrideAccess: true })
 }
 
-const INFRA_ERROR = Response.json({ status: 'error', message: 'Temporary failure — try again' }, { status: 500 })
-
 type Loaded = { tenantId: string | number; state: NudgeStateDoc }
 
 async function loadForAction(req: PayloadRequest): Promise<Loaded | Response | 'gone'> {
