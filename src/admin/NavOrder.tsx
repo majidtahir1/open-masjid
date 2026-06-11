@@ -20,9 +20,12 @@ import React from 'react'
  *   99. Site Settings      (custom — pinned bottom)
  *   100. Logout
  *
- * Group identification uses `:has(a[href^="..."])` to find each group by a
- * collection slug it contains. Stable as long as the group's `admin.group`
- * label or members don't change.
+ * Group identification uses `:has(#nav-<slug>)` to find each group by a
+ * collection slug it contains. Payload gives every nav entry that id whether
+ * it renders as a link or — on the entry's own page — as a plain <div>
+ * (an href-based selector would stop matching there and the group would
+ * jump to order 0, above the Dashboard). Stable as long as the group's
+ * `admin.group` label or members don't change.
  */
 export default function NavOrder() {
   const css = `
@@ -35,10 +38,10 @@ export default function NavOrder() {
        Site Settings then takes over as the bottom-pinned item. */
 
     .nav .nav__link--dashboard { order: 1; }
-    .nav .nav-group:has(a[href^="/admin/collections/prayer-schedules"]) { order: 2; }
-    .nav .nav-group:has(a[href^="/admin/collections/events"]) { order: 3; }
-    .nav .nav-group:has(a[href^="/admin/collections/kiosks"]) { order: 4; }
-    .nav .nav-group:has(a[href^="/admin/collections/forms"]) { order: 5; }
+    .nav .nav-group:has(#nav-prayer-schedules) { order: 2; }
+    .nav .nav-group:has(#nav-events) { order: 3; }
+    .nav .nav-group:has(#nav-kiosks) { order: 4; }
+    .nav .nav-group:has(#nav-forms) { order: 5; }
     .nav a[data-membership-nav-link] { order: 6; }
     .nav a[data-donations-nav-link] { order: 7; }
     .nav a[data-view-public-site] { order: 8; }
