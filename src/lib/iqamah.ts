@@ -2,7 +2,7 @@ export type IqamahRule =
   | { mode: 'absolute'; value: string }
   | { mode: 'offset'; value: number }
 
-function parseTime(time: string): number | null {
+export function parseTime(time: string): number | null {
   const match = time.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
   if (!match) return null
   let hour = parseInt(match[1], 10)
@@ -13,7 +13,7 @@ function parseTime(time: string): number | null {
   return hour * 60 + minute
 }
 
-function formatTime(totalMinutes: number): string {
+export function formatTime(totalMinutes: number): string {
   const normalized = ((totalMinutes % 1440) + 1440) % 1440
   const hour24 = Math.floor(normalized / 60)
   const minute = normalized % 60
