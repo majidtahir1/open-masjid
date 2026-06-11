@@ -1,5 +1,14 @@
 // src/ansari/time.ts
 // Tenant-local time math via Intl — no date library, mirrors src/lib/adhan.ts / hijri.ts.
+//
+// Timezone contract
+// -----------------
+// All exported functions accept an IANA timezone string.  Every function
+// EXCEPT `hijriParts` will throw a RangeError when given an invalid timezone
+// (propagated from Intl.DateTimeFormat).  `hijriParts` mirrors the behaviour of
+// src/lib/hijri.ts: it silently falls back to the system timezone on an invalid
+// value.  Callers that resolve a tenant timezone must validate / fallback before
+// calling (the nudge-engine pipeline does this).
 
 const DAY_MS = 86_400_000
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -13,6 +22,12 @@ export type LocalParts = {
   weekday: number // 0=Sunday … 6=Saturday
 }
 
+/**
+ * Returns a new Date offset by `days` exact 24-hour multiples (instant arithmetic).
+ *
+ * Near a DST transition the resulting LOCAL date can skip or repeat; callers
+ * iterating local days rely on hourly re-polling to self-correct.
+ */
 export function addDays(date: Date, days: number): Date {
   return new Date(date.getTime() + days * DAY_MS)
 }
@@ -87,7 +102,7 @@ export function hijriParts(date: Date, timeZone: string): { year: number; month:
   }
   const parts: Record<string, string> = {}
   for (const p of formatted) parts[p.type] = p.value
-  return { year: parseInt(parts.year, 10), month: Number(parts.month), day: Number(parts.day) }
+  return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day) }
 }
 
 /** ISO-8601 week key of the tenant-local date, e.g. '2026-W24'. */

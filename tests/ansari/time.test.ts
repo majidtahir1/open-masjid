@@ -56,6 +56,15 @@ describe('isoWeekKey', () => {
     expect(isoWeekKey(new Date('2026-06-14T12:00:00Z'), CHI)).toBe('2026-W24') // Sunday, same ISO week
     expect(isoWeekKey(new Date('2026-06-15T12:00:00Z'), CHI)).toBe('2026-W25') // Monday
   })
+
+  it('handles ISO year rollover correctly', () => {
+    // 2025-12-29 (Mon) is in ISO week 2026-W01 — first week of 2026
+    expect(isoWeekKey(new Date('2025-12-29T12:00:00Z'), CHI)).toBe('2026-W01')
+    // 2027-01-01 (Fri) still belongs to ISO week 2026-W53 — last week of 2026
+    expect(isoWeekKey(new Date('2027-01-01T12:00:00Z'), CHI)).toBe('2026-W53')
+    // 2024-12-30 (Mon) is in ISO week 2025-W01 — first week of 2025
+    expect(isoWeekKey(new Date('2024-12-30T12:00:00Z'), CHI)).toBe('2025-W01')
+  })
 })
 
 describe('addDays / endOfNextMonthISO', () => {
@@ -65,5 +74,22 @@ describe('addDays / endOfNextMonthISO', () => {
   it('endOfNextMonthISO returns the last day of the following local month', () => {
     expect(endOfNextMonthISO(new Date('2026-06-15T12:00:00Z'), CHI)).toBe('2026-07-31')
     expect(endOfNextMonthISO(new Date('2026-12-15T12:00:00Z'), CHI)).toBe('2027-01-31')
+  })
+  it('endOfNextMonthISO handles leap February', () => {
+    // 2028 is a leap year; next month after Jan 2028 is Feb 2028 → ends on the 29th
+    expect(endOfNextMonthISO(new Date('2028-01-15T12:00:00Z'), CHI)).toBe('2028-02-29')
+  })
+})
+
+describe('hijriParts timezone sensitivity', () => {
+  it('UTC and America/Chicago disagree on hijri day around a month boundary', () => {
+    // Empirically verified: at 2026-02-18T03:00:00Z
+    //   UTC  → 1447 Ramadan 1  (month 9, day 1)
+    //   Chicago (CST, UTC-6) → still 1447 Sha'ban 29 (month 8, day 29)
+    const instant = new Date('2026-02-18T03:00:00Z')
+    const utcParts = hijriParts(instant, 'UTC')
+    const chiParts = hijriParts(instant, CHI)
+    expect(utcParts).toEqual({ year: 1447, month: 9, day: 1 })
+    expect(chiParts).toEqual({ year: 1447, month: 8, day: 29 })
   })
 })
