@@ -1,7 +1,8 @@
 # Design: Proactive Nudge Engine (Ansari)
 
 - **Date:** 2026-05-31 (revised 2026-06-11: review feedback folded in — donations rule cut, delivery acks, apply-time semantics, action taxonomy)
-- **Status:** Approved → in implementation
+- **Status:** Implemented (OpenMasjid side) — Hermes integration pending
+- **Plan:** [2026-06-11 plan](../plans/2026-06-11-proactive-nudge-engine.md)
 - **Depends on:** [Agent Capability Surface v1](./2026-05-31-ai-agent-capability-surface-v1-design.md)
 - **Related:** [Marketing Spotlight](./2026-05-31-ai-assistant-marketing-spotlight-design.md), [Multi-Tenant Productization](./2026-05-31-ansari-multi-tenant-productization-design.md)
 

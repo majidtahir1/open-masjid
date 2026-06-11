@@ -36,6 +36,13 @@ import { createTenantEndpoint } from './endpoints/createTenant'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
 import { runJobsDevEndpoint } from './endpoints/runJobsDev'
+import { ansariNudgeAckEndpoint, ansariNudgesEndpoint } from './endpoints/ansari/nudges'
+import {
+  ansariNudgeApplyEndpoint,
+  ansariNudgeDismissEndpoint,
+  ansariNudgeMuteEndpoint,
+  ansariNudgeSnoozeEndpoint,
+} from './endpoints/ansari/nudgeActions'
 import { withApiKeyScopeEnforcement } from './access/apiScoped'
 
 const filename = fileURLToPath(import.meta.url)
@@ -162,6 +169,12 @@ export default buildConfig({
     inviteUserEndpoint,
     runJobsDevEndpoint,
     createTenantEndpoint,
+    ansariNudgesEndpoint,
+    ansariNudgeAckEndpoint,
+    ansariNudgeApplyEndpoint,
+    ansariNudgeDismissEndpoint,
+    ansariNudgeSnoozeEndpoint,
+    ansariNudgeMuteEndpoint,
   ],
   jobs: {
     // Dev: `src/instrumentation.ts` ticks the queue every 30s.
