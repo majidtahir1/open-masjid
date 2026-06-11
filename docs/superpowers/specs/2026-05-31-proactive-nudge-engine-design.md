@@ -107,7 +107,7 @@ Not every [Yes] is a one-tap write. **`direct`** actions (extend schedule, adjus
 1. **Load context** — tenant, timezone, preferences record.
 2. **Select** — drop rules the admin disabled or muted.
 3. **Evaluate** — run each rule's `evaluate(ctx)`; collect findings.
-4. **Dedup** — look up each finding's `dedupKey` in NudgeState. Already delivered & unresolved → drop (silence). Emitted but never acked → re-emit. New/changed → keep.
+4. **Dedup** — look up each finding's `dedupKey` in NudgeState (any un-resolved state). Already delivered & unresolved → drop (silence). Emitted but never acked → re-emit. **Dismissed/applied & still firing → drop** (a [No] sticks for that problem instance; when the condition later clears, the sweep stamps `resolvedAt` without touching the status, so a genuine recurrence is treated fresh). New/changed → keep. A rule whose `evaluate` threw this cycle is exempt from the resolution sweep — transient failures must not resurrect delivered nudges. Duplicate states for one dedupKey (concurrent-poll race) self-heal: smallest id wins.
 5. **Tier & timing gate** — immediate findings pass only inside the allowed window (i.e. *outside* quiet hours); a finding blocked by the gate is **held, not recorded** — it fires on the next in-window poll. Digest findings held until the weekly run (which also re-surfaces unresolved immediates).
 6. **Snooze** — hold findings marked *Not now* until the next weekly digest.
 7. **Emit & record** — return survivors as structured intents; write them to NudgeState as **emitted** (→ *delivered* only on Hermes ack).
