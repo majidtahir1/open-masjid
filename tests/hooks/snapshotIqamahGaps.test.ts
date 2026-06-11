@@ -51,8 +51,47 @@ describe('snapshotIqamahGaps', () => {
     expect((out.iqamahRules as typeof baseRules).fajr).toMatchObject({ gapAtCreation: 22 })
   })
 
-  it('ignores offset-mode prayers and missing days', async () => {
+  it('skips offset-mode prayers while snapshotting absolute ones', async () => {
+    const rules = {
+      fajr: { mode: 'absolute', absoluteValue: '6:00 AM' },
+      zuhr: { mode: 'offset', offsetMinutes: 15 },
+      asr: { mode: 'offset', offsetMinutes: 15 },
+      maghrib: { mode: 'offset', offsetMinutes: 5 },
+      isha: { mode: 'offset', offsetMinutes: 15 },
+    }
+    const data = {
+      iqamahRules: structuredClone(rules),
+      days: [day('2099-01-01T00:00:00.000Z', '5:30 AM', '6:00 AM')],
+    }
+    const out = await run(data)
+    expect((out.iqamahRules as typeof rules).fajr).toHaveProperty('gapAtCreation')
+    expect((out.iqamahRules as typeof rules).zuhr).not.toHaveProperty('gapAtCreation')
+  })
+
+  it('is a no-op when there are no generated days', async () => {
     const out = await run({ iqamahRules: structuredClone(baseRules), days: [] })
+    expect((out.iqamahRules as typeof baseRules).fajr).not.toHaveProperty('gapAtCreation')
     expect((out.iqamahRules as typeof baseRules).zuhr).not.toHaveProperty('gapAtCreation')
+  })
+
+  it('snapshots a midnight-crossing iqamah gap as 30 minutes (11:45 PM → 12:15 AM)', async () => {
+    const ishaDay = {
+      date: '2099-01-01T00:00:00.000Z',
+      fajr: { adhan: '5:30 AM', iqamah: '6:00 AM' },
+      zuhr: { adhan: '1:30 PM', iqamah: '1:45 PM' },
+      asr: { adhan: '5:00 PM', iqamah: '5:15 PM' },
+      maghrib: { adhan: '8:30 PM', iqamah: '8:35 PM' },
+      isha: { adhan: '11:45 PM', iqamah: '12:15 AM' },
+    }
+    const rules = {
+      fajr: { mode: 'offset', offsetMinutes: 30 },
+      zuhr: { mode: 'offset', offsetMinutes: 15 },
+      asr: { mode: 'offset', offsetMinutes: 15 },
+      maghrib: { mode: 'offset', offsetMinutes: 5 },
+      isha: { mode: 'absolute', absoluteValue: '12:15 AM' },
+    }
+    const data = { iqamahRules: structuredClone(rules), days: [ishaDay] }
+    const out = await run(data)
+    expect((out.iqamahRules as typeof rules).isha).toMatchObject({ gapAtCreation: 30 })
   })
 })

@@ -24,6 +24,18 @@ export function formatTime(totalMinutes: number): string {
   return `${hour12}:${mm} ${isPm ? 'PM' : 'AM'}`
 }
 
+/**
+ * Minutes from adhan to iqamah, normalized to [0, 1440) so a time pair that
+ * crosses midnight (Isha adhan 11:45 PM, iqamah 12:15 AM) yields 30, not -1410.
+ * Returns null when either time fails to parse.
+ */
+export function iqamahGapMinutes(adhan: string, iqamah: string): number | null {
+  const a = parseTime(adhan)
+  const i = parseTime(iqamah)
+  if (a === null || i === null) return null
+  return (((i - a) % 1440) + 1440) % 1440
+}
+
 export function applyIqamahRule(rule: IqamahRule, adhan: string): string {
   if (rule.mode === 'absolute') return rule.value || ''
   const base = parseTime(adhan)

@@ -7,6 +7,7 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { RULE_IDS } from '../ansari/ruleIds'
 
@@ -18,12 +19,14 @@ export const AnsariSettings: CollectionConfig = {
     description:
       'Proactive nudge preferences for this masjid: which nudges are on, quiet hours, and the weekly digest slot.',
     useAsTitle: 'id',
+    hidden: hideForKioskManager,
   },
+  // Deliberately NOT wrapped with withBillingLock — settings should remain editable when billing-locked.
   access: {
-    read: tenantScopedRead,
-    create: tenantScopedCreate,
-    update: tenantScopedUpdate,
-    delete: tenantScopedDelete,
+    read: denyKioskManager(tenantScopedRead),
+    create: denyKioskManager(tenantScopedCreate),
+    update: denyKioskManager(tenantScopedUpdate),
+    delete: denyKioskManager(tenantScopedDelete),
   },
   hooks: {
     beforeChange: [setTenantFromUser],
@@ -35,7 +38,6 @@ export const AnsariSettings: CollectionConfig = {
       relationTo: 'tenants',
       required: true,
       unique: true,
-      index: true,
       admin: { position: 'sidebar' },
     },
     {

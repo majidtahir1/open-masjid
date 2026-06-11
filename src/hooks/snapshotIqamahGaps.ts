@@ -1,7 +1,7 @@
 // src/hooks/snapshotIqamahGaps.ts
 import type { CollectionBeforeChangeHook } from 'payload'
 
-import { parseTime } from '@/lib/iqamah'
+import { iqamahGapMinutes } from '@/lib/iqamah'
 
 const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'] as const
 
@@ -23,6 +23,7 @@ export const snapshotIqamahGaps: CollectionBeforeChangeHook = async ({ data, ori
   const days = ((data?.days ?? originalDoc?.days) as DayRow[] | undefined) ?? []
   if (days.length === 0) return data
 
+  // UTC date — not tenant-local; ≤1-day refDay skew is acceptable (~minutes of adhan drift).
   const todayISO = new Date().toISOString().slice(0, 10)
   const refDay =
     days.find((d) => typeof d.date === 'string' && d.date.slice(0, 10) >= todayISO) ?? days[0]
@@ -37,12 +38,11 @@ export const snapshotIqamahGaps: CollectionBeforeChangeHook = async ({ data, ori
     const changed = rule.absoluteValue !== origValue
     if (!changed && rule.gapAtCreation != null) continue
 
-    const adhan = parseTime(
-      ((refDay[prayer] as { adhan?: string | null } | undefined)?.adhan as string) ?? '',
-    )
-    const iqamah = parseTime(rule.absoluteValue)
-    if (adhan == null || iqamah == null) continue
-    rule.gapAtCreation = iqamah - adhan
+    const adhanString =
+      ((refDay[prayer] as { adhan?: string | null } | undefined)?.adhan as string) ?? ''
+    const gap = iqamahGapMinutes(adhanString, rule.absoluteValue)
+    if (gap == null) continue
+    rule.gapAtCreation = gap
   }
   return data
 }

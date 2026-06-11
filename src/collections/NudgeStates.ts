@@ -1,11 +1,8 @@
 // src/collections/NudgeStates.ts
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import { tenantScopedRead } from '../access/tenantScoped'
-
-// Lifecycle writes happen server-side with overrideAccess: true; humans only read.
-const serverOnly: Access = ({ req: { user } }) =>
-  (user as { role?: string } | null)?.role === 'platformOwner'
+import { platformOwnerOnly, tenantScopedRead } from '../access/tenantScoped'
+import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 
 export const NudgeStates: CollectionConfig = {
   slug: 'nudge-states',
@@ -14,12 +11,14 @@ export const NudgeStates: CollectionConfig = {
     group: 'Ansari',
     description: 'Dedup + lifecycle bookkeeping for proactive nudges. Managed by the engine.',
     defaultColumns: ['rule', 'dedupKey', 'status', 'emittedAt'],
+    hidden: hideForKioskManager,
   },
   access: {
-    read: tenantScopedRead,
-    create: serverOnly,
-    update: serverOnly,
-    delete: serverOnly,
+    read: denyKioskManager(tenantScopedRead),
+    // Lifecycle writes happen server-side with overrideAccess: true; humans only read.
+    create: denyKioskManager(platformOwnerOnly),
+    update: denyKioskManager(platformOwnerOnly),
+    delete: denyKioskManager(platformOwnerOnly),
   },
   timestamps: true,
   fields: [
