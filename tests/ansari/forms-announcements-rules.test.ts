@@ -7,10 +7,10 @@ import { makeCtx, makePayload } from './helpers'
 
 function formsPayload(forms: object[], countsByFormId: Record<number, number>) {
   return makePayload({
-    find: vi.fn(async ({ collection, where }: { collection: string; where?: never }) => {
+    find: vi.fn(async ({ collection, where }: { collection: string; where?: unknown }) => {
       if (collection === 'forms') return { docs: forms, totalDocs: forms.length }
       if (collection === 'form-submissions') {
-        const formId = (where as { form?: { equals?: number } })?.form?.equals ?? -1
+        const formId = (where as { form?: { equals?: number } } | undefined)?.form?.equals ?? -1
         return { docs: [], totalDocs: countsByFormId[formId] ?? 0 }
       }
       return { docs: [], totalDocs: 0 }

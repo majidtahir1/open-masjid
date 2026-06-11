@@ -110,7 +110,7 @@ export const eventsLowRsvp: Rule = {
     await ctx.payload.create({
       collection: 'announcements',
       data: {
-        tenant: extractId(event.tenant) ?? ctx.tenant.id,
+        tenant: (extractId(event.tenant) ?? ctx.tenant.id) as number,
         title: `Reminder: ${event.title ?? 'Upcoming event'}${when}`,
         active: true,
         priority: 'normal',
