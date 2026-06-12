@@ -1,8 +1,9 @@
 <!--
   Ansari NUDGES skill — TEMPLATE
   Companion to SOUL.template.md. At provisioning time, substitute
-  {{OPENMASJID_BASE_URL}} and {{OPENMASJID_API_KEY}} and write the result to
-  the Hermes profile's home dir as NUDGES.md.
+  {{OPENMASJID_BASE_URL}}, {{OPENMASJID_API_KEY}}, and
+  {{TELEGRAM_ADMIN_CHAT_ID}} and write the result to the Hermes profile's
+  home dir as NUDGES.md.
 
   Load this skill in two situations only:
     1. The hourly heartbeat cron fires (the delivery loop below).
@@ -20,6 +21,8 @@ You deliver nudges that OpenMasjid has already decided are worth sending, and yo
 
 All requests use: `Authorization: users API-Key {{OPENMASJID_API_KEY}}` against `{{OPENMASJID_BASE_URL}}`.
 
+**Target chat:** nudges are admin-facing actions, not broadcasts — send every nudge (including the weekly digest) to the admin DM: `{{TELEGRAM_ADMIN_CHAT_ID}}`. Never the public/announcements group.
+
 ## The heartbeat (hourly cron)
 
 1. `GET {{OPENMASJID_BASE_URL}}/api/ansari/nudges`
@@ -31,6 +34,13 @@ All requests use: `Authorization: users API-Key {{OPENMASJID_API_KEY}}` against 
    c. Only after Telegram confirms the send: `POST /api/ansari/nudges/<id>/ack`.
       If the send failed, **do not ack** — the nudge will be re-offered next
       poll. Never ack what you didn't deliver.
+      The ack is **idempotent and safe to retry** — if it fails after a
+      successful send, retry it a few times (with brief backoff) before giving
+      up. If every retry fails, accept that the nudge may be re-delivered next
+      poll: a rare duplicate is the deliberate worst case of at-least-once
+      delivery. Do **not** keep a local "already sent" cache to suppress
+      re-offers — local state that outlives a crash is exactly the
+      false-"delivered" failure the ack protocol exists to prevent.
 4. If the GET itself fails, do nothing and let the next heartbeat retry. Never fabricate a nudge from memory.
 
 ## Phrasing a nudge
@@ -64,7 +74,18 @@ this fixed template, verbatim, and write only the connective prose around it:
 Close with the action summary ("Want me to handle any of it?"). If `unresolved`
 is empty, omit that section entirely rather than inventing content.
 
+**Length:** the server bounds the data but does not truncate for any channel.
+Telegram caps messages at 4096 chars — if the rendered digest would run long,
+keep the first ~8 events and ~10 open items and append "…and N more — ask me
+for the rest" (the reactive flow can list them on request). One message, never
+a thread of fragments.
+
 ## Button routing
+
+Button taps arrive as Telegram callbacks in the **normal interactive session**
+— never in the cron. The cron only delivers and acks; it never converses. So
+everything below (including handoffs) runs in a session that can hold a
+conversation, in the same chat where the button was tapped.
 
 | Tap | Call | Then say |
 |---|---|---|
@@ -77,8 +98,8 @@ is empty, omit that section entirely rather than inventing content.
 
 - `{ "status": "applied", "detail": ... }` → confirm using `detail` ("Done — schedule extended through July 31.").
 - `{ "status": "already-handled" }` → say it's already taken care of (the admin or another tap handled it). Calm, no apology needed.
-- `{ "status": "changed", "nudge": {...} }` → things moved since the nudge was sent. Present the **new** proposal from `nudge.intent`/`nudge.action` as a fresh message with fresh buttons (same `nudge.id`), then ack it again. Never execute the old proposal yourself — there is no way to; only [Yes] on the new message can.
-- `{ "status": "handoff", "intent": ..., "topic": ... }` → this action is a conversation, not a one-tap write (e.g. Ramadan schedule setup, flyer generation). Switch to the normal reactive flow with the `intent` as your opening context, and start that conversation now.
+- `{ "status": "changed", "nudge": {...} }` → things moved since the nudge was sent, and the server has re-armed the state with the new proposal. This is a **full second delivery round**, exactly like the heartbeat: send a fresh message composed from `nudge.intent`/`nudge.action` with fresh buttons (same `nudge.id`), and **after the send is confirmed, ack again** — you are not re-acking the original tap. Never execute the old proposal yourself; only [Yes] on the new message can.
+- `{ "status": "handoff", "intent": ..., "topic": ... }` → this action is a conversation, not a one-tap write (e.g. Ramadan schedule setup, flyer generation). You're already in the interactive session in the admin's chat (see above) — continue right there, using the `intent` as your opening context, and start that conversation now.
 - HTTP 500 / `{ "status": "error" }` → "I couldn't do that just now — try the button again in a bit." Do not retry on your own.
 
 ## Hard rules
