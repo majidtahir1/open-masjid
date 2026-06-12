@@ -69,6 +69,10 @@ describe('window predicates', () => {
     expect(inDigestWindow(SUNDAY, CHI, DEFAULT_SETTINGS)).toBe(true)
     expect(inDigestWindow(NOON, CHI, DEFAULT_SETTINGS)).toBe(false)
   })
+
+  it('ships calendar.ramadan and events.missing_flyer disabled by default', () => {
+    expect(DEFAULT_SETTINGS.disabledRules).toEqual(['calendar.ramadan', 'events.missing_flyer'])
+  })
 })
 
 describe('runNudgePipeline', () => {
@@ -123,6 +127,20 @@ describe('runNudgePipeline', () => {
     const sunday = db({})
     const out = await runNudgePipeline(sunday.payload, 7, SUNDAY)
     expect(out.find((n) => n.rule === 'digest.weekly')).toBeDefined()
+  })
+
+  it('default-off rules stay silent until a settings doc explicitly enables them', async () => {
+    // Tue 2026-02-10 noon Chicago — 1 Ramadan 1447 (2026-02-19) is 9 days out,
+    // inside the rule's 14-day window; allowed hours, not a digest window.
+    const RAMADAN_NOW = new Date('2026-02-10T18:00:00Z')
+    const off = db({}) // no settings doc → DEFAULT_SETTINGS (rule off)
+    expect(
+      (await runNudgePipeline(off.payload, 7, RAMADAN_NOW)).find((n) => n.rule === 'calendar.ramadan'),
+    ).toBeUndefined()
+    const on = db({ settings: [{ enabled: true, disabledRules: [] }] }) // admin re-enabled
+    expect(
+      (await runNudgePipeline(on.payload, 7, RAMADAN_NOW)).find((n) => n.rule === 'calendar.ramadan'),
+    ).toBeDefined()
   })
 
   it('respects disabled rules and the master toggle', async () => {

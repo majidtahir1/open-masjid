@@ -145,12 +145,12 @@ Each rule defines what "the same problem" means — this is what makes Ansari sm
 | 1 | `prayer.coverage_gap` | data-state | schedule ends within **7 days**, nothing covers after | extend schedule | direct | `prayer-times:write` | immediate |
 | 2 | `prayer.iqamah_drift` | data-state (lookahead) | absolute iqamah will breach gap floor/tolerance within **14 days** | adjust time, or convert to offset | direct | `prayer-times:write` | immediate |
 | 3 | `calendar.dst` | calendar | DST change within **5 days** | review/shift Fajr & Isha | conversation-starter | `prayer-times:write` | immediate |
-| 4 | `calendar.ramadan` | calendar (Hijri) | Ramadan begins within **14 days** | start Ramadan schedule flow | conversation-starter | `prayer-times:write` | immediate |
+| 4 | `calendar.ramadan` | calendar (Hijri) | Ramadan begins within **14 days** | start Ramadan schedule flow | conversation-starter | `prayer-times:write` | immediate — **ships disabled (opt-in)** |
 | 5 | `forms.capacity` | data-state | RSVP at **90%** / **100%** of capacity | raise cap or close | direct | `forms:write` | immediate |
 | 6 | `announcements.expiring` | data-state | notice expires within **24h** | extend or remove | direct | `announcements:write` | immediate |
 | 7 | `events.low_rsvp` | data-state | event within **3 days** and **< 25%** capacity (or < 10 uncapped) | post a reminder | direct | `announcements:write` | digest |
 |   | ↳ *requires a new optional `signupForm` relationship on Events (→ Forms); events without a linked form are skipped — there is no other path from an event to its RSVP count.* |
-| 8 | `events.missing_flyer` | data-state | event within **7 days**, no flyer | generate flyer | conversation-starter | `events:write` | digest |
+| 8 | `events.missing_flyer` | data-state | event within **7 days**, no flyer | generate flyer | conversation-starter | `events:write` | digest — **ships disabled (opt-in)** |
 | 9 | `digest.weekly` | scheduled | the weekly rollup | "want me to handle any of it?" | conversation-starter | reads only | digest |
 
 > `donations.milestone` was **cut from v1** (2026-06-11): it needs `donations:read` (deferred to capability-surface v1.1 — no SUM endpoint) and there is no goal/target field on funds, so "80% of goal" has no denominator. Revisit alongside the v1.1 donations work.

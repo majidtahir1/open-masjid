@@ -19,9 +19,15 @@ export type NudgeSettings = {
   digestHour: number
 }
 
+/**
+ * Rules that ship disabled (opt-in per tenant). Keep in sync with the
+ * disabledRules defaultValue on the AnsariSettings collection.
+ */
+export const DEFAULT_RULES_OFF = ['calendar.ramadan', 'events.missing_flyer']
+
 export const DEFAULT_SETTINGS: NudgeSettings = {
   enabled: true,
-  disabledRules: [],
+  disabledRules: DEFAULT_RULES_OFF,
   quietHoursStart: 21,
   quietHoursEnd: 8,
   digestDay: 0,

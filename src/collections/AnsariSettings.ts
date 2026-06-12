@@ -52,6 +52,9 @@ export const AnsariSettings: CollectionConfig = {
       hasMany: true,
       label: 'Disabled nudge types',
       options: RULE_IDS.map((id) => ({ label: id, value: id })),
+      // Keep in sync with DEFAULT_RULES_OFF in src/ansari/pipeline.ts (the
+      // no-settings-doc fallback) — these ship off and are opt-in per tenant.
+      defaultValue: ['calendar.ramadan', 'events.missing_flyer'],
       admin: {
         description: 'Nudge types Ansari will stay silent about ("Stop these" also lands here).',
       },
