@@ -7,10 +7,12 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { AnsariSettings } from './collections/AnsariSettings'
 import { Announcements } from './collections/Announcements'
 import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
+import { NudgeStates } from './collections/NudgeStates'
 import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
 import { Events } from './collections/Events'
@@ -34,6 +36,13 @@ import { createTenantEndpoint } from './endpoints/createTenant'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
 import { runJobsDevEndpoint } from './endpoints/runJobsDev'
+import { ansariNudgeAckEndpoint, ansariNudgesEndpoint } from './endpoints/ansari/nudges'
+import {
+  ansariNudgeApplyEndpoint,
+  ansariNudgeDismissEndpoint,
+  ansariNudgeMuteEndpoint,
+  ansariNudgeSnoozeEndpoint,
+} from './endpoints/ansari/nudgeActions'
 import { withApiKeyScopeEnforcement } from './access/apiScoped'
 
 const filename = fileURLToPath(import.meta.url)
@@ -151,6 +160,8 @@ export default buildConfig({
     Media,
     Users,
     Tenants,
+    AnsariSettings,
+    NudgeStates,
   ].map(withApiKeyScopeEnforcement),
   endpoints: [
     generatePrayerTimesEndpoint,
@@ -158,6 +169,12 @@ export default buildConfig({
     inviteUserEndpoint,
     runJobsDevEndpoint,
     createTenantEndpoint,
+    ansariNudgesEndpoint,
+    ansariNudgeAckEndpoint,
+    ansariNudgeApplyEndpoint,
+    ansariNudgeDismissEndpoint,
+    ansariNudgeSnoozeEndpoint,
+    ansariNudgeMuteEndpoint,
   ],
   jobs: {
     // Dev: `src/instrumentation.ts` ticks the queue every 30s.

@@ -320,6 +320,17 @@ export const Events: CollectionConfig = {
       ],
     },
     {
+      name: 'signupForm',
+      type: 'relationship',
+      relationTo: 'forms',
+      label: 'Signup / RSVP form',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Optional — link the RSVP form for this event so signup counts can be tracked (used by Ansari nudges).',
+      },
+    },
+    {
       name: 'slug',
       type: 'text',
       index: true,

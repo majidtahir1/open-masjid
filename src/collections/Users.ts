@@ -365,6 +365,7 @@ export const Users: CollectionConfig = {
         { label: 'Events — read', value: 'events:read' },
         { label: 'Events — write', value: 'events:write' },
         { label: 'Members — read', value: 'members:read' },
+        { label: 'Ansari — nudges', value: 'ansari:nudges' },
         { label: 'Media — read', value: 'media:read' },
         { label: 'Media — write', value: 'media:write' },
         { label: 'Blog (The Minbar) — read', value: 'blog:read' },

@@ -12,6 +12,7 @@ import { autoRegeneratePrayerDays } from '../hooks/autoRegeneratePrayerDays'
 import { bumpKioskBroadcast } from '../hooks/bumpKioskBroadcast'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { trimDaysToRange } from '../hooks/trimDaysToRange'
+import { snapshotIqamahGaps } from '../hooks/snapshotIqamahGaps'
 
 const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'] as const
 
@@ -65,6 +66,11 @@ const iqamahRuleFields = (prayer: (typeof PRAYERS)[number]) => ({
             },
           ],
         },
+        {
+          name: 'gapAtCreation',
+          type: 'number' as const,
+          admin: { hidden: true },
+        },
       ],
     },
   ],
@@ -109,7 +115,7 @@ export const PrayerSchedules: CollectionConfig = {
     delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
-    beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays],
+    beforeChange: [setTenantFromUser, trimDaysToRange, autoRegeneratePrayerDays, snapshotIqamahGaps],
     afterChange: [bumpKioskBroadcast],
   },
   fields: [

@@ -32,6 +32,7 @@ import * as migration_20260603_163728_blog_posts from './20260603_163728_blog_po
 import * as migration_20260604_090000_blog_api_scopes from './20260604_090000_blog_api_scopes';
 import * as migration_20260604_205205_demo_mode from './20260604_205205_demo_mode';
 import * as migration_20260610_174850_form_submissions_trash from './20260610_174850_form_submissions_trash';
+import * as migration_20260611_210334_proactive_nudge_engine from './20260611_210334_proactive_nudge_engine';
 
 export const migrations = [
   {
@@ -202,6 +203,11 @@ export const migrations = [
   {
     up: migration_20260610_174850_form_submissions_trash.up,
     down: migration_20260610_174850_form_submissions_trash.down,
-    name: '20260610_174850_form_submissions_trash'
+    name: '20260610_174850_form_submissions_trash',
+  },
+  {
+    up: migration_20260611_210334_proactive_nudge_engine.up,
+    down: migration_20260611_210334_proactive_nudge_engine.down,
+    name: '20260611_210334_proactive_nudge_engine'
   },
 ];
