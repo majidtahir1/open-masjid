@@ -180,7 +180,7 @@ One scheduled message (default Sunday morning, tenant-local) aggregating:
 
 - **Total members** and **new members this month**
 - Upcoming events (and any still needing a flyer)
-- Any unresolved immediate-tier items (the safety net)
+- Any unresolved items (the safety net) — immediates plus snoozed/undelivered digest-tier nudges; dismissed ([No]) items stay dismissed
 
 (Donation/campaign progress joins the digest with the v1.1 donations work.)
 

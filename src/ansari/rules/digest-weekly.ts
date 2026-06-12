@@ -47,13 +47,17 @@ export const digestWeekly: Rule = {
       (e) => ({ title: e.title ?? '', startDate: e.startDate ?? null, hasFlyer: Boolean(e.flyerImage) }),
     )
 
-    // The safety net: unresolved immediate-tier items resurface here.
+    // The safety net: unresolved items resurface here — immediates plus
+    // snoozed/undelivered digest-tier nudges (which otherwise stay suppressed
+    // until their condition changes). Dismissed ([No]) stays dismissed, and the
+    // digest's own state is excluded so it never lists itself.
     const unresolvedRes = await payload.find({
       collection: 'nudge-states',
       where: {
         tenant: { equals: tenant.id },
-        tier: { equals: 'immediate' },
+        rule: { not_equals: 'digest.weekly' },
         status: { in: ['emitted', 'delivered', 'snoozed'] },
+        resolvedAt: { exists: false },
       },
       limit: 50,
       depth: 0,

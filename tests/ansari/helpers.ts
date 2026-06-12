@@ -9,6 +9,7 @@ export type PayloadMock = {
   update: ReturnType<typeof vi.fn>
   create: ReturnType<typeof vi.fn>
   count: ReturnType<typeof vi.fn>
+  delete: ReturnType<typeof vi.fn>
 }
 
 export function makePayload(over: Partial<PayloadMock> = {}): PayloadMock {
@@ -18,6 +19,7 @@ export function makePayload(over: Partial<PayloadMock> = {}): PayloadMock {
     update: over.update ?? vi.fn(async (a: { data: unknown }) => a.data),
     create: over.create ?? vi.fn(async (a: { data: object }) => ({ id: 1, ...a.data })),
     count: over.count ?? vi.fn(async () => ({ totalDocs: 0 })),
+    delete: over.delete ?? vi.fn(async () => ({ docs: [], errors: [] })),
   }
 }
 

@@ -1,10 +1,14 @@
 // src/ansari/pipeline.ts
 import type { Payload } from 'payload'
 
+import { canonical } from './canonical'
 import { RULES } from './registry'
 import { digestDedupKey } from './rules/digest-weekly'
 import { localParts } from './time'
 import type { ActionDescriptor, Finding, NudgeContext, NudgeTier, Rule } from './types'
+
+/** Resolved states are kept this long so stale Telegram buttons still land gracefully. */
+const RESOLVED_RETENTION_DAYS = 90
 
 export type NudgeSettings = {
   enabled: boolean
@@ -109,6 +113,8 @@ type StateDoc = {
   status: string
   tier: string
   resolvedAt?: string | null
+  intent?: Record<string, unknown> | null
+  action?: Record<string, unknown> | null
 }
 
 export async function runNudgePipeline(
@@ -140,6 +146,26 @@ export async function runNudgePipeline(
         'nudge rule evaluation failed',
       )
     }
+  }
+
+  // GC: the spec keeps resolved states ~90 days (stale-button grace), then drops
+  // them. Cheap tenant-scoped bulk delete; a GC failure must not break the poll.
+  try {
+    await payload.delete({
+      collection: 'nudge-states',
+      where: {
+        tenant: { equals: tenantId },
+        resolvedAt: {
+          less_than: new Date(now.getTime() - RESOLVED_RETENTION_DAYS * 86_400_000).toISOString(),
+        },
+      },
+      overrideAccess: true,
+    })
+  } catch (err: unknown) {
+    ;(payload as unknown as { logger: { warn: (...a: unknown[]) => void } }).logger.warn(
+      { err, tenant: tenantId },
+      'nudge-states GC failed',
+    )
   }
 
   // Widen to all unresolved states including terminal ones (dismissed/applied),
@@ -268,6 +294,20 @@ export async function runNudgePipeline(
       // Re-emit to output ONLY when status is 'emitted' and the tier gate is open;
       // delivered/snoozed/dismissed/applied stay silent.
       if (existing.status === 'emitted' && !gateClosed) {
+        // Refresh the stored proposal if it drifted between polls, so the row
+        // the admin eventually applies matches what they were just shown
+        // (otherwise apply would answer 'changed' and force a second tap).
+        if (
+          canonical(existing.action) !== canonical(finding.action) ||
+          canonical(existing.intent) !== canonical(finding.intent)
+        ) {
+          await payload.update({
+            collection: 'nudge-states',
+            id: existing.id,
+            data: { intent: finding.intent, action: finding.action },
+            overrideAccess: true,
+          })
+        }
         out.push({ id: existing.id, rule: rule.id, tier: rule.tier, intent: finding.intent, action: finding.action })
       }
       continue

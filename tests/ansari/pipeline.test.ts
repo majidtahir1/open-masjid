@@ -50,6 +50,7 @@ function db(opts: {
       updated.push(a)
       return a.data
     }),
+    delete: vi.fn(async () => ({ docs: [], errors: [] })),
     logger: { error: vi.fn(), warn: vi.fn() },
   }
   return { payload: payload as never, created, updated }
@@ -252,6 +253,53 @@ describe('runNudgePipeline', () => {
     // id 56 should have been healed (resolved)
     const healUpdate = updated.find((u) => u.id === 56)
     expect(healUpdate?.data).toMatchObject({ status: 'resolved' })
+  })
+
+  // GC: resolved states older than the 90-day retention are deleted each poll
+  it('GCs resolved states older than 90 days', async () => {
+    const { payload } = db({})
+    await runNudgePipeline(payload, 7, NOON)
+    const del = (payload as unknown as { delete: ReturnType<typeof vi.fn> }).delete
+    expect(del).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'nudge-states',
+        where: expect.objectContaining({
+          tenant: { equals: 7 },
+          resolvedAt: { less_than: '2026-03-13T17:00:00.000Z' }, // NOON − 90 days
+        }),
+      }),
+    )
+  })
+
+  // Re-emit refresh: an unacked emitted state whose stored proposal drifted gets
+  // its row updated to the fresh action, so a later apply matches what was shown.
+  it('re-emit refreshes a drifted stored action on the state row', async () => {
+    const staleAction = {
+      kind: 'direct',
+      op: 'extendSchedule',
+      params: { scheduleId: 42, newEndDate: '2026-06-30' },
+      summary: 'Extend the prayer schedule through 2026-06-30',
+    }
+    const { payload, updated } = db({
+      schedules: FIRING_SCHEDULE,
+      states: [
+        {
+          id: 55,
+          rule: 'prayer.coverage_gap',
+          dedupKey: 'coverage:2026-06',
+          status: 'emitted',
+          tier: 'immediate',
+          intent: {},
+          action: staleAction,
+        },
+      ],
+    })
+    const out = await runNudgePipeline(payload, 7, NOON)
+    const coverage = out.find((n) => n.rule === 'prayer.coverage_gap')!
+    expect((coverage.action as unknown as { params: { newEndDate: string } }).params.newEndDate).toBe('2026-07-31')
+    const refresh = updated.find((u) => u.id === 55)
+    expect(refresh).toBeDefined()
+    expect((refresh!.data.action as { params: { newEndDate: string } }).params.newEndDate).toBe('2026-07-31')
   })
 
   // Fix 7: heal preserves terminal status — discarded dismissed duplicate gets only resolvedAt

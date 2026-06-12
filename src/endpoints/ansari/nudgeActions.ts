@@ -1,6 +1,7 @@
 // src/endpoints/ansari/nudgeActions.ts
 import type { Endpoint, PayloadRequest } from 'payload'
 
+import { canonical } from '@/ansari/canonical'
 import { tenantTimezone } from '@/ansari/pipeline'
 import { ruleById } from '@/ansari/registry'
 import type { RuleId } from '@/ansari/ruleIds'
@@ -8,18 +9,6 @@ import type { NudgeContext } from '@/ansari/types'
 import { authorizeAnsari, hasApiScope, loadOwnState, type NudgeStateDoc } from './shared'
 
 const TERMINAL = ['applied', 'dismissed', 'resolved']
-
-/** Key-order-independent serialization — stored actions round-trip through jsonb, which reorders keys. */
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
-  if (value && typeof value === 'object') {
-    return `{${Object.keys(value as Record<string, unknown>)
-      .sort()
-      .map((k) => `${JSON.stringify(k)}:${canonical((value as Record<string, unknown>)[k])}`)
-      .join(',')}}`
-  }
-  return JSON.stringify(value)
-}
 
 async function setStatus(
   req: PayloadRequest,

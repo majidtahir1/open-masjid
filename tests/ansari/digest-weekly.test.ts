@@ -51,6 +51,20 @@ describe('digest.weekly', () => {
       }),
     )
   })
+
+  it('safety net spans both tiers, excludes its own state and resolved-stamped rows', async () => {
+    const payload = makePayload()
+    await digestWeekly.evaluate(makeCtx(payload))
+    const call = payload.find.mock.calls.find(
+      (c: Array<{ collection?: string }>) => c[0].collection === 'nudge-states',
+    )![0] as { where: Record<string, unknown> }
+    expect(call.where).toMatchObject({
+      rule: { not_equals: 'digest.weekly' },
+      status: { in: ['emitted', 'delivered', 'snoozed'] },
+      resolvedAt: { exists: false },
+    })
+    expect(call.where).not.toHaveProperty('tier') // digest-tier snoozed items resurface too
+  })
 })
 
 describe('registry', () => {

@@ -12,6 +12,7 @@ function req(over: Record<string, unknown> = {}) {
       create: vi.fn(async (a: { data: object }) => ({ id: 1, ...a.data })),
       update: vi.fn(async (a: { data: object }) => a.data),
       count: vi.fn(async () => ({ totalDocs: 0 })),
+      delete: vi.fn(async () => ({ docs: [], errors: [] })),
       logger: { error: vi.fn(), warn: vi.fn() },
     },
     routeParams: {},
@@ -49,6 +50,7 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
       find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
       create: vi.fn(),
       count: vi.fn(async () => ({ totalDocs: 0 })),
+      delete: vi.fn(async () => ({ docs: [], errors: [] })),
       logger: { error: vi.fn(), warn: vi.fn() },
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
@@ -71,6 +73,7 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
       find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
       create: vi.fn(),
       count: vi.fn(async () => ({ totalDocs: 0 })),
+      delete: vi.fn(async () => ({ docs: [], errors: [] })),
       logger: { error: vi.fn(), warn: vi.fn() },
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
@@ -89,6 +92,7 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
       find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
       create: vi.fn(),
       count: vi.fn(async () => ({ totalDocs: 0 })),
+      delete: vi.fn(async () => ({ docs: [], errors: [] })),
       logger: { error: vi.fn(), warn: vi.fn() },
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '999' } }))
@@ -105,6 +109,7 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
       find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
       create: vi.fn(),
       count: vi.fn(async () => ({ totalDocs: 0 })),
+      delete: vi.fn(async () => ({ docs: [], errors: [] })),
       logger: { error: vi.fn(), warn: vi.fn() },
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
@@ -119,6 +124,7 @@ describe('POST /api/ansari/nudges/:id/ack', () => {
       find: vi.fn(async () => ({ docs: [], totalDocs: 0 })),
       create: vi.fn(),
       count: vi.fn(async () => ({ totalDocs: 0 })),
+      delete: vi.fn(async () => ({ docs: [], errors: [] })),
       logger: { error: vi.fn(), warn: vi.fn() },
     }
     const res = await ansariNudgeAckEndpoint.handler(req({ payload, routeParams: { id: '55' } }))
