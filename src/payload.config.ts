@@ -36,7 +36,11 @@ import { createTenantEndpoint } from './endpoints/createTenant'
 import { generatePrayerTimesEndpoint } from './endpoints/generatePrayerTimes'
 import { inviteUserEndpoint } from './endpoints/inviteUser'
 import { runJobsDevEndpoint } from './endpoints/runJobsDev'
-import { ansariNudgeAckEndpoint, ansariNudgesEndpoint } from './endpoints/ansari/nudges'
+import {
+  ansariNudgeAckEndpoint,
+  ansariNudgesAwaitingEndpoint,
+  ansariNudgesEndpoint,
+} from './endpoints/ansari/nudges'
 import {
   ansariNudgeApplyEndpoint,
   ansariNudgeDismissEndpoint,
@@ -170,6 +174,7 @@ export default buildConfig({
     runJobsDevEndpoint,
     createTenantEndpoint,
     ansariNudgesEndpoint,
+    ansariNudgesAwaitingEndpoint,
     ansariNudgeAckEndpoint,
     ansariNudgeApplyEndpoint,
     ansariNudgeDismissEndpoint,

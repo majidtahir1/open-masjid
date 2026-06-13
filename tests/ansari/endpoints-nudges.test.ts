@@ -1,7 +1,11 @@
 // tests/ansari/endpoints-nudges.test.ts
 import { describe, expect, it, vi } from 'vitest'
 
-import { ansariNudgesEndpoint, ansariNudgeAckEndpoint } from '@/endpoints/ansari/nudges'
+import {
+  ansariNudgeAckEndpoint,
+  ansariNudgesAwaitingEndpoint,
+  ansariNudgesEndpoint,
+} from '@/endpoints/ansari/nudges'
 
 function req(over: Record<string, unknown> = {}) {
   return {
@@ -39,6 +43,53 @@ describe('GET /api/ansari/nudges', () => {
     const body = await res.json()
     expect(body).toHaveProperty('nudges')
     expect(Array.isArray(body.nudges)).toBe(true)
+  })
+})
+
+describe('GET /api/ansari/nudges/awaiting', () => {
+  it('403s an API key missing the ansari:nudges scope', async () => {
+    const res = await ansariNudgesAwaitingEndpoint.handler(
+      req({ user: { id: 1, role: 'admin', tenant: 7, _strategy: 'api-key', apiScopes: ['prayer-times:read'] } }),
+    )
+    expect(res.status).toBe(403)
+  })
+
+  it('returns pending nudges (full intent + action + id) for the caller tenant, newest first', async () => {
+    const docs = [
+      {
+        id: 42,
+        rule: 'prayer.coverage_gap',
+        status: 'delivered',
+        intent: { rule: 'prayer.coverage_gap', uncoveredFrom: '2026-07-01' },
+        action: { kind: 'direct', op: 'extendSchedule', params: { scheduleId: 9 }, summary: 'Extend through 2026-07-31' },
+        emittedAt: '2026-06-12T15:00:00.000Z',
+        deliveredAt: '2026-06-12T15:01:00.000Z',
+      },
+    ]
+    const find = vi.fn(async (_args: { where: Record<string, unknown>; sort: string }) => ({ docs, totalDocs: 1 }))
+    const res = await ansariNudgesAwaitingEndpoint.handler(req({ payload: { find, logger: { error: vi.fn(), warn: vi.fn() } } }))
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.awaiting).toHaveLength(1)
+    expect(body.awaiting[0]).toMatchObject({
+      id: 42,
+      rule: 'prayer.coverage_gap',
+      action: { op: 'extendSchedule' },
+    })
+    // queried this tenant's undecided nudges, newest first, no pipeline
+    const call = find.mock.calls[0][0]
+    expect(call.where).toMatchObject({
+      tenant: { equals: 7 },
+      status: { in: ['emitted', 'delivered'] },
+      resolvedAt: { exists: false },
+    })
+    expect(call.sort).toBe('-emittedAt')
+  })
+
+  it('returns an empty list when nothing is pending', async () => {
+    const res = await ansariNudgesAwaitingEndpoint.handler(req())
+    expect(res.status).toBe(200)
+    expect((await res.json()).awaiting).toEqual([])
   })
 })
 
