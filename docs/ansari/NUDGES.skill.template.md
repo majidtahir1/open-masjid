@@ -29,8 +29,17 @@ All requests use `Authorization: users API-Key {{OPENMASJID_API_KEY}}` against `
 
 ## Mode 1 — Heartbeat (hourly cron)
 
+**The heartbeat is silent in-chat.** The ONLY messages it puts in the admin DM
+are the heads-ups themselves (step 2, via curl). It must **never** post a run
+summary — no "N delivered / acked", no "empty list / silence is correct", no
+"Cronjob Response" wrapper. Those are telemetry: write them to logs/stdout, not
+to the chat. If the runner echoes the agent's final turn into the chat, the
+cron agent must end its turn with **no user-facing output** on a run that had
+nothing to deliver — otherwise the hourly "nothing to report" message becomes
+exactly the nagging this whole design exists to prevent.
+
 1. `GET {{OPENMASJID_BASE_URL}}/api/ansari/nudges` → `{ "nudges": [...] }`.
-   **An empty list is the normal, healthy case — send nothing, do nothing.**
+   **An empty list is the normal, healthy case — send nothing, say nothing.**
    Quiet hours, dedup, snoozes, and preferences are already applied server-side.
 2. For each nudge `{ id, rule, tier, intent, action }`, send ONE short heads-up
    to the admin DM. **No buttons. No yes/no question.** State the situation and
