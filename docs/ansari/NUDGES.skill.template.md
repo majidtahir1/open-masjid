@@ -38,8 +38,12 @@ All requests use `Authorization: users API-Key {{OPENMASJID_API_KEY}}` against `
 
    > Salaam — your prayer schedule ends **{{coveredThrough}}** and nothing covers after. I can extend it through **{{newEndDate}}**. Reply **nudges** to review and act on this.
 
-   Do **not** end with "…extend it? [yes/no]" — a bare "yes" here has no context
-   and will go nowhere. Always redirect to **nudges**.
+   **The heads-up is a notification, not an action prompt.** It tells the admin
+   *there is something for them* and that the way to act is to say **nudges** —
+   nothing more. Do **not** end with "…extend it? [yes/no]" (a bare "yes" here
+   has no referent), do **not** offer numbered choices, and do **not** put a
+   nudge `id` in the text (the admin never needs it — you resolve ids from
+   `/awaiting` during the review). The only call-to-action is **nudges**.
 3. Deliver via the direct Telegram Bot API helper (`send_telegram_text.sh` /
    curl) — **not** the agent's `send_message` tool, which is blocked in cron.
 4. Only after the send succeeds: `POST /api/ansari/nudges/<id>/ack`. The ack is
@@ -70,18 +74,26 @@ Trigger this whenever the admin asks to see what you've flagged: **"nudges"**,
      > One thing waiting: your prayer schedule ends **June 30**. Want me to extend it through **July 31**? (yes / no / later / stop these)
 
      Because you asked the question *this turn*, the admin's "yes" now answers it
-     unambiguously — handle it conversationally.
+     unambiguously — handle it conversationally. Show the four canonical choices
+     **(yes / no / later / stop these)** so the options are clear, but **match
+     the admin's intent, not literal tokens** — you're an LLM, not a keyword
+     parser. "go ahead", "sure", "please do", "y", "extend it" all mean *yes*;
+     "leave it", "nah" mean *no*; "not today", "remind me later" mean *later*;
+     "stop reminding me", "mute these" mean *stop these*. When the intent is
+     genuinely unclear, ask — don't guess at an action.
    - **Several** → list them briefly, numbered, then handle **one at a time**
      (one ask per message). Don't dump every action at once.
 3. Route the confirmed answer to the matching endpoint, using the `id` from
    `/awaiting`:
 
-   | Admin says | Call | Then |
-   |---|---|---|
-   | yes / do it / go ahead | `POST /api/ansari/nudges/<id>/apply` | see apply handling |
-   | no / dismiss / leave it | `POST /api/ansari/nudges/<id>/dismiss` | "Understood — leaving it." |
-   | later / not now | `POST /api/ansari/nudges/<id>/snooze` | "No problem — I'll include it in the weekly digest." |
-   | stop these / mute | `POST /api/ansari/nudges/<id>/mute` | confirm that *kind* is off, re-enable in Ansari Settings |
+   Canonical choice (what you show) → intent (what you match) → endpoint:
+
+   | Choice shown | Means | Call | Then |
+   |---|---|---|---|
+   | **yes** | yes / do it / go ahead / sure / please / y / "extend it" | `POST /api/ansari/nudges/<id>/apply` | see apply handling |
+   | **no** | no / dismiss / leave it / nah | `POST /api/ansari/nudges/<id>/dismiss` | "Understood — leaving it." |
+   | **later** | later / not now / not today / remind me later | `POST /api/ansari/nudges/<id>/snooze` | "No problem — I'll include it in the weekly digest." |
+   | **stop these** | stop these / mute / stop reminding me about this | `POST /api/ansari/nudges/<id>/mute` | confirm that *kind* is off, re-enable in Ansari Settings |
 
 ### Handling the `apply` response
 
