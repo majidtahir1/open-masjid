@@ -92,22 +92,45 @@ export const prayerIqamahDrift: Rule = {
 
         const adhanThatDay = (d[prayer] as { adhan?: string }).adhan ?? ''
         const proposed = formatTime((parseTime(adhanThatDay) ?? 0) + Math.max(intendedGap, FLOOR_MIN))
+        const label = prayer.charAt(0).toUpperCase() + prayer.slice(1)
+        const proposedGap = Math.max(intendedGap, FLOOR_MIN)
+
+        // Plain-language framing for the admin — no engine vocabulary ("drift",
+        // "floor", "0-minute gap"). The point a masjid admin cares about is the
+        // time between the call to prayer (adhan) and the start of the
+        // congregation prayer (iqamah) — i.e. time for people to gather.
+        const problem =
+          breach === 'floor'
+            ? gap <= 0
+              ? `Your ${label} iqamah (${rule.absoluteValue}) now lands on the adhan, so there's no time for the congregation to gather before the prayer begins.`
+              : `Your ${label} iqamah leaves only a ${gap}-minute gap after the adhan — likely too little time for the congregation to gather.`
+            : `The gap between your ${label} adhan and iqamah has changed to ${gap} minutes (you'd set it for ${intendedGap}).`
+        const summary =
+          breach === 'drift'
+            ? `Move ${label} iqamah to ${proposed} — back to your usual ${proposedGap}-minute gap after the adhan`
+            : `Move ${label} iqamah to ${proposed}, giving a ${proposedGap}-minute gap after the adhan`
+
         findings.push({
           dedupKey: `iqamah:${prayer}:${breach}`,
           intent: {
             rule: 'prayer.iqamah_drift',
             prayer,
+            prayerLabel: label,
             breach,
+            problem,
             firstBreachDate: typeof d.date === 'string' ? d.date.slice(0, 10) : null,
             currentIqamah: rule.absoluteValue,
+            adhanTime: adhanThatDay,
+            proposedIqamah: proposed,
             gapMinutes: gap,
             intendedGapMinutes: intendedGap,
+            proposedGapMinutes: proposedGap,
           },
           action: {
             kind: 'direct',
             op: 'setAbsoluteIqamah',
             params: { scheduleId: schedule.id, prayer, value: proposed },
-            summary: `Move ${prayer} iqamah to ${proposed} (restores the ${intendedGap}-min gap)`,
+            summary,
           },
         })
         break // earliest breach per prayer only
@@ -138,6 +161,7 @@ export const prayerIqamahDrift: Rule = {
       data: { iqamahRules: rules },
       overrideAccess: true,
     })
-    return { ok: true, detail: `${prayer} iqamah moved to ${value}` }
+    const label = prayer.charAt(0).toUpperCase() + prayer.slice(1)
+    return { ok: true, detail: `${label} iqamah moved to ${value}` }
   },
 }

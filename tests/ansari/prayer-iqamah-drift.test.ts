@@ -66,6 +66,22 @@ describe('prayer.iqamah_drift', () => {
     expect((findings[0].action as { params?: { value?: string } }).params?.value).toBe('5:16 AM')
   })
 
+  it('frames findings in masjid-admin language, free of engine jargon', async () => {
+    const payload = makePayload({
+      find: vi.fn(async () => schedule({ absolute: '5:10 AM', gapAtCreation: 10, advanceMinPerDay: 3 })),
+    })
+    const [finding] = await prayerIqamahDrift.evaluate(makeCtx(payload))
+    const intent = finding.intent as { problem?: string; prayerLabel?: string }
+    const summary = (finding.action as { summary?: string }).summary ?? ''
+    // admin-friendly framing present
+    expect(intent.prayerLabel).toBe('Fajr')
+    expect(intent.problem).toMatch(/congregation|gather/i)
+    expect(summary).toMatch(/gap after the adhan/i)
+    // no engine vocabulary leaks into the prose the admin will see
+    const adminFacing = `${intent.problem} ${summary}`
+    expect(adminFacing).not.toMatch(/\bdrift\b|\bfloor\b|\bbreach\b|prayer\.iqamah_drift/i)
+  })
+
   it('fires a drift breach when the gap strays more than ±10 min from gapAtCreation', async () => {
     // base 5:00 + 2/day, iqamah 5:45, intended 45 → day i gap = 45 − 2i;
     // day 6: gap 33, |33 − 45| = 12 > 10 → drift (still ≥ 5, so not floor)
