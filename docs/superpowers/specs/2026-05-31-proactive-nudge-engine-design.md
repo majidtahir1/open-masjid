@@ -49,18 +49,18 @@ OpenMasjid becomes a pure function: *given the time now, what should Ansari say?
 
 - `GET /api/ansari/nudges` → the nudges to deliver right now, each as **structured intent** (e.g. `{rule: "prayer.coverage_gap", period: "July", action: "extend_schedule"}`) — *not* pre-written prose; Hermes does the wording. Marks each returned finding **emitted** (not delivered) and keeps re-returning it on subsequent polls until acked — delivery is **at-least-once**, never silently lost.
 - `POST /api/ansari/nudges/:id/ack` → Hermes confirms the Telegram send succeeded; the finding is now **delivered** and stops being returned. (If Hermes crashes, the LLM call fails, or Telegram is down, no ack arrives and the next poll re-returns the nudge.)
-- `GET /api/ansari/nudges/awaiting` → the **reply-routing read**: what is awaiting *this admin's* decision (emitted/delivered, undecided), newest first, with full intent + action + id. Pure read — no pipeline, no emit. The cron delivers a heads-up out-of-band, so the interactive Ansari session never saw it; when the admin asks to review ("nudges"), the agent calls this to recover the open items and route their replies. The state lives server-side, so the mouth holds none — see *Delivery & replies* below.
+- `GET /api/ansari/nudges/awaiting` → the **reply-routing read**: what is awaiting *this admin's* decision (emitted/delivered, undecided), newest first, with full intent + action + id. Pure read — no pipeline, no emit. The cron delivers a heads-up out-of-band, so the interactive Ansari session never saw it; when the admin asks to review ("review"), the agent calls this to recover the open items and route their replies. The state lives server-side, so the mouth holds none — see *Delivery & replies* below.
 - `POST /api/ansari/nudges/:id/apply` → OpenMasjid **re-validates against live state**, then executes (or replies "already handled").
 - `POST …/dismiss`, `…/snooze` ("not now"), and `…/mute` → updates state / preferences.
 
 This makes Hermes a thin, swappable delivery layer, and because OpenMasjid is already per-tenant, multi-tenant later only needs a per-tenant Telegram binding + key.
 
-### Delivery & replies: heads-up + "nudges" review
+### Delivery & replies: heads-up + "review"
 
 Telegram inline buttons were the original plan but were dropped: a button tap has to carry the nudge's context back into a session that *remembers* it, which makes the mouth stateful and forces framework patches (callback routing, session binding, working memory) on whatever channel Hermes is. That violates the brain/mouth split. Instead:
 
-- The heartbeat delivers each nudge as a plain-text **heads-up** (no buttons, no yes/no question) ending with "reply **nudges** to act."
-- To act, the admin says **"nudges"**; Hermes calls `/awaiting`, which **pulls the open items into the live conversation**. From then on every "yes / no / later / stop" answers a question the agent just asked, in-session — so replies have an unambiguous referent and there is no ambient interpretation of "yes" anywhere. This sidesteps Telegram-specific button plumbing entirely and keeps Hermes a thin mouth.
+- The heartbeat delivers each nudge as a plain-text **heads-up** (no buttons, no yes/no question) ending with "reply **review** to act."
+- To act, the admin says **"review"**; Hermes calls `/awaiting`, which **pulls the open items into the live conversation**. From then on every "yes / no / later / stop" answers a question the agent just asked, in-session — so replies have an unambiguous referent and there is no ambient interpretation of "yes" anywhere. This sidesteps Telegram-specific button plumbing entirely and keeps Hermes a thin mouth.
 
 ## Behavior model: one ping per problem
 
