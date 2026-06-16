@@ -29,6 +29,8 @@ export default function CompareSquarespacePage() {
           <CompareTable
             leftLabel="Squarespace"
             rows={[
+              { label: 'AI assistant', left: 'None', right: 'Built-in, AI-native (Ansari)' },
+              { label: 'Update by chat', left: 'No — manual editor', right: 'Update site & in-masjid display by chatting' },
               { label: 'Prayer times', left: 'Build it yourself', right: 'Built in' },
               { label: 'Jummah slots', left: 'Manual editing every week', right: 'First-class field' },
               { label: 'Hijri date', left: 'Manual', right: 'Automatic' },

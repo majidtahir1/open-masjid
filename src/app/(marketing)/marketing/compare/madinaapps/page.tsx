@@ -30,6 +30,8 @@ export default function CompareMadinaAppsPage() {
             leftLabel="MadinaApps"
             rows={[
               { label: 'Built for masajid', left: 'Yes', right: 'Yes' },
+              { label: 'AI assistant', left: 'None', right: 'Built-in, AI-native (Ansari)' },
+              { label: 'Update by chat', left: 'No — manual admin screens', right: 'Update site & in-masjid display by chatting' },
               { label: 'Modern design', left: 'Dated', right: 'Designed-by-default 2026' },
               { label: 'Custom branding', left: 'Limited', right: 'Full skin: logo, 3 colors, font' },
               { label: 'Forms / RSVPs', left: 'Basic, third-party for richer needs', right: 'Visual builder, capacity, payments' },
