@@ -16,6 +16,10 @@ const attendanceCreate: Access = (args) => {
   return schoolTenantCreate(args)
 }
 
+/** Teacher gets their session-scoped write; everyone else routes through schoolTenantWrite (denies staff). */
+const attendanceUpdate: Access = async (args) =>
+  roleOf(args.req.user) === 'teacher' ? teacherAttendanceRead(args) : schoolTenantWrite(args)
+
 export const AttendanceRecords: CollectionConfig = {
   slug: 'attendance-records',
   labels: { singular: 'Attendance Record', plural: 'Attendance Records' },
@@ -30,7 +34,7 @@ export const AttendanceRecords: CollectionConfig = {
   access: {
     read: denyKioskManager(teacherAttendanceRead),
     create: denyKioskManager(attendanceCreate),
-    update: denyKioskManager(teacherAttendanceRead),
+    update: denyKioskManager(attendanceUpdate),
     delete: denyKioskManager(schoolTenantWrite),
   },
   hooks: {

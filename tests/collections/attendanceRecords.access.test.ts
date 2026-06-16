@@ -26,5 +26,11 @@ describe('AttendanceRecords access', () => {
       tenant: { equals: 1 },
     })
     expect(await access.create({ req: { user: { role: 'staff', tenant: 1 } } })).toBe(false)
+    expect(await access.update({ req: { user: { role: 'staff', tenant: 1 } } })).toBe(false)
+  })
+  it('admin can update (tenant-scoped)', async () => {
+    expect(await access.update({ req: { user: { role: 'admin', tenant: 1 } } })).toEqual({
+      tenant: { equals: 1 },
+    })
   })
 })
