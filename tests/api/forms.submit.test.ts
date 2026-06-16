@@ -132,6 +132,21 @@ describe('POST /api/forms/[slug]/submit', () => {
     expect(body.fieldErrors).toEqual({ name: 'Required', email: 'Invalid email' })
   })
 
+  it('returns 200 on honeypot trip without persisting or fetching a row', async () => {
+    // Regression: the honeypot used to return submissionId 0, and the route
+    // then called findByID(0) → Payload NotFound → uncaught 500. Real Android
+    // autofill was tripping the honeypot, so legit submissions surfaced as
+    // "Something went wrong" with no row saved.
+    vi.mocked(formSubmit.submitForm).mockResolvedValue({ ok: true, honeypot: true })
+
+    const res = await POST(makeReq({ _hp: 'autofilled name' }), makeParams())
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body).toEqual({ ok: true })
+    expect(payloadInstance.findByID).not.toHaveBeenCalled()
+    expect(formNotifications.sendFormNotifications).not.toHaveBeenCalled()
+  })
+
   it('returns 429 when rate-limited', async () => {
     vi.mocked(formSubmit.submitForm).mockResolvedValue({ ok: false, error: 'rate_limited' })
 

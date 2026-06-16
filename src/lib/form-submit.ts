@@ -15,7 +15,8 @@ interface SubmitArgs {
 }
 
 export type SubmitResult =
-  | { ok: true; submissionId: string|number; checkoutPending: boolean }
+  | { ok: true; honeypot: true }
+  | { ok: true; honeypot?: false; submissionId: string|number; checkoutPending: boolean }
   | { ok: false; error: 'rate_limited' | 'validation' | 'closed' | 'not_published'
        errors?: Record<string, string> }
 
@@ -24,8 +25,10 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
 
   if (form.status !== 'published') return { ok: false, error: 'not_published' }
 
-  // 1. Honeypot — silent success on bot
-  if (data._hp) return { ok: true, submissionId: 0 as unknown as string, checkoutPending: false }
+  // 1. Honeypot — silent success on bot (no row persisted). Signalled via an
+  // explicit flag, NOT a fake submissionId: the caller must short-circuit
+  // before any findByID, or it would look up a non-existent row and 500.
+  if (data._hp) return { ok: true, honeypot: true }
 
   // 2. Rate limit
   const ipHash = createHash('sha256').update(ip).digest('hex').slice(0, 32)
