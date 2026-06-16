@@ -33,6 +33,7 @@ import * as migration_20260604_090000_blog_api_scopes from './20260604_090000_bl
 import * as migration_20260604_205205_demo_mode from './20260604_205205_demo_mode';
 import * as migration_20260610_174850_form_submissions_trash from './20260610_174850_form_submissions_trash';
 import * as migration_20260611_210334_proactive_nudge_engine from './20260611_210334_proactive_nudge_engine';
+import * as migration_20260616_210336_sunday_school_attendance from './20260616_210336_sunday_school_attendance';
 
 export const migrations = [
   {
@@ -208,6 +209,11 @@ export const migrations = [
   {
     up: migration_20260611_210334_proactive_nudge_engine.up,
     down: migration_20260611_210334_proactive_nudge_engine.down,
-    name: '20260611_210334_proactive_nudge_engine'
+    name: '20260611_210334_proactive_nudge_engine',
+  },
+  {
+    up: migration_20260616_210336_sunday_school_attendance.up,
+    down: migration_20260616_210336_sunday_school_attendance.down,
+    name: '20260616_210336_sunday_school_attendance'
   },
 ];

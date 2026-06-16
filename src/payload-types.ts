@@ -86,6 +86,12 @@ export interface Config {
     donations: Donation;
     'membership-tiers': MembershipTier;
     members: Member;
+    terms: Term;
+    'school-classes': SchoolClass;
+    students: Student;
+    enrollments: Enrollment;
+    'class-sessions': ClassSession;
+    'attendance-records': AttendanceRecord;
     media: Media;
     users: User;
     tenants: Tenant;
@@ -118,6 +124,12 @@ export interface Config {
     donations: DonationsSelect<false> | DonationsSelect<true>;
     'membership-tiers': MembershipTiersSelect<false> | MembershipTiersSelect<true>;
     members: MembersSelect<false> | MembersSelect<true>;
+    terms: TermsSelect<false> | TermsSelect<true>;
+    'school-classes': SchoolClassesSelect<false> | SchoolClassesSelect<true>;
+    students: StudentsSelect<false> | StudentsSelect<true>;
+    enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
+    'class-sessions': ClassSessionsSelect<false> | ClassSessionsSelect<true>;
+    'attendance-records': AttendanceRecordsSelect<false> | AttendanceRecordsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
@@ -1645,6 +1657,44 @@ export interface Member {
   createdAt: string;
 }
 /**
+ * Academic periods for the Sunday school (e.g. "Fall 2026").
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms".
+ */
+export interface Term {
+  id: number;
+  tenant: number | Tenant;
+  name: string;
+  startDate: string;
+  endDate: string;
+  meetingDay: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+  status: 'active' | 'archived';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * A class offered in a term (e.g. "Grade 3 Quran").
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "school-classes".
+ */
+export interface SchoolClass {
+  id: number;
+  tenant: number | Tenant;
+  name: string;
+  term: number | Term;
+  teachers?: (number | User)[] | null;
+  gradeLevel?: string | null;
+  room?: string | null;
+  /**
+   * Informational only — not enforced.
+   */
+  capacity?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * People who can log into the admin panel. Each non-platform user belongs to exactly one tenant and only sees that tenant's content.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1661,9 +1711,9 @@ export interface User {
    */
   lastName: string;
   /**
-   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content.
+   * Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content. School Admin manages the Sunday school (terms, classes, students, attendance) within one masjid. Teacher can only mark attendance for their assigned classes.
    */
-  role: 'platformOwner' | 'admin' | 'staff' | 'kioskManager';
+  role: 'platformOwner' | 'admin' | 'staff' | 'kioskManager' | 'school_admin' | 'teacher';
   /**
    * Which masjid this user belongs to. Required for Admin and Staff; leave blank for Platform Owner (they access every tenant). Only a Platform Owner can change this field.
    */
@@ -1714,6 +1764,99 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * Children enrolled in the Sunday school. Holds guardian PII.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "students".
+ */
+export interface Student {
+  id: number;
+  tenant: number | Tenant;
+  /**
+   * Auto-filled from first + last name.
+   */
+  fullName?: string | null;
+  firstName: string;
+  lastName: string;
+  /**
+   * Captured at registration.
+   */
+  age?: number | null;
+  /**
+   * Assigned by admin during placement.
+   */
+  gradeLevel?: string | null;
+  guardians?:
+    | {
+        name: string;
+        relationship?: string | null;
+        phone?: string | null;
+        email?: string | null;
+        isPrimary?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  allergiesNotes?: string | null;
+  emergencyContact?: string | null;
+  /**
+   * Optional link to a paying Member (reserved for future tuition).
+   */
+  member?: (number | null) | Member;
+  status: 'active' | 'inactive';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Joins a student to a class for a term (the roster).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrollments".
+ */
+export interface Enrollment {
+  id: number;
+  tenant: number | Tenant;
+  student: number | Student;
+  class: number | SchoolClass;
+  status: 'active' | 'withdrawn';
+  enrolledAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One weekly meeting of a class.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "class-sessions".
+ */
+export interface ClassSession {
+  id: number;
+  tenant: number | Tenant;
+  class: number | SchoolClass;
+  date: string;
+  status: 'scheduled' | 'held' | 'cancelled';
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One student's attendance for one session.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attendance-records".
+ */
+export interface AttendanceRecord {
+  id: number;
+  tenant: number | Tenant;
+  session: number | ClassSession;
+  student: number | Student;
+  status: 'present' | 'absent' | 'late' | 'excused';
+  markedBy?: (number | null) | User;
+  markedAt?: string | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Proactive nudge preferences for this masjid: which nudges are on, quiet hours, and the weekly digest slot.
@@ -1987,6 +2130,30 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'members';
         value: number | Member;
+      } | null)
+    | ({
+        relationTo: 'terms';
+        value: number | Term;
+      } | null)
+    | ({
+        relationTo: 'school-classes';
+        value: number | SchoolClass;
+      } | null)
+    | ({
+        relationTo: 'students';
+        value: number | Student;
+      } | null)
+    | ({
+        relationTo: 'enrollments';
+        value: number | Enrollment;
+      } | null)
+    | ({
+        relationTo: 'class-sessions';
+        value: number | ClassSession;
+      } | null)
+    | ({
+        relationTo: 'attendance-records';
+        value: number | AttendanceRecord;
       } | null)
     | ({
         relationTo: 'media';
@@ -2612,6 +2779,104 @@ export interface MembersSelect<T extends boolean = true> {
   currentPeriodEnd?: T;
   canceledAt?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms_select".
+ */
+export interface TermsSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  startDate?: T;
+  endDate?: T;
+  meetingDay?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "school-classes_select".
+ */
+export interface SchoolClassesSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  term?: T;
+  teachers?: T;
+  gradeLevel?: T;
+  room?: T;
+  capacity?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "students_select".
+ */
+export interface StudentsSelect<T extends boolean = true> {
+  tenant?: T;
+  fullName?: T;
+  firstName?: T;
+  lastName?: T;
+  age?: T;
+  gradeLevel?: T;
+  guardians?:
+    | T
+    | {
+        name?: T;
+        relationship?: T;
+        phone?: T;
+        email?: T;
+        isPrimary?: T;
+        id?: T;
+      };
+  allergiesNotes?: T;
+  emergencyContact?: T;
+  member?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrollments_select".
+ */
+export interface EnrollmentsSelect<T extends boolean = true> {
+  tenant?: T;
+  student?: T;
+  class?: T;
+  status?: T;
+  enrolledAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "class-sessions_select".
+ */
+export interface ClassSessionsSelect<T extends boolean = true> {
+  tenant?: T;
+  class?: T;
+  date?: T;
+  status?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attendance-records_select".
+ */
+export interface AttendanceRecordsSelect<T extends boolean = true> {
+  tenant?: T;
+  session?: T;
+  student?: T;
+  status?: T;
+  markedBy?: T;
+  markedAt?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -12,6 +12,12 @@ import { Announcements } from './collections/Announcements'
 import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
+import { Terms } from './collections/Terms'
+import { SchoolClasses } from './collections/SchoolClasses'
+import { Students } from './collections/Students'
+import { Enrollments } from './collections/Enrollments'
+import { ClassSessions } from './collections/ClassSessions'
+import { AttendanceRecords } from './collections/AttendanceRecords'
 import { NudgeStates } from './collections/NudgeStates'
 import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
@@ -161,6 +167,12 @@ export default buildConfig({
     Donations,
     MembershipTiers,
     Members,
+    Terms,
+    SchoolClasses,
+    Students,
+    Enrollments,
+    ClassSessions,
+    AttendanceRecords,
     Media,
     Users,
     Tenants,
