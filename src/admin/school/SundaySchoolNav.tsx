@@ -16,10 +16,12 @@ function tenantIdOf(t: TenantRef): string | number | null {
   return t as string | number
 }
 
+const ALLOWED_ROLES = new Set(['platformOwner', 'admin', 'school_admin', 'teacher'])
+
 /**
  * Custom Payload nav link for school teachers and admins to reach the
- * Take Attendance page. Only renders for school_admin and teacher roles;
- * all other roles (platform owners, regular admins, staff, kiosk) get nothing.
+ * Take Attendance page. Renders for platformOwner, admin, school_admin, and
+ * teacher roles; staff and kioskManager are excluded.
  * Mirrors the DonationsNav / MembershipNav pattern.
  */
 export default async function SundaySchoolNav() {
@@ -28,10 +30,13 @@ export default async function SundaySchoolNav() {
     if (!user) return null
 
     const u = user as { tenant?: TenantRef; role?: string }
-    if (u.role !== 'school_admin' && u.role !== 'teacher') return null
+    if (!u.role || !ALLOWED_ROLES.has(u.role)) return null
 
+    // platformOwner may not have a tenant; that's fine — the page handles it.
+    // For tenant-scoped roles (school_admin, teacher, admin) require a tenant.
+    const isSuperRole = u.role === 'platformOwner'
     const tenantId = tenantIdOf(u.tenant)
-    if (!tenantId) return null
+    if (!isSuperRole && !tenantId) return null
 
     return (
       <Link

@@ -24,7 +24,8 @@ export default async function TakeAttendancePage() {
   if (!user) redirect(loginUrl('/admin/take-attendance'))
 
   const u = user as { role?: string }
-  if (u.role !== 'school_admin' && u.role !== 'teacher') {
+  const ALLOWED_ROLES = new Set(['platformOwner', 'admin', 'school_admin', 'teacher'])
+  if (!u.role || !ALLOWED_ROLES.has(u.role)) {
     redirect('/admin')
   }
 

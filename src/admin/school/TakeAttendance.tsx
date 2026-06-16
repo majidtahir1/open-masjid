@@ -42,10 +42,11 @@ const TakeAttendance: React.FC = () => {
         `/class-sessions?where[class][equals]=${id}&where[status][not_equals]=cancelled&sort=date&limit=200&depth=0`,
       )
       const today = new Date().toISOString().slice(0, 10)
+      // Find the next upcoming session (on or after today); if none, fall back
+      // to the most recent past session (last element of the ascending sort).
       const upcoming =
         sess.docs.find((s: Doc) => String(s.date).slice(0, 10) >= today) ??
-        sess.docs[0] ??
-        null
+        (sess.docs.length > 0 ? sess.docs[sess.docs.length - 1] : null)
       setSession(upcoming)
 
       const enr = await api(
