@@ -5,6 +5,7 @@ import {
   Calendar,
   ClipboardList,
   Code,
+  Globe,
   Heart,
   Monitor,
   Palette,
@@ -27,6 +28,7 @@ export const metadata = {
 
 const FEATURES = [
   { Icon: Sparkles, title: 'Ansari · AI assistant', body: 'Run your masjid by chatting with it. Prayer times, announcements, forms, events — just send a message.', to: '/features/ansari' },
+  { Icon: Globe, title: 'Your website', body: 'A fast, beautiful public site — prayer times, events, and donations front and center. Your branding, your domain.', to: '/features/website' },
   { Icon: Sunrise, title: 'Prayer times', body: 'Multiple jummah slots, iqamah overrides, Hijri dates, full-year setup in minutes.', to: '/features/prayer-times' },
   { Icon: Calendar, title: 'Events & flyers', body: 'Three display modes — uploaded, auto-generated, or text-only.', to: '/features/events' },
   { Icon: Heart, title: 'Donations', body: 'Native Stripe with Sadaqah / Zakat / Building Fund tabs.', to: '/features/donations' },

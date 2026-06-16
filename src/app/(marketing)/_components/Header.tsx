@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { OMLogo } from './Logo'
-import { ArrowRight, ChevronDown, Menu, X, Sunrise, Calendar, ClipboardList, Heart, Monitor, Palette, Shield, Sparkles } from './Icons'
+import { ArrowRight, ChevronDown, Menu, X, Globe, Sunrise, Calendar, ClipboardList, Heart, Monitor, Palette, Shield, Sparkles } from './Icons'
 
 const HEADER_NAV: Array<{ label: string; to: string; hasDropdown?: boolean; external?: boolean }> = [
   { label: 'Features', to: '/features', hasDropdown: true },
@@ -12,6 +12,7 @@ const HEADER_NAV: Array<{ label: string; to: string; hasDropdown?: boolean; exte
 
 const FEATURE_DROPDOWN = [
   { to: '/features/ansari', Icon: Sparkles, title: 'Ansari · AI assistant', desc: 'Run your masjid by chatting with it.' },
+  { to: '/features/website', Icon: Globe, title: 'Your Website', desc: 'A fast, beautiful public site for your community.' },
   { to: '/features/prayer-times', Icon: Sunrise, title: 'Prayer Times', desc: 'Quick, easy setup for the whole year.' },
   { to: '/features/events', Icon: Calendar, title: 'Events & Flyers', desc: 'Three display modes. Recurring patterns.' },
   { to: '/features/donations', Icon: Heart, title: 'Donations', desc: 'Native Stripe. Sadaqah, Zakat, Building Fund.' },
