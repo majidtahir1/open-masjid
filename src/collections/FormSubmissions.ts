@@ -2,6 +2,7 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScopedRead } from '../access/tenantScoped'
 import { denyKioskManager } from '../access/kioskRoles'
+import { createStudentFromRegistration } from '../hooks/createStudentFromRegistration'
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
@@ -25,6 +26,9 @@ export const FormSubmissions: CollectionConfig = {
     update: denyKioskManager(() => false),
     delete: denyKioskManager(() => false),
     read: denyKioskManager(tenantScopedRead),
+  },
+  hooks: {
+    afterChange: [createStudentFromRegistration],
   },
   fields: [
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true,
