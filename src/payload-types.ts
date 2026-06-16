@@ -103,7 +103,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    students: {
+      attendance: 'attendance-records';
+    };
+  };
   collectionsSelect: {
     'prayer-schedules': PrayerSchedulesSelect<false> | PrayerSchedulesSelect<true>;
     'prayer-display-content': PrayerDisplayContentSelect<false> | PrayerDisplayContentSelect<true>;
@@ -1805,22 +1809,32 @@ export interface Student {
    */
   member?: (number | null) | Member;
   status: 'active' | 'inactive';
+  /**
+   * Attendance history for this student.
+   */
+  attendance?: {
+    docs?: (number | AttendanceRecord)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Joins a student to a class for a term (the roster).
+ * One student's attendance for one session.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "enrollments".
+ * via the `definition` "attendance-records".
  */
-export interface Enrollment {
+export interface AttendanceRecord {
   id: number;
   tenant: number | Tenant;
+  session: number | ClassSession;
   student: number | Student;
-  class: number | SchoolClass;
-  status: 'active' | 'withdrawn';
-  enrolledAt?: string | null;
+  status: 'present' | 'absent' | 'late' | 'excused';
+  markedBy?: (number | null) | User;
+  markedAt?: string | null;
+  note?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1841,20 +1855,18 @@ export interface ClassSession {
   createdAt: string;
 }
 /**
- * One student's attendance for one session.
+ * Joins a student to a class for a term (the roster).
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "attendance-records".
+ * via the `definition` "enrollments".
  */
-export interface AttendanceRecord {
+export interface Enrollment {
   id: number;
   tenant: number | Tenant;
-  session: number | ClassSession;
   student: number | Student;
-  status: 'present' | 'absent' | 'late' | 'excused';
-  markedBy?: (number | null) | User;
-  markedAt?: string | null;
-  note?: string | null;
+  class: number | SchoolClass;
+  status: 'active' | 'withdrawn';
+  enrolledAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2836,6 +2848,7 @@ export interface StudentsSelect<T extends boolean = true> {
   emergencyContact?: T;
   member?: T;
   status?: T;
+  attendance?: T;
   updatedAt?: T;
   createdAt?: T;
 }

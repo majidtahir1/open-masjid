@@ -83,6 +83,13 @@ export const Students: CollectionConfig = {
         { label: 'Inactive', value: 'inactive' },
       ],
     },
+    {
+      name: 'attendance',
+      type: 'join',
+      collection: 'attendance-records',
+      on: 'student',
+      admin: { description: 'Attendance history for this student.' },
+    },
   ],
 }
 
