@@ -31,6 +31,8 @@ export default function CompareWordPressPage() {
           <CompareTable
             leftLabel="WordPress + plugins"
             rows={[
+              { label: 'AI assistant', left: 'None (some chatbot plugins)', right: 'Built-in, AI-native (Ansari)' },
+              { label: 'Update by chat', left: 'No — dashboards & plugin menus', right: 'Update site & in-masjid display by chatting' },
               { label: 'Prayer times', left: 'Plugin (varies)', right: 'First-class, included' },
               { label: 'Events & flyers', left: 'Events Calendar plugin', right: 'Built-in, three display modes' },
               { label: 'Donations', left: 'GiveWP / WooCommerce', right: 'Native Stripe, included' },
