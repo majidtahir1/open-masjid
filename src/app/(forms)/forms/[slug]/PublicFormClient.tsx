@@ -280,21 +280,20 @@ export function PublicFormClient({ form, closed }: Props) {
         />
       )}
 
-      {/* Honeypot — visually hidden, not reachable by keyboard */}
+      {/* Honeypot — hidden from real users AND from browser autofill.
+          MUST use display:none, not off-screen positioning: Chrome/Android
+          autofill happily fills a position:absolute / left:-10000px field but
+          skips display:none ones. The old off-screen approach was letting
+          Android autofill populate _hp, which tripped the honeypot and made the
+          submit 500 (findByID on a non-existent row) — silently dropping real
+          submissions. Naive spam bots that fill every input still trip it. */}
       <input
         type="text"
         name="_hp"
         autoComplete="off"
         tabIndex={-1}
         aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: '-10000px',
-          top: 'auto',
-          width: 1,
-          height: 1,
-          overflow: 'hidden',
-        }}
+        style={{ display: 'none' }}
       />
 
       {errors._form && (

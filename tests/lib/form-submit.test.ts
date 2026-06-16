@@ -56,7 +56,10 @@ describe('submitForm', () => {
     })
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.checkoutPending).toBe(false)
+      // Honeypot returns an explicit flag and NO submissionId — the route must
+      // short-circuit on this before any findByID (regression: id 0 → 500).
+      expect(result.honeypot).toBe(true)
+      expect('submissionId' in result).toBe(false)
     }
     expect(payload.create).not.toHaveBeenCalled()
   })
@@ -157,7 +160,7 @@ describe('submitForm', () => {
       userAgent: 'test-agent',
     })
     expect(result.ok).toBe(true)
-    if (result.ok) {
+    if (result.ok && !result.honeypot) {
       expect(result.submissionId).toBe('sub-123')
     }
   })
@@ -172,7 +175,7 @@ describe('submitForm', () => {
       userAgent: 'Mozilla/5.0',
     })
     expect(result.ok).toBe(true)
-    if (result.ok) {
+    if (result.ok && !result.honeypot) {
       expect(result.submissionId).toBe('sub-123')
       expect(result.checkoutPending).toBe(false)
     }
@@ -200,7 +203,7 @@ describe('submitForm', () => {
       userAgent: 'Mozilla/5.0',
     })
     expect(result.ok).toBe(true)
-    if (result.ok) {
+    if (result.ok && !result.honeypot) {
       expect(result.checkoutPending).toBe(true)
     }
     const createArgs = payload.create.mock.calls[0][0]

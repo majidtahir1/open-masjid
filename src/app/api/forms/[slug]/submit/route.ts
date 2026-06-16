@@ -44,6 +44,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     return NextResponse.json({ error: result.error }, { status: 400 })
   }
 
+  // Honeypot trip: fake a success so bots think they got through, but persist
+  // nothing. MUST return before findByID — there is no submission row to fetch.
+  if (result.honeypot) return NextResponse.json({ ok: true })
+
   if (!result.checkoutPending) {
     const submission = await payload.findByID({
       collection: 'form-submissions',
