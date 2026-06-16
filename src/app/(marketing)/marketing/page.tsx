@@ -1,15 +1,26 @@
 import Link from 'next/link'
 import { MarketingShell } from '../_components/MarketingShell'
-import { AnsariBanner } from '../_components/AnsariBanner'
 import OpenMasjidJsonLd from '../_components/OpenMasjidJsonLd'
-import { BrowserFrame, TenantPreview } from '../_components/TenantPreview'
+import {
+  AnsariChat,
+  ChatCard,
+  ChatDone,
+  ChatIn,
+  ChatOut,
+  ChatTime,
+  ChatTyping,
+  Confirm,
+  DiffRow,
+} from '../_components/AnsariChat'
 import {
   ArrowRight,
+  Bell,
   Calendar,
   Check,
   ClipboardList,
   Code,
   Github,
+  Globe,
   Heart,
   Monitor,
   MoonStar,
@@ -19,26 +30,28 @@ import {
   Sunrise,
 } from '../_components/Icons'
 
+const HOME_TITLE = 'OpenMasjid — A modern website platform built for masajid'
+const HOME_DESCRIPTION =
+  "Run your masjid through conversation. Ansari, the AI assistant, handles prayer times, events, donations, and announcements — without the WordPress headaches. Free to self-host. $49/mo hosted."
+
 export const metadata = {
-  title: 'OpenMasjid — A modern website platform built for masajid',
-  description:
-    "Prayer times, events, donations, and your branding — without the WordPress headaches. Free to self-host. $49/mo hosted.",
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'OpenMasjid — A modern website platform built for masajid',
-    description:
-      "Prayer times, events, donations, and your branding — without the WordPress headaches. Free to self-host. $49/mo hosted.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     url: '/',
     type: 'website',
   },
   twitter: {
-    title: 'OpenMasjid — A modern website platform built for masajid',
-    description:
-      "Prayer times, events, donations, and your branding — without the WordPress headaches. Free to self-host. $49/mo hosted.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
   },
 }
 
 const FEATURES = [
+  { Icon: Globe, title: 'Your website', body: "A fast, beautiful public site your community actually visits — prayer times, events, and donations front and center. Your branding, your custom domain.", to: '/features/website' },
   { Icon: Sunrise, title: 'Prayer times', body: 'Set up the whole year in minutes. Multiple jummah slots, iqamah overrides, Hijri dates.', to: '/features/prayer-times' },
   { Icon: Calendar, title: 'Events & flyers', body: "Upload a flyer or auto-generate one in your masjid's branding. Recurring patterns ('Mondays after Isha') supported.", to: '/features/events' },
   { Icon: Heart, title: 'Donations', body: 'Native Stripe integration with Sadaqah / Zakat / Building Fund tabs. Or link out to your existing processor.', to: '/features/donations' },
@@ -56,42 +69,44 @@ const STEPS = [
   { n: '04', title: 'Connect your domain', body: 'Point yourmasjid.org at us when you ready. We handle TLS automatically.' },
 ]
 
+const WATCHES = [
+  'Your prayer schedule is about to run out',
+  'An iqamah time is drifting too close to the adhan',
+  'An RSVP is filling up, or a notice is about to expire',
+  'Daylight saving or Ramadan is coming up',
+  'A display in the lobby stops checking in',
+]
+
 export default function MarketingHome() {
   return (
     <MarketingShell current="/">
       <OpenMasjidJsonLd />
-      {/* Announcement banner — Meet Ansari, above the hero */}
-      <AnsariBanner />
       {/* Hero */}
       <section className="om-hero">
         <div className="om-container om-hero-grid">
           <div className="om-hero-text">
             <span className="om-pill">
               <Sparkles width={14} height={14} />
-              Open-source
+              Meet Ansari · your AI assistant
             </span>
             <h1 className="om-h1">
-              A modern website for your masjid.
-              <br /><em className="om-hero-em">Without the headaches.</em>
+              Run your masjid through
+              <br /><em className="om-hero-em">conversation.</em>
             </h1>
             <p className="om-lede">
-              Prayer times, events, donations, and your branding — managed by your volunteers, not your IT vendor.
-              Free to self-host. <b style={{ color: 'var(--fg1)' }}>$49/mo</b> if you'd rather we host it for you.
+              OpenMasjid is the world&apos;s first AI-native platform for running a masjid. It comes with Ansari,
+              your masjid&apos;s personal assistant. Ansari can update your prayer times, set up events, and tell you
+              how your programs and fundraising are really doing. Just ask.
             </p>
             <div className="om-hero-ctas">
               <Link className="om-btn om-btn-primary om-btn-lg" href="/get-started">
                 Get Started
                 <ArrowRight />
               </Link>
-              <a
-                className="om-btn om-btn-secondary om-btn-lg"
-                href="https://demo.openmasjid.app"
-                target="_blank"
-                rel="noopener"
-              >
-                Explore the live demo
+              <Link className="om-btn om-btn-secondary om-btn-lg" href="/features/ansari">
+                See Ansari in action
                 <ArrowRight />
-              </a>
+              </Link>
             </div>
             <p className="om-hero-trust">
               <Check width={14} height={14} /> 14-day trial, no card
@@ -99,16 +114,69 @@ export default function MarketingHome() {
           </div>
 
           <div className="om-hero-preview">
-            <BrowserFrame url="alnoor.openmasjid.app">
-              <TenantPreview variant="default" />
-            </BrowserFrame>
+            <AnsariChat>
+              <ChatTime>This Friday · 10:42 AM</ChatTime>
+              <ChatOut>Add a 2:15 jummah slot this Friday</ChatOut>
+              <ChatTyping />
+              <ChatIn>Here&apos;s the change before I apply it:</ChatIn>
+              <ChatCard label="Prayer times · review">
+                <div className="oa-diff">
+                  <DiffRow k="2nd Jummah" newVal="2:15 PM khutbah" />
+                  <DiffRow k="Effective" newVal="This Friday →" />
+                </div>
+                <Confirm yes="Yes, apply" no="Edit" />
+              </ChatCard>
+              <ChatOut>yes</ChatOut>
+              <ChatDone>Live on your site and the lobby displays.</ChatDone>
+            </AnsariChat>
             <div className="om-hero-floater om-hero-floater--ribbon">
               <span className="om-ribbon-dot" />
-              Live tenant preview
+              Replies in seconds
             </div>
           </div>
         </div>
         <div className="om-hero-glow" aria-hidden="true" />
+      </section>
+
+      {/* Digital administrator — proactive monitoring + daily briefing */}
+      <section className="oa-proactive">
+        <div className="oa-proactive-glow" aria-hidden="true" />
+        <div className="om-container oa-proactive-grid">
+          <div className="oa-proactive-text">
+            <p className="oa-kicker on-dark">
+              <Bell width={14} height={14} /> Your digital masjid administrator
+            </p>
+            <h2 className="om-h2">Wake up knowing what&apos;s happening at your masjid.</h2>
+            <p className="om-lede">
+              Volunteers are busy and things slip. OpenMasjid watches your masjid around the clock, keeping an eye on
+              your prayer schedule, forms, events, displays, and the calendar. The moment something needs attention, it
+              reaches out with a one-tap fix ready to go.
+            </p>
+            <ul className="oa-watch-list">
+              {WATCHES.map((w) => (
+                <li key={w}><Check width={17} height={17} /> {w}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <AnsariChat input={false}>
+              <ChatTime>Sunday · 7:30 AM</ChatTime>
+              <ChatIn>
+                <b>Good morning.</b> Here&apos;s where the masjid stands this week:
+              </ChatIn>
+              <ChatCard label="Weekly briefing" Icon={Calendar}>
+                <div className="oa-diff">
+                  <DiffRow k="Family Night" newVal="43 / 75 RSVPs · pace below average" />
+                  <DiffRow k="Prayer times" newVal="expire in 8 days" />
+                  <DiffRow k="Memberships" newVal="2 renew this week" />
+                  <DiffRow k="Donations" newVal="up 11% vs last month" />
+                  <DiffRow k="Displays" newVal="all 3 online" />
+                </div>
+              </ChatCard>
+            </AnsariChat>
+          </div>
+        </div>
       </section>
 
       {/* Problem */}
