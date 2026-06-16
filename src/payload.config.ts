@@ -109,6 +109,7 @@ export default buildConfig({
         '/src/admin/DashboardLink#default',
         '/src/admin/donations/DonationsNav#default',
         '/src/admin/membership/MembershipNav#default',
+        '/src/admin/school/SundaySchoolNav#default',
       ],
       afterNavLinks: [
         '/src/admin/ViewPublicSiteLink#default',
