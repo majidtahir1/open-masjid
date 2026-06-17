@@ -512,3 +512,20 @@
   .ss-finish__badge { animation: none; opacity: 1; }
   .ss-btn:hover { transform: none; }
 }
+
+/* charts */
+.ss-chart__donut { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.ss-chart__donutnum { font-family: var(--ss-serif); font-weight: 600; font-size: 22px; fill: var(--theme-elevation-900); }
+.ss-chart__donutlbl { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; fill: var(--theme-elevation-500); }
+.ss-chart__legend { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.ss-chart__legend li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--theme-elevation-700); }
+.ss-chart__legend li span { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.ss-chart__legend li b { margin-left: auto; font-weight: 700; }
+.ss-chart__bars { display: grid; gap: 10px; }
+.ss-chart__bar { display: grid; grid-template-columns: 120px 1fr 44px; align-items: center; gap: 10px; }
+.ss-chart__barlabel { font-size: 13px; color: var(--theme-elevation-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ss-chart__bartrack { height: 10px; border-radius: 999px; background: var(--theme-elevation-100); overflow: hidden; }
+.ss-chart__barfill { display: block; height: 100%; border-radius: 999px; transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.ss-chart__barval { font-size: 12.5px; font-weight: 600; color: var(--theme-elevation-700); text-align: right; }
+.ss-chart__area { width: 100%; height: auto; display: block; }
+@media (prefers-reduced-motion: reduce) { .ss-chart__barfill { transition: none; } }
