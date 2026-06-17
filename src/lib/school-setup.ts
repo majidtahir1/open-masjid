@@ -21,7 +21,7 @@ export interface HubTerm {
   name: string
   startDate?: string | null
   endDate?: string | null
-  meetingDay?: string | null
+  meetingDays: string[]
   holidays: string[]
   sessionsPerClass: number
 }
@@ -54,7 +54,7 @@ interface RawDocs {
     name: string
     startDate?: string | null
     endDate?: string | null
-    meetingDay?: string | null
+    meetingDays?: string[] | null
     holidays?: Array<{ date?: unknown }> | null
   } | null
   classes: Array<{ id: string | number; teachers?: unknown[] }>
@@ -80,7 +80,7 @@ export function buildHubSummary(raw: RawDocs): HubSummary {
       name: raw.term.name,
       startDate: raw.term.startDate ?? null,
       endDate: raw.term.endDate ?? null,
-      meetingDay: raw.term.meetingDay ?? null,
+      meetingDays: raw.term.meetingDays ?? [],
       holidays: (raw.term.holidays ?? []).map((h) => String(h?.date ?? '').slice(0, 10)).filter(Boolean),
       sessionsPerClass: raw.sessionsPerClass,
     },

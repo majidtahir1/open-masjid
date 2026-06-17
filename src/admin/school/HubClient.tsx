@@ -3,14 +3,9 @@ import React from 'react'
 import Link from 'next/link'
 import { CalendarDays, GraduationCap, UserCheck, Users, ArrowRight, CalendarPlus, ClipboardCheck } from 'lucide-react'
 import type { HubSummary } from '@/lib/school-setup'
-import { firstIncompleteStep } from '@/lib/school-setup'
+import { firstIncompleteStep, formatDays } from '@/lib/school-setup'
 import SessionTimeline from './SessionTimeline'
 import './sunday-school.css'
-
-const WEEKDAY_PLURAL: Record<string, string> = {
-  sunday: 'Sundays', monday: 'Mondays', tuesday: 'Tuesdays', wednesday: 'Wednesdays',
-  thursday: 'Thursdays', friday: 'Fridays', saturday: 'Saturdays',
-}
 
 const fmt = (iso?: string | null) => (iso ? String(iso).slice(0, 10) : '')
 
@@ -25,14 +20,14 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
           <p className="ss-eyebrow">Sunday school · current term</p>
           <h1 className="ss-masthead__title">{term.name}</h1>
           <p className="ss-masthead__meta">
-            {term.meetingDay ? WEEKDAY_PLURAL[term.meetingDay] ?? 'Weekly' : 'Weekly'}
+            {formatDays(term.meetingDays)}
             {term.startDate && term.endDate ? ` · ${fmt(term.startDate)} → ${fmt(term.endDate)}` : ''}
             {` · ${term.sessionsPerClass} sessions per class, created automatically`}
           </p>
           <SessionTimeline
             startDate={term.startDate}
             endDate={term.endDate}
-            meetingDay={term.meetingDay}
+            meetingDays={term.meetingDays}
             holidays={term.holidays}
             variant="masthead"
           />

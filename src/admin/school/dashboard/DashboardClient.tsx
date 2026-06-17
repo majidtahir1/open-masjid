@@ -14,7 +14,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const shortDate = (iso: string) => { const [, m, d] = iso.split('-').map(Number); return `${MONTHS[(m ?? 1) - 1]} ${d}` }
 
 export interface DashboardData {
-  term: { name: string; startDate?: string | null; endDate?: string | null; meetingDay?: string | null; holidays: string[] } | null
+  term: { name: string; startDate?: string | null; endDate?: string | null; meetingDays: string[]; holidays: string[] } | null
   kpis: Kpis
   trend: TrendPoint[]
   rateByClass: ClassRate[]
@@ -51,7 +51,7 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
       <header className="ss-masthead">
         <p className="ss-eyebrow">Current term</p>
         <h1 className="ss-masthead__title">{term.name}</h1>
-        <SessionTimeline startDate={term.startDate} endDate={term.endDate} meetingDay={term.meetingDay} holidays={term.holidays} variant="masthead" />
+        <SessionTimeline startDate={term.startDate} endDate={term.endDate} meetingDays={term.meetingDays} holidays={term.holidays} variant="masthead" />
       </header>
 
       <div className="ss-stats">

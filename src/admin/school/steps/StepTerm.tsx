@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { api } from '../api'
 import SessionTimeline from '../SessionTimeline'
-import { weeklyDates } from '@/hooks/generateClassSessions'
+import { programDates } from '@/hooks/generateClassSessions'
 
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 const day = (d: unknown) => String(d ?? '').slice(0, 10)
@@ -13,7 +13,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
   const [name, setName] = useState('')
   const [startDate, setStart] = useState('')
   const [endDate, setEnd] = useState('')
-  const [meetingDay, setDay] = useState('sunday')
+  const [meetingDays, setDays] = useState<string[]>(['sunday'])
   const [holidays, setHolidays] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -23,7 +23,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
       const t = r.docs[0]
       if (t) {
         setTerm(t); setName(t.name ?? ''); setStart(day(t.startDate))
-        setEnd(day(t.endDate)); setDay(t.meetingDay ?? 'sunday')
+        setEnd(day(t.endDate)); setDays(Array.isArray(t.meetingDays) && t.meetingDays.length ? t.meetingDays : ['sunday'])
         setHolidays((t.holidays ?? []).map((h: any) => day(h.date)).filter(Boolean))
       }
     }).catch(() => {})
@@ -36,7 +36,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
     setBusy(true); setError('')
     try {
       const data = {
-        name, startDate, endDate, meetingDay, status: 'active',
+        name, startDate, endDate, meetingDays, status: 'active',
         holidays: holidays.map((d) => ({ date: d })),
       }
       const saved = term
@@ -51,7 +51,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
     }
   }
 
-  const total = startDate && endDate ? weeklyDates(startDate, endDate, meetingDay).length : 0
+  const total = startDate && endDate ? programDates(startDate, endDate, meetingDays).length : 0
   const meeting = Math.max(total - holidays.length, 0)
 
   // Are the days off shown different from what's saved on the term?
@@ -78,11 +78,25 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
         <label className="ss-field"><span>Last day</span>
           <input className="ss-input" type="date" value={endDate} onChange={(e) => setEnd(e.target.value)} />
         </label>
-        <label className="ss-field"><span>Meets every</span>
-          <select className="ss-select" value={meetingDay} onChange={(e) => setDay(e.target.value)}>
-            {WEEKDAYS.map((d) => <option key={d} value={d}>{d[0].toUpperCase() + d.slice(1)}</option>)}
-          </select>
-        </label>
+        <div className="ss-field"><span>Meets on</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {WEEKDAYS.map((d) => {
+              const on = meetingDays.includes(d)
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  className={`ss-status__btn is-present${on ? ' ss-status__btn--on' : ''}`}
+                  style={{ borderRadius: 8, textTransform: 'capitalize' }}
+                  aria-pressed={on}
+                  onClick={() => setDays((prev) => prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d])}
+                >
+                  {d.slice(0, 3)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
       {startDate && endDate && (
@@ -93,7 +107,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
           <SessionTimeline
             startDate={startDate}
             endDate={endDate}
-            meetingDay={meetingDay}
+            meetingDays={meetingDays}
             holidays={holidays}
             onToggle={toggleHoliday}
             variant="inline"
@@ -111,7 +125,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
       {error && <p className="ss-error">{error}</p>}
 
       <div className="ss-foot">
-        <button className="ss-btn ss-btn--ghost" disabled={busy || !name || !startDate || !endDate} onClick={save}>
+        <button className="ss-btn ss-btn--ghost" disabled={busy || !name || !startDate || !endDate || meetingDays.length === 0} onClick={save}>
           {term ? 'Save term' : 'Create term'}
         </button>
         <button className="ss-btn" disabled={!term} onClick={onNext}>

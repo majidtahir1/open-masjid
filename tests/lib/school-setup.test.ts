@@ -23,7 +23,7 @@ describe('firstIncompleteStep', () => {
 
 describe('buildHubSummary', () => {
   it('counts classes, teacherless classes, placed and unplaced students', () => {
-    const term = { id: 1, name: 'Fall 2026', startDate: '2026-09-06', endDate: '2026-11-29', meetingDay: 'sunday' }
+    const term = { id: 1, name: 'Fall 2026', startDate: '2026-09-06', endDate: '2026-11-29', meetingDays: ['sunday'] }
     const classes = [
       { id: 11, teachers: [{ id: 9 }] },
       { id: 12, teachers: [] },

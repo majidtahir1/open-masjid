@@ -92,7 +92,7 @@ export default async function SundaySchoolHubPage() {
     const unplaced = students.filter((s: any) => !placed.has(String(s.id))).length
 
     dashboard = {
-      term: { name: term.name, startDate: term.startDate, endDate: term.endDate, meetingDay: (term as any).meetingDay, holidays: ((term as any).holidays ?? []).map((h: any) => String(h.date).slice(0, 10)) },
+      term: { name: term.name, startDate: term.startDate, endDate: term.endDate, meetingDays: ((term as any).meetingDays ?? []), holidays: ((term as any).holidays ?? []).map((h: any) => String(h.date).slice(0, 10)) },
       kpis: dashboardKpis({ students, classes: classDocs, sessions: sessDocs, records: recDocs, today }),
       trend: attendanceTrend(sessDocs, recDocs),
       rateByClass: rateByClass(classDocs, sessDocs, recDocs),

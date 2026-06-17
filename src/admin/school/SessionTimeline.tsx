@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { weeklyDates } from '@/hooks/generateClassSessions'
+import { programDates } from '@/hooks/generateClassSessions'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -18,15 +18,15 @@ function label(iso: string): string {
 const SessionTimeline: React.FC<{
   startDate?: string | null
   endDate?: string | null
-  meetingDay?: string | null
+  meetingDays?: string[]
   holidays?: string[]
   onToggle?: (iso: string) => void
   variant?: 'masthead' | 'inline'
   max?: number
-}> = ({ startDate, endDate, meetingDay, holidays = [], onToggle, variant = 'masthead', max = 80 }) => {
+}> = ({ startDate, endDate, meetingDays = [], holidays = [], onToggle, variant = 'masthead', max = 80 }) => {
   if (!startDate || !endDate) return null
   // Full set of meeting days (including days off) so every week is visible/toggleable.
-  const all = weeklyDates(startDate, endDate, meetingDay ?? 'sunday')
+  const all = programDates(startDate, endDate, meetingDays)
   if (all.length === 0) return null
   const off = new Set(holidays.map((h) => String(h).slice(0, 10)))
 
