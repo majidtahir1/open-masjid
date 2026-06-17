@@ -8,7 +8,7 @@ import { programDates } from '@/hooks/generateClassSessions'
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 const day = (d: unknown) => String(d ?? '').slice(0, 10)
 
-const StepTerm: React.FC<{ programId: string | null; createMode: boolean; onNext: () => void; onChanged: () => void }> = ({ programId, createMode, onNext, onChanged }) => {
+const StepTerm: React.FC<{ programId: string | null; createMode: boolean; onNext: () => void; onChanged: () => void; onProgram?: (id: string | number) => void }> = ({ programId, createMode, onNext, onChanged, onProgram }) => {
   const [term, setTerm] = useState<any>(null)
   const [name, setName] = useState('')
   const [startDate, setStart] = useState('')
@@ -43,6 +43,7 @@ const StepTerm: React.FC<{ programId: string | null; createMode: boolean; onNext
         ? await api(`/terms/${term.id}`, { method: 'PATCH', body: JSON.stringify(data) }).then((r) => r.doc)
         : await api('/terms', { method: 'POST', body: JSON.stringify(data) }).then((r) => r.doc)
       setTerm(saved)
+      if (saved?.id != null) onProgram?.(saved.id)
       onChanged()
     } catch (e) {
       setError((e as Error).message)

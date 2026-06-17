@@ -50,25 +50,29 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
   const [ready, setReady] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [summary, setSummary] = useState<HubSummary>(EMPTY)
+  // Tracks the program being set up. Starts from the resolved prop, but in
+  // create mode StepTerm reports the id of the newly-created program so the
+  // later steps (and the URL) point at it.
+  const [progId, setProgId] = useState<string | null>(programId)
 
   const refresh = useCallback(() => setReloadKey((k) => k + 1), [])
 
   useEffect(() => {
     let active = true
-    loadSummary(programId).then((s) => {
+    loadSummary(progId).then((s) => {
       if (!active) return
       setSummary(s)
       const qs = params.get('step')
-      const resume = qs ? Number(qs) : (createMode ? 1 : firstIncompleteStep(s))
+      const resume = qs ? Number(qs) : (createMode && !progId ? 1 : firstIncompleteStep(s))
       setStep((cur) => (cur === 5 ? 5 : Math.min(Math.max(resume, 1), 4)))
       setReady(true)
     })
     return () => { active = false }
-  }, [params, reloadKey, programId, createMode])
+  }, [params, reloadKey, progId, createMode])
 
   const goto = (s: number) => {
     setStep(s)
-    router.replace(`/admin/sunday-school/setup?step=${s}`)
+    router.replace(`/admin/sunday-school/setup?step=${s}${progId ? `&program=${progId}` : ''}`)
   }
 
   if (!ready) return <div className="ss-root"><p className="ss-emptyline">Loading…</p></div>
@@ -100,10 +104,10 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
         </nav>
 
         <div>
-          {step === 1 && <StepTerm programId={programId} createMode={createMode} onNext={() => goto(2)} onChanged={refresh} />}
-          {step === 2 && <StepClasses programId={programId} onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
-          {step === 3 && <StepTeachers programId={programId} onBack={() => goto(2)} onNext={() => goto(4)} />}
-          {step === 4 && <StepStudents programId={programId} onBack={() => goto(3)} onFinish={() => goto(5)} onChanged={refresh} />}
+          {step === 1 && <StepTerm programId={progId} createMode={createMode && !progId} onNext={() => goto(2)} onChanged={refresh} onProgram={(id) => setProgId(String(id))} />}
+          {step === 2 && <StepClasses programId={progId} onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
+          {step === 3 && <StepTeachers programId={progId} onBack={() => goto(2)} onNext={() => goto(4)} />}
+          {step === 4 && <StepStudents programId={progId} onBack={() => goto(3)} onFinish={() => goto(5)} onChanged={refresh} />}
           {step === 5 && (
             <div className="ss-card">
               <div className="ss-finish">
