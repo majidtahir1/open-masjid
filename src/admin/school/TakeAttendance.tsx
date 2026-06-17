@@ -1,6 +1,9 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
-import { api } from './api'
+import Link from 'next/link'
+import { ArrowLeft, CheckCheck, ClipboardCheck } from 'lucide-react'
+import { api, toId } from './api'
+import './sunday-school.css'
 
 type Doc = { id: number | string; [k: string]: any }
 const STATUSES = ['present', 'absent', 'late', 'excused'] as const
@@ -33,8 +36,6 @@ const TakeAttendance: React.FC = () => {
         `/class-sessions?where[class][equals]=${id}&where[status][not_equals]=cancelled&sort=date&limit=200&depth=0`,
       )
       const today = new Date().toISOString().slice(0, 10)
-      // Find the next upcoming session (on or after today); if none, fall back
-      // to the most recent past session (last element of the ascending sort).
       const upcoming =
         sess.docs.find((s: Doc) => String(s.date).slice(0, 10) >= today) ??
         (sess.docs.length > 0 ? sess.docs[sess.docs.length - 1] : null)
@@ -78,7 +79,7 @@ const TakeAttendance: React.FC = () => {
       } else {
         saved = await api('/attendance-records', {
           method: 'POST',
-          body: JSON.stringify({ session: session.id, student: studentId, status }),
+          body: JSON.stringify({ session: toId(session.id), student: toId(studentId), status }),
         }).then((r) => r.doc)
       }
       setMarks((prev) => ({ ...prev, [key]: { id: saved.id, status } }))
@@ -89,82 +90,84 @@ const TakeAttendance: React.FC = () => {
     }
   }
 
+  const markRestPresent = async () => {
+    for (const st of roster) {
+      if (!marks[String(st.id)]) await mark(st.id, 'present')
+    }
+  }
+
   const counts = STATUSES.reduce(
-    (acc, s) => ({
-      ...acc,
-      [s]: roster.filter((st) => marks[String(st.id)]?.status === s).length,
-    }),
+    (acc, s) => ({ ...acc, [s]: roster.filter((st) => marks[String(st.id)]?.status === s).length }),
     {} as Record<Status, number>,
   )
-  const unmarked =
-    roster.length - Object.values(counts).reduce((a, b) => a + b, 0)
+  const unmarked = roster.length - Object.values(counts).reduce((a, b) => a + b, 0)
 
   return (
-    <div>
-      <label>
-        Class:{' '}
-        <select value={classId} onChange={(e) => loadClass(e.target.value)}>
-          <option value="">— select —</option>
-          {classes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </label>
+    <div className="ss-root">
+      <p className="ss-eyebrow">Sunday school</p>
+      <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 18 }}>Take attendance</h1>
 
-      {error && (
-        <p style={{ color: 'var(--theme-error-500, #ef4444)', marginTop: 8 }}>{error}</p>
+      <div className="ss-att__bar">
+        <div className="ss-att__pick">
+          <ClipboardCheck size={18} style={{ color: 'var(--ss-teal-600)' }} />
+          <select className="ss-select" style={{ maxWidth: 280 }} value={classId} onChange={(e) => loadClass(e.target.value)}>
+            <option value="">Choose a class…</option>
+            {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          {session && <span className="ss-att__date">{String(session.date).slice(0, 10)}</span>}
+        </div>
+
+        {session && roster.length > 0 && (
+          <div className="ss-att__counts">
+            <span className="ss-chip"><b>{counts.present}</b> present</span>
+            <span className="ss-chip"><b>{counts.absent}</b> absent</span>
+            <span className="ss-chip"><b>{counts.late}</b> late</span>
+            <span className="ss-chip"><b>{counts.excused}</b> excused</span>
+            {unmarked > 0 && <span className="ss-chip ss-chip--unmarked"><b>{unmarked}</b> unmarked</span>}
+          </div>
+        )}
+      </div>
+
+      {error && <p className="ss-error">{error}</p>}
+      {classId && !session && <p className="ss-emptyline">No sessions scheduled for this class yet.</p>}
+      {session && roster.length === 0 && <p className="ss-emptyline">No students enrolled in this class yet.</p>}
+
+      {session && roster.length > 0 && (
+        <>
+          {unmarked > 0 && (
+            <button className="ss-btn ss-btn--ghost ss-btn--small" style={{ marginBottom: 6 }} disabled={busy} onClick={markRestPresent}>
+              <CheckCheck size={15} /> Mark remaining {unmarked} present
+            </button>
+          )}
+          <div className="ss-card" style={{ padding: '8px 14px', animation: 'none' }}>
+            {roster.map((st) => {
+              const cur = marks[String(st.id)]?.status
+              return (
+                <div key={st.id} className="ss-row">
+                  <span className="ss-row__name">{st.fullName ?? `${st.firstName ?? ''} ${st.lastName ?? ''}`.trim()}</span>
+                  <span className="ss-status">
+                    {STATUSES.map((s) => (
+                      <button
+                        key={s}
+                        className={`ss-status__btn is-${s}${cur === s ? ' ss-status__btn--on' : ''}`}
+                        disabled={busy}
+                        aria-pressed={cur === s}
+                        onClick={() => mark(st.id, s)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
 
-      {session && (
-        <p style={{ marginTop: 12 }}>
-          Session: <strong>{String(session.date).slice(0, 10)}</strong> · present{' '}
-          {counts.present} · absent {counts.absent} · late {counts.late} · excused{' '}
-          {counts.excused} · <strong>{unmarked} unmarked</strong>
-        </p>
-      )}
-      {classId && !session && <p>No sessions scheduled for this class.</p>}
-
-      <ul style={{ listStyle: 'none', padding: 0, marginTop: 16 }}>
-        {roster.map((st) => {
-          const cur = marks[String(st.id)]?.status
-          return (
-            <li
-              key={st.id}
-              style={{
-                display: 'flex',
-                gap: 8,
-                alignItems: 'center',
-                padding: '6px 0',
-                borderBottom: '1px solid var(--theme-elevation-100, #e5e7eb)',
-              }}
-            >
-              <span style={{ flex: 1 }}>
-                {st.fullName ?? `${st.firstName ?? ''} ${st.lastName ?? ''}`.trim()}
-              </span>
-              {STATUSES.map((s) => (
-                <button
-                  key={s}
-                  disabled={busy || !session}
-                  onClick={() => mark(st.id, s)}
-                  style={{
-                    fontWeight: cur === s ? 700 : 400,
-                    opacity: cur === s ? 1 : 0.55,
-                    cursor: busy || !session ? 'not-allowed' : 'pointer',
-                    padding: '4px 10px',
-                    border: cur === s ? '2px solid currentColor' : '1px solid currentColor',
-                    borderRadius: 4,
-                    background: 'transparent',
-                  }}
-                >
-                  {s}
-                </button>
-              ))}
-            </li>
-          )
-        })}
-      </ul>
+      <div className="ss-foot">
+        <Link className="ss-btn ss-btn--ghost" href="/admin/sunday-school"><ArrowLeft size={17} /> Dashboard</Link>
+      </div>
     </div>
   )
 }

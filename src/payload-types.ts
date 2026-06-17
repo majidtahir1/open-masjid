@@ -1672,6 +1672,19 @@ export interface Term {
   name: string;
   startDate: string;
   endDate: string;
+  /**
+   * Meeting-day dates the school does not meet. Sessions are not created on these days.
+   */
+  holidays?:
+    | {
+        date: string;
+        /**
+         * Optional (e.g. "Winter break").
+         */
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   meetingDay: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
   status: 'active' | 'archived';
   updatedAt: string;
@@ -2803,6 +2816,13 @@ export interface TermsSelect<T extends boolean = true> {
   name?: T;
   startDate?: T;
   endDate?: T;
+  holidays?:
+    | T
+    | {
+        date?: T;
+        label?: T;
+        id?: T;
+      };
   meetingDay?: T;
   status?: T;
   updatedAt?: T;

@@ -4,9 +4,20 @@ const WEEKDAY_INDEX: Record<string, number> = {
   sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6,
 }
 
-/** All YYYY-MM-DD dates on `weekday` between start and end (inclusive). UTC-based to avoid TZ drift. */
-export function weeklyDates(start: string, end: string, weekday: string): string[] {
+const day = (d: unknown): string => String(d ?? '').slice(0, 10)
+
+/** Normalize a term's `holidays` array (of `{ date }`) to a set of YYYY-MM-DD strings. */
+export function holidaySet(holidays?: Array<{ date?: unknown }> | null): Set<string> {
+  return new Set((holidays ?? []).map((h) => day(h?.date)).filter(Boolean))
+}
+
+/**
+ * All YYYY-MM-DD dates on `weekday` between start and end (inclusive),
+ * excluding any date in `holidays`. UTC-based to avoid TZ drift.
+ */
+export function weeklyDates(start: string, end: string, weekday: string, holidays?: Iterable<string>): string[] {
   const target = WEEKDAY_INDEX[weekday] ?? 0
+  const skip = holidays instanceof Set ? holidays : new Set(holidays ?? [])
   const out: string[] = []
   const cursor = new Date(`${start.slice(0, 10)}T00:00:00Z`)
   const last = new Date(`${end.slice(0, 10)}T00:00:00Z`)
@@ -15,13 +26,44 @@ export function weeklyDates(start: string, end: string, weekday: string): string
     cursor.setUTCDate(cursor.getUTCDate() + 1)
   }
   while (cursor <= last) {
-    out.push(cursor.toISOString().slice(0, 10))
+    const iso = cursor.toISOString().slice(0, 10)
+    if (!skip.has(iso)) out.push(iso)
     cursor.setUTCDate(cursor.getUTCDate() + 7)
   }
   return out
 }
 
-/** On class create, materialise weekly ClassSessions across the term. Idempotent per (tenant, class, date). */
+export interface ExistingSession {
+  id: string | number
+  date: string
+  hasAttendance: boolean
+}
+
+export interface SessionPlan {
+  toCreate: string[]
+  toCancel: (string | number)[]
+  toDelete: (string | number)[]
+}
+
+/**
+ * Reconcile a class's sessions against the desired meeting dates. Dates that
+ * are no longer wanted (a newly-added holiday, or a shortened term) are
+ * cancelled when they already hold attendance — preserving history — and
+ * deleted otherwise. Pure; no I/O.
+ */
+export function reconcileSessions(desired: string[], existing: ExistingSession[]): SessionPlan {
+  const desiredSet = new Set(desired)
+  const existingDates = new Set(existing.map((e) => day(e.date)))
+  const toCreate = desired.filter((d) => !existingDates.has(d))
+  const obsolete = existing.filter((e) => !desiredSet.has(day(e.date)))
+  return {
+    toCreate,
+    toCancel: obsolete.filter((e) => e.hasAttendance).map((e) => e.id),
+    toDelete: obsolete.filter((e) => !e.hasAttendance).map((e) => e.id),
+  }
+}
+
+/** On class create, materialise weekly ClassSessions across the term (skipping holidays). */
 export const generateClassSessions: CollectionAfterChangeHook = async ({
   doc,
   operation,
@@ -42,7 +84,7 @@ export const generateClassSessions: CollectionAfterChangeHook = async ({
   })
   if (!term?.startDate || !term?.endDate) return doc
 
-  const dates = weeklyDates(term.startDate, term.endDate, term.meetingDay ?? 'sunday')
+  const dates = weeklyDates(term.startDate, term.endDate, term.meetingDay ?? 'sunday', holidaySet(term.holidays))
   for (const date of dates) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

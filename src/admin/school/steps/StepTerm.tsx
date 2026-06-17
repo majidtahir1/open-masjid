@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { api } from '../api'
 import SessionTimeline from '../SessionTimeline'
+import { weeklyDates } from '@/hooks/generateClassSessions'
 
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+const day = (d: unknown) => String(d ?? '').slice(0, 10)
 
 const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onNext, onChanged }) => {
   const [term, setTerm] = useState<any>(null)
@@ -12,6 +14,7 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
   const [startDate, setStart] = useState('')
   const [endDate, setEnd] = useState('')
   const [meetingDay, setDay] = useState('sunday')
+  const [holidays, setHolidays] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -19,16 +22,23 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
     api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0').then((r) => {
       const t = r.docs[0]
       if (t) {
-        setTerm(t); setName(t.name ?? ''); setStart(String(t.startDate ?? '').slice(0, 10))
-        setEnd(String(t.endDate ?? '').slice(0, 10)); setDay(t.meetingDay ?? 'sunday')
+        setTerm(t); setName(t.name ?? ''); setStart(day(t.startDate))
+        setEnd(day(t.endDate)); setDay(t.meetingDay ?? 'sunday')
+        setHolidays((t.holidays ?? []).map((h: any) => day(h.date)).filter(Boolean))
       }
     }).catch(() => {})
   }, [])
 
+  const toggleHoliday = (iso: string) =>
+    setHolidays((prev) => (prev.includes(iso) ? prev.filter((d) => d !== iso) : [...prev, iso]))
+
   const save = async () => {
     setBusy(true); setError('')
     try {
-      const data = { name, startDate, endDate, meetingDay, status: 'active' }
+      const data = {
+        name, startDate, endDate, meetingDay, status: 'active',
+        holidays: holidays.map((d) => ({ date: d })),
+      }
       const saved = term
         ? await api(`/terms/${term.id}`, { method: 'PATCH', body: JSON.stringify(data) }).then((r) => r.doc)
         : await api('/terms', { method: 'POST', body: JSON.stringify(data) }).then((r) => r.doc)
@@ -40,6 +50,9 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
       setBusy(false)
     }
   }
+
+  const total = startDate && endDate ? weeklyDates(startDate, endDate, meetingDay).length : 0
+  const meeting = Math.max(total - holidays.length, 0)
 
   return (
     <div className="ss-card">
@@ -69,8 +82,22 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
 
       {startDate && endDate && (
         <div style={{ marginTop: 18 }}>
-          <p className="ss-eyebrow" style={{ marginBottom: 2 }}>These sessions will be created</p>
-          <SessionTimeline startDate={startDate} endDate={endDate} meetingDay={meetingDay} variant="inline" />
+          <p className="ss-eyebrow" style={{ marginBottom: 2 }}>
+            {meeting} sessions per class · click a week to mark a day off
+          </p>
+          <SessionTimeline
+            startDate={startDate}
+            endDate={endDate}
+            meetingDay={meetingDay}
+            holidays={holidays}
+            onToggle={toggleHoliday}
+            variant="inline"
+          />
+          <p className="ss-card__hint" style={{ margin: '8px 0 0' }}>
+            {holidays.length > 0
+              ? `${holidays.length} day${holidays.length === 1 ? '' : 's'} off — save to apply.`
+              : 'No days off. Click a faded-in week above to skip it (holidays, breaks).'}
+          </p>
         </div>
       )}
 

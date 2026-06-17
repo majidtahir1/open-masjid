@@ -13,7 +13,7 @@ import { loginUrl } from '@/lib/login-redirect'
 import { importMap } from '../importMap'
 import HubClient from '@/admin/school/HubClient'
 import { buildHubSummary } from '@/lib/school-setup'
-import { weeklyDates } from '@/hooks/generateClassSessions'
+import { weeklyDates, holidaySet } from '@/hooks/generateClassSessions'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -67,7 +67,7 @@ export default async function SundaySchoolHubPage() {
     students = (await payload.find({ collection: 'students', where: { status: { equals: 'active' } }, limit: 5000, depth: 0, req })).docs
     sessionsPerClass =
       term.startDate && term.endDate
-        ? weeklyDates(term.startDate, term.endDate, (term as any).meetingDay ?? 'sunday').length
+        ? weeklyDates(term.startDate, term.endDate, (term as any).meetingDay ?? 'sunday', holidaySet((term as any).holidays)).length
         : 0
   }
 

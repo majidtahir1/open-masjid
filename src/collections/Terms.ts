@@ -1,6 +1,7 @@
 import type { Access, CollectionConfig } from 'payload'
 import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import { syncTermSessions } from '../hooks/syncTermSessions'
 import {
   schoolTenantCreate,
   schoolTenantRead,
@@ -35,12 +36,22 @@ export const Terms: CollectionConfig = {
     update: denyKioskManager(schoolTenantWrite),
     delete: denyKioskManager(schoolTenantWrite),
   },
-  hooks: { beforeChange: [setTenantFromUser] },
+  hooks: { beforeChange: [setTenantFromUser], afterChange: [syncTermSessions] },
   fields: [
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true, admin: { hidden: true } },
     { name: 'name', type: 'text', required: true },
     { name: 'startDate', type: 'date', required: true },
     { name: 'endDate', type: 'date', required: true },
+    {
+      name: 'holidays',
+      type: 'array',
+      labels: { singular: 'Day off', plural: 'Days off' },
+      admin: { description: 'Meeting-day dates the school does not meet. Sessions are not created on these days.' },
+      fields: [
+        { name: 'date', type: 'date', required: true },
+        { name: 'label', type: 'text', admin: { description: 'Optional (e.g. "Winter break").' } },
+      ],
+    },
     {
       name: 'meetingDay',
       type: 'select',

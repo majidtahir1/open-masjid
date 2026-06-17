@@ -33,6 +33,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
             startDate={term.startDate}
             endDate={term.endDate}
             meetingDay={term.meetingDay}
+            holidays={term.holidays}
             variant="masthead"
           />
         </header>
