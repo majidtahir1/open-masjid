@@ -94,7 +94,8 @@ export const generateClassSessions: CollectionAfterChangeHook = async ({
   })
   if (!term?.startDate || !term?.endDate) return doc
 
-  const dates = weeklyDates(term.startDate, term.endDate, term.meetingDay ?? 'sunday', holidaySet(term.holidays))
+  const days: string[] = Array.isArray(term.meetingDays) ? term.meetingDays : term.meetingDay ? [term.meetingDay] : ['sunday']
+  const dates = programDates(term.startDate, term.endDate, days, holidaySet(term.holidays))
   for (const date of dates) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

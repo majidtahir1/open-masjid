@@ -1689,7 +1689,10 @@ export interface Term {
         id?: string | null;
       }[]
     | null;
-  meetingDay: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+  /**
+   * Days the program meets each week. Sessions are created on every selected day.
+   */
+  meetingDays: ('sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday')[];
   status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
@@ -2832,7 +2835,7 @@ export interface TermsSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
-  meetingDay?: T;
+  meetingDays?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

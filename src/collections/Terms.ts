@@ -27,7 +27,7 @@ export const Terms: CollectionConfig = {
     group: 'Sunday School',
     hidden: true,
     useAsTitle: 'name',
-    defaultColumns: ['name', 'startDate', 'endDate', 'meetingDay', 'status'],
+    defaultColumns: ['name', 'startDate', 'endDate', 'status'],
     description: 'Academic periods for the Sunday school (e.g. "Fall 2026").',
   },
   access: {
@@ -53,10 +53,12 @@ export const Terms: CollectionConfig = {
       ],
     },
     {
-      name: 'meetingDay',
+      name: 'meetingDays',
       type: 'select',
+      hasMany: true,
       required: true,
-      defaultValue: 'sunday',
+      defaultValue: ['sunday'],
+      label: 'Meets on',
       options: [
         { label: 'Sunday', value: 'sunday' },
         { label: 'Monday', value: 'monday' },
@@ -66,6 +68,7 @@ export const Terms: CollectionConfig = {
         { label: 'Friday', value: 'friday' },
         { label: 'Saturday', value: 'saturday' },
       ],
+      admin: { description: 'Days the program meets each week. Sessions are created on every selected day.' },
     },
     {
       name: 'status',

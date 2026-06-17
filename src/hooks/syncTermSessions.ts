@@ -1,5 +1,5 @@
 import type { CollectionAfterChangeHook } from 'payload'
-import { holidaySet, reconcileSessions, weeklyDates, type ExistingSession } from './generateClassSessions'
+import { holidaySet, programDates, reconcileSessions, type ExistingSession } from './generateClassSessions'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -17,12 +17,13 @@ export const syncTermSessions: CollectionAfterChangeHook = async ({ doc, operati
   const scheduleChanged =
     previousDoc?.startDate !== doc.startDate ||
     previousDoc?.endDate !== doc.endDate ||
-    previousDoc?.meetingDay !== doc.meetingDay ||
+    JSON.stringify(previousDoc?.meetingDays ?? []) !== JSON.stringify(doc.meetingDays ?? []) ||
     JSON.stringify(previousDoc?.holidays ?? []) !== JSON.stringify(doc.holidays ?? [])
   if (!scheduleChanged) return doc
 
   const payload = req.payload as any
-  const desired = weeklyDates(doc.startDate, doc.endDate, doc.meetingDay ?? 'sunday', holidaySet(doc.holidays))
+  const days: string[] = Array.isArray(doc.meetingDays) ? doc.meetingDays : doc.meetingDay ? [doc.meetingDay] : ['sunday']
+  const desired = programDates(doc.startDate, doc.endDate, days, holidaySet(doc.holidays))
 
   const classes = await payload.find({
     collection: 'school-classes',
