@@ -4,13 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, GraduationCap, Users, ClipboardList, Wand2 } from 'lucide-react'
 
-// `soon: true` marks a tab whose route ships in Phase 2 — rendered disabled so
+// `soon: true` marks a tab whose route isn't built yet — rendered disabled so
 // there are no dead links. Drop the flag when the route exists.
-const TABS = [
+type Tab = { href: string; label: string; icon: React.ComponentType<{ size?: number }>; exact?: boolean; soon?: boolean }
+const TABS: Tab[] = [
   { href: '/admin/sunday-school', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/sunday-school/classes', label: 'Classes', icon: GraduationCap },
-  { href: '/admin/sunday-school/students', label: 'Students', icon: Users, soon: true },
-  { href: '/admin/sunday-school/attendance', label: 'Attendance', icon: ClipboardList, soon: true },
+  { href: '/admin/sunday-school/students', label: 'Students', icon: Users },
+  { href: '/admin/sunday-school/attendance', label: 'Attendance', icon: ClipboardList },
   { href: '/admin/sunday-school/setup', label: 'Setup', icon: Wand2 },
 ]
 
