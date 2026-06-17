@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
+import { ArrowRight, ArrowLeft, Plus, CalendarDays } from 'lucide-react'
 import { api } from '../api'
 
 const StepClasses: React.FC<{ onBack: () => void; onNext: () => void; onChanged: () => void }> = ({ onBack, onNext, onChanged }) => {
@@ -48,27 +49,40 @@ const StepClasses: React.FC<{ onBack: () => void; onNext: () => void; onChanged:
   }
 
   return (
-    <div>
-      <h2>2. Classes</h2>
-      <p>Add the classes in this term. Each class automatically gets a weekly session for every meeting day in the term.</p>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+    <div className="ss-card">
+      <p className="ss-eyebrow">Step 2</p>
+      <h2 className="ss-card__title">Add your classes</h2>
+      <p className="ss-card__hint">
+        Each class meets weekly. As soon as you add one, its sessions are filled in across the term.
+      </p>
+
+      <div style={{ marginBottom: 18 }}>
+        {classes.length === 0 && <p className="ss-emptyline">No classes yet — add your first one below.</p>}
         {classes.map((c) => (
-          <li key={c.id} style={{ padding: '4px 0' }}>
-            <strong>{c.name}</strong>{c.gradeLevel ? ` · ${c.gradeLevel}` : ''} — {sessionsByClass[String(c.id)] ?? 0} sessions
-          </li>
+          <div key={c.id} className="ss-row">
+            <span className="ss-row__name">
+              {c.name}{c.gradeLevel ? ` · ${c.gradeLevel}` : ''}
+            </span>
+            <span className="ss-pill"><CalendarDays size={13} /> {sessionsByClass[String(c.id)] ?? 0} sessions</span>
+          </div>
         ))}
-        {classes.length === 0 && <li style={{ color: 'var(--theme-elevation-500)' }}>No classes yet.</li>}
-      </ul>
-      <div style={{ display: 'grid', gap: 10, maxWidth: 420, marginTop: 12 }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Class name (e.g. Grade 3 Quran)" />
-        <input value={gradeLevel} onChange={(e) => setGrade(e.target.value)} placeholder="Grade level (optional)" />
-        <input value={room} onChange={(e) => setRoom(e.target.value)} placeholder="Room (optional)" />
-        <input value={capacity} onChange={(e) => setCap(e.target.value)} placeholder="Capacity (optional)" type="number" />
-        <button className="btn btn--style-secondary btn--size-medium" disabled={busy || !name} onClick={add}>Add class</button>
       </div>
-      <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
-        <button className="btn btn--style-secondary btn--size-medium" onClick={onBack}>← Back</button>
-        <button className="btn btn--style-primary btn--size-medium" disabled={classes.length === 0} onClick={onNext}>Next: Teachers →</button>
+
+      <div className="ss-grid">
+        <input className="ss-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Class name (e.g. Grade 3 Quran)" />
+        <input className="ss-input" value={gradeLevel} onChange={(e) => setGrade(e.target.value)} placeholder="Grade level (optional)" />
+        <input className="ss-input" value={room} onChange={(e) => setRoom(e.target.value)} placeholder="Room (optional)" />
+        <input className="ss-input" value={capacity} onChange={(e) => setCap(e.target.value)} placeholder="Capacity (optional)" type="number" />
+        <button className="ss-btn ss-btn--ghost" disabled={busy || !name} onClick={add}>
+          <Plus size={16} /> Add class
+        </button>
+      </div>
+
+      <div className="ss-foot">
+        <button className="ss-btn ss-btn--ghost" onClick={onBack}><ArrowLeft size={17} /> Back</button>
+        <button className="ss-btn" disabled={classes.length === 0} onClick={onNext}>
+          Next: Teachers <ArrowRight size={17} />
+        </button>
       </div>
     </div>
   )

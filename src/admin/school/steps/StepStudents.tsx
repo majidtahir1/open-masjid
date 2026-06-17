@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
+import { ArrowLeft, Check, UserPlus } from 'lucide-react'
 import { api } from '../api'
 
 const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChanged: () => void }> = ({ onBack, onFinish, onChanged }) => {
@@ -11,6 +12,7 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
   const [guardian, setGuardian] = useState('')
   const [newClass, setNewClass] = useState('')
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
 
   const reload = useCallback(async () => {
     const tr = await api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0')
@@ -31,13 +33,18 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
 
   const place = async (studentId: string | number, classId: string) => {
     if (!classId) return
-    await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: studentId, class: classId, status: 'active' }) })
-    await reload(); onChanged()
+    setError('')
+    try {
+      await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: studentId, class: classId, status: 'active' }) })
+      await reload(); onChanged()
+    } catch {
+      setError('Couldn’t place that student — they may already be enrolled in this class.')
+    }
   }
 
   const addNew = async () => {
     if (!newClass) return
-    setBusy(true)
+    setBusy(true); setError('')
     try {
       const data: any = { firstName: first, lastName: last, status: 'active' }
       if (age) data.age = Number(age)
@@ -46,46 +53,61 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
       await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: student.id, class: newClass, status: 'active' }) })
       setFirst(''); setLast(''); setAge(''); setGuardian('')
       await reload(); onChanged()
+    } catch (e) {
+      setError((e as Error).message)
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div>
-      <h2>4. Students</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+    <div className="ss-card">
+      <p className="ss-eyebrow">Step 4</p>
+      <h2 className="ss-card__title">Enroll students</h2>
+      <p className="ss-card__hint">
+        Place students who registered online, or add new ones here. Either way, pick the class they join.
+      </p>
+
+      <div className="ss-cols2">
         <div>
-          <h3>Place registered students</h3>
-          {unplaced.length === 0 && <p style={{ color: 'var(--theme-elevation-500)' }}>No unplaced students.</p>}
+          <p className="ss-eyebrow" style={{ color: 'var(--theme-elevation-500)' }}>Registered · awaiting a class</p>
+          {unplaced.length === 0 && <p className="ss-emptyline">Everyone&apos;s placed. Nice.</p>}
           {unplaced.map((s) => (
-            <div key={s.id} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '4px 0' }}>
-              <span style={{ flex: 1 }}>{s.fullName ?? `${s.firstName} ${s.lastName}`}{s.age ? ` (age ${s.age})` : ''}</span>
-              <select defaultValue="" onChange={(e) => place(s.id, e.target.value)}>
-                <option value="">place in…</option>
+            <div key={s.id} className="ss-row">
+              <span className="ss-row__name">
+                {s.fullName ?? `${s.firstName} ${s.lastName}`}{s.age ? ` · age ${s.age}` : ''}
+              </span>
+              <select className="ss-select" style={{ maxWidth: 160 }} defaultValue="" onChange={(e) => place(s.id, e.target.value)}>
+                <option value="">Place in…</option>
                 {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
           ))}
         </div>
+
         <div>
-          <h3>Add a new student</h3>
-          <div style={{ display: 'grid', gap: 8, maxWidth: 320 }}>
-            <input placeholder="First name" value={first} onChange={(e) => setFirst(e.target.value)} />
-            <input placeholder="Last name" value={last} onChange={(e) => setLast(e.target.value)} />
-            <input placeholder="Age" type="number" value={age} onChange={(e) => setAge(e.target.value)} />
-            <input placeholder="Guardian name" value={guardian} onChange={(e) => setGuardian(e.target.value)} />
-            <select value={newClass} onChange={(e) => setNewClass(e.target.value)}>
+          <p className="ss-eyebrow" style={{ color: 'var(--theme-elevation-500)' }}>Add a new student</p>
+          <div className="ss-grid">
+            <input className="ss-input" placeholder="First name" value={first} onChange={(e) => setFirst(e.target.value)} />
+            <input className="ss-input" placeholder="Last name" value={last} onChange={(e) => setLast(e.target.value)} />
+            <input className="ss-input" placeholder="Age" type="number" value={age} onChange={(e) => setAge(e.target.value)} />
+            <input className="ss-input" placeholder="Guardian name" value={guardian} onChange={(e) => setGuardian(e.target.value)} />
+            <select className="ss-select" value={newClass} onChange={(e) => setNewClass(e.target.value)}>
               <option value="">Enroll in class…</option>
               {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            <button className="btn btn--style-secondary btn--size-medium" disabled={busy || !first || !last || !newClass} onClick={addNew}>Add & enroll</button>
+            <button className="ss-btn ss-btn--ghost" disabled={busy || !first || !last || !newClass} onClick={addNew}>
+              <UserPlus size={16} /> Add &amp; enroll
+            </button>
           </div>
         </div>
       </div>
-      <div style={{ marginTop: 20, display: 'flex', gap: 12 }}>
-        <button className="btn btn--style-secondary btn--size-medium" onClick={onBack}>← Back</button>
-        <button className="btn btn--style-primary btn--size-medium" onClick={onFinish}>Finish →</button>
+
+      {error && <p className="ss-error">{error}</p>}
+
+      <div className="ss-foot">
+        <button className="ss-btn ss-btn--ghost" onClick={onBack}><ArrowLeft size={17} /> Back</button>
+        <button className="ss-btn" onClick={onFinish}><Check size={17} /> Finish</button>
       </div>
     </div>
   )

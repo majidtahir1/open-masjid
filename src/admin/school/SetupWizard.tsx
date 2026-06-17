@@ -1,27 +1,46 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { CalendarRange, GraduationCap, UserCheck, Users, Check, Sparkles } from 'lucide-react'
 import { api } from './api'
 import { buildHubSummary, firstIncompleteStep, type HubSummary } from '@/lib/school-setup'
 import StepTerm from './steps/StepTerm'
 import StepClasses from './steps/StepClasses'
 import StepTeachers from './steps/StepTeachers'
 import StepStudents from './steps/StepStudents'
+import './sunday-school.css'
 
-const STEPS = ['Term', 'Classes', 'Teachers', 'Students'] as const
+const EMPTY = buildHubSummary({ term: null, classes: [], enrollments: [], students: [], sessionsPerClass: 0 })
 
-async function loadSummary(): Promise<{ summary: HubSummary; termId: string | number | null }> {
+const STEPS = [
+  { key: 'Term', icon: CalendarRange },
+  { key: 'Classes', icon: GraduationCap },
+  { key: 'Teachers', icon: UserCheck },
+  { key: 'Students', icon: Users },
+] as const
+
+async function loadSummary(): Promise<HubSummary> {
   const termRes = await api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0')
   const term = termRes.docs[0] ?? null
-  if (!term) return { summary: buildHubSummary({ term: null, classes: [], enrollments: [], students: [], sessionsPerClass: 0 }), termId: null }
+  if (!term) return EMPTY
   const classes = (await api(`/school-classes?where[term][equals]=${term.id}&limit=1000&depth=0`)).docs
   const classIds = classes.map((c: any) => c.id)
   const enrollments = classIds.length
     ? (await api(`/enrollments?where[class][in]=${classIds.join(',')}&limit=5000&depth=0`)).docs
     : []
   const students = (await api('/students?where[status][equals]=active&limit=5000&depth=0')).docs
-  const summary = buildHubSummary({ term, classes, enrollments, students, sessionsPerClass: 0 })
-  return { summary, termId: term.id }
+  return buildHubSummary({ term, classes, enrollments, students, sessionsPerClass: 0 })
+}
+
+/** Per-step completion, derived from data. Teachers (optional) completes once
+ *  at least one class has a teacher. */
+function doneFlags(s: HubSummary): boolean[] {
+  return [
+    !!s.term,
+    s.classCount > 0,
+    s.classCount > 0 && s.teacherlessCount < s.classCount,
+    s.classCount > 0 && s.unplacedCount === 0 && s.placedCount > 0,
+  ]
 }
 
 const SetupWizard: React.FC = () => {
@@ -30,16 +49,18 @@ const SetupWizard: React.FC = () => {
   const [step, setStep] = useState<number>(0)
   const [ready, setReady] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
+  const [summary, setSummary] = useState<HubSummary>(EMPTY)
 
   const refresh = useCallback(() => setReloadKey((k) => k + 1), [])
 
   useEffect(() => {
     let active = true
-    loadSummary().then(({ summary }) => {
+    loadSummary().then((s) => {
       if (!active) return
+      setSummary(s)
       const qs = params.get('step')
-      const resume = qs ? Number(qs) : firstIncompleteStep(summary)
-      setStep(Math.min(Math.max(resume, 1), 4))
+      const resume = qs ? Number(qs) : firstIncompleteStep(s)
+      setStep((cur) => (cur === 5 ? 5 : Math.min(Math.max(resume, 1), 4)))
       setReady(true)
     })
     return () => { active = false }
@@ -50,31 +71,60 @@ const SetupWizard: React.FC = () => {
     router.replace(`/admin/sunday-school/setup?step=${s}`)
   }
 
-  if (!ready) return <div style={{ padding: '1.5rem' }}>Loading…</div>
+  if (!ready) return <div className="ss-root"><p className="ss-emptyline">Loading…</p></div>
+
+  const done = doneFlags(summary)
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: 880 }}>
-      <h1>Set up Sunday School</h1>
-      <ol style={{ display: 'flex', gap: 8, listStyle: 'none', padding: 0, marginBottom: 24 }}>
-        {STEPS.map((label, i) => {
-          const n = i + 1
-          return (
-            <li key={label}>
-              <button
-                onClick={() => goto(n)}
-                style={{ fontWeight: step === n ? 700 : 400, textDecoration: step === n ? 'underline' : 'none' }}
-              >
-                {n}. {label}
-              </button>
-            </li>
-          )
-        })}
-      </ol>
+    <div className="ss-root">
+      <p className="ss-eyebrow">Sunday school</p>
+      <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 24 }}>Set up your school</h1>
 
-      {step === 1 && <StepTerm onNext={() => goto(2)} onChanged={refresh} />}
-      {step === 2 && <StepClasses onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
-      {step === 3 && <StepTeachers onBack={() => goto(2)} onNext={() => goto(4)} />}
-      {step === 4 && <StepStudents onBack={() => goto(3)} onFinish={() => router.push('/admin/sunday-school')} onChanged={refresh} />}
+      <div className="ss-wizard">
+        <nav className="ss-rail" aria-label="Setup steps">
+          {STEPS.map((s, i) => {
+            const n = i + 1
+            const Icon = s.icon
+            const isDone = done[i] && step !== n
+            const cls = `ss-railstep${step === n ? ' ss-railstep--active' : ''}${isDone ? ' ss-railstep--done' : ''}`
+            return (
+              <button key={s.key} className={cls} onClick={() => goto(n)} aria-current={step === n ? 'step' : undefined}>
+                <span className="ss-railstep__node">{isDone ? <Check size={16} /> : <Icon size={16} />}</span>
+                <span className="ss-railstep__body">
+                  <span className="ss-railstep__k">Step {n}{i === 2 ? ' · optional' : ''}</span>
+                  <span className="ss-railstep__label">{s.key}</span>
+                </span>
+              </button>
+            )
+          })}
+        </nav>
+
+        <div>
+          {step === 1 && <StepTerm onNext={() => goto(2)} onChanged={refresh} />}
+          {step === 2 && <StepClasses onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
+          {step === 3 && <StepTeachers onBack={() => goto(2)} onNext={() => goto(4)} />}
+          {step === 4 && <StepStudents onBack={() => goto(3)} onFinish={() => goto(5)} onChanged={refresh} />}
+          {step === 5 && (
+            <div className="ss-card">
+              <div className="ss-finish">
+                <span className="ss-finish__badge"><Sparkles size={26} /></span>
+                <h2 className="ss-card__title" style={{ marginBottom: 4 }}>Your school is ready</h2>
+                <p className="ss-card__hint" style={{ margin: '0 auto 4px' }}>
+                  {summary.term?.name} is set up. You can take attendance any time from the dashboard.
+                </p>
+                <div className="ss-finish__summary">
+                  <span><b>{summary.classCount}</b> classes</span>
+                  <span><b>{summary.placedCount}</b> students</span>
+                  <span><b>{summary.teacherlessCount}</b> classes need a teacher</span>
+                </div>
+                <div className="ss-foot" style={{ justifyContent: 'center' }}>
+                  <button className="ss-btn" onClick={() => router.push('/admin/sunday-school')}>Go to dashboard</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

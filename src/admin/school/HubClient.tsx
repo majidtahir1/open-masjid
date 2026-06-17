@@ -1,59 +1,103 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
+import { CalendarDays, GraduationCap, UserCheck, Users, ArrowRight, CalendarPlus, ClipboardCheck } from 'lucide-react'
 import type { HubSummary } from '@/lib/school-setup'
 import { firstIncompleteStep } from '@/lib/school-setup'
+import SessionTimeline from './SessionTimeline'
+import './sunday-school.css'
 
-const tile: React.CSSProperties = { border: '1px solid var(--theme-elevation-150)', borderRadius: 8, padding: '12px 16px', minWidth: 140 }
+const WEEKDAY_PLURAL: Record<string, string> = {
+  sunday: 'Sundays', monday: 'Mondays', tuesday: 'Tuesdays', wednesday: 'Wednesdays',
+  thursday: 'Thursdays', friday: 'Fridays', saturday: 'Saturdays',
+}
+
+const fmt = (iso?: string | null) => (iso ? String(iso).slice(0, 10) : '')
 
 const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summary, canSetup }) => {
+  const { term } = summary
   const resume = firstIncompleteStep(summary)
-  return (
-    <div style={{ padding: '1.5rem', maxWidth: 880 }}>
-      <h1>Sunday School</h1>
-      <p style={{ color: 'var(--theme-elevation-600)' }}>
-        A <strong>Term</strong> holds <strong>Classes</strong>. Each class meets weekly —{' '}
-        <strong>Sessions are created automatically</strong> from the term&apos;s dates. Students enroll into classes.
-      </p>
 
-      {summary.term ? (
-        <div style={{ ...tile, minWidth: 'auto', marginBottom: 16 }}>
-          <h2 style={{ margin: 0 }}>{summary.term.name}</h2>
-          <p style={{ margin: '4px 0 0' }}>
-            {summary.term.sessionsPerClass} weekly sessions auto-created
-            {summary.term.startDate && summary.term.endDate
-              ? ` (${String(summary.term.startDate).slice(0, 10)} → ${String(summary.term.endDate).slice(0, 10)})`
-              : ''}
+  return (
+    <div className="ss-root">
+      {term ? (
+        <header className="ss-masthead">
+          <p className="ss-eyebrow">Sunday school · current term</p>
+          <h1 className="ss-masthead__title">{term.name}</h1>
+          <p className="ss-masthead__meta">
+            {term.meetingDay ? WEEKDAY_PLURAL[term.meetingDay] ?? 'Weekly' : 'Weekly'}
+            {term.startDate && term.endDate ? ` · ${fmt(term.startDate)} → ${fmt(term.endDate)}` : ''}
+            {` · ${term.sessionsPerClass} sessions per class, created automatically`}
           </p>
-        </div>
+          <SessionTimeline
+            startDate={term.startDate}
+            endDate={term.endDate}
+            meetingDay={term.meetingDay}
+            variant="masthead"
+          />
+        </header>
       ) : (
-        <div style={{ ...tile, minWidth: 'auto', marginBottom: 16 }}>
-          <p style={{ margin: 0 }}>No term set up yet.</p>
-        </div>
+        <section className="ss-empty">
+          <p className="ss-eyebrow">Sunday school</p>
+          <h1 className="ss-empty__title">Let&apos;s set up your school</h1>
+          <p className="ss-empty__body">
+            Start with a term — its dates and weekly meeting day. Every class you add gets its weekly
+            sessions created automatically, so you never schedule them by hand.
+          </p>
+          {canSetup && (
+            <Link className="ss-btn" href="/admin/sunday-school/setup?step=1">
+              <CalendarPlus size={18} /> Start setup
+            </Link>
+          )}
+        </section>
       )}
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-        <div style={tile}><strong>{summary.classCount}</strong><br />classes</div>
-        <div style={tile}><strong>{summary.teacherlessCount}</strong><br />without a teacher</div>
-        <div style={tile}><strong>{summary.placedCount}</strong><br />students placed</div>
-        <div style={tile}>
-          <strong>{summary.unplacedCount}</strong><br />
-          {summary.unplacedCount > 0 && canSetup ? (
-            <Link href="/admin/sunday-school/setup?step=4">unplaced →</Link>
-          ) : ('unplaced')}
-        </div>
-      </div>
+      {term && (
+        <>
+          <div className="ss-stats">
+            <div className="ss-stat">
+              <span className="ss-stat__icon"><GraduationCap size={19} /></span>
+              <div className="ss-stat__num">{summary.classCount}</div>
+              <div className="ss-stat__label">{summary.classCount === 1 ? 'class' : 'classes'}</div>
+            </div>
+            <div className={`ss-stat${summary.teacherlessCount > 0 ? ' ss-stat--warn' : ''}`}>
+              <span className="ss-stat__icon"><UserCheck size={19} /></span>
+              <div className="ss-stat__num">{summary.teacherlessCount}</div>
+              <div className="ss-stat__label">without a teacher</div>
+            </div>
+            <div className="ss-stat ss-stat--good">
+              <span className="ss-stat__icon"><Users size={19} /></span>
+              <div className="ss-stat__num">{summary.placedCount}</div>
+              <div className="ss-stat__label">students placed</div>
+            </div>
+            <div className={`ss-stat${summary.unplacedCount > 0 ? ' ss-stat--warn' : ''}`}>
+              <span className="ss-stat__icon"><CalendarDays size={19} /></span>
+              <div className="ss-stat__num">{summary.unplacedCount}</div>
+              <div className="ss-stat__label">awaiting a class</div>
+              {summary.unplacedCount > 0 && canSetup && (
+                <Link className="ss-stat__link" href="/admin/sunday-school/setup?step=4">Place them →</Link>
+              )}
+            </div>
+          </div>
 
-      <div style={{ display: 'flex', gap: 12 }}>
-        {canSetup && (
-          <Link className="btn btn--style-primary btn--size-medium" href={`/admin/sunday-school/setup?step=${summary.term ? resume : 1}`}>
-            {summary.term ? 'Continue setup' : 'Start setup'}
-          </Link>
-        )}
-        <Link className="btn btn--style-secondary btn--size-medium" href="/admin/take-attendance">
-          Take attendance
-        </Link>
-      </div>
+          <p className="ss-explainer">
+            A <strong>term</strong> holds <strong>classes</strong>. Each class meets weekly, and its{' '}
+            <strong>sessions are created automatically</strong> from the term&apos;s dates — those are the
+            beads above. Students enroll into classes, and you mark attendance per session.
+          </p>
+
+          <div className="ss-actions">
+            {canSetup && (
+              <Link className="ss-btn" href={`/admin/sunday-school/setup?step=${resume}`}>
+                <ArrowRight size={18} /> Continue setup
+              </Link>
+            )}
+            <Link className="ss-btn ss-btn--ghost" href="/admin/take-attendance">
+              <ClipboardCheck size={18} /> Take attendance
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -1,6 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
 import { api } from '../api'
+import SessionTimeline from '../SessionTimeline'
 
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -40,25 +42,47 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
   }
 
   return (
-    <div>
-      <h2>1. Term</h2>
-      <p>Name, dates, and weekly meeting day. Sessions are generated automatically for every class in this term.</p>
-      <div style={{ display: 'grid', gap: 10, maxWidth: 420 }}>
-        <label>Name <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Fall 2026" /></label>
-        <label>Start <input type="date" value={startDate} onChange={(e) => setStart(e.target.value)} /></label>
-        <label>End <input type="date" value={endDate} onChange={(e) => setEnd(e.target.value)} /></label>
-        <label>Meeting day{' '}
-          <select value={meetingDay} onChange={(e) => setDay(e.target.value)}>
+    <div className="ss-card">
+      <p className="ss-eyebrow">Step 1</p>
+      <h2 className="ss-card__title">Name your term</h2>
+      <p className="ss-card__hint">
+        Set the dates and the day you meet each week. Every class you add gets a session for each of
+        these days — created for you, no scheduling by hand.
+      </p>
+
+      <div className="ss-grid">
+        <label className="ss-field"><span>Term name</span>
+          <input className="ss-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Fall 2026" />
+        </label>
+        <label className="ss-field"><span>First day</span>
+          <input className="ss-input" type="date" value={startDate} onChange={(e) => setStart(e.target.value)} />
+        </label>
+        <label className="ss-field"><span>Last day</span>
+          <input className="ss-input" type="date" value={endDate} onChange={(e) => setEnd(e.target.value)} />
+        </label>
+        <label className="ss-field"><span>Meets every</span>
+          <select className="ss-select" value={meetingDay} onChange={(e) => setDay(e.target.value)}>
             {WEEKDAYS.map((d) => <option key={d} value={d}>{d[0].toUpperCase() + d.slice(1)}</option>)}
           </select>
         </label>
       </div>
-      {error && <p style={{ color: 'var(--theme-error-500)' }}>{error}</p>}
-      <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
-        <button className="btn btn--style-secondary btn--size-medium" disabled={busy || !name || !startDate || !endDate} onClick={save}>
+
+      {startDate && endDate && (
+        <div style={{ marginTop: 18 }}>
+          <p className="ss-eyebrow" style={{ marginBottom: 2 }}>These sessions will be created</p>
+          <SessionTimeline startDate={startDate} endDate={endDate} meetingDay={meetingDay} variant="inline" />
+        </div>
+      )}
+
+      {error && <p className="ss-error">{error}</p>}
+
+      <div className="ss-foot">
+        <button className="ss-btn ss-btn--ghost" disabled={busy || !name || !startDate || !endDate} onClick={save}>
           {term ? 'Save term' : 'Create term'}
         </button>
-        <button className="btn btn--style-primary btn--size-medium" disabled={!term} onClick={onNext}>Next: Classes →</button>
+        <button className="ss-btn" disabled={!term} onClick={onNext}>
+          Next: Classes <ArrowRight size={17} />
+        </button>
       </div>
     </div>
   )
