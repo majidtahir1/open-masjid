@@ -37,6 +37,17 @@ export const SchoolClasses: CollectionConfig = {
     { name: 'gradeLevel', type: 'text' },
     { name: 'room', type: 'text' },
     { name: 'capacity', type: 'number', min: 0, admin: { description: 'Informational only — not enforced.' } },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'active',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Archived', value: 'archived' },
+      ],
+      admin: { description: 'Archived classes are hidden from the live list but keep their history.' },
+    },
   ],
 }
 

@@ -35,6 +35,7 @@ import * as migration_20260610_174850_form_submissions_trash from './20260610_17
 import * as migration_20260611_210334_proactive_nudge_engine from './20260611_210334_proactive_nudge_engine';
 import * as migration_20260616_210336_sunday_school_attendance from './20260616_210336_sunday_school_attendance';
 import * as migration_20260617_171316_term_holidays from './20260617_171316_term_holidays';
+import * as migration_20260617_174206_class_status from './20260617_174206_class_status';
 
 export const migrations = [
   {
@@ -220,6 +221,11 @@ export const migrations = [
   {
     up: migration_20260617_171316_term_holidays.up,
     down: migration_20260617_171316_term_holidays.down,
-    name: '20260617_171316_term_holidays'
+    name: '20260617_171316_term_holidays',
+  },
+  {
+    up: migration_20260617_174206_class_status.up,
+    down: migration_20260617_174206_class_status.down,
+    name: '20260617_174206_class_status'
   },
 ];

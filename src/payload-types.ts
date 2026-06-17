@@ -1708,6 +1708,10 @@ export interface SchoolClass {
    * Informational only — not enforced.
    */
   capacity?: number | null;
+  /**
+   * Archived classes are hidden from the live list but keep their history.
+   */
+  status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
 }
@@ -2840,6 +2844,7 @@ export interface SchoolClassesSelect<T extends boolean = true> {
   gradeLevel?: T;
   room?: T;
   capacity?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
