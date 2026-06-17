@@ -67,7 +67,7 @@ function presentRate(studentId: string | number, sessions: Session[], records: A
   return `${present}/${marked}`
 }
 
-export default function AttendanceClient() {
+export default function AttendanceClient({ programId }: { programId: string | null }) {
   const [classes, setClasses] = useState<SchoolClass[]>([])
   const [classId, setClassId] = useState<string>('')
   const [className, setClassName] = useState<string>('')
@@ -80,10 +80,11 @@ export default function AttendanceClient() {
 
   // Load class list
   useEffect(() => {
-    api('/school-classes?where[status][equals]=active&limit=1000&depth=0')
+    const q = programId ? `&where[term][equals]=${programId}` : ''
+    api(`/school-classes?where[status][equals]=active${q}&limit=1000&depth=0`)
       .then((res) => setClasses(res.docs ?? []))
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
-  }, [])
+  }, [programId])
 
   // Load sessions, students, records when class changes
   useEffect(() => {

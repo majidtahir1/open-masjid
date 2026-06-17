@@ -9,7 +9,7 @@ type Doc = { id: number | string; [k: string]: any }
 const STATUSES = ['present', 'absent', 'late', 'excused'] as const
 type Status = (typeof STATUSES)[number]
 
-const TakeAttendance: React.FC = () => {
+const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) => {
   const [classes, setClasses] = useState<Doc[]>([])
   const [classId, setClassId] = useState<string>('')
   const [session, setSession] = useState<Doc | null>(null)
@@ -19,10 +19,11 @@ const TakeAttendance: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    api('/school-classes?limit=200&depth=0')
+    const q = programId ? `&where[term][equals]=${programId}` : ''
+    api(`/school-classes?limit=200&depth=0${q}`)
       .then((r) => setClasses(r.docs))
       .catch(() => setError('Failed to load classes.'))
-  }, [])
+  }, [programId])
 
   const loadClass = useCallback(async (id: string) => {
     setClassId(id)

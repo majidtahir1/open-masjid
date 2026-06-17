@@ -13,13 +13,18 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
+import { resolveProgramId } from '@/lib/program-context'
 import { importMap } from '../importMap'
 import TakeAttendance from '@/admin/school/TakeAttendance'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-export default async function TakeAttendancePage() {
+const idOf = (v: unknown): string | number | null =>
+  v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
+
+export default async function TakeAttendancePage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
+  const sp = await searchParams
   const { user, permissions } = await getAdminUser()
   if (!user) redirect(loginUrl('/admin/take-attendance'))
 
@@ -41,6 +46,18 @@ export default async function TakeAttendancePage() {
       .map(({ slug }) => slug),
   }
 
+  const tenantId = idOf((user as { tenant?: unknown }).tenant)
+
+  const programsRes = await payload.find({
+    collection: 'terms',
+    where: { ...(tenantId ? { tenant: { equals: tenantId } } : {}) },
+    sort: '-startDate',
+    limit: 1000,
+    depth: 0,
+    req,
+  })
+  const selectedId = resolveProgramId(sp.program, programsRes.docs as any)
+
   return (
     <DefaultTemplate
       i18n={req.i18n}
@@ -54,7 +71,7 @@ export default async function TakeAttendancePage() {
     >
       <main style={{ padding: '2rem', maxWidth: 720 }}>
         <h1 style={{ marginBottom: '1.5rem' }}>Take Attendance</h1>
-        <TakeAttendance />
+        <TakeAttendance programId={selectedId != null ? String(selectedId) : null} />
       </main>
     </DefaultTemplate>
   )
