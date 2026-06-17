@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Archive, ArchiveRestore, Trash2, Ban, RotateCcw } from 'lucide-react'
-import { api } from '../api'
+import { api, toId } from '../api'
 import { canHardDelete } from '@/lib/school-reports'
 import SchoolTabs from '../SchoolTabs'
 import '../sunday-school.css'
@@ -18,14 +18,18 @@ const ClassDetailClient: React.FC<{ classId: string }> = ({ classId }) => {
   const [sessions, setSessions] = useState<any[]>([])
   const [counts, setCounts] = useState<{ enroll: number; att: number }>({ enroll: 0, att: 0 })
   const [msg, setMsg] = useState('')
+  const [roster, setRoster] = useState<any[]>([]) // active enrollments w/ populated student
+  const [allClasses, setAllClasses] = useState<any[]>([])
+  const [teachers, setTeachers] = useState<any[]>([])
+  const [unplaced, setUnplaced] = useState<any[]>([])
 
   const load = useCallback(async () => {
-    const c = await api(`/school-classes/${classId}?depth=0`)
-    setKlass(c)
-    setName(c.name ?? '')
-    setGrade(c.gradeLevel ?? '')
-    setRoom(c.room ?? '')
-    setCap(c.capacity != null ? String(c.capacity) : '')
+    const klassDoc = await api(`/school-classes/${classId}?depth=0`)
+    setKlass(klassDoc)
+    setName(klassDoc.name ?? '')
+    setGrade(klassDoc.gradeLevel ?? '')
+    setRoom(klassDoc.room ?? '')
+    setCap(klassDoc.capacity != null ? String(klassDoc.capacity) : '')
     const ses = (await api(`/class-sessions?where[class][equals]=${classId}&sort=date&limit=1000&depth=0`)).docs
     setSessions(ses)
     const enr = await api(`/enrollments?where[class][equals]=${classId}&limit=0&depth=0`)
@@ -34,6 +38,18 @@ const ClassDetailClient: React.FC<{ classId: string }> = ({ classId }) => {
       ? await api(`/attendance-records?where[session][in]=${sessIds.join(',')}&limit=0&depth=0`)
       : { totalDocs: 0 }
     setCounts({ enroll: enr.totalDocs ?? 0, att: att.totalDocs ?? 0 })
+    const term = typeof klassDoc.term === 'object' ? klassDoc.term?.id : klassDoc.term
+    setRoster((await api(`/enrollments?where[class][equals]=${classId}&where[status][equals]=active&limit=1000&depth=1`)).docs)
+    setAllClasses((await api(`/school-classes?where[term][equals]=${term}&where[status][equals]=active&limit=1000&depth=0`)).docs)
+    setTeachers((await api('/users?where[role][equals]=teacher&limit=1000&depth=0')).docs)
+    const termClassIds = (await api(`/school-classes?where[term][equals]=${term}&limit=1000&depth=0`)).docs.map((tc: any) => tc.id)
+    const placedIds = new Set(
+      (termClassIds.length
+        ? (await api(`/enrollments?where[class][in]=${termClassIds.join(',')}&where[status][equals]=active&limit=5000&depth=0`)).docs
+        : []
+      ).map((e: any) => String(typeof e.student === 'object' ? e.student.id : e.student)),
+    )
+    setUnplaced((await api('/students?where[status][equals]=active&limit=5000&depth=0')).docs.filter((s: any) => !placedIds.has(String(s.id))))
   }, [classId])
 
   useEffect(() => {
@@ -77,6 +93,20 @@ const ClassDetailClient: React.FC<{ classId: string }> = ({ classId }) => {
   const setSessionStatus = async (id: string | number, status: string) => {
     await api(`/class-sessions/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) })
     await load()
+  }
+
+  const enroll = async (studentId: string | number) => {
+    await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: toId(studentId), class: toId(classId), status: 'active' }) }); await load()
+  }
+  const withdraw = async (enrollmentId: string | number) => {
+    await api(`/enrollments/${enrollmentId}`, { method: 'PATCH', body: JSON.stringify({ status: 'withdrawn' }) }); await load()
+  }
+  const move = async (enrollmentId: string | number, toClass: string) => {
+    if (!toClass) return
+    await api(`/enrollments/${enrollmentId}`, { method: 'PATCH', body: JSON.stringify({ class: toId(toClass) }) }); await load()
+  }
+  const setTeacher = async (teacherId: string) => {
+    await api(`/school-classes/${classId}`, { method: 'PATCH', body: JSON.stringify({ teachers: teacherId ? [toId(teacherId)] : [] }) }); await load()
   }
 
   if (!klass)
@@ -156,6 +186,41 @@ const ClassDetailClient: React.FC<{ classId: string }> = ({ classId }) => {
           </button>
         </div>
         {msg && <p className="ss-note">{msg}</p>}
+      </div>
+
+      <div className="ss-card ss-panel" style={{ marginBottom: 16 }}>
+        <p className="ss-eyebrow">Teacher</p>
+        <select className="ss-select" style={{ maxWidth: 280 }} value={Array.isArray(klass.teachers) && klass.teachers[0] ? String(typeof klass.teachers[0] === 'object' ? klass.teachers[0].id : klass.teachers[0]) : ''} onChange={(e) => setTeacher(e.target.value)}>
+          <option value="">No teacher</option>
+          {teachers.map((t) => <option key={t.id} value={t.id}>{t.email}</option>)}
+        </select>
+      </div>
+
+      <div className="ss-card ss-panel" style={{ marginBottom: 16 }}>
+        <p className="ss-eyebrow">Roster · {roster.length}</p>
+        {roster.length === 0 && <p className="ss-emptyline">No students enrolled.</p>}
+        {roster.map((e) => {
+          const s = e.student || {}
+          return (
+            <div key={e.id} className="ss-row">
+              <span className="ss-row__name">{s.fullName ?? `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim()}</span>
+              <select className="ss-select" style={{ maxWidth: 170 }} defaultValue="" onChange={(ev) => move(e.id, ev.target.value)}>
+                <option value="">Move to…</option>
+                {allClasses.filter((c) => String(c.id) !== String(classId)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <button className="ss-btn ss-btn--ghost ss-btn--small" onClick={() => withdraw(e.id)}>Withdraw</button>
+            </div>
+          )
+        })}
+        {unplaced.length > 0 && (
+          <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span className="ss-eyebrow" style={{ margin: 0 }}>Enroll a student</span>
+            <select className="ss-select" style={{ maxWidth: 240 }} defaultValue="" onChange={(e) => { if (e.target.value) enroll(e.target.value) }}>
+              <option value="">Choose…</option>
+              {unplaced.map((s) => <option key={s.id} value={s.id}>{s.fullName ?? `${s.firstName} ${s.lastName}`}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="ss-card ss-panel">
