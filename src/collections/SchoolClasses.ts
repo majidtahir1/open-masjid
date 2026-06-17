@@ -7,6 +7,7 @@ import {
   teacherClassesRead,
 } from '../access/schoolAccess'
 import { generateClassSessions } from '../hooks/generateClassSessions'
+import { blockClassDeleteWithHistory } from '../hooks/blockClassDeleteWithHistory'
 
 export const SchoolClasses: CollectionConfig = {
   slug: 'school-classes',
@@ -26,6 +27,7 @@ export const SchoolClasses: CollectionConfig = {
     delete: denyKioskManager(schoolTenantWrite),
   },
   hooks: {
+    beforeDelete: [blockClassDeleteWithHistory],
     beforeChange: [setTenantFromUser],
     afterChange: [generateClassSessions],
   },
