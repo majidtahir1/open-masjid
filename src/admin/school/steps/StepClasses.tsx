@@ -3,8 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { ArrowRight, ArrowLeft, Plus, CalendarDays } from 'lucide-react'
 import { api } from '../api'
 
-const StepClasses: React.FC<{ onBack: () => void; onNext: () => void; onChanged: () => void }> = ({ onBack, onNext, onChanged }) => {
-  const [termId, setTermId] = useState<string | number | null>(null)
+const StepClasses: React.FC<{ programId: string | null; onBack: () => void; onNext: () => void; onChanged: () => void }> = ({ programId, onBack, onNext, onChanged }) => {
   const [classes, setClasses] = useState<any[]>([])
   const [sessionsByClass, setSessions] = useState<Record<string, number>>({})
   const [name, setName] = useState('')
@@ -13,7 +12,7 @@ const StepClasses: React.FC<{ onBack: () => void; onNext: () => void; onChanged:
   const [capacity, setCap] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const reload = useCallback(async (tid: string | number) => {
+  const reload = useCallback(async (tid: string) => {
     const cl = (await api(`/school-classes?where[term][equals]=${tid}&limit=1000&depth=0`)).docs
     setClasses(cl)
     const counts: Record<string, number> = {}
@@ -25,23 +24,21 @@ const StepClasses: React.FC<{ onBack: () => void; onNext: () => void; onChanged:
   }, [])
 
   useEffect(() => {
-    api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0').then(async (r) => {
-      const t = r.docs[0]
-      if (t) { setTermId(t.id); await reload(t.id) }
-    }).catch(() => {})
-  }, [reload])
+    if (!programId) return
+    reload(programId).catch(() => {})
+  }, [programId, reload])
 
   const add = async () => {
-    if (!termId) return
+    if (!programId) return
     setBusy(true)
     try {
-      const data: any = { name, term: termId, status: 'active' }
+      const data: any = { name, term: programId, status: 'active' }
       if (gradeLevel) data.gradeLevel = gradeLevel
       if (room) data.room = room
       if (capacity) data.capacity = Number(capacity)
       await api('/school-classes', { method: 'POST', body: JSON.stringify(data) })
       setName(''); setGrade(''); setRoom(''); setCap('')
-      await reload(termId)
+      await reload(programId)
       onChanged()
     } finally {
       setBusy(false)

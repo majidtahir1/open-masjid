@@ -8,7 +8,7 @@ import { programDates } from '@/hooks/generateClassSessions'
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 const day = (d: unknown) => String(d ?? '').slice(0, 10)
 
-const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onNext, onChanged }) => {
+const StepTerm: React.FC<{ programId: string | null; createMode: boolean; onNext: () => void; onChanged: () => void }> = ({ programId, createMode, onNext, onChanged }) => {
   const [term, setTerm] = useState<any>(null)
   const [name, setName] = useState('')
   const [startDate, setStart] = useState('')
@@ -19,15 +19,15 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
   const [error, setError] = useState('')
 
   useEffect(() => {
-    api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0').then((r) => {
-      const t = r.docs[0]
+    if (createMode || !programId) return
+    api(`/terms/${programId}?depth=0`).then((t) => {
       if (t) {
         setTerm(t); setName(t.name ?? ''); setStart(day(t.startDate))
         setEnd(day(t.endDate)); setDays(Array.isArray(t.meetingDays) && t.meetingDays.length ? t.meetingDays : ['sunday'])
         setHolidays((t.holidays ?? []).map((h: any) => day(h.date)).filter(Boolean))
       }
     }).catch(() => {})
-  }, [])
+  }, [programId, createMode])
 
   const toggleHoliday = (iso: string) =>
     setHolidays((prev) => (prev.includes(iso) ? prev.filter((d) => d !== iso) : [...prev, iso]))

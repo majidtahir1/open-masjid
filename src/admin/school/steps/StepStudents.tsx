@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { ArrowLeft, Check, UserPlus } from 'lucide-react'
 import { api, toId } from '../api'
 
-const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChanged: () => void }> = ({ onBack, onFinish, onChanged }) => {
+const StepStudents: React.FC<{ programId: string | null; onBack: () => void; onFinish: () => void; onChanged: () => void }> = ({ programId, onBack, onFinish, onChanged }) => {
   const [classes, setClasses] = useState<any[]>([])
   const [unplaced, setUnplaced] = useState<any[]>([])
   const [first, setFirst] = useState('')
@@ -15,10 +15,8 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
   const [error, setError] = useState('')
 
   const reload = useCallback(async () => {
-    const tr = await api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0')
-    const term = tr.docs[0]
-    if (!term) return
-    const cl = (await api(`/school-classes?where[term][equals]=${term.id}&limit=1000&depth=0`)).docs
+    if (!programId) return
+    const cl = (await api(`/school-classes?where[term][equals]=${programId}&limit=1000&depth=0`)).docs
     setClasses(cl)
     const classIds = cl.map((c: any) => c.id)
     const enr = classIds.length
@@ -27,7 +25,7 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
     const placed = new Set(enr.map((e: any) => String(typeof e.student === 'object' ? e.student.id : e.student)))
     const students = (await api('/students?where[status][equals]=active&limit=5000&depth=0')).docs
     setUnplaced(students.filter((s: any) => !placed.has(String(s.id))))
-  }, [])
+  }, [programId])
 
   useEffect(() => { reload().catch(() => {}) }, [reload])
 

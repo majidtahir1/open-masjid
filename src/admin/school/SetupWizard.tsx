@@ -19,11 +19,11 @@ const STEPS = [
   { key: 'Students', icon: Users },
 ] as const
 
-async function loadSummary(): Promise<HubSummary> {
-  const termRes = await api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0')
-  const term = termRes.docs[0] ?? null
-  if (!term) return EMPTY
-  const classes = (await api(`/school-classes?where[term][equals]=${term.id}&limit=1000&depth=0`)).docs
+async function loadSummary(programId: string | null): Promise<HubSummary> {
+  if (!programId) return EMPTY
+  const term = await api(`/terms/${programId}?depth=0`)
+  if (!term?.id) return EMPTY
+  const classes = (await api(`/school-classes?where[term][equals]=${programId}&limit=1000&depth=0`)).docs
   const classIds = classes.map((c: any) => c.id)
   const enrollments = classIds.length
     ? (await api(`/enrollments?where[class][in]=${classIds.join(',')}&limit=5000&depth=0`)).docs
@@ -43,7 +43,7 @@ function doneFlags(s: HubSummary): boolean[] {
   ]
 }
 
-const SetupWizard: React.FC = () => {
+const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> = ({ programId, createMode }) => {
   const router = useRouter()
   const params = useSearchParams()
   const [step, setStep] = useState<number>(0)
@@ -55,16 +55,16 @@ const SetupWizard: React.FC = () => {
 
   useEffect(() => {
     let active = true
-    loadSummary().then((s) => {
+    loadSummary(programId).then((s) => {
       if (!active) return
       setSummary(s)
       const qs = params.get('step')
-      const resume = qs ? Number(qs) : firstIncompleteStep(s)
+      const resume = qs ? Number(qs) : (createMode ? 1 : firstIncompleteStep(s))
       setStep((cur) => (cur === 5 ? 5 : Math.min(Math.max(resume, 1), 4)))
       setReady(true)
     })
     return () => { active = false }
-  }, [params, reloadKey])
+  }, [params, reloadKey, programId, createMode])
 
   const goto = (s: number) => {
     setStep(s)
@@ -100,10 +100,10 @@ const SetupWizard: React.FC = () => {
         </nav>
 
         <div>
-          {step === 1 && <StepTerm onNext={() => goto(2)} onChanged={refresh} />}
-          {step === 2 && <StepClasses onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
-          {step === 3 && <StepTeachers onBack={() => goto(2)} onNext={() => goto(4)} />}
-          {step === 4 && <StepStudents onBack={() => goto(3)} onFinish={() => goto(5)} onChanged={refresh} />}
+          {step === 1 && <StepTerm programId={programId} createMode={createMode} onNext={() => goto(2)} onChanged={refresh} />}
+          {step === 2 && <StepClasses programId={programId} onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
+          {step === 3 && <StepTeachers programId={programId} onBack={() => goto(2)} onNext={() => goto(4)} />}
+          {step === 4 && <StepStudents programId={programId} onBack={() => goto(3)} onFinish={() => goto(5)} onChanged={refresh} />}
           {step === 5 && (
             <div className="ss-card">
               <div className="ss-finish">

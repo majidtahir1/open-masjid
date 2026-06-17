@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { ArrowRight, ArrowLeft, UserPlus, UserCheck } from 'lucide-react'
 import { api, toId } from '../api'
 
-const StepTeachers: React.FC<{ onBack: () => void; onNext: () => void }> = ({ onBack, onNext }) => {
+const StepTeachers: React.FC<{ programId: string | null; onBack: () => void; onNext: () => void }> = ({ programId, onBack, onNext }) => {
   const [classes, setClasses] = useState<any[]>([])
   const [teachers, setTeachers] = useState<any[]>([])
   const [inviteFor, setInviteFor] = useState<string | number | null>(null)
@@ -13,12 +13,10 @@ const StepTeachers: React.FC<{ onBack: () => void; onNext: () => void }> = ({ on
   const [msg, setMsg] = useState('')
 
   const reload = useCallback(async () => {
-    const tr = await api('/terms?where[status][equals]=active&sort=-startDate&limit=1&depth=0')
-    const term = tr.docs[0]
-    if (!term) return
-    setClasses((await api(`/school-classes?where[term][equals]=${term.id}&limit=1000&depth=1`)).docs)
+    if (!programId) return
+    setClasses((await api(`/school-classes?where[term][equals]=${programId}&limit=1000&depth=1`)).docs)
     setTeachers((await api('/users?where[role][equals]=teacher&limit=1000&depth=0')).docs)
-  }, [])
+  }, [programId])
 
   useEffect(() => { reload().catch(() => {}) }, [reload])
 
