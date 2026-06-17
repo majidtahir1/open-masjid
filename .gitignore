@@ -47,3 +47,6 @@ coverage/
 
 # Local git worktrees
 .claude/worktrees/
+
+# Sunday school demo seed manifest (local DB ids)
+scripts/.school-demo-seed.json

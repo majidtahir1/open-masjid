@@ -22,6 +22,8 @@
     "seed:blog": "node --env-file=.env --import tsx scripts/seedBlogIntro.ts",
     "cleanup:pending-tenants": "node --env-file=.env --import tsx scripts/cleanupPendingTenants.ts",
     "seed:prayer-display-content": "node --env-file=.env --import tsx scripts/seedPrayerDisplayContent.ts",
+    "seed:school": "node --env-file=.env --import tsx scripts/seed-school-demo.ts",
+    "cleanup:school": "node --env-file=.env --import tsx scripts/cleanup-school-demo.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
