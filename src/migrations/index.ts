@@ -37,7 +37,7 @@ import * as migration_20260616_210336_sunday_school_attendance from './20260616_
 import * as migration_20260617_171316_term_holidays from './20260617_171316_term_holidays';
 import * as migration_20260617_174206_class_status from './20260617_174206_class_status';
 import * as migration_20260617_212605_form_school_registration from './20260617_212605_form_school_registration';
-import * as migration_20260617_215000_term_meeting_days from './20260617_215000_term_meeting_days';
+import * as migration_20260617_225620_term_meeting_days from './20260617_225620_term_meeting_days';
 
 export const migrations = [
   {
@@ -233,11 +233,11 @@ export const migrations = [
   {
     up: migration_20260617_212605_form_school_registration.up,
     down: migration_20260617_212605_form_school_registration.down,
-    name: '20260617_212605_form_school_registration'
+    name: '20260617_212605_form_school_registration',
   },
   {
-    up: migration_20260617_215000_term_meeting_days.up,
-    down: migration_20260617_215000_term_meeting_days.down,
-    name: '20260617_215000_term_meeting_days',
+    up: migration_20260617_225620_term_meeting_days.up,
+    down: migration_20260617_225620_term_meeting_days.down,
+    name: '20260617_225620_term_meeting_days'
   },
 ];
