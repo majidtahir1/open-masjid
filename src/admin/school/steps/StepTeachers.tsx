@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
 import { ArrowRight, ArrowLeft, UserPlus, UserCheck } from 'lucide-react'
-import { api } from '../api'
+import { api, toId } from '../api'
 
 const StepTeachers: React.FC<{ onBack: () => void; onNext: () => void }> = ({ onBack, onNext }) => {
   const [classes, setClasses] = useState<any[]>([])
@@ -25,7 +25,7 @@ const StepTeachers: React.FC<{ onBack: () => void; onNext: () => void }> = ({ on
   const assign = async (classId: string | number, teacherId: string) => {
     await api(`/school-classes/${classId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ teachers: teacherId ? [teacherId] : [] }),
+      body: JSON.stringify({ teachers: teacherId ? [toId(teacherId)] : [] }),
     })
     await reload()
   }

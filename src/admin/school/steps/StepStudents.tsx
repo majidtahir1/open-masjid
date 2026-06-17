@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
 import { ArrowLeft, Check, UserPlus } from 'lucide-react'
-import { api } from '../api'
+import { api, toId } from '../api'
 
 const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChanged: () => void }> = ({ onBack, onFinish, onChanged }) => {
   const [classes, setClasses] = useState<any[]>([])
@@ -35,10 +35,10 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
     if (!classId) return
     setError('')
     try {
-      await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: studentId, class: classId, status: 'active' }) })
+      await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: toId(studentId), class: toId(classId), status: 'active' }) })
       await reload(); onChanged()
-    } catch {
-      setError('Couldn’t place that student — they may already be enrolled in this class.')
+    } catch (e) {
+      setError((e as Error).message || 'Couldn’t place that student.')
     }
   }
 
@@ -50,7 +50,7 @@ const StepStudents: React.FC<{ onBack: () => void; onFinish: () => void; onChang
       if (age) data.age = Number(age)
       if (guardian) data.guardians = [{ name: guardian, isPrimary: true }]
       const student = await api('/students', { method: 'POST', body: JSON.stringify(data) }).then((r) => r.doc)
-      await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: student.id, class: newClass, status: 'active' }) })
+      await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: toId(student.id), class: toId(newClass), status: 'active' }) })
       setFirst(''); setLast(''); setAge(''); setGuardian('')
       await reload(); onChanged()
     } catch (e) {
