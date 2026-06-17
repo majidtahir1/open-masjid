@@ -54,6 +54,11 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
   const total = startDate && endDate ? weeklyDates(startDate, endDate, meetingDay).length : 0
   const meeting = Math.max(total - holidays.length, 0)
 
+  // Are the days off shown different from what's saved on the term?
+  const savedHolidays = (term?.holidays ?? []).map((h: any) => day(h.date)).filter(Boolean)
+  const key = (xs: string[]) => [...xs].sort().join(',')
+  const holidaysDirty = key(holidays) !== key(savedHolidays)
+
   return (
     <div className="ss-card">
       <p className="ss-eyebrow">Step 1</p>
@@ -94,9 +99,11 @@ const StepTerm: React.FC<{ onNext: () => void; onChanged: () => void }> = ({ onN
             variant="inline"
           />
           <p className="ss-card__hint" style={{ margin: '8px 0 0' }}>
-            {holidays.length > 0
-              ? `${holidays.length} day${holidays.length === 1 ? '' : 's'} off — save to apply.`
-              : 'No days off. Click a faded-in week above to skip it (holidays, breaks).'}
+            {holidays.length === 0
+              ? 'No days off. Click a week above to skip it (holidays, breaks).'
+              : holidaysDirty
+                ? `${holidays.length} day${holidays.length === 1 ? '' : 's'} off — save to apply.`
+                : `${holidays.length} day${holidays.length === 1 ? '' : 's'} off, applied.`}
           </p>
         </div>
       )}
