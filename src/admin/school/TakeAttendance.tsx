@@ -1,19 +1,10 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
+import { api } from './api'
 
 type Doc = { id: number | string; [k: string]: any }
 const STATUSES = ['present', 'absent', 'late', 'excused'] as const
 type Status = (typeof STATUSES)[number]
-
-async function api(path: string, init?: RequestInit) {
-  const res = await fetch(`/api${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...init,
-  })
-  if (!res.ok) throw new Error(`${res.status} ${path}`)
-  return res.json()
-}
 
 const TakeAttendance: React.FC = () => {
   const [classes, setClasses] = useState<Doc[]>([])
