@@ -722,6 +722,10 @@ export interface Form {
   slug?: string | null;
   status: 'draft' | 'published' | 'closed';
   /**
+   * Submissions create an unplaced student you can place into a class.
+   */
+  schoolRegistration?: boolean | null;
+  /**
    * Shown above the form on the public page.
    */
   description?: {
@@ -2647,6 +2651,7 @@ export interface FormsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   status?: T;
+  schoolRegistration?: T;
   description?: T;
   schema?: T;
   settings?:

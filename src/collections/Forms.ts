@@ -10,6 +10,7 @@ import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateSchema } from '../lib/form-schema'
 import { applyRenames, detectFieldRenames } from '../lib/form-schema-migrate'
+import { hasRequiredRegistrationFields } from '../lib/registration-fields'
 
 const slugify = (v: string): string =>
   v.toLowerCase().trim()
@@ -61,6 +62,9 @@ export const Forms: CollectionConfig = {
       if (data?.schema) {
         const r = validateSchema(data.schema)
         if (!r.success) throw new Error(`Invalid form schema: ${r.error}`)
+        if (data.schoolRegistration === true && !hasRequiredRegistrationFields(r.schema)) {
+          throw new Error('A registration form must keep the Student first name and Student last name fields.')
+        }
       }
       return data
     }],
@@ -125,6 +129,16 @@ export const Forms: CollectionConfig = {
         { label: 'Closed', value: 'closed' },
       ],
       admin: { position: 'sidebar' },
+    },
+    {
+      name: 'schoolRegistration',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Sunday school registration form',
+      admin: {
+        position: 'sidebar',
+        description: 'Submissions create an unplaced student you can place into a class.',
+      },
     },
     {
       name: 'submissionsCount',
