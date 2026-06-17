@@ -160,7 +160,7 @@ export default function AttendanceClient({ programId }: { programId: string | nu
       <SchoolTabs />
 
       <div style={{ padding: '28px 32px 0' }}>
-        <p className="ss-eyebrow">Sunday School</p>
+        <p className="ss-eyebrow">Programs</p>
         <h1 className="ss-display">Attendance</h1>
       </div>
 

@@ -37,9 +37,9 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
       <div className="ss-root">
         <SchoolTabs />
         <section className="ss-empty">
-          <p className="ss-eyebrow">Sunday school</p>
-          <h1 className="ss-empty__title">No active term yet</h1>
-          <p className="ss-empty__body">Set up a term to unlock the dashboard.</p>
+          <p className="ss-eyebrow">Programs</p>
+          <h1 className="ss-empty__title">No program yet</h1>
+          <p className="ss-empty__body">Set up a program to unlock the dashboard.</p>
           <Link className="ss-btn" href="/admin/sunday-school/setup?step=1">Start setup</Link>
         </section>
       </div>
@@ -49,7 +49,7 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
     <div className="ss-root">
       <SchoolTabs />
       <header className="ss-masthead">
-        <p className="ss-eyebrow">Current term</p>
+        <p className="ss-eyebrow">Current program</p>
         <h1 className="ss-masthead__title">{term.name}</h1>
         <SessionTimeline startDate={term.startDate} endDate={term.endDate} meetingDays={term.meetingDays} holidays={term.holidays} variant="masthead" />
       </header>

@@ -114,7 +114,7 @@ const StudentsClient: React.FC = () => {
 
       <div className="ss-att__bar">
         <div>
-          <p className="ss-eyebrow">Sunday School</p>
+          <p className="ss-eyebrow">Programs</p>
           <h1 className="ss-display" style={{ fontSize: 26 }}>
             Students
           </h1>

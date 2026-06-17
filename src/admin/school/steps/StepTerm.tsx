@@ -63,14 +63,14 @@ const StepTerm: React.FC<{ programId: string | null; createMode: boolean; onNext
   return (
     <div className="ss-card">
       <p className="ss-eyebrow">Step 1</p>
-      <h2 className="ss-card__title">Name your term</h2>
+      <h2 className="ss-card__title">Name your program</h2>
       <p className="ss-card__hint">
         Set the dates and the day you meet each week. Every class you add gets a session for each of
         these days — created for you, no scheduling by hand.
       </p>
 
       <div className="ss-grid">
-        <label className="ss-field"><span>Term name</span>
+        <label className="ss-field"><span>Program name</span>
           <input className="ss-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Fall 2026" />
         </label>
         <label className="ss-field"><span>First day</span>
@@ -127,7 +127,7 @@ const StepTerm: React.FC<{ programId: string | null; createMode: boolean; onNext
 
       <div className="ss-foot">
         <button className="ss-btn ss-btn--ghost" disabled={busy || !name || !startDate || !endDate || meetingDays.length === 0} onClick={save}>
-          {term ? 'Save term' : 'Create term'}
+          {term ? 'Save program' : 'Create program'}
         </button>
         <button className="ss-btn" disabled={!term} onClick={onNext}>
           Next: Classes <ArrowRight size={17} />

@@ -44,7 +44,7 @@ export default async function SundaySchoolNav() {
         href="/admin/sunday-school"
         data-sunday-school-nav-link
       >
-        Sunday School
+        Programs
       </Link>
     )
   } catch {

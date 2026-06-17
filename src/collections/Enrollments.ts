@@ -12,7 +12,7 @@ export const Enrollments: CollectionConfig = {
   labels: { singular: 'Enrollment', plural: 'Enrollments' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Sunday School',
+    group: 'Programs',
     hidden: true,
     useAsTitle: 'id',
     defaultColumns: ['student', 'class', 'status', 'enrolledAt'],

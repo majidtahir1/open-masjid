@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { LayoutDashboard, GraduationCap, Users, ClipboardList, Wand2 } from 'lucide-react'
 import ProgramPicker from './ProgramPicker'
 
@@ -18,10 +18,12 @@ const TABS: Tab[] = [
 
 const SchoolTabs: React.FC = () => {
   const path = usePathname()
+  const params = useSearchParams()
+  const program = params.get('program')
   return (
     <>
       <ProgramPicker />
-      <nav className="ss-tabs" aria-label="Sunday school sections">
+      <nav className="ss-tabs" aria-label="Programs sections">
         {TABS.map((t) => {
           const active = t.exact ? path === t.href : path.startsWith(t.href)
           const Icon = t.icon
@@ -33,7 +35,7 @@ const SchoolTabs: React.FC = () => {
             )
           }
           return (
-            <Link key={t.href} href={t.href} className={`ss-tab${active ? ' ss-tab--active' : ''}`} aria-current={active ? 'page' : undefined}>
+            <Link key={t.href} href={program ? `${t.href}?program=${program}` : t.href} className={`ss-tab${active ? ' ss-tab--active' : ''}`} aria-current={active ? 'page' : undefined}>
               <Icon size={16} /> {t.label}
             </Link>
           )

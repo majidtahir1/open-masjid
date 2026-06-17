@@ -81,8 +81,8 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
 
   return (
     <div className="ss-root">
-      <p className="ss-eyebrow">Sunday school</p>
-      <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 24 }}>Set up your school</h1>
+      <p className="ss-eyebrow">Programs</p>
+      <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 24 }}>Set up your program</h1>
 
       <div className="ss-wizard">
         <nav className="ss-rail" aria-label="Setup steps">
@@ -112,7 +112,7 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
             <div className="ss-card">
               <div className="ss-finish">
                 <span className="ss-finish__badge"><Sparkles size={26} /></span>
-                <h2 className="ss-card__title" style={{ marginBottom: 4 }}>Your school is ready</h2>
+                <h2 className="ss-card__title" style={{ marginBottom: 4 }}>Your program is ready</h2>
                 <p className="ss-card__hint" style={{ margin: '0 auto 4px' }}>
                   {summary.term?.name} is set up. You can take attendance any time from the dashboard.
                 </p>

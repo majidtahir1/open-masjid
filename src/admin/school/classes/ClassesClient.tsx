@@ -104,7 +104,7 @@ const ClassesClient: React.FC<{ termId: string | null; termName: string | null }
         </label>
       </div>
 
-      {!termId && <p className="ss-emptyline">Create a term first in Setup.</p>}
+      {!termId && <p className="ss-emptyline">Create a program first in Setup.</p>}
       {termId && loading && <p className="ss-emptyline">Loading…</p>}
 
       {termId && !loading && (

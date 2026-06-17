@@ -22,7 +22,7 @@ export const Students: CollectionConfig = {
   labels: { singular: 'Student', plural: 'Students' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Sunday School',
+    group: 'Programs',
     hidden: true,
     useAsTitle: 'fullName',
     defaultColumns: ['fullName', 'age', 'gradeLevel', 'status'],

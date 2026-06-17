@@ -14,7 +14,7 @@ export const SchoolClasses: CollectionConfig = {
   labels: { singular: 'Class', plural: 'Classes' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Sunday School',
+    group: 'Programs',
     hidden: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'term', 'gradeLevel', 'room', 'capacity'],

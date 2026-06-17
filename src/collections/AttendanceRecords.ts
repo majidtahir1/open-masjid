@@ -25,7 +25,7 @@ export const AttendanceRecords: CollectionConfig = {
   labels: { singular: 'Attendance Record', plural: 'Attendance Records' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Sunday School',
+    group: 'Programs',
     hidden: true,
     useAsTitle: 'id',
     defaultColumns: ['student', 'session', 'status', 'markedAt'],

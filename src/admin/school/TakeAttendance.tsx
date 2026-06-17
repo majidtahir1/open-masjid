@@ -105,7 +105,7 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
 
   return (
     <div className="ss-root">
-      <p className="ss-eyebrow">Sunday school</p>
+      <p className="ss-eyebrow">Programs</p>
       <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 18 }}>Take attendance</h1>
 
       <div className="ss-att__bar">

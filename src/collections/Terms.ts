@@ -21,14 +21,14 @@ const termRead: Access = (args) => {
 
 export const Terms: CollectionConfig = {
   slug: 'terms',
-  labels: { singular: 'Term', plural: 'Terms' },
+  labels: { singular: 'Program', plural: 'Programs' },
   admin: {
     enableListViewSelectAPI: true,
-    group: 'Sunday School',
+    group: 'Programs',
     hidden: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'startDate', 'endDate', 'status'],
-    description: 'Academic periods for the Sunday school (e.g. "Fall 2026").',
+    description: 'Programs (e.g. a Sunday school term, a Saturday program, or a summer camp).',
   },
   access: {
     read: denyKioskManager(termRead),

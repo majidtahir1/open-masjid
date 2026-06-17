@@ -6,7 +6,7 @@ import '../sunday-school.css'
 
 const TeacherDashboard: React.FC<{ termName: string | null; classes: { id: string | number; name: string }[] }> = ({ termName, classes }) => (
   <div className="ss-root">
-    <p className="ss-eyebrow">Sunday school{termName ? ` · ${termName}` : ''}</p>
+    <p className="ss-eyebrow">Programs{termName ? ` · ${termName}` : ''}</p>
     <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 18 }}>Your classes</h1>
     {classes.length === 0 && <p className="ss-emptyline">You have no classes assigned yet.</p>}
     <div className="ss-card" style={{ padding: '8px 14px' }}>

@@ -17,7 +17,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
     <div className="ss-root">
       {term ? (
         <header className="ss-masthead">
-          <p className="ss-eyebrow">Sunday school · current term</p>
+          <p className="ss-eyebrow">Programs · current program</p>
           <h1 className="ss-masthead__title">{term.name}</h1>
           <p className="ss-masthead__meta">
             {formatDays(term.meetingDays)}
@@ -34,7 +34,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
         </header>
       ) : (
         <section className="ss-empty">
-          <p className="ss-eyebrow">Sunday school</p>
+          <p className="ss-eyebrow">Programs</p>
           <h1 className="ss-empty__title">Let&apos;s set up your school</h1>
           <p className="ss-empty__body">
             Start with a term — its dates and weekly meeting day. Every class you add gets its weekly
