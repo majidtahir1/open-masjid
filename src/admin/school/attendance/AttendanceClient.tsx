@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, ChevronRight } from 'lucide-react'
 import { api } from '../api'
 import SchoolTabs from '../SchoolTabs'
 import '../sunday-school.css'
@@ -38,6 +38,13 @@ interface AttendanceRecord {
   status: string
 }
 
+const STATUS_TINT: Record<string, React.CSSProperties> = {
+  present: { background: 'rgba(40,160,180,0.14)', color: 'var(--ss-teal-600)' },
+  late: { background: 'rgba(240,200,140,0.22)', color: 'var(--ss-gold-700)' },
+  excused: { background: 'var(--theme-elevation-100)', color: 'var(--theme-elevation-600)' },
+  absent: { background: 'rgba(212,88,76,0.14)', color: 'var(--theme-error-500, #d4584c)' },
+}
+
 function idOf(v: unknown): string | number {
   if (v == null) return ''
   if (typeof v === 'object' && 'id' in (v as object)) return (v as { id: string | number }).id
@@ -69,6 +76,7 @@ export default function AttendanceClient() {
   const [records, setRecords] = useState<AttendanceRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [openSession, setOpenSession] = useState<string | null>(null)
 
   // Load class list
   useEffect(() => {
@@ -204,15 +212,48 @@ export default function AttendanceClient() {
               </h2>
               {sessions.map((session) => {
                 const counts = sessionSummary(session.id)
+                const date = String(session.date).slice(0, 10)
+                const isOpen = openSession === String(session.id)
+                const marked = STATUS_LABELS.reduce((n, s) => n + (counts[s] ?? 0), 0)
                 return (
-                  <div key={session.id} className="ss-row">
-                    <span className="ss-row__name">{String(session.date).slice(0, 10)}</span>
-                    {STATUS_LABELS.map((status) =>
-                      counts[status] != null ? (
-                        <span key={status} className="ss-pill" style={{ marginLeft: 6 }}>
-                          {counts[status]} {status}
-                        </span>
-                      ) : null,
+                  <div key={session.id}>
+                    <button
+                      type="button"
+                      className="ss-row"
+                      style={{ width: '100%', background: 'none', border: 0, cursor: 'pointer', textAlign: 'left' }}
+                      aria-expanded={isOpen}
+                      onClick={() => setOpenSession(isOpen ? null : String(session.id))}
+                    >
+                      <ChevronRight size={15} style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease', color: 'var(--theme-elevation-400)' }} />
+                      <span className="ss-row__name" style={{ fontWeight: 600 }}>{date}</span>
+                      {marked === 0
+                        ? <span className="ss-pill ss-pill--muted">not taken</span>
+                        : STATUS_LABELS.map((status) =>
+                            counts[status] != null ? (
+                              <span key={status} className="ss-pill" style={{ marginLeft: 6, ...STATUS_TINT[status] }}>
+                                {counts[status]} {status}
+                              </span>
+                            ) : null,
+                          )}
+                    </button>
+                    {isOpen && (
+                      <div style={{ padding: '4px 0 14px 28px' }}>
+                        {students.map((student) => {
+                          const rec = records.find(
+                            (r) => String(idOf(r.session)) === String(session.id) && String(idOf(r.student)) === String(student.id),
+                          )
+                          const status = rec?.status
+                          return (
+                            <div key={student.id} className="ss-row" style={{ padding: '6px 12px' }}>
+                              <span className="ss-row__name">{studentName(student)}</span>
+                              <span className="ss-pill" style={status ? STATUS_TINT[status] : { background: 'var(--theme-elevation-100)', color: 'var(--theme-elevation-500)' }}>
+                                {status ?? 'not marked'}
+                              </span>
+                            </div>
+                          )
+                        })}
+                        {students.length === 0 && <p className="ss-emptyline">No students enrolled.</p>}
+                      </div>
                     )}
                   </div>
                 )
