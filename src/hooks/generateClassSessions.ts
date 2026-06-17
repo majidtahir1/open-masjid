@@ -33,6 +33,16 @@ export function weeklyDates(start: string, end: string, weekday: string, holiday
   return out
 }
 
+/** Union of weekly dates across every day in `days`, deduped, sorted ascending, minus holidays. */
+export function programDates(start: string, end: string, days: string[], holidays?: Iterable<string>): string[] {
+  const skip = holidays instanceof Set ? holidays : new Set(holidays ?? [])
+  const set = new Set<string>()
+  for (const d of days) {
+    for (const iso of weeklyDates(start, end, d)) set.add(iso)
+  }
+  return [...set].filter((iso) => !skip.has(iso)).sort()
+}
+
 export interface ExistingSession {
   id: string | number
   date: string

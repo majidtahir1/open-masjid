@@ -1,3 +1,21 @@
+const WEEK_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+const DAY_PLURAL: Record<string, string> = {
+  sunday: 'Sundays', monday: 'Mondays', tuesday: 'Tuesdays', wednesday: 'Wednesdays',
+  thursday: 'Thursdays', friday: 'Fridays', saturday: 'Saturdays',
+}
+
+/** Human label for a set of meeting days, e.g. "Saturdays & Sundays", "Weekdays", "Every day". */
+export function formatDays(days: string[]): string {
+  const set = new Set(days)
+  if (set.size === 0) return '—'
+  if (set.size === 7) return 'Every day'
+  const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+  if (set.size === 5 && weekdays.every((d) => set.has(d))) return 'Weekdays'
+  const ordered = WEEK_ORDER.filter((d) => set.has(d)).map((d) => DAY_PLURAL[d])
+  if (ordered.length === 1) return ordered[0]
+  return `${ordered.slice(0, -1).join(', ')} & ${ordered[ordered.length - 1]}`
+}
+
 export interface HubTerm {
   id: string | number
   name: string

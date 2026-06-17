@@ -58,3 +58,23 @@ describe('reconcileSessions', () => {
     expect(plan.toCancel).toEqual([3])
   })
 })
+
+import { programDates } from '@/hooks/generateClassSessions'
+
+describe('programDates', () => {
+  it('unions weekly dates across multiple days, sorted ascending', () => {
+    // 2026-09-05 is a Saturday, 2026-09-06 a Sunday.
+    const dates = programDates('2026-09-05', '2026-09-14', ['saturday', 'sunday'])
+    expect(dates).toEqual(['2026-09-05', '2026-09-06', '2026-09-12', '2026-09-13'])
+  })
+  it('excludes holidays', () => {
+    const dates = programDates('2026-09-05', '2026-09-14', ['saturday', 'sunday'], new Set(['2026-09-06']))
+    expect(dates).toEqual(['2026-09-05', '2026-09-12', '2026-09-13'])
+  })
+  it('empty when no days', () => {
+    expect(programDates('2026-09-05', '2026-09-14', [])).toEqual([])
+  })
+  it('single day matches weeklyDates', () => {
+    expect(programDates('2026-09-06', '2026-09-27', ['sunday'])).toEqual(['2026-09-06', '2026-09-13', '2026-09-20', '2026-09-27'])
+  })
+})

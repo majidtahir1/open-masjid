@@ -48,3 +48,20 @@ describe('buildHubSummary', () => {
     expect(s).toEqual({ term: null, classCount: 0, teacherlessCount: 0, placedCount: 0, unplacedCount: 0 })
   })
 })
+
+import { formatDays } from '@/lib/school-setup'
+
+describe('formatDays', () => {
+  it('one day → plural', () => { expect(formatDays(['sunday'])).toBe('Sundays') })
+  it('weekend pair', () => { expect(formatDays(['saturday', 'sunday'])).toBe('Saturdays & Sundays') })
+  it('the five weekdays → Weekdays', () => {
+    expect(formatDays(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'])).toBe('Weekdays')
+  })
+  it('all seven → Every day', () => {
+    expect(formatDays(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'])).toBe('Every day')
+  })
+  it('arbitrary set joins in week order', () => {
+    expect(formatDays(['friday', 'monday', 'wednesday'])).toBe('Mondays, Wednesdays & Fridays')
+  })
+  it('empty → dash', () => { expect(formatDays([])).toBe('—') })
+})
