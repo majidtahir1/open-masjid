@@ -23,7 +23,7 @@ const SessionTimeline: React.FC<{
   onToggle?: (iso: string) => void
   variant?: 'masthead' | 'inline'
   max?: number
-}> = ({ startDate, endDate, meetingDay, holidays = [], onToggle, variant = 'masthead', max = 26 }) => {
+}> = ({ startDate, endDate, meetingDay, holidays = [], onToggle, variant = 'masthead', max = 80 }) => {
   if (!startDate || !endDate) return null
   // Full set of meeting days (including days off) so every week is visible/toggleable.
   const all = weeklyDates(startDate, endDate, meetingDay ?? 'sunday')
