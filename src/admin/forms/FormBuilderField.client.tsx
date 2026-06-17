@@ -24,6 +24,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { Field, FieldTypeId, FormSchema } from '@/lib/form-schema'
 import { FIELD_TYPES } from '@/lib/form-schema'
+import { ensureStudentFields, hasRequiredRegistrationFields } from '@/lib/registration-fields'
 import { PLATFORM_DOMAIN } from '@/lib/tenant-parse'
 import FieldCard from './builder/FieldCard'
 import AddFieldPopover from './builder/AddFieldPopover'
@@ -226,6 +227,17 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
     }
     return value
   })()
+
+  // When the "Sunday school registration" flag is on, ensure the two required
+  // student-name fields exist in the builder — injected instantly so the admin
+  // sees them without saving. The guard makes this a no-op once the fields are
+  // present, so it cannot loop.
+  const { value: isSchoolReg } = useField<boolean>({ path: 'schoolRegistration' })
+  useEffect(() => {
+    if (isSchoolReg && !hasRequiredRegistrationFields(schema)) {
+      setValue(ensureStudentFields(schema, randomId))
+    }
+  }, [isSchoolReg, schema, setValue])
 
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null)
   const [popoverAt, setPopoverAt] = useState<PopoverPosition | null>(null)
