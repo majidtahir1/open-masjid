@@ -529,3 +529,17 @@
 .ss-chart__barval { font-size: 12.5px; font-weight: 600; color: var(--theme-elevation-700); text-align: right; }
 .ss-chart__area { width: 100%; height: auto; display: block; }
 @media (prefers-reduced-motion: reduce) { .ss-chart__barfill { transition: none; } }
+
+/* tabs */
+.ss-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--theme-elevation-150); margin-bottom: 22px; }
+.ss-tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 14px; font-size: 14px; font-weight: 600; text-decoration: none;
+  color: var(--theme-elevation-600); border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+.ss-tab:hover { color: var(--theme-elevation-900); }
+.ss-tab--active { color: var(--ss-teal-600); border-bottom-color: var(--ss-teal-500); }
+.ss-tab--soon { color: var(--theme-elevation-400); cursor: default; }
+.ss-tab--soon:hover { color: var(--theme-elevation-400); }
+.ss-tab__soon { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: var(--theme-elevation-100); color: var(--theme-elevation-500); }
