@@ -10,6 +10,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
+import { resolveProgramId } from '@/lib/program-context'
 import { importMap } from '../../importMap'
 import ClassesClient from '@/admin/school/classes/ClassesClient'
 
@@ -21,7 +22,8 @@ const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
 const idOf = (v: unknown): string | number | null =>
   v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
-export default async function ClassesPage() {
+export default async function ClassesPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
+  const sp = await searchParams
   const { user, permissions } = await getAdminUser()
   if (!user) redirect(loginUrl('/admin/sunday-school/classes'))
 
@@ -42,15 +44,16 @@ export default async function ClassesPage() {
 
   const tenantId = idOf((user as { tenant?: unknown }).tenant)
 
-  const termRes = await payload.find({
+  const programsRes = await payload.find({
     collection: 'terms',
-    where: { status: { equals: 'active' }, ...(tenantId ? { tenant: { equals: tenantId } } : {}) },
+    where: { ...(tenantId ? { tenant: { equals: tenantId } } : {}) },
     sort: '-startDate',
-    limit: 1,
+    limit: 1000,
     depth: 0,
     req,
   })
-  const term = termRes.docs[0] ?? null
+  const selectedId = resolveProgramId(sp.program, programsRes.docs as any)
+  const term = selectedId != null ? (programsRes.docs.find((p: any) => String(p.id) === String(selectedId)) ?? null) : null
 
   return (
     <DefaultTemplate
