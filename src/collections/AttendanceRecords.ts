@@ -1,5 +1,5 @@
 import type { Access, CollectionConfig } from 'payload'
-import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
+import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { assertTeacherOwnsSession } from '../hooks/assertTeacherOwnsSession'
 import {
@@ -26,7 +26,7 @@ export const AttendanceRecords: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Sunday School',
-    hidden: hideForKioskManager,
+    hidden: true,
     useAsTitle: 'id',
     defaultColumns: ['student', 'session', 'status', 'markedAt'],
     description: "One student's attendance for one session.",

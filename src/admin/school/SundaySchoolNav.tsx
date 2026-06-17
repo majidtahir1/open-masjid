@@ -41,10 +41,10 @@ export default async function SundaySchoolNav() {
     return (
       <Link
         className="nav__link"
-        href="/admin/take-attendance"
+        href="/admin/sunday-school"
         data-sunday-school-nav-link
       >
-        Take Attendance
+        Sunday School
       </Link>
     )
   } catch {

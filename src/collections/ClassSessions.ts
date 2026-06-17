@@ -1,5 +1,5 @@
 import type { Access, CollectionConfig } from 'payload'
-import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
+import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import {
   schoolTenantCreate,
@@ -28,7 +28,7 @@ export const ClassSessions: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Sunday School',
-    hidden: hideForKioskManager,
+    hidden: true,
     useAsTitle: 'date',
     defaultColumns: ['class', 'date', 'status'],
     description: 'One weekly meeting of a class.',

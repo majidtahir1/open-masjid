@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
+import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import {
   schoolTenantCreate,
@@ -13,7 +13,7 @@ export const Enrollments: CollectionConfig = {
   admin: {
     enableListViewSelectAPI: true,
     group: 'Sunday School',
-    hidden: hideForKioskManager,
+    hidden: true,
     useAsTitle: 'id',
     defaultColumns: ['student', 'class', 'status', 'enrolledAt'],
     description: 'Joins a student to a class for a term (the roster).',
