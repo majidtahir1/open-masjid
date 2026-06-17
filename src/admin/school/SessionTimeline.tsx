@@ -34,36 +34,36 @@ const SessionTimeline: React.FC<{
   const overflow = all.length - shown.length
   const interactive = typeof onToggle === 'function'
 
-  const Bead: React.FC<{ iso: string; i: number }> = ({ iso, i }) => {
-    const isOff = off.has(iso)
-    const cls = `ss-bead${isOff ? ' ss-bead--off' : ''}${interactive ? ' ss-bead--toggle' : ''}`
-    const style = { animationDelay: `${Math.min(i * 30, 700)}ms` } as React.CSSProperties
-    const inner = (
-      <>
-        <span className="ss-bead__dot" />
-        <span className="ss-bead__label">{label(iso)}</span>
-      </>
-    )
-    if (interactive) {
-      return (
-        <button
-          type="button"
-          className={cls}
-          style={style}
-          aria-pressed={!isOff}
-          title={isOff ? 'Day off — click to add this week back' : 'Click to mark this week off'}
-          onClick={() => onToggle!(iso)}
-        >
-          {inner}
-        </button>
-      )
-    }
-    return <span className={cls} style={style}>{inner}</span>
-  }
-
   return (
     <div className={`ss-rhythm${variant === 'inline' ? ' ss-rhythm--inline' : ''}`}>
-      {shown.map((iso, i) => <Bead key={iso} iso={iso} i={i} />)}
+      {shown.map((iso, i) => {
+        const isOff = off.has(iso)
+        const cls = `ss-bead${isOff ? ' ss-bead--off' : ''}${interactive ? ' ss-bead--toggle' : ''}`
+        // Stagger only the first paint; once mounted the element persists across
+        // toggles (stable key), so no re-animation on click.
+        const style = { animationDelay: `${Math.min(i * 30, 700)}ms` } as React.CSSProperties
+        const inner = (
+          <>
+            <span className="ss-bead__dot" />
+            <span className="ss-bead__label">{label(iso)}</span>
+          </>
+        )
+        return interactive ? (
+          <button
+            key={iso}
+            type="button"
+            className={cls}
+            style={style}
+            aria-pressed={!isOff}
+            title={isOff ? 'Day off — click to add this week back' : 'Click to mark this week off'}
+            onClick={() => onToggle!(iso)}
+          >
+            {inner}
+          </button>
+        ) : (
+          <span key={iso} className={cls} style={style}>{inner}</span>
+        )
+      })}
       {overflow > 0 && (
         <span className="ss-bead" style={{ animationDelay: `${Math.min(shown.length * 30, 700)}ms` }}>
           <span className="ss-bead__dot" style={{ background: 'currentColor', opacity: 0.5 }} />
