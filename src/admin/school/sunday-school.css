@@ -543,3 +543,14 @@
 .ss-tab--soon { color: var(--theme-elevation-400); cursor: default; }
 .ss-tab--soon:hover { color: var(--theme-elevation-400); }
 .ss-tab__soon { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: var(--theme-elevation-100); color: var(--theme-elevation-500); }
+
+/* dashboard */
+.ss-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+.ss-panel { padding: 18px 20px; }
+.ss-attention {
+  display: flex; align-items: center; gap: 8px; margin-top: 16px;
+  padding: 10px 14px; border-radius: 10px; font-size: 13.5px;
+  background: var(--ss-gold-wash); color: var(--ss-gold-700);
+}
+.ss-attention a { color: inherit; font-weight: 700; text-decoration: underline; }
+@media (max-width: 860px) { .ss-grid2 { grid-template-columns: 1fr; } }

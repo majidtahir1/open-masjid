@@ -11,9 +11,9 @@ import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
 import { importMap } from '../importMap'
-import HubClient from '@/admin/school/HubClient'
-import { buildHubSummary } from '@/lib/school-setup'
-import { weeklyDates, holidaySet } from '@/hooks/generateClassSessions'
+import DashboardClient, { type DashboardData } from '@/admin/school/dashboard/DashboardClient'
+import TeacherDashboard from '@/admin/school/dashboard/TeacherDashboard'
+import { attendanceTrend, rateByClass, statusBreakdown, enrollmentByClass, dashboardKpis } from '@/lib/school-reports'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -54,24 +54,53 @@ export default async function SundaySchoolHubPage() {
   })
   const term = termRes.docs[0] ?? null
 
-  let classes: any[] = []
-  let enrollments: any[] = []
-  let students: any[] = []
-  let sessionsPerClass = 0
-  if (term) {
-    classes = (await payload.find({ collection: 'school-classes', where: { term: { equals: term.id } }, limit: 1000, depth: 0, req })).docs
-    const classIds = classes.map((c) => c.id)
-    if (classIds.length) {
-      enrollments = (await payload.find({ collection: 'enrollments', where: { class: { in: classIds } }, limit: 5000, depth: 0, req })).docs
-    }
-    students = (await payload.find({ collection: 'students', where: { status: { equals: 'active' } }, limit: 5000, depth: 0, req })).docs
-    sessionsPerClass =
-      term.startDate && term.endDate
-        ? weeklyDates(term.startDate, term.endDate, (term as any).meetingDay ?? 'sunday', holidaySet((term as any).holidays)).length
-        : 0
+  const today = new Date().toISOString().slice(0, 10)
+
+  // Teacher: trimmed view of their own classes (no analytics/CRUD).
+  if (role === 'teacher') {
+    const myClasses = term
+      ? (await payload.find({ collection: 'school-classes', where: { term: { equals: term.id }, status: { equals: 'active' } }, limit: 1000, depth: 0, req })).docs
+      : []
+    return (
+      <DefaultTemplate i18n={req.i18n} params={{}} payload={payload} permissions={permissions as SanitizedPermissions} req={req} searchParams={{}} user={user} visibleEntities={visibleEntities}>
+        <TeacherDashboard termName={term?.name ?? null} classes={myClasses.map((c: any) => ({ id: c.id, name: c.name }))} />
+      </DefaultTemplate>
+    )
   }
 
-  const summary = buildHubSummary({ term, classes, enrollments, students, sessionsPerClass })
+  let dashboard: DashboardData = {
+    term: null,
+    kpis: { students: 0, activeClasses: 0, avgAttendanceRate: 0, sessionsHeld: 0, sessionsUpcoming: 0 },
+    trend: [], rateByClass: [], statusBreakdown: { present: 0, absent: 0, late: 0, excused: 0 }, enrollmentByClass: [],
+    attention: { teacherlessClasses: 0, unplacedStudents: 0 },
+  }
+
+  if (term) {
+    const classes = (await payload.find({ collection: 'school-classes', where: { term: { equals: term.id }, status: { equals: 'active' } }, limit: 1000, depth: 0, req })).docs
+    const classIds = classes.map((c: any) => c.id)
+    const sessions = classIds.length ? (await payload.find({ collection: 'class-sessions', where: { class: { in: classIds } }, limit: 10000, depth: 0, req })).docs : []
+    const sessionIds = sessions.map((s: any) => s.id)
+    const records = sessionIds.length ? (await payload.find({ collection: 'attendance-records', where: { session: { in: sessionIds } }, limit: 50000, depth: 0, req })).docs : []
+    const enrollments = classIds.length ? (await payload.find({ collection: 'enrollments', where: { class: { in: classIds } }, limit: 10000, depth: 0, req })).docs : []
+    const students = (await payload.find({ collection: 'students', where: { status: { equals: 'active' } }, limit: 10000, depth: 0, req })).docs
+
+    const classDocs = classes.map((c: any) => ({ id: c.id, name: c.name }))
+    const sessDocs = sessions.map((s: any) => ({ id: s.id, class: s.class, date: s.date }))
+    const recDocs = records.map((r: any) => ({ session: r.session, status: r.status }))
+    const teacherless = classes.filter((c: any) => !c.teachers || c.teachers.length === 0).length
+    const placed = new Set(enrollments.filter((e: any) => e.status === 'active').map((e: any) => String(typeof e.student === 'object' ? e.student.id : e.student)))
+    const unplaced = students.filter((s: any) => !placed.has(String(s.id))).length
+
+    dashboard = {
+      term: { name: term.name, startDate: term.startDate, endDate: term.endDate, meetingDay: (term as any).meetingDay, holidays: ((term as any).holidays ?? []).map((h: any) => String(h.date).slice(0, 10)) },
+      kpis: dashboardKpis({ students, classes: classDocs, sessions: sessDocs, records: recDocs, today }),
+      trend: attendanceTrend(sessDocs, recDocs),
+      rateByClass: rateByClass(classDocs, sessDocs, recDocs),
+      statusBreakdown: statusBreakdown(recDocs),
+      enrollmentByClass: enrollmentByClass(classDocs, enrollments.map((e: any) => ({ class: e.class, status: e.status }))),
+      attention: { teacherlessClasses: teacherless, unplacedStudents: unplaced },
+    }
+  }
 
   return (
     <DefaultTemplate
@@ -84,7 +113,7 @@ export default async function SundaySchoolHubPage() {
       user={user}
       visibleEntities={visibleEntities}
     >
-      <HubClient summary={summary} canSetup={role !== 'teacher'} />
+      <DashboardClient data={dashboard} />
     </DefaultTemplate>
   )
 }
