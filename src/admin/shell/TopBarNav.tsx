@@ -82,7 +82,9 @@ export default function TopBarNav() {
       })
 
     fetch(
-      `/api/form-submissions?where[tenant][equals]=${idStr}&limit=0&depth=0`,
+      // Count only NEW (unreviewed) submissions — must match the dashboard's
+      // "Review submissions" card, which filters status=new.
+      `/api/form-submissions?where[tenant][equals]=${idStr}&where[status][equals]=new&limit=0&depth=0`,
       { credentials: 'include' },
     )
       .then((r) => (r.ok ? (r.json() as Promise<{ totalDocs?: number }>) : null))
