@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { Users, GraduationCap, Percent, CalendarCheck, AlertTriangle } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { Users, GraduationCap, Percent, CalendarCheck, AlertTriangle, ClipboardCheck, Wand2 } from 'lucide-react'
 import SchoolTabs from '../SchoolTabs'
 import SessionTimeline from '../SessionTimeline'
 import Donut from '../charts/Donut'
@@ -32,6 +33,9 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
 
 const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
   const { term, kpis } = data
+  const params = useSearchParams()
+  const program = params.get('program')
+  const progQ = program ? `?program=${program}` : ''
   if (!term) {
     return (
       <div className="ss-root">
@@ -53,6 +57,11 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
         <h1 className="ss-masthead__title">{term.name}</h1>
         <SessionTimeline startDate={term.startDate} endDate={term.endDate} meetingDays={term.meetingDays} holidays={term.holidays} variant="masthead" />
       </header>
+
+      <div className="ss-actions" style={{ margin: '16px 0 0' }}>
+        <Link className="ss-btn" href={`/admin/take-attendance${progQ}`}><ClipboardCheck size={18} /> Take attendance</Link>
+        <Link className="ss-btn ss-btn--ghost" href={`/admin/sunday-school/setup${progQ}`}><Wand2 size={18} /> Edit program</Link>
+      </div>
 
       <div className="ss-stats">
         <div className="ss-stat"><span className="ss-stat__icon"><Users size={19} /></span><div className="ss-stat__num">{kpis.students}</div><div className="ss-stat__label">students</div></div>
