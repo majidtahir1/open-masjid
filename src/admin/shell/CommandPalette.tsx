@@ -35,7 +35,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   return (
     <div className="omk" style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(10,22,56,.32)' }} />
-      <div role="dialog" aria-modal style={{
+      <div role="dialog" aria-modal aria-label="Command palette" style={{
         position: 'absolute', top: 88, left: '50%', transform: 'translateX(-50%)',
         width: 600, maxWidth: '92vw', background: '#fff', borderRadius: 16,
         boxShadow: '0 30px 80px rgba(10,22,56,.4)', overflow: 'hidden',
