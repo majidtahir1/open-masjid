@@ -3,7 +3,12 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import { api } from './api'
-import { resolveProgramId } from '@/lib/program-context'
+import { PROGRAM_COOKIE, resolveProgramId } from '@/lib/program-context'
+
+function readCookie(name: string): string | null {
+  const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+  return m ? decodeURIComponent(m[1]) : null
+}
 
 interface Program { id: string | number; name: string; status?: string; startDate?: string | null }
 
@@ -26,11 +31,15 @@ const ProgramPicker: React.FC = () => {
   }, [])
 
   if (programs.length === 0) return null
-  const requested = params.get('program')
+  // Fall back to the persisted cookie when the URL has no ?program, so the
+  // picker shows the same program the server resolved on a fresh entry.
+  const requested = params.get('program') ?? readCookie(PROGRAM_COOKIE)
   const selected = resolveProgramId(requested, programs)
 
   const go = (value: string) => {
     if (value === 'new') { router.push('/admin/sunday-school/setup?program=new'); return }
+    // Persist the choice so other school pages default to it without a ?program.
+    document.cookie = `${PROGRAM_COOKIE}=${encodeURIComponent(value)}; path=/admin; max-age=${60 * 60 * 24 * 180}; samesite=lax`
     const next = new URLSearchParams(Array.from(params.entries()))
     next.set('program', value)
     router.push(`${pathname}?${next.toString()}`)

@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, CheckCheck, ClipboardCheck } from 'lucide-react'
 import { api, toId } from './api'
+import ProgramPicker from './ProgramPicker'
 import './sunday-school.css'
 
 type Doc = { id: number | string; [k: string]: any }
@@ -30,6 +31,12 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Switching programs invalidates the current class/session selection.
+    setClassId('')
+    setSessions([])
+    setSession(null)
+    setRoster([])
+    setMarks({})
     const q = programId ? `&where[term][equals]=${programId}` : ''
     api(`/school-classes?limit=200&depth=0${q}`)
       .then((r) => setClasses(r.docs))
@@ -135,6 +142,10 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
     <div className="ss-root">
       <p className="ss-eyebrow">Programs</p>
       <h1 className="ss-display" style={{ fontSize: 28, marginBottom: 18 }}>Take attendance</h1>
+
+      <div style={{ marginBottom: 14 }}>
+        <ProgramPicker />
+      </div>
 
       <div className="ss-att__bar">
         <div className="ss-att__pick">

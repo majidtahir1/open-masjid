@@ -10,7 +10,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
-import { resolveProgramId } from '@/lib/program-context'
+import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../importMap'
 import DashboardClient, { type DashboardData } from '@/admin/school/dashboard/DashboardClient'
 import TeacherDashboard from '@/admin/school/dashboard/TeacherDashboard'
@@ -55,7 +55,7 @@ export default async function SundaySchoolHubPage({ searchParams }: { searchPara
     depth: 0,
     req,
   })
-  const selectedId = resolveProgramId(sp.program, programsRes.docs as any)
+  const selectedId = await selectedProgramId(sp.program, programsRes.docs as any)
   const term = selectedId != null ? (programsRes.docs.find((p: any) => String(p.id) === String(selectedId)) ?? null) : null
 
   const today = new Date().toISOString().slice(0, 10)

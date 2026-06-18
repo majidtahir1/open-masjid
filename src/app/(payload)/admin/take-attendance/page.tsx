@@ -13,7 +13,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
-import { resolveProgramId } from '@/lib/program-context'
+import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../importMap'
 import TakeAttendance from '@/admin/school/TakeAttendance'
 
@@ -56,7 +56,7 @@ export default async function TakeAttendancePage({ searchParams }: { searchParam
     depth: 0,
     req,
   })
-  const selectedId = resolveProgramId(sp.program, programsRes.docs as any)
+  const selectedId = await selectedProgramId(sp.program, programsRes.docs as any)
 
   return (
     <DefaultTemplate
