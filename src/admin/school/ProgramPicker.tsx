@@ -12,9 +12,17 @@ const ProgramPicker: React.FC = () => {
   const pathname = usePathname()
   const params = useSearchParams()
   const [programs, setPrograms] = useState<Program[]>([])
+  const [canCreate, setCanCreate] = useState(false)
 
   useEffect(() => {
     api('/terms?limit=1000&depth=0&sort=-startDate').then((r) => setPrograms(r.docs ?? [])).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    api('/users/me').then((r) => {
+      const role = r?.user?.role
+      setCanCreate(role === 'admin' || role === 'platformOwner')
+    }).catch(() => {})
   }, [])
 
   if (programs.length === 0) return null
@@ -36,7 +44,9 @@ const ProgramPicker: React.FC = () => {
           {programs.map((p) => (
             <option key={p.id} value={String(p.id)}>{p.name}{p.status === 'archived' ? ' (archived)' : ''}</option>
           ))}
-          <option value="new">+ New program…</option>
+          {canCreate && (
+            <option value="new">+ New program…</option>
+          )}
         </select>
         <ChevronDown size={15} className="ss-progpick__chev" />
       </div>

@@ -29,6 +29,7 @@ export default async function SundaySchoolSetupPage({ searchParams }: { searchPa
 
   const role = (user as { role?: string }).role
   if (!role || !SETUP_ROLES.has(role)) redirect('/admin/sunday-school')
+  if (role === 'school_admin' && sp.program === 'new') redirect('/admin/sunday-school')
 
   const payload = await getPayload({ config, importMap })
   const req = await createLocalReq({ user }, payload)
@@ -51,7 +52,7 @@ export default async function SundaySchoolSetupPage({ searchParams }: { searchPa
     depth: 0,
     req,
   })
-  const createMode = sp.program === 'new' || programsRes.docs.length === 0
+  const createMode = (sp.program === 'new' || programsRes.docs.length === 0) && role !== 'school_admin'
   const selectedId = createMode ? null : resolveProgramId(sp.program, programsRes.docs as any)
 
   return (
