@@ -552,3 +552,19 @@ aside.nav,
 .om-dashboard-hub a {
   text-decoration: none !important;
 }
+
+/* =========================================================================
+ * Mobile shell (< 860px) — the MobileShell bottom tab bar is position:fixed,
+ * so reserve space at the bottom of the page content so it isn't obscured.
+ * The Create sheet uses this slide-up keyframe.
+ * ========================================================================= */
+@keyframes om-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 859px) {
+  .template-default__wrap {
+    padding-bottom: 90px;
+  }
+}

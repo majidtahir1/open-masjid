@@ -380,6 +380,15 @@
   border-top: 1px solid #f5c6c3;
 }
 
+/* On mobile the bottom tab bar + FAB own the bottom-right corner, and the
+   shell's sheets/panels would clash with the floating launcher, so hide it
+   below the shell breakpoint. */
+@media (max-width: 859px) {
+  .launcher {
+    display: none;
+  }
+}
+
 /* ---- mobile: docked and expanded panels go near-fullscreen ---- */
 @media (max-width: 480px) {
   .panel,

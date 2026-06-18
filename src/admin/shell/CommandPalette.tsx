@@ -10,7 +10,16 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const role = ((user as { role?: Role } | null)?.role ?? 'staff') as Role
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 859px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   const { actions, pages } = useMemo(() => searchEntries(role, query), [role, query])
   const flat = useMemo(
@@ -32,6 +41,39 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   if (!open) return null
   const ai = flat.length ? Math.min(active, flat.length - 1) : 0
+
+  const results = (
+    <>
+      {actions.length > 0 && <Section title="Actions" items={actions.map((a, i) => ({ key: a.href, label: a.label, group: a.group, activeRow: i === ai, onClick: () => go(a.href) }))} />}
+      {pages.length > 0 && <Section title="Go to" items={pages.map((p, i) => ({ key: p.href, label: p.label, group: p.label, activeRow: actions.length + i === ai, onClick: () => go(p.href) }))} />}
+      {flat.length === 0 && <div style={{ padding: '34px 12px', textAlign: 'center', color: '#9CA4A4' }}>No matches for &ldquo;{query}&rdquo;</div>}
+    </>
+  )
+
+  if (isMobile) {
+    return (
+      <div className="omk" role="dialog" aria-modal aria-label="Command palette" style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#F4F5F6', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 16px 12px', background: '#fff', borderBottom: '1px solid #EEF0F0' }}>
+          <span style={{ color: '#9CA4A4', display: 'inline-flex' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+              <path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
+          <input
+            ref={inputRef} value={query} onChange={(e) => { setQuery(e.target.value); setActive(0) }}
+            onKeyDown={onKeyDown} placeholder="Search pages and actions…"
+            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, background: 'transparent' }}
+          />
+          <button type="button" onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#28A0B4', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+            Cancel
+          </button>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 10 }}>{results}</div>
+      </div>
+    )
+  }
+
   return (
     <div className="omk" style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(10,22,56,.32)' }} />
@@ -48,11 +90,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
           />
           <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: '#F7F8F8', color: '#747C7C' }}>esc</span>
         </div>
-        <div style={{ maxHeight: 420, overflowY: 'auto', padding: 10 }}>
-          {actions.length > 0 && <Section title="Actions" items={actions.map((a, i) => ({ key: a.href, label: a.label, group: a.group, activeRow: i === ai, onClick: () => go(a.href) }))} />}
-          {pages.length > 0 && <Section title="Go to" items={pages.map((p, i) => ({ key: p.href, label: p.label, group: p.label, activeRow: actions.length + i === ai, onClick: () => go(p.href) }))} />}
-          {flat.length === 0 && <div style={{ padding: '34px 12px', textAlign: 'center', color: '#9CA4A4' }}>No matches for &ldquo;{query}&rdquo;</div>}
-        </div>
+        <div style={{ maxHeight: 420, overflowY: 'auto', padding: 10 }}>{results}</div>
       </div>
     </div>
   )

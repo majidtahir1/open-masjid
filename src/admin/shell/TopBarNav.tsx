@@ -5,7 +5,7 @@ import { useAuth } from '@payloadcms/ui'
 import { visibleFor, type Role, type NavItem } from './nav-config'
 import { MegaMenu } from './MegaMenu'
 import { AccountMenu } from './AccountMenu'
-import { MobileDrawer } from './MobileDrawer'
+import MobileShell from './MobileShell'
 
 type ShellUser = {
   role?: Role
@@ -49,18 +49,22 @@ export default function TopBarNav() {
   const initial = (u.firstName?.[0] ?? email?.[0] ?? '?').toUpperCase()
   const showSettings = role === 'admin' || role === 'platformOwner'
 
-  const [width, setWidth] = useState(1280)
+  // Detect mobile via matchMedia, NOT window.innerWidth: the (overflowing)
+  // desktop bar can skew innerWidth on a narrow viewport, but matchMedia
+  // tracks the real CSS breakpoint.
+  const [isMobile, setIsMobile] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [accountOpen, setAccountOpen] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
   const [viewSiteHref, setViewSiteHref] = useState<string | undefined>(undefined)
   const [tenantEditHref, setTenantEditHref] = useState<string | undefined>(undefined)
+  const [tenantName, setTenantName] = useState<string | undefined>(undefined)
 
   useEffect(() => {
-    const onResize = () => setWidth(window.innerWidth)
-    onResize()
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    const mq = window.matchMedia('(max-width: 859px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
   }, [])
 
   const tenantId = tenantIdOf(u.tenant)
@@ -72,9 +76,11 @@ export default function TopBarNav() {
     setTenantEditHref(`/admin/collections/tenants/${idStr}`)
 
     fetch(`/api/tenants/${idStr}?depth=0`, { credentials: 'include' })
-      .then((r) => (r.ok ? (r.json() as Promise<{ slug?: string | null }>) : null))
+      .then((r) => (r.ok ? (r.json() as Promise<{ slug?: string | null; name?: string | null }>) : null))
       .then((doc) => {
-        if (!cancelled && doc?.slug) setViewSiteHref(`https://${doc.slug}.openmasjid.app`)
+        if (cancelled || !doc) return
+        if (doc.slug) setViewSiteHref(`https://${doc.slug}.openmasjid.app`)
+        if (doc.name) setTenantName(doc.name)
       })
       .catch(() => {
         /* graceful */
@@ -85,7 +91,6 @@ export default function TopBarNav() {
     }
   }, [tenantId])
 
-  const isMobile = width < 860
   const openPalette = () => window.dispatchEvent(new Event('om:open-palette'))
 
   const closeAll = () => {
@@ -133,42 +138,15 @@ export default function TopBarNav() {
 
   if (isMobile) {
     return (
-      <nav data-om-topbar style={bar}>
-        <button
-          type="button"
-          aria-label="Open menu"
-          onClick={() => setMobileOpen((o) => !o)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: '#fff',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            padding: 4,
-          }}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
-        {Logo}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button
-            type="button"
-            aria-label="Search"
-            onClick={openPalette}
-            style={{ background: 'transparent', border: 'none', color: '#B6C0E0', cursor: 'pointer', display: 'inline-flex', padding: 4 }}
-          >
-            <SearchIcon size={19} />
-          </button>
-          {Avatar}
-        </div>
-        <MobileDrawer
-          open={mobileOpen}
-          items={items}
-          onNavigate={() => setMobileOpen(false)}
-        />
-      </nav>
+      <MobileShell
+        items={items}
+        role={role}
+        user={{ name, email, initial }}
+        tenantName={tenantName}
+        viewSiteHref={viewSiteHref}
+        tenantEditHref={tenantEditHref}
+        showSettings={showSettings}
+      />
     )
   }
 
