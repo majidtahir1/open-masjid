@@ -43,6 +43,11 @@ const leaf = (
 const ALL: Role[] = ['admin', 'staff', 'kioskManager', 'platformOwner']
 const CONTENT: Role[] = ['admin', 'staff', 'platformOwner']
 const ADMIN_ONLY: Role[] = ['admin', 'platformOwner']
+// Displays currently coincides with ALL, but is kept distinct on purpose: it
+// declares "every role can manage display content", which the access layer
+// backs up — the six Displays collections use tenantScoped create/read (NOT
+// denyKioskManager), so kioskManager genuinely reads and writes them. If a
+// future collection narrows kiosk access, change DISPLAYS, not ALL.
 const DISPLAYS: Role[] = ['admin', 'staff', 'kioskManager', 'platformOwner']
 
 export const NAV: NavItem[] = [
@@ -137,6 +142,6 @@ export function searchEntries(role: Role, query: string): SearchResult {
     !q || `${label} ${group}`.toLowerCase().includes(q)
   return {
     actions: ACTIONS.filter((a) => roleOk(a.roles, role) && match(a.label, a.group)),
-    pages: pagesFor(role).filter((p) => match(p.label, p.label)),
+    pages: pagesFor(role).filter((p) => match(p.label, '')),
   }
 }

@@ -29,9 +29,9 @@ describe('visibleFor', () => {
 
   it('filters children of a mega-menu by role', () => {
     const displaysForKiosk = visibleFor('kioskManager').find((i) => i.label === 'Displays')
-    expect(displaysForKiosk && 'children' in displaysForKiosk).toBe(true)
+    expect(displaysForKiosk?.kind).toBe('group')
     // Kiosk keeps all Displays children
-    const kids = (displaysForKiosk as { children: { label: string }[] }).children.map((c) => c.label)
+    const kids = displaysForKiosk?.kind === 'group' ? displaysForKiosk.children.map((c) => c.label) : []
     expect(kids).toContain('Kiosks')
   })
 })
