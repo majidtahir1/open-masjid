@@ -9,9 +9,20 @@ type Doc = { id: number | string; [k: string]: any }
 const STATUSES = ['present', 'absent', 'late', 'excused'] as const
 type Status = (typeof STATUSES)[number]
 
+/** Readable session label, e.g. "Sat, Sep 6, 2026" (marks today's session). */
+const fmtSession = (s: Doc): string => {
+  const iso = String(s.date).slice(0, 10)
+  const d = new Date(`${iso}T00:00:00`)
+  const label = Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+  return iso === new Date().toISOString().slice(0, 10) ? `${label} · today` : label
+}
+
 const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) => {
   const [classes, setClasses] = useState<Doc[]>([])
   const [classId, setClassId] = useState<string>('')
+  const [sessions, setSessions] = useState<Doc[]>([])
   const [session, setSession] = useState<Doc | null>(null)
   const [roster, setRoster] = useState<Doc[]>([])
   const [marks, setMarks] = useState<Record<string, { id?: string | number; status: Status }>>({})
@@ -25,44 +36,61 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
       .catch(() => setError('Failed to load classes.'))
   }, [programId])
 
-  const loadClass = useCallback(async (id: string) => {
-    setClassId(id)
-    setSession(null)
-    setRoster([])
+  // Load (or switch to) a specific session and pull its saved marks. The roster
+  // is class-based, so switching sessions only refreshes the marks.
+  const loadSession = useCallback(async (sess: Doc | null) => {
+    setSession(sess)
     setMarks({})
-    setError(null)
-    if (!id) return
+    if (!sess) return
     try {
-      const sess = await api(
-        `/class-sessions?where[class][equals]=${id}&where[status][not_equals]=cancelled&sort=date&limit=200&depth=0`,
+      const att = await api(
+        `/attendance-records?where[session][equals]=${sess.id}&limit=500&depth=0`,
       )
-      const today = new Date().toISOString().slice(0, 10)
-      const upcoming =
-        sess.docs.find((s: Doc) => String(s.date).slice(0, 10) >= today) ??
-        (sess.docs.length > 0 ? sess.docs[sess.docs.length - 1] : null)
-      setSession(upcoming)
-
-      const enr = await api(
-        `/enrollments?where[class][equals]=${id}&where[status][equals]=active&limit=500&depth=1`,
-      )
-      const students: Doc[] = enr.docs.map((e: Doc) => e.student).filter(Boolean)
-      setRoster(students)
-
-      if (upcoming) {
-        const att = await api(
-          `/attendance-records?where[session][equals]=${upcoming.id}&limit=500&depth=0`,
-        )
-        const m: Record<string, { id: string | number; status: Status }> = {}
-        for (const a of att.docs) {
-          const sid = typeof a.student === 'object' ? a.student.id : a.student
-          m[String(sid)] = { id: a.id, status: a.status }
-        }
-        setMarks(m)
+      const m: Record<string, { id: string | number; status: Status }> = {}
+      for (const a of att.docs) {
+        const sid = typeof a.student === 'object' ? a.student.id : a.student
+        m[String(sid)] = { id: a.id, status: a.status }
       }
+      setMarks(m)
     } catch (e: any) {
-      setError(e?.message ?? 'Failed to load class data.')
+      setError(e?.message ?? 'Failed to load attendance.')
     }
   }, [])
+
+  const loadClass = useCallback(
+    async (id: string) => {
+      setClassId(id)
+      setSessions([])
+      setSession(null)
+      setRoster([])
+      setMarks({})
+      setError(null)
+      if (!id) return
+      try {
+        const sess = await api(
+          `/class-sessions?where[class][equals]=${id}&where[status][not_equals]=cancelled&sort=date&limit=200&depth=0`,
+        )
+        setSessions(sess.docs)
+        // Default to the next session today-or-later; otherwise the most recent
+        // past session. The user can switch to any session via the date picker.
+        const today = new Date().toISOString().slice(0, 10)
+        const upcoming =
+          sess.docs.find((s: Doc) => String(s.date).slice(0, 10) >= today) ??
+          (sess.docs.length > 0 ? sess.docs[sess.docs.length - 1] : null)
+
+        const enr = await api(
+          `/enrollments?where[class][equals]=${id}&where[status][equals]=active&limit=500&depth=1`,
+        )
+        const students: Doc[] = enr.docs.map((e: Doc) => e.student).filter(Boolean)
+        setRoster(students)
+
+        await loadSession(upcoming)
+      } catch (e: any) {
+        setError(e?.message ?? 'Failed to load class data.')
+      }
+    },
+    [loadSession],
+  )
 
   const mark = async (studentId: string | number, status: Status) => {
     if (!session) return
@@ -115,7 +143,24 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
             <option value="">Choose a class…</option>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          {session && <span className="ss-att__date">{String(session.date).slice(0, 10)}</span>}
+          {sessions.length > 0 && (
+            <select
+              className="ss-select"
+              style={{ maxWidth: 220 }}
+              aria-label="Session date"
+              value={session ? String(session.id) : ''}
+              onChange={(e) => {
+                const s = sessions.find((x) => String(x.id) === e.target.value) ?? null
+                void loadSession(s)
+              }}
+            >
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {fmtSession(s)}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {session && roster.length > 0 && (
