@@ -505,3 +505,32 @@ aside.nav,
   background-color: var(--icp-navy-900);
   color: #F7F8F8;
 }
+
+/* =========================================================================
+ * Top-bar admin shell — promote Payload's Nav slot to a full-width bar and
+ * flow content beneath it. Depends on Payload template class names; update
+ * here if a Payload upgrade renames them (see also NavOrder history).
+ * NOTE: this block is intentionally appended last so its `aside.nav`
+ * background (navy-700) overrides the earlier sidebar `aside.nav` (navy-900).
+ * ========================================================================= */
+.template-default {
+  display: block;
+}
+.template-default__nav,
+aside.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 62px;
+  width: 100%;
+  z-index: 60;
+  border-right: none;
+  background: var(--icp-navy-700);
+  overflow: visible; /* let mega-menus escape the bar */
+}
+.template-default__wrap {
+  margin-left: 0 !important;
+  width: 100% !important;
+  padding-top: 62px;
+}
+/* Payload's mobile sidebar toggler is replaced by our own hamburger. */
+.nav-toggler { display: none !important; }

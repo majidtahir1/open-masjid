@@ -67,7 +67,9 @@ import { default as default_b265241eae706a0b7cddb9ba85c0aab9 } from '../../../..
 import { default as default_446124d7ee8ac8871d34efe9e97a216f } from '../../../../src/admin/SiteSettingsBrandingField'
 import { default as default_cc3379bc86beb1c39f1499840395f332 } from '../../../../src/admin/TeamPanel'
 import { default as default_980fed5703db1f4b51a0b7179e8c7ab9 } from '../../../../src/admin/BillingTabIntro'
+import { default as default_777e0d2a096f74b28463a185c1e1893c } from '../../../../src/admin/AnsariSettingsTab'
 import { default as default_ed26a91d770179c222166a676f958f4e } from '../../../../src/admin/CreateTenantPanel'
+import { default as default_1143ba710966547ad1716e7a1de48f4b } from '../../../../src/admin/shell/TopBarNav'
 import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
 import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
 import { default as default_658c7ea3707a6bc2089ab24ef81b7161 } from '../../../../src/admin/donations/HideDonationsCollections'
@@ -85,6 +87,7 @@ import { default as default_88163b0148bba3b80a9d3df09283cc03 } from '../../../..
 import { default as default_4ce2b6d430be17aa881be5628d11e397 } from '../../../../src/admin/membership/MembershipNav'
 import { default as default_dd804e3394bca869aeef1b539d7ad2d0 } from '../../../../src/admin/school/SundaySchoolNav'
 import { default as default_de0558b1f50970bcd7a35a4756342e14 } from '../../../../src/admin/ansari/AnsariProvider'
+import { default as default_f8689e4ba7cbc603a2ec91345825a0c7 } from '../../../../src/admin/shell/CommandPaletteProvider'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -159,7 +162,9 @@ export const importMap = {
   "/src/admin/SiteSettingsBrandingField#default": default_446124d7ee8ac8871d34efe9e97a216f,
   "/src/admin/TeamPanel#default": default_cc3379bc86beb1c39f1499840395f332,
   "/src/admin/BillingTabIntro#default": default_980fed5703db1f4b51a0b7179e8c7ab9,
+  "/src/admin/AnsariSettingsTab#default": default_777e0d2a096f74b28463a185c1e1893c,
   "/src/admin/CreateTenantPanel#default": default_ed26a91d770179c222166a676f958f4e,
+  "/src/admin/shell/TopBarNav#default": default_1143ba710966547ad1716e7a1de48f4b,
   "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
   "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,
   "/src/admin/donations/HideDonationsCollections#default": default_658c7ea3707a6bc2089ab24ef81b7161,
@@ -177,6 +182,7 @@ export const importMap = {
   "/src/admin/membership/MembershipNav#default": default_4ce2b6d430be17aa881be5628d11e397,
   "/src/admin/school/SundaySchoolNav#default": default_dd804e3394bca869aeef1b539d7ad2d0,
   "/src/admin/ansari/AnsariProvider#default": default_de0558b1f50970bcd7a35a4756342e14,
+  "/src/admin/shell/CommandPaletteProvider#default": default_f8689e4ba7cbc603a2ec91345825a0c7,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

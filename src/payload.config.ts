@@ -91,6 +91,7 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
+      Nav: '/src/admin/shell/TopBarNav#default',
       // Sidebar order intent (top → bottom), achieved via CSS `order` in NavOrder:
       //   1. Dashboard
       //   2. Prayer group        (native)
@@ -137,7 +138,10 @@ export default buildConfig({
         // the cleanest way to keep the built-in admin shell intact while
         // fully owning the login UI.
       },
-      providers: ['/src/admin/ansari/AnsariProvider#default'],
+      providers: [
+        '/src/admin/ansari/AnsariProvider#default',
+        '/src/admin/shell/CommandPaletteProvider#default',
+      ],
     },
   },
   // Order matters — Payload renders sidebar groups in the order their first
