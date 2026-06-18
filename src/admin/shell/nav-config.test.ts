@@ -1,6 +1,6 @@
 // src/admin/shell/nav-config.test.ts
 import { describe, it, expect } from 'vitest'
-import { NAV, visibleFor, searchEntries, type Role } from './nav-config'
+import { visibleFor, searchEntries } from './nav-config'
 
 describe('visibleFor', () => {
   it('admin sees every top-level area', () => {
