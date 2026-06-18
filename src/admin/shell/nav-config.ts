@@ -4,7 +4,13 @@
 // ./icons.tsx by IconName. Nav is a UX filter — collection access control
 // remains the real security boundary.
 
-export type Role = 'admin' | 'staff' | 'kioskManager' | 'platformOwner'
+export type Role =
+  | 'admin'
+  | 'staff'
+  | 'kioskManager'
+  | 'platformOwner'
+  | 'school_admin'
+  | 'teacher'
 
 export type IconName =
   | 'dashboard' | 'clock' | 'globe' | 'calendar' | 'image' | 'megaphone'
@@ -39,9 +45,13 @@ const leaf = (
   extra: Partial<Pick<NavLeaf, 'description'>> = {},
 ): NavLeaf => ({ kind: 'leaf', label, href, icon, roles, ...extra })
 
-const ALL: Role[] = ['admin', 'staff', 'kioskManager', 'platformOwner']
+const ALL: Role[] = ['admin', 'staff', 'kioskManager', 'platformOwner', 'school_admin', 'teacher']
 const CONTENT: Role[] = ['admin', 'staff', 'platformOwner']
 const ADMIN_ONLY: Role[] = ['admin', 'platformOwner']
+// Sunday-school program roles — mirrors the hub's HUB_ROLES gate. Staff and
+// kioskManager are intentionally excluded (the /admin/sunday-school page
+// redirects them away).
+const SCHOOL: Role[] = ['admin', 'platformOwner', 'school_admin', 'teacher']
 // Displays currently coincides with ALL, but is kept distinct on purpose: it
 // declares "every role can manage display content", which the access layer
 // backs up — the six Displays collections use tenantScoped create/read (NOT
@@ -85,8 +95,9 @@ export const NAV: NavItem[] = [
     ],
   },
   // Programs → the custom Sunday-school hub (attendance, classes, students,
-  // setup), NOT the raw school-classes collection list.
-  leaf('Programs', '/admin/sunday-school', 'graduation', CONTENT),
+  // setup), NOT the raw school-classes collection list. Visible to the school
+  // roles (incl. school_admin / teacher), not staff/kioskManager.
+  leaf('Programs', '/admin/sunday-school', 'graduation', SCHOOL),
   // platformOwner-only top-level entries.
   leaf('Tenants', `${ADMIN_BASE}/tenants`, 'building', ['platformOwner']),
   leaf('Users', `${ADMIN_BASE}/users`, 'users', ['platformOwner']),

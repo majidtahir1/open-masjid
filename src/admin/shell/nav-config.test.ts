@@ -27,6 +27,16 @@ describe('visibleFor', () => {
     expect(labels).toContain('Tenants')
   })
 
+  it('school_admin and teacher see only Dashboard and Programs', () => {
+    for (const role of ['school_admin', 'teacher'] as const) {
+      expect(visibleFor(role).map((i) => i.label)).toEqual(['Dashboard', 'Programs'])
+    }
+  })
+
+  it('staff does not see Programs (school-only)', () => {
+    expect(visibleFor('staff').map((i) => i.label)).not.toContain('Programs')
+  })
+
   it('filters children of a mega-menu by role', () => {
     const displaysForKiosk = visibleFor('kioskManager').find((i) => i.label === 'Displays')
     expect(displaysForKiosk?.kind).toBe('group')
