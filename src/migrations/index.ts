@@ -38,6 +38,7 @@ import * as migration_20260617_171316_term_holidays from './20260617_171316_term
 import * as migration_20260617_174206_class_status from './20260617_174206_class_status';
 import * as migration_20260617_212605_form_school_registration from './20260617_212605_form_school_registration';
 import * as migration_20260617_225620_term_meeting_days from './20260617_225620_term_meeting_days';
+import * as migration_20260618_041107_registration_program_targeting from './20260618_041107_registration_program_targeting';
 
 export const migrations = [
   {
@@ -238,6 +239,11 @@ export const migrations = [
   {
     up: migration_20260617_225620_term_meeting_days.up,
     down: migration_20260617_225620_term_meeting_days.down,
-    name: '20260617_225620_term_meeting_days'
+    name: '20260617_225620_term_meeting_days',
+  },
+  {
+    up: migration_20260618_041107_registration_program_targeting.up,
+    down: migration_20260618_041107_registration_program_targeting.down,
+    name: '20260618_041107_registration_program_targeting'
   },
 ];

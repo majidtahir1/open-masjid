@@ -65,6 +65,9 @@ export const Forms: CollectionConfig = {
         if (data.schoolRegistration === true && !hasRequiredRegistrationFields(r.schema)) {
           throw new Error('A registration form must keep the Student first name and Student last name fields.')
         }
+        if (data.schoolRegistration === true && !data.registrationProgram) {
+          throw new Error('A registration form must have a program selected (For program).')
+        }
       }
       return data
     }],
@@ -138,6 +141,16 @@ export const Forms: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: 'Submissions create an unplaced student you can place into a class.',
+      },
+    },
+    {
+      name: 'registrationProgram',
+      type: 'relationship',
+      relationTo: 'terms',
+      admin: {
+        position: 'sidebar',
+        description: 'Which program registrants are signed up for.',
+        condition: (data) => data?.schoolRegistration === true,
       },
     },
     {

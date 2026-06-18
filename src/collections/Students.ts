@@ -74,6 +74,12 @@ export const Students: CollectionConfig = {
       admin: { description: 'Optional link to a paying Member (reserved for future tuition).' },
     },
     {
+      name: 'registeredProgram',
+      type: 'relationship',
+      relationTo: 'terms',
+      admin: { description: 'The program this student registered for (set at registration). A placement hint — students are not owned by a program.' },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

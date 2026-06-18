@@ -726,6 +726,10 @@ export interface Form {
    */
   schoolRegistration?: boolean | null;
   /**
+   * Which program registrants are signed up for.
+   */
+  registrationProgram?: (number | null) | Term;
+  /**
    * Shown above the form on the public page.
    */
   description?: {
@@ -862,6 +866,39 @@ export interface Form {
     description?: string | null;
   };
   tenant: number | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Programs (e.g. a Sunday school term, a Saturday program, or a summer camp).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms".
+ */
+export interface Term {
+  id: number;
+  tenant: number | Tenant;
+  name: string;
+  startDate: string;
+  endDate: string;
+  /**
+   * Meeting-day dates the school does not meet. Sessions are not created on these days.
+   */
+  holidays?:
+    | {
+        date: string;
+        /**
+         * Optional (e.g. "Winter break").
+         */
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Days the program meets each week. Sessions are created on every selected day.
+   */
+  meetingDays: ('sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday')[];
+  status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
 }
@@ -1665,39 +1702,6 @@ export interface Member {
   createdAt: string;
 }
 /**
- * Academic periods for the Sunday school (e.g. "Fall 2026").
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "terms".
- */
-export interface Term {
-  id: number;
-  tenant: number | Tenant;
-  name: string;
-  startDate: string;
-  endDate: string;
-  /**
-   * Meeting-day dates the school does not meet. Sessions are not created on these days.
-   */
-  holidays?:
-    | {
-        date: string;
-        /**
-         * Optional (e.g. "Winter break").
-         */
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Days the program meets each week. Sessions are created on every selected day.
-   */
-  meetingDays: ('sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday')[];
-  status: 'active' | 'archived';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * A class offered in a term (e.g. "Grade 3 Quran").
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1832,6 +1836,10 @@ export interface Student {
    * Optional link to a paying Member (reserved for future tuition).
    */
   member?: (number | null) | Member;
+  /**
+   * The program this student registered for (set at registration). A placement hint — students are not owned by a program.
+   */
+  registeredProgram?: (number | null) | Term;
   status: 'active' | 'inactive';
   /**
    * Attendance history for this student.
@@ -2655,6 +2663,7 @@ export interface FormsSelect<T extends boolean = true> {
   slug?: T;
   status?: T;
   schoolRegistration?: T;
+  registrationProgram?: T;
   description?: T;
   schema?: T;
   settings?:
@@ -2880,6 +2889,7 @@ export interface StudentsSelect<T extends boolean = true> {
   allergiesNotes?: T;
   emergencyContact?: T;
   member?: T;
+  registeredProgram?: T;
   status?: T;
   attendance?: T;
   updatedAt?: T;
