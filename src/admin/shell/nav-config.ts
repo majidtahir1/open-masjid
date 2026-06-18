@@ -18,7 +18,6 @@ export type NavLeaf = {
   icon: IconName
   description?: string
   roles: Role[]
-  badge?: 'submissions'
 }
 
 export type NavGroup = {
@@ -37,7 +36,7 @@ const ADMIN_BASE = '/admin/collections'
 // Helper to keep declarations terse.
 const leaf = (
   label: string, href: string, icon: IconName, roles: Role[],
-  extra: Partial<Pick<NavLeaf, 'description' | 'badge'>> = {},
+  extra: Partial<Pick<NavLeaf, 'description'>> = {},
 ): NavLeaf => ({ kind: 'leaf', label, href, icon, roles, ...extra })
 
 const ALL: Role[] = ['admin', 'staff', 'kioskManager', 'platformOwner']
@@ -75,13 +74,9 @@ export const NAV: NavItem[] = [
       leaf('QR Codes', `${ADMIN_BASE}/qr-codes`, 'qr', DISPLAYS),
     ],
   },
-  {
-    kind: 'group', label: 'Forms', icon: 'fileText', roles: CONTENT, layout: 'list',
-    children: [
-      leaf('Forms', `${ADMIN_BASE}/forms`, 'fileText', CONTENT),
-      leaf('Form Submissions', `${ADMIN_BASE}/form-submissions`, 'inbox', CONTENT, { badge: 'submissions' }),
-    ],
-  },
+  // Forms is a single link — submissions are viewed inside each form, not as a
+  // standalone collection page (form-submissions is admin-hidden).
+  leaf('Forms', `${ADMIN_BASE}/forms`, 'fileText', CONTENT),
   {
     kind: 'group', label: 'Community', icon: 'users', roles: ADMIN_ONLY, layout: 'list',
     children: [

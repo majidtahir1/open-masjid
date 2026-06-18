@@ -36,7 +36,6 @@ import {
   Clock,
   FileText,
   GraduationCap,
-  Inbox,
   Megaphone,
   Monitor,
   Images,
@@ -267,8 +266,7 @@ async function TenantDashboard({
     }),
   ])
 
-  const [tenantDoc, prayerSchedulesCount, heroSlidesCount, eventsTotal, submissionsCount] =
-    await Promise.all([
+  const [tenantDoc, prayerSchedulesCount, heroSlidesCount, eventsTotal] = await Promise.all([
     payload.findByID({
       collection: 'tenants',
       id: tenantId,
@@ -304,18 +302,6 @@ async function TenantDashboard({
         overrideAccess: true,
       })
       .then((r) => r.totalDocs),
-    // New (unreviewed) form submissions. FormSubmissions has no boolean
-    // "unread" flag; it uses a `status` select — count rows still in `new`.
-    payload
-      .find({
-        collection: 'form-submissions',
-        where: { tenant: { equals: tenantId }, status: { equals: 'new' } },
-        limit: 0,
-        depth: 0,
-        overrideAccess: true,
-      })
-      .then((r) => r.totalDocs)
-      .catch(() => 0),
   ])
 
   const onboardingStates = computeMilestoneStates({
@@ -471,11 +457,7 @@ async function TenantDashboard({
         <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9CA4A4]">
           Jump back in
         </h2>
-        <div
-          className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${
-            isKiosk ? 'lg:grid-cols-3' : 'lg:grid-cols-4'
-          }`}
-        >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {isKiosk ? (
             <>
               <QuickActionCard
@@ -511,13 +493,6 @@ async function TenantDashboard({
                 icon={<FileText className="h-5 w-5" aria-hidden />}
                 title="Create form"
                 description="Signup or registration form"
-              />
-              <QuickActionCard
-                href="/admin/collections/form-submissions"
-                icon={<Inbox className="h-5 w-5" aria-hidden />}
-                title="Review submissions"
-                description="New form responses"
-                badge={submissionsCount}
               />
               <QuickActionCard
                 href="/admin/collections/school-classes"
@@ -646,7 +621,6 @@ function QuickActionCard({
   title,
   description,
   featured = false,
-  badge,
 }: {
   href: string
   icon: React.ReactNode
@@ -654,8 +628,6 @@ function QuickActionCard({
   description: string
   /** Navy filled card used to highlight the primary action. */
   featured?: boolean
-  /** Optional count rendered as a pill on the card (e.g. new submissions). */
-  badge?: number
 }) {
   if (featured) {
     return (
@@ -675,14 +647,7 @@ function QuickActionCard({
       className="block rounded-[13px] border border-[#DDE1E1] bg-white p-[21px] transition duration-200 hover:border-[#BEE4E9] hover:shadow-[0_6px_18px_rgba(19,46,48,0.08)]"
     >
       <span className="text-[#1E7E8E] [&_svg]:size-[22px]">{icon}</span>
-      <div className="mt-[18px] flex items-center gap-2 text-[16.5px] font-semibold text-[#141616]">
-        {title}
-        {badge != null && badge > 0 && (
-          <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#B2493C] px-1.5 text-[12.5px] font-bold leading-none text-white">
-            {badge}
-          </span>
-        )}
-      </div>
+      <div className="mt-[18px] text-[16.5px] font-semibold text-[#141616]">{title}</div>
       <div className="mt-0.5 text-[14px] text-[#747C7C]">{description}</div>
     </Link>
   )

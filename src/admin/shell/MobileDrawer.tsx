@@ -4,17 +4,7 @@ import React from 'react'
 import { NavIcon } from './icons'
 import type { NavItem, NavLeaf } from './nav-config'
 
-function LeafRow({
-  leaf,
-  onNavigate,
-  submissionsCount,
-}: {
-  leaf: NavLeaf
-  onNavigate: () => void
-  submissionsCount?: number
-}) {
-  const showBadge =
-    leaf.badge === 'submissions' && typeof submissionsCount === 'number' && submissionsCount > 0
+function LeafRow({ leaf, onNavigate }: { leaf: NavLeaf; onNavigate: () => void }) {
   return (
     <a
       href={leaf.href}
@@ -34,26 +24,6 @@ function LeafRow({
         <NavIcon name={leaf.icon} size={19} />
       </span>
       {leaf.label}
-      {showBadge && (
-        <span
-          style={{
-            marginLeft: 'auto',
-            minWidth: 20,
-            height: 20,
-            padding: '0 6px',
-            borderRadius: 999,
-            background: '#B2493C',
-            color: '#fff',
-            fontSize: 11,
-            fontWeight: 700,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {submissionsCount}
-        </span>
-      )}
     </a>
   )
 }
@@ -61,12 +31,10 @@ function LeafRow({
 export function MobileDrawer({
   open,
   items,
-  submissionsCount,
   onNavigate,
 }: {
   open: boolean
   items: NavItem[]
-  submissionsCount?: number
   onNavigate: () => void
 }) {
   if (!open) return null
@@ -88,7 +56,7 @@ export function MobileDrawer({
     >
       {items.map((item) =>
         item.kind === 'leaf' ? (
-          <LeafRow key={item.href} leaf={item} onNavigate={onNavigate} submissionsCount={submissionsCount} />
+          <LeafRow key={item.href} leaf={item} onNavigate={onNavigate} />
         ) : (
           <div key={item.label} style={{ marginTop: 10 }}>
             <div
@@ -104,7 +72,7 @@ export function MobileDrawer({
               {item.label}
             </div>
             {item.children.map((c) => (
-              <LeafRow key={c.href} leaf={c} onNavigate={onNavigate} submissionsCount={submissionsCount} />
+              <LeafRow key={c.href} leaf={c} onNavigate={onNavigate} />
             ))}
           </div>
         ),

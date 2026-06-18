@@ -15,39 +15,14 @@ const CARD: React.CSSProperties = {
   boxShadow: '0 18px 44px rgba(15,30,74,.20)',
 }
 
-function SubmissionsBadge({ count }: { count: number }) {
-  return (
-    <span
-      style={{
-        marginLeft: 'auto',
-        minWidth: 20,
-        height: 20,
-        padding: '0 6px',
-        borderRadius: 999,
-        background: '#B2493C',
-        color: '#fff',
-        fontSize: 11,
-        fontWeight: 700,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {count}
-    </span>
-  )
-}
-
 export function MegaMenu({
   group,
   open,
   onToggle,
-  submissionsCount,
 }: {
   group: NavGroup
   open: boolean
   onToggle: () => void
-  submissionsCount?: number
 }) {
   const hover = (e: React.MouseEvent<HTMLAnchorElement>, on: boolean) => {
     e.currentTarget.style.background = on ? '#F7F8F8' : 'transparent'
@@ -121,34 +96,30 @@ export function MegaMenu({
 
       {open && group.layout === 'list' && (
         <div style={{ ...CARD, width: 300, padding: 10 }}>
-          {group.children.map((c) => {
-            const showBadge = c.badge === 'submissions' && typeof submissionsCount === 'number' && submissionsCount > 0
-            return (
-              <a
-                key={c.href}
-                href={c.href}
-                onMouseEnter={(e) => hover(e, true)}
-                onMouseLeave={(e) => hover(e, false)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 11,
-                  padding: '10px 11px',
-                  borderRadius: 9,
-                  color: '#3A3F3F',
-                  fontSize: 13.5,
-                  textDecoration: 'none',
-                  background: 'transparent',
-                }}
-              >
-                <span style={{ color: '#1E7E8E', flexShrink: 0, display: 'inline-flex' }}>
-                  <NavIcon name={c.icon} size={18} />
-                </span>
-                {c.label}
-                {showBadge && <SubmissionsBadge count={submissionsCount as number} />}
-              </a>
-            )
-          })}
+          {group.children.map((c) => (
+            <a
+              key={c.href}
+              href={c.href}
+              onMouseEnter={(e) => hover(e, true)}
+              onMouseLeave={(e) => hover(e, false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 11,
+                padding: '10px 11px',
+                borderRadius: 9,
+                color: '#3A3F3F',
+                fontSize: 13.5,
+                textDecoration: 'none',
+                background: 'transparent',
+              }}
+            >
+              <span style={{ color: '#1E7E8E', flexShrink: 0, display: 'inline-flex' }}>
+                <NavIcon name={c.icon} size={18} />
+              </span>
+              {c.label}
+            </a>
+          ))}
         </div>
       )}
     </div>

@@ -55,7 +55,6 @@ export default function TopBarNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [viewSiteHref, setViewSiteHref] = useState<string | undefined>(undefined)
   const [tenantEditHref, setTenantEditHref] = useState<string | undefined>(undefined)
-  const [submissionsCount, setSubmissionsCount] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     const onResize = () => setWidth(window.innerWidth)
@@ -76,20 +75,6 @@ export default function TopBarNav() {
       .then((r) => (r.ok ? (r.json() as Promise<{ slug?: string | null }>) : null))
       .then((doc) => {
         if (!cancelled && doc?.slug) setViewSiteHref(`https://${doc.slug}.openmasjid.app`)
-      })
-      .catch(() => {
-        /* graceful */
-      })
-
-    fetch(
-      // Count only NEW (unreviewed) submissions — must match the dashboard's
-      // "Review submissions" card, which filters status=new.
-      `/api/form-submissions?where[tenant][equals]=${idStr}&where[status][equals]=new&limit=0&depth=0`,
-      { credentials: 'include' },
-    )
-      .then((r) => (r.ok ? (r.json() as Promise<{ totalDocs?: number }>) : null))
-      .then((res) => {
-        if (!cancelled && typeof res?.totalDocs === 'number') setSubmissionsCount(res.totalDocs)
       })
       .catch(() => {
         /* graceful */
@@ -181,7 +166,6 @@ export default function TopBarNav() {
         <MobileDrawer
           open={mobileOpen}
           items={items}
-          submissionsCount={submissionsCount}
           onNavigate={() => setMobileOpen(false)}
         />
       </nav>
@@ -226,7 +210,6 @@ export default function TopBarNav() {
                 setAccountOpen(false)
                 setOpenMenu((cur) => (cur === item.label ? null : item.label))
               }}
-              submissionsCount={submissionsCount}
             />
           ),
         )}
