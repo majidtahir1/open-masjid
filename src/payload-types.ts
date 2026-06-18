@@ -1751,6 +1751,10 @@ export interface User {
    */
   tenant?: (number | null) | Tenant;
   /**
+   * Programs this School Admin manages. They get full access to the classes, students, and attendance within these programs only.
+   */
+  managedPrograms?: (number | Term)[] | null;
+  /**
    * Restricts what this user's API key can do. Leave empty to inherit the user's full role permissions. UI session permissions are never restricted by this field.
    */
   apiScopes?:
@@ -2998,6 +3002,7 @@ export interface UsersSelect<T extends boolean = true> {
   lastName?: T;
   role?: T;
   tenant?: T;
+  managedPrograms?: T;
   apiScopes?: T;
   onboardingWelcomeSeenAt?: T;
   updatedAt?: T;

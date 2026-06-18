@@ -353,6 +353,17 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      name: 'managedPrograms',
+      type: 'relationship',
+      relationTo: 'terms',
+      hasMany: true,
+      index: true,
+      admin: {
+        description: 'Programs this School Admin manages. They get full access to the classes, students, and attendance within these programs only.',
+        condition: (data) => data?.role === 'school_admin',
+      },
+    },
+    {
       name: 'apiScopes',
       type: 'select',
       hasMany: true,

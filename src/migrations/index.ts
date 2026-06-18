@@ -39,6 +39,7 @@ import * as migration_20260617_174206_class_status from './20260617_174206_class
 import * as migration_20260617_212605_form_school_registration from './20260617_212605_form_school_registration';
 import * as migration_20260617_225620_term_meeting_days from './20260617_225620_term_meeting_days';
 import * as migration_20260618_041107_registration_program_targeting from './20260618_041107_registration_program_targeting';
+import * as migration_20260618_044149_user_managed_programs from './20260618_044149_user_managed_programs';
 
 export const migrations = [
   {
@@ -244,6 +245,11 @@ export const migrations = [
   {
     up: migration_20260618_041107_registration_program_targeting.up,
     down: migration_20260618_041107_registration_program_targeting.down,
-    name: '20260618_041107_registration_program_targeting'
+    name: '20260618_041107_registration_program_targeting',
+  },
+  {
+    up: migration_20260618_044149_user_managed_programs.up,
+    down: migration_20260618_044149_user_managed_programs.down,
+    name: '20260618_044149_user_managed_programs'
   },
 ];
