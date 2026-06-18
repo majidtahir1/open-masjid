@@ -421,7 +421,7 @@ async function TenantDashboard({
   const isKiosk = user.role === 'kioskManager'
 
   return (
-    <div className="min-h-screen bg-[#F7F8F8] px-6 py-10 md:px-14 md:py-11">
+    <div className="om-dashboard-hub min-h-screen bg-[#F7F8F8] px-6 py-10 md:px-14 md:py-11">
       <div className="mx-auto max-w-[1180px] space-y-9">
       <OnboardingShell
         initialStates={onboardingStates}

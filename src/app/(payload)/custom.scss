@@ -543,3 +543,9 @@ aside.nav {
 .app-header {
   display: none !important;
 }
+
+/* Dashboard hub cards are tappable surfaces, not inline text links — strip
+   Payload's default anchor underline inside the hub so they read as cards. */
+.om-dashboard-hub a {
+  text-decoration: none !important;
+}
