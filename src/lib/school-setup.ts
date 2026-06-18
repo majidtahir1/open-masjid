@@ -63,6 +63,20 @@ interface RawDocs {
   sessionsPerClass: number
 }
 
+export interface RegisteredStudent { id: string | number; registeredProgram?: unknown }
+
+/** Active students registered for `programId` who are not in the placed set. */
+export function unplacedForProgram(
+  students: RegisteredStudent[],
+  enrollments: Array<{ student: unknown; status?: string }>,
+  programId: string | number,
+): RegisteredStudent[] {
+  const idOfRel = (v: unknown): string =>
+    String(typeof v === 'object' && v !== null && 'id' in v ? (v as { id: unknown }).id : v)
+  const placed = new Set(enrollments.filter((e) => e.status === 'active').map((e) => idOfRel(e.student)))
+  return students.filter((s) => idOfRel(s.registeredProgram) === String(programId) && !placed.has(String(s.id)))
+}
+
 /** Pure aggregation of raw docs into the hub summary. */
 export function buildHubSummary(raw: RawDocs): HubSummary {
   if (!raw.term) {

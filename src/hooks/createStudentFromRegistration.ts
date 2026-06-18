@@ -17,6 +17,7 @@ const str = (data: Record<string, unknown>, key: string): string | undefined => 
 export function mapRegistrationFields(
   data: Record<string, unknown>,
   tenantId: string | number,
+  registeredProgram?: string | number | null,
 ): Record<string, unknown> | null {
   const firstName = str(data, 'student_first_name')
   const lastName = str(data, 'student_last_name')
@@ -43,6 +44,7 @@ export function mapRegistrationFields(
     result.guardians = [guardian]
   }
 
+  if (registeredProgram != null) result.registeredProgram = registeredProgram
   return result
 }
 

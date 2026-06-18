@@ -33,4 +33,12 @@ describe('mapRegistrationFields', () => {
     expect(result).not.toHaveProperty('allergiesNotes')
     expect(result).not.toHaveProperty('guardians')
   })
+  it('includes registeredProgram when provided', () => {
+    const r = mapRegistrationFields({ student_first_name: 'Ali', student_last_name: 'Hassan' }, 9, 55)
+    expect(r).toMatchObject({ firstName: 'Ali', lastName: 'Hassan', registeredProgram: 55 })
+  })
+  it('omits registeredProgram when not provided', () => {
+    const r = mapRegistrationFields({ student_first_name: 'Ali', student_last_name: 'Hassan' }, 9)
+    expect(r).not.toHaveProperty('registeredProgram')
+  })
 })

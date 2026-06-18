@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { firstIncompleteStep, buildHubSummary } from '@/lib/school-setup'
+import { firstIncompleteStep, buildHubSummary, unplacedForProgram } from '@/lib/school-setup'
 
 describe('firstIncompleteStep', () => {
   it('no active term → step 1', () => {
@@ -50,6 +50,26 @@ describe('buildHubSummary', () => {
 })
 
 import { formatDays } from '@/lib/school-setup'
+
+describe('unplacedForProgram', () => {
+  const students = [
+    { id: 1, registeredProgram: 10 },
+    { id: 2, registeredProgram: 10 },
+    { id: 3, registeredProgram: 20 },
+    { id: 4, registeredProgram: null },
+  ]
+  const enrollments = [{ student: 1, status: 'active' }]
+  it('returns this program\'s registrants who are not placed', () => {
+    expect(unplacedForProgram(students, enrollments, 10).map((s) => s.id)).toEqual([2])
+  })
+  it('ignores other programs and placed students', () => {
+    expect(unplacedForProgram(students, [], 20).map((s) => s.id)).toEqual([3])
+  })
+  it('handles populated relationship objects', () => {
+    const s = [{ id: 5, registeredProgram: { id: 10 } }]
+    expect(unplacedForProgram(s as any, [], 10).map((x) => x.id)).toEqual([5])
+  })
+})
 
 describe('formatDays', () => {
   it('one day → plural', () => { expect(formatDays(['sunday'])).toBe('Sundays') })
