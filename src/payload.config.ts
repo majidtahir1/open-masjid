@@ -91,38 +91,16 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
+      // The sidebar is replaced by the custom top-bar shell. Because Payload
+      // only renders before/afterNavLinks from its default sidebar Nav, those
+      // slots are gone — navigation (incl. Donations, Membership, Programs,
+      // View site, Profile, Site Settings) now lives in TopBarNav / the account
+      // menu, and the billing + onboarding banners are re-homed into the
+      // AdminBanners provider below. The Hide*Nav / NavOrder helpers are also
+      // retired: there is no native sidebar left to reorder or hide.
       Nav: '/src/admin/shell/TopBarNav#default',
-      // Sidebar order intent (top → bottom), achieved via CSS `order` in NavOrder:
-      //   1. Dashboard
-      //   2. Prayer group        (native)
-      //   3. Donations           (custom link, slotted between Prayer and Content)
-      //   4. Content group       (native)
-      //   5. Library group       (native — Media)
-      //   6. View public site    (custom)
-      //   7. Site Settings       (custom, margin-top:auto pins it to the bottom)
-      //
-      // Billing has been removed from the sidebar entirely; it lives as a tab
-      // inside the tenant edit page (Site Settings → Billing tab) so masjid
-      // admins don't have to look at it day-to-day.
-      beforeNavLinks: [
-        '/src/admin/BillingBanner#default',
-        '/src/admin/onboarding/OnboardingBanner#default',
-        '/src/admin/DashboardLink#default',
-        '/src/admin/donations/DonationsNav#default',
-        '/src/admin/membership/MembershipNav#default',
-        '/src/admin/school/SundaySchoolNav#default',
-      ],
-      afterNavLinks: [
-        '/src/admin/ViewPublicSiteLink#default',
-        '/src/admin/ProfileLink#default',
-        '/src/admin/SiteSettingsCluster#default',
-      ],
       header: [
         '/src/admin/Favicon#default',
-        '/src/admin/HideTenantsNav#default',
-        '/src/admin/donations/HideDonationsCollections#default',
-        '/src/admin/HideMediaAndPeopleNav#default',
-        '/src/admin/NavOrder#default',
         '/src/admin/TenantThemeStyle#default',
       ],
       graphics: {
@@ -139,6 +117,7 @@ export default buildConfig({
         // fully owning the login UI.
       },
       providers: [
+        '/src/admin/AdminBanners#default',
         '/src/admin/ansari/AnsariProvider#default',
         '/src/admin/shell/CommandPaletteProvider#default',
       ],
