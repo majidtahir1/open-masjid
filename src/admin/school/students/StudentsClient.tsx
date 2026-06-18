@@ -24,6 +24,7 @@ const idOf = (v: unknown): string | number | null =>
 const StudentsClient: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([])
   const [classMap, setClassMap] = useState<Record<string | number, string>>({})
+  const [programNames, setProgramNames] = useState<Map<string, string>>(new Map())
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -39,10 +40,15 @@ const StudentsClient: React.FC = () => {
     setLoading(true)
     setError(null)
     try {
-      const [studentsRes, enrollmentsRes] = await Promise.all([
+      const [studentsRes, enrollmentsRes, programsRes] = await Promise.all([
         api('/students?where[status][equals]=active&limit=5000&depth=0&sort=lastName'),
         api('/enrollments?where[status][equals]=active&limit=5000&depth=1'),
+        api('/terms?limit=1000&depth=0'),
       ])
+
+      const progs = programsRes.docs ?? []
+      const progName = new Map<string, string>(progs.map((p: any) => [String(p.id), p.name]))
+      setProgramNames(progName)
 
       // Build studentId -> class name(s) map
       const map: Record<string | number, string[]> = {}
@@ -155,6 +161,9 @@ const StudentsClient: React.FC = () => {
                   </span>
                   {s.grade && (
                     <span className="ss-pill ss-pill--muted">{s.grade}</span>
+                  )}
+                  {(s as any).registeredProgram != null && (
+                    <span className="ss-pill ss-pill--muted">registered: {programNames.get(String(idOf((s as any).registeredProgram))) ?? '—'}</span>
                   )}
                   <span className="ss-pill">{className ?? 'No class'}</span>
                   <ChevronRight size={16} style={{ color: 'var(--theme-elevation-400)' }} />

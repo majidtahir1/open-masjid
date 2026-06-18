@@ -15,6 +15,7 @@ import { importMap } from '../importMap'
 import DashboardClient, { type DashboardData } from '@/admin/school/dashboard/DashboardClient'
 import TeacherDashboard from '@/admin/school/dashboard/TeacherDashboard'
 import { attendanceTrend, rateByClass, statusBreakdown, enrollmentByClass, dashboardKpis } from '@/lib/school-reports'
+import { unplacedForProgram } from '@/lib/school-setup'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -91,8 +92,7 @@ export default async function SundaySchoolHubPage({ searchParams }: { searchPara
     const sessDocs = sessions.map((s: any) => ({ id: s.id, class: s.class, date: s.date }))
     const recDocs = records.map((r: any) => ({ session: r.session, status: r.status }))
     const teacherless = classes.filter((c: any) => !c.teachers || c.teachers.length === 0).length
-    const placed = new Set(enrollments.filter((e: any) => e.status === 'active').map((e: any) => String(typeof e.student === 'object' ? e.student.id : e.student)))
-    const unplaced = students.filter((s: any) => !placed.has(String(s.id))).length
+    const unplaced = unplacedForProgram(students as any, enrollments.map((e: any) => ({ student: e.student, status: e.status })), term.id).length
 
     dashboard = {
       term: { name: term.name, startDate: term.startDate, endDate: term.endDate, meetingDays: ((term as any).meetingDays ?? []), holidays: ((term as any).holidays ?? []).map((h: any) => String(h.date).slice(0, 10)) },

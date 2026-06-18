@@ -23,7 +23,9 @@ const StepStudents: React.FC<{ programId: string | null; onBack: () => void; onF
       ? (await api(`/enrollments?where[class][in]=${classIds.join(',')}&where[status][equals]=active&limit=5000&depth=0`)).docs
       : []
     const placed = new Set(enr.map((e: any) => String(typeof e.student === 'object' ? e.student.id : e.student)))
-    const students = (await api('/students?where[status][equals]=active&limit=5000&depth=0')).docs
+    const students = programId
+      ? (await api(`/students?where[status][equals]=active&where[registeredProgram][equals]=${programId}&limit=5000&depth=0`)).docs
+      : []
     setUnplaced(students.filter((s: any) => !placed.has(String(s.id))))
   }, [programId])
 
@@ -44,7 +46,7 @@ const StepStudents: React.FC<{ programId: string | null; onBack: () => void; onF
     if (!newClass) return
     setBusy(true); setError('')
     try {
-      const data: any = { firstName: first, lastName: last, status: 'active' }
+      const data: any = { firstName: first, lastName: last, status: 'active', ...(programId ? { registeredProgram: toId(programId) } : {}) }
       if (age) data.age = Number(age)
       if (guardian) data.guardians = [{ name: guardian, isPrimary: true }]
       const student = await api('/students', { method: 'POST', body: JSON.stringify(data) }).then((r) => r.doc)
@@ -69,7 +71,7 @@ const StepStudents: React.FC<{ programId: string | null; onBack: () => void; onF
       <div className="ss-cols2">
         <div>
           <p className="ss-eyebrow" style={{ color: 'var(--theme-elevation-500)' }}>Registered · awaiting a class</p>
-          {unplaced.length === 0 && <p className="ss-emptyline">Everyone&apos;s placed. Nice.</p>}
+          {unplaced.length === 0 && <p className="ss-emptyline">No one has registered for this program yet.</p>}
           {unplaced.map((s) => (
             <div key={s.id} className="ss-row">
               <span className="ss-row__name">
