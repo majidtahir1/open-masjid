@@ -534,3 +534,12 @@ aside.nav {
 }
 /* Payload's mobile sidebar toggler is replaced by our own hamburger. */
 .nav-toggler { display: none !important; }
+
+/* The top bar owns the logo, search, and account menu, so Payload's default
+   app-header (gravatar + breadcrumb strip) is redundant and leaves an empty
+   white band directly under the bar. Hide it. Document save/publish controls
+   live in the view body (.doc-controls / .collection-edit), not the
+   app-header, so editing collection docs is unaffected. */
+.app-header {
+  display: none !important;
+}

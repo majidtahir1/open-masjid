@@ -558,7 +558,10 @@ export function OnboardingShell({
 
   return (
     <>
-      {dashboardStrip}
+      {/* Once setup is complete the prominent strip is just noise — the
+          dashboard header shows a compact "N of N done" pill instead. Only
+          nudge while there's still setup work to do. */}
+      {remaining > 0 && dashboardStrip}
 
       <Dialog open={welcomeOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-5xl p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col" hideCloseButton>
