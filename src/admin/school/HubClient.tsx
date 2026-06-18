@@ -31,6 +31,16 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
             holidays={term.holidays}
             variant="masthead"
           />
+          <div className="ss-rhythm-legend">
+            <span className="ss-rhythm-legend__item">
+              <i className="ss-rhythm-legend__dot" />
+              Class day
+            </span>
+            <span className="ss-rhythm-legend__item">
+              <i className="ss-rhythm-legend__dot ss-rhythm-legend__dot--off" />
+              <span style={{ textDecoration: 'line-through' }}>Day off</span>
+            </span>
+          </div>
         </header>
       ) : (
         <section className="ss-empty">
