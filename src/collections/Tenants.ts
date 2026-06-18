@@ -774,6 +774,24 @@ export const Tenants: CollectionConfig = {
           ],
         },
         {
+          label: 'Ansari',
+          description: "Proactive nudge preferences for Ansari, this masjid's assistant.",
+          fields: [
+            {
+              name: 'ansariSettingsPanel',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '/src/admin/AnsariSettingsTab#default',
+                },
+                // Kiosk managers can't read/write ansari-settings; hide the tab.
+                condition: (_data, _siblingData, { user }) =>
+                  (user as { role?: string } | null | undefined)?.role !== 'kioskManager',
+              },
+            },
+          ],
+        },
+        {
           label: 'Onboarding',
           description: 'Internal setup-checklist state. Managed by the welcome wizard.',
           fields: [
