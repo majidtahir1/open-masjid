@@ -23,6 +23,9 @@
 
   padding: 20px 28px 64px;
   max-width: 1040px;
+  /* Center within the full-width admin shell (the old sidebar layout used to
+     offset this; without it the max-width content would pin to the left). */
+  margin-inline: auto;
 }
 
 /* --- shared eyebrow / type --------------------------------------------- */
