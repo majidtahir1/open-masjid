@@ -34,13 +34,17 @@ import {
   CalendarPlus,
   ChevronRight,
   Clock,
-  Image as ImageIcon,
+  FileText,
+  GraduationCap,
+  Inbox,
   Megaphone,
+  Monitor,
+  Images,
   Users,
 } from 'lucide-react'
 
 import { OnboardingShell } from './onboarding/OnboardingShell'
-import { computeMilestoneStates } from '@/lib/onboarding'
+import { computeMilestoneStates, doneCount } from '@/lib/onboarding'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -59,7 +63,7 @@ type UserLite = {
   email?: string
   firstName?: string
   lastName?: string
-  role?: 'platformOwner' | 'admin' | 'staff'
+  role?: 'platformOwner' | 'admin' | 'staff' | 'kioskManager'
   tenant?: TenantRef
   onboardingWelcomeSeenAt?: string | null
 } | null
@@ -264,7 +268,8 @@ async function TenantDashboard({
     }),
   ])
 
-  const [tenantDoc, prayerSchedulesCount, heroSlidesCount, eventsTotal] = await Promise.all([
+  const [tenantDoc, prayerSchedulesCount, heroSlidesCount, eventsTotal, submissionsCount] =
+    await Promise.all([
     payload.findByID({
       collection: 'tenants',
       id: tenantId,
@@ -300,6 +305,18 @@ async function TenantDashboard({
         overrideAccess: true,
       })
       .then((r) => r.totalDocs),
+    // New (unreviewed) form submissions. FormSubmissions has no boolean
+    // "unread" flag; it uses a `status` select — count rows still in `new`.
+    payload
+      .find({
+        collection: 'form-submissions',
+        where: { tenant: { equals: tenantId }, status: { equals: 'new' } },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+      })
+      .then((r) => r.totalDocs)
+      .catch(() => 0),
   ])
 
   const onboardingStates = computeMilestoneStates({
@@ -399,14 +416,10 @@ async function TenantDashboard({
     ? `/admin/collections/${scheduleCollection}/${schedule.id}`
     : `/admin/collections/${scheduleCollection}`
 
-  // If prayer-schedules isn't registered yet, point the quick-action button
-  // at the legacy collection so the link still resolves.
-  const newScheduleHref =
-    schedule?.collectionSlug === 'prayer-times'
-      ? '/admin/collections/prayer-times/create'
-      : '/admin/collections/prayer-schedules/create'
-
   const displayName = greetingName(user)
+  const setupDone = doneCount(onboardingStates)
+  const isAdmin = user.role === 'admin'
+  const isKiosk = user.role === 'kioskManager'
 
   return (
     <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
@@ -429,6 +442,18 @@ async function TenantDashboard({
               <Building className="size-4" aria-hidden />
               {tenantName}
             </Badge>
+            {isAdmin && (
+              <Badge
+                variant="outline"
+                className="gap-1.5 text-sm px-3 py-1.5 font-medium"
+              >
+                <span
+                  className="inline-block size-2 rounded-full bg-emerald-500"
+                  aria-hidden
+                />
+                {setupDone} of {onboardingStates.length} done
+              </Badge>
+            )}
           </div>
         </div>
         {tenantLogo && (
@@ -439,6 +464,68 @@ async function TenantDashboard({
           />
         )}
       </header>
+
+      {/* Jump back in — role-aware quick actions.
+          `setTenantFromUser` hooks pre-fill the tenant on save for non-platform
+          users; create forms save as Draft until Publish. */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Jump back in
+        </h2>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {isKiosk ? (
+            <>
+              <QuickActionCard
+                href="/admin/collections/prayer-display-content"
+                icon={<Monitor className="h-5 w-5" aria-hidden />}
+                title="Update prayer display"
+                description="Edit the prayer screen content"
+              />
+              <QuickActionCard
+                href="/admin/collections/carousel-slides"
+                icon={<Images className="h-5 w-5" aria-hidden />}
+                title="Manage carousel"
+                description="Slides shown between prayers"
+              />
+              <QuickActionCard
+                href="/admin/collections/kiosks"
+                icon={<Monitor className="h-5 w-5" aria-hidden />}
+                title="Manage kiosks"
+                description="Registered display devices"
+              />
+            </>
+          ) : (
+            <>
+              <QuickActionCard
+                href="/admin/collections/events/create"
+                icon={<CalendarPlus className="h-5 w-5" aria-hidden />}
+                title="Add event"
+                description="Class, program, or gathering"
+                featured
+              />
+              <QuickActionCard
+                href="/admin/collections/forms/create"
+                icon={<FileText className="h-5 w-5" aria-hidden />}
+                title="Create form"
+                description="Signup or registration form"
+              />
+              <QuickActionCard
+                href="/admin/collections/form-submissions"
+                icon={<Inbox className="h-5 w-5" aria-hidden />}
+                title="Review submissions"
+                description="New form responses"
+                badge={submissionsCount}
+              />
+              <QuickActionCard
+                href="/admin/collections/school-classes"
+                icon={<GraduationCap className="h-5 w-5" aria-hidden />}
+                title="Review programs"
+                description="Sunday-school classes"
+              />
+            </>
+          )}
+        </div>
+      </section>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {/* Active prayer schedule */}
@@ -571,7 +658,10 @@ async function TenantDashboard({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
-            <p className="text-6xl md:text-7xl font-bold text-foreground leading-none">
+            <p
+              className="text-6xl md:text-7xl font-bold text-foreground leading-none"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               {announcementsRes.totalDocs}
             </p>
             <p className="text-base text-muted-foreground mt-2">
@@ -593,43 +683,9 @@ async function TenantDashboard({
 
       <Separator />
 
-      {/* Quick actions.
-          `setTenantFromUser` hook on each collection pre-fills the tenant on
-          save for non-platformOwner users; platformOwners pick a tenant on the
-          form. With drafts enabled on Events/Announcements/Pages/HeroSlides/
-          Services, a fresh create saves as Draft until the admin clicks
-          Publish — giving them a safe preview loop. */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Quick actions
-        </h2>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <QuickActionCard
-            href="/admin/collections/events/create"
-            icon={<CalendarPlus className="h-5 w-5" aria-hidden />}
-            title="New Event"
-            description="Class, program, or gathering"
-          />
-          <QuickActionCard
-            href="/admin/collections/announcements/create"
-            icon={<Megaphone className="h-5 w-5" aria-hidden />}
-            title="New Announcement"
-            description="Short notice for the site banner"
-          />
-          <QuickActionCard
-            href={newScheduleHref}
-            icon={<Clock className="h-5 w-5" aria-hidden />}
-            title="New Prayer Schedule"
-            description="Seasonal iqamah + adhan range"
-          />
-          <QuickActionCard
-            href="/admin/collections/hero-slides/create"
-            icon={<ImageIcon className="h-5 w-5" aria-hidden />}
-            title="New Hero Slide"
-            description="Homepage hero card"
-          />
-        </div>
-      </section>
+      <p className="text-sm text-muted-foreground">
+        Tip — press <kbd className="font-medium">⌘K</kbd> to jump anywhere or run an action.
+      </p>
     </div>
   )
 }
@@ -639,12 +695,34 @@ function QuickActionCard({
   icon,
   title,
   description,
+  featured = false,
+  badge,
 }: {
   href: string
   icon: React.ReactNode
   title: string
   description: string
+  /** Navy filled card used to highlight the primary action. */
+  featured?: boolean
+  /** Optional count rendered as a pill on the card (e.g. new submissions). */
+  badge?: number
 }) {
+  if (featured) {
+    return (
+      <Link
+        href={href}
+        className="group flex items-center gap-3 rounded-lg bg-primary p-4 text-primary-foreground transition-colors hover:bg-primary/90"
+      >
+        <span className="grid h-10 w-10 place-items-center rounded-md bg-white/15 text-primary-foreground">
+          {icon}
+        </span>
+        <span className="flex min-w-0 flex-col">
+          <span className="text-base font-semibold">{title}</span>
+          <span className="text-sm text-primary-foreground/70">{description}</span>
+        </span>
+      </Link>
+    )
+  }
   return (
     <Link
       href={href}
@@ -657,6 +735,11 @@ function QuickActionCard({
         <span className="text-base font-semibold text-foreground">{title}</span>
         <span className="text-sm text-muted-foreground">{description}</span>
       </span>
+      {badge != null && badge > 0 && (
+        <Badge variant="secondary" className="ml-auto shrink-0">
+          {badge}
+        </Badge>
+      )}
     </Link>
   )
 }
