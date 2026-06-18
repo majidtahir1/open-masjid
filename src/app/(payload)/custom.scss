@@ -514,23 +514,26 @@ aside.nav,
  * background (navy-700) overrides the earlier sidebar `aside.nav` (navy-900).
  * ========================================================================= */
 .template-default {
-  display: block;
+  display: block; /* stack the top bar above the content (no left sidebar) */
 }
-.template-default__nav,
-aside.nav {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 62px;
-  width: 100%;
+/* TopBarNav fills Payload's Nav slot and renders as a bare <nav data-om-topbar>
+   child here (NOT Payload's default aside.nav), so target it directly. It sits
+   in normal flow as a full-width 62px bar; make it sticky so it stays pinned
+   while content scrolls, and keep overflow visible so mega-menus can escape. */
+.template-default > nav[data-om-topbar] {
+  /* `!important` overrides TopBarNav's inline `position: relative` so the bar
+     pins to the top instead of scrolling away on long list/edit pages. */
+  position: sticky !important;
+  top: 0;
   z-index: 60;
-  border-right: none;
-  background: var(--icp-navy-700);
-  overflow: visible; /* let mega-menus escape the bar */
+  overflow: visible;
 }
 .template-default__wrap {
   margin-left: 0 !important;
   width: 100% !important;
-  padding-top: 62px;
+  /* No padding-top: the bar is in normal flow, so the content already begins
+     directly beneath it. (A padding-top here double-counted the bar height and
+     left an empty white band under it.) */
 }
 /* Payload's mobile sidebar toggler is replaced by our own hamburger. */
 .nav-toggler { display: none !important; }
