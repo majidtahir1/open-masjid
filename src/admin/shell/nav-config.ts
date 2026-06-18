@@ -84,7 +84,9 @@ export const NAV: NavItem[] = [
       leaf('Donations', `${ADMIN_BASE}/donations`, 'heart', ADMIN_ONLY),
     ],
   },
-  leaf('Programs', `${ADMIN_BASE}/school-classes`, 'graduation', CONTENT),
+  // Programs → the custom Sunday-school hub (attendance, classes, students,
+  // setup), NOT the raw school-classes collection list.
+  leaf('Programs', '/admin/sunday-school', 'graduation', CONTENT),
   // platformOwner-only top-level entries.
   leaf('Tenants', `${ADMIN_BASE}/tenants`, 'building', ['platformOwner']),
   leaf('Users', `${ADMIN_BASE}/users`, 'users', ['platformOwner']),
