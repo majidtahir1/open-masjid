@@ -58,7 +58,7 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
   const formId = typeof doc.form === 'object' ? doc.form?.id : doc.form
   if (!formId) return doc
 
-  let form: { schoolRegistration?: boolean } | null = null
+  let form: { schoolRegistration?: boolean; registrationProgram?: unknown } | null = null
   try {
     form = (await req.payload.findByID({
       collection: 'forms',
@@ -66,16 +66,23 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
       depth: 0,
       overrideAccess: true,
       req,
-    })) as { schoolRegistration?: boolean } | null
+    })) as { schoolRegistration?: boolean; registrationProgram?: unknown } | null
   } catch {
     return doc
   }
 
   if (form?.schoolRegistration !== true) return doc
 
+  const programId =
+    form.registrationProgram == null
+      ? null
+      : typeof form.registrationProgram === 'object'
+        ? (form.registrationProgram as { id: string | number }).id
+        : (form.registrationProgram as string | number)
+
   const submissionData = (doc.data ?? {}) as Record<string, unknown>
   const tenantId = typeof doc.tenant === 'object' ? (doc.tenant as { id: string | number }).id : doc.tenant
-  const studentData = mapRegistrationFields(submissionData, tenantId)
+  const studentData = mapRegistrationFields(submissionData, tenantId, programId)
   if (!studentData) return doc
 
   try {
