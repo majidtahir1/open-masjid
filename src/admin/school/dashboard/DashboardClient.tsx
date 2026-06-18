@@ -56,6 +56,16 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
         <p className="ss-eyebrow">Current program</p>
         <h1 className="ss-masthead__title">{term.name}</h1>
         <SessionTimeline startDate={term.startDate} endDate={term.endDate} meetingDays={term.meetingDays} holidays={term.holidays} variant="masthead" />
+        <div className="ss-rhythm-legend">
+          <span className="ss-rhythm-legend__item">
+            <i className="ss-rhythm-legend__dot" />
+            Class day
+          </span>
+          <span className="ss-rhythm-legend__item">
+            <i className="ss-rhythm-legend__dot ss-rhythm-legend__dot--off" />
+            <span style={{ textDecoration: 'line-through' }}>Day off</span>
+          </span>
+        </div>
       </header>
 
       <div className="ss-actions" style={{ margin: '16px 0 0' }}>
