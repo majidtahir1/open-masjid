@@ -1,23 +1,14 @@
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { syncTermSessions } from '../hooks/syncTermSessions'
 import {
-  schoolTenantCreate,
-  schoolTenantRead,
-  schoolTenantWrite,
-  roleOf,
+  readByRole,
+  writeByRole,
+  adminOnlyCreate,
+  schoolAdminTermsRead,
   tenantOf,
 } from '../access/schoolAccess'
-
-/** Terms are readable by any tenant member (incl. teachers); writable by admin/school_admin. */
-const termRead: Access = (args) => {
-  if (roleOf(args.req.user) === 'teacher') {
-    const t = tenantOf(args.req.user)
-    return t ? { tenant: { equals: t } } : false
-  }
-  return schoolTenantRead(args)
-}
 
 export const Terms: CollectionConfig = {
   slug: 'terms',
@@ -31,10 +22,13 @@ export const Terms: CollectionConfig = {
     description: 'Programs (e.g. a Sunday school term, a Saturday program, or a summer camp).',
   },
   access: {
-    read: denyKioskManager(termRead),
-    create: denyKioskManager(schoolTenantCreate),
-    update: denyKioskManager(schoolTenantWrite),
-    delete: denyKioskManager(schoolTenantWrite),
+    read: denyKioskManager(readByRole({
+      teacher: async (req) => { const t = tenantOf(req.user); return t ? { tenant: { equals: t } } : false },
+      schoolAdmin: schoolAdminTermsRead,
+    })),
+    create: denyKioskManager(adminOnlyCreate),
+    update: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminTermsRead })),
+    delete: denyKioskManager(adminOnlyCreate),
   },
   hooks: { beforeChange: [setTenantFromUser], afterChange: [syncTermSessions] },
   fields: [

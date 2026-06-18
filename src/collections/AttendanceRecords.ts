@@ -1,24 +1,16 @@
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
-import { assertTeacherOwnsSession } from '../hooks/assertTeacherOwnsSession'
+import { assertSessionScope } from '../hooks/assertTeacherOwnsSession'
 import {
-  schoolTenantCreate,
-  schoolTenantWrite,
-  teacherAttendanceRead,
+  readByRole,
+  writeByRole,
+  schoolAdminCreate,
+  teacherAttendanceResolve,
+  schoolAdminAttendanceRead,
   roleOf,
   tenantOf,
 } from '../access/schoolAccess'
-
-/** Teacher create is a boolean (any assigned teacher); the beforeValidate hook enforces session ownership. */
-const attendanceCreate: Access = (args) => {
-  if (roleOf(args.req.user) === 'teacher') return Boolean(tenantOf(args.req.user))
-  return schoolTenantCreate(args)
-}
-
-/** Teacher gets their session-scoped write; everyone else routes through schoolTenantWrite (denies staff). */
-const attendanceUpdate: Access = async (args) =>
-  roleOf(args.req.user) === 'teacher' ? teacherAttendanceRead(args) : schoolTenantWrite(args)
 
 export const AttendanceRecords: CollectionConfig = {
   slug: 'attendance-records',
@@ -32,13 +24,16 @@ export const AttendanceRecords: CollectionConfig = {
     description: "One student's attendance for one session.",
   },
   access: {
-    read: denyKioskManager(teacherAttendanceRead),
-    create: denyKioskManager(attendanceCreate),
-    update: denyKioskManager(attendanceUpdate),
-    delete: denyKioskManager(schoolTenantWrite),
+    read: denyKioskManager(readByRole({ teacher: teacherAttendanceResolve, schoolAdmin: schoolAdminAttendanceRead })),
+    create: denyKioskManager((args) => {
+      if (roleOf(args.req.user) === 'teacher') return Boolean(tenantOf(args.req.user))
+      return schoolAdminCreate(args)
+    }),
+    update: denyKioskManager(writeByRole({ teacher: teacherAttendanceResolve, schoolAdmin: schoolAdminAttendanceRead })),
+    delete: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminAttendanceRead })),
   },
   hooks: {
-    beforeValidate: [assertTeacherOwnsSession],
+    beforeValidate: [assertSessionScope],
     beforeChange: [
       setTenantFromUser,
       ({ data, req, operation }) => {

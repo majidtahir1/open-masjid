@@ -2,10 +2,13 @@ import type { CollectionConfig } from 'payload'
 import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import {
-  schoolTenantCreate,
-  schoolTenantWrite,
-  teacherEnrollmentsRead,
+  readByRole,
+  writeByRole,
+  schoolAdminCreate,
+  teacherEnrollmentsResolve,
+  schoolAdminEnrollmentsRead,
 } from '../access/schoolAccess'
+import { assertEnrollmentProgramScope } from '../hooks/assertProgramScope'
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
@@ -19,12 +22,12 @@ export const Enrollments: CollectionConfig = {
     description: 'Joins a student to a class for a term (the roster).',
   },
   access: {
-    read: denyKioskManager(teacherEnrollmentsRead),
-    create: denyKioskManager(schoolTenantCreate),
-    update: denyKioskManager(schoolTenantWrite),
-    delete: denyKioskManager(schoolTenantWrite),
+    read: denyKioskManager(readByRole({ teacher: teacherEnrollmentsResolve, schoolAdmin: schoolAdminEnrollmentsRead })),
+    create: denyKioskManager(schoolAdminCreate),
+    update: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminEnrollmentsRead })),
+    delete: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminEnrollmentsRead })),
   },
-  hooks: { beforeChange: [setTenantFromUser] },
+  hooks: { beforeValidate: [assertEnrollmentProgramScope], beforeChange: [setTenantFromUser] },
   fields: [
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true, admin: { hidden: true } },
     { name: 'student', type: 'relationship', relationTo: 'students', required: true, index: true },

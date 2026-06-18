@@ -2,12 +2,15 @@ import type { CollectionConfig } from 'payload'
 import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import {
-  schoolTenantCreate,
-  schoolTenantWrite,
-  teacherClassesRead,
+  readByRole,
+  writeByRole,
+  schoolAdminCreate,
+  teacherClassesResolve,
+  schoolAdminClassesRead,
 } from '../access/schoolAccess'
 import { generateClassSessions } from '../hooks/generateClassSessions'
 import { blockClassDeleteWithHistory } from '../hooks/blockClassDeleteWithHistory'
+import { assertClassProgramScope } from '../hooks/assertProgramScope'
 
 export const SchoolClasses: CollectionConfig = {
   slug: 'school-classes',
@@ -21,12 +24,13 @@ export const SchoolClasses: CollectionConfig = {
     description: 'A class offered in a term (e.g. "Grade 3 Quran").',
   },
   access: {
-    read: denyKioskManager(teacherClassesRead),
-    create: denyKioskManager(schoolTenantCreate),
-    update: denyKioskManager(schoolTenantWrite),
-    delete: denyKioskManager(schoolTenantWrite),
+    read: denyKioskManager(readByRole({ teacher: teacherClassesResolve, schoolAdmin: schoolAdminClassesRead })),
+    create: denyKioskManager(schoolAdminCreate),
+    update: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminClassesRead })),
+    delete: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminClassesRead })),
   },
   hooks: {
+    beforeValidate: [assertClassProgramScope],
     beforeDelete: [blockClassDeleteWithHistory],
     beforeChange: [setTenantFromUser],
     afterChange: [generateClassSessions],

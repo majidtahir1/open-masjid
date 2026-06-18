@@ -3,20 +3,19 @@ import { AttendanceRecords } from '@/collections/AttendanceRecords'
 
 const access = AttendanceRecords.access as Record<string, any>
 
+function reqWith(user: any, byCollection: Record<string, any[]> = {}) {
+  return { user, payload: { find: async ({ collection }: any) => ({ docs: byCollection[collection] ?? [] }) } } as any
+}
+
 describe('AttendanceRecords access', () => {
   it('teacher reads only own-class sessions', async () => {
-    const find = async ({ collection }: any) =>
-      collection === 'school-classes' ? { docs: [{ id: 11 }] } : { docs: [{ id: 301 }] }
-    const req = { user: { id: 9, role: 'teacher', tenant: 1 }, payload: { find } }
+    const req = reqWith({ id: 9, role: 'teacher', tenant: 1 }, { 'school-classes': [{ id: 11 }], 'class-sessions': [{ id: 301 }] })
     expect(await access.read({ req })).toEqual({ session: { in: [301] } })
   })
   it('teacher may create and update (ownership enforced by hook)', async () => {
     expect(await access.create({ req: { user: { role: 'teacher', tenant: 1 } } })).toBe(true)
-    const find = async ({ collection }: any) =>
-      collection === 'school-classes' ? { docs: [{ id: 11 }] } : { docs: [{ id: 301 }] }
-    expect(
-      await access.update({ req: { user: { id: 9, role: 'teacher', tenant: 1 }, payload: { find } } }),
-    ).toEqual({ session: { in: [301] } })
+    const req = reqWith({ id: 9, role: 'teacher', tenant: 1 }, { 'school-classes': [{ id: 11 }], 'class-sessions': [{ id: 301 }] })
+    expect(await access.update({ req })).toEqual({ session: { in: [301] } })
   })
   it('teacher cannot delete', async () => {
     expect(await access.delete({ req: { user: { role: 'teacher', tenant: 1 } } })).toBe(false)
@@ -32,5 +31,21 @@ describe('AttendanceRecords access', () => {
     expect(await access.update({ req: { user: { role: 'admin', tenant: 1 } } })).toEqual({
       tenant: { equals: 1 },
     })
+  })
+  it('school_admin read scoped to managed programs (by session)', async () => {
+    const req = reqWith({ role: 'school_admin', tenant: 1, managedPrograms: [10] }, { 'school-classes': [{ id: 41 }], 'class-sessions': [{ id: 301 }] })
+    expect(await access.read({ req })).toEqual({ session: { in: [301] } })
+  })
+  it('school_admin create allowed with managed programs', async () => {
+    const req = reqWith({ role: 'school_admin', tenant: 1, managedPrograms: [10] })
+    expect(await access.create({ req })).toBe(true)
+  })
+  it('school_admin create denied without managed programs', async () => {
+    const req = reqWith({ role: 'school_admin', tenant: 1, managedPrograms: [] })
+    expect(await access.create({ req })).toBe(false)
+  })
+  it('school_admin delete scoped to managed programs (by session)', async () => {
+    const req = reqWith({ role: 'school_admin', tenant: 1, managedPrograms: [10] }, { 'school-classes': [{ id: 41 }], 'class-sessions': [{ id: 301 }] })
+    expect(await access.delete({ req })).toEqual({ session: { in: [301] } })
   })
 })

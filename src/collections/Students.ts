@@ -1,21 +1,13 @@
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 import { denyKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import {
-  schoolTenantCreate,
-  schoolTenantWrite,
-  teacherStudentsRead,
-  roleOf,
+  readByRole,
+  writeByRole,
+  schoolAdminCreate,
+  teacherStudentsResolve,
+  schoolAdminStudentsRead,
 } from '../access/schoolAccess'
-
-/**
- * Update access: teachers may update only their enrolled students;
- * other roles fall through to schoolTenantWrite (staff are denied).
- */
-const teacherStudentsUpdate: Access = async (args) => {
-  if (roleOf(args.req.user) === 'teacher') return teacherStudentsRead(args)
-  return schoolTenantWrite(args)
-}
 
 export const Students: CollectionConfig = {
   slug: 'students',
@@ -29,10 +21,10 @@ export const Students: CollectionConfig = {
     description: 'Children enrolled in the Sunday school. Holds guardian PII.',
   },
   access: {
-    read: denyKioskManager(teacherStudentsRead),
-    create: denyKioskManager(schoolTenantCreate),
-    update: denyKioskManager(teacherStudentsUpdate),
-    delete: denyKioskManager(schoolTenantWrite),
+    read: denyKioskManager(readByRole({ teacher: teacherStudentsResolve, schoolAdmin: schoolAdminStudentsRead })),
+    create: denyKioskManager(schoolAdminCreate),
+    update: denyKioskManager(writeByRole({ teacher: teacherStudentsResolve, schoolAdmin: schoolAdminStudentsRead })),
+    delete: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminStudentsRead })),
   },
   hooks: { beforeChange: [setTenantFromUser] },
   fields: [
