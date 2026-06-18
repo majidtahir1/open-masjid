@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
 import { ArrowRight, ArrowLeft, Plus, CalendarDays } from 'lucide-react'
-import { api } from '../api'
+import { api, toId } from '../api'
 
 const StepClasses: React.FC<{ programId: string | null; onBack: () => void; onNext: () => void; onChanged: () => void }> = ({ programId, onBack, onNext, onChanged }) => {
   const [classes, setClasses] = useState<any[]>([])
@@ -32,7 +32,7 @@ const StepClasses: React.FC<{ programId: string | null; onBack: () => void; onNe
     if (!programId) return
     setBusy(true)
     try {
-      const data: any = { name, term: programId, status: 'active' }
+      const data: any = { name, term: toId(programId), status: 'active' }
       if (gradeLevel) data.gradeLevel = gradeLevel
       if (room) data.room = room
       if (capacity) data.capacity = Number(capacity)
