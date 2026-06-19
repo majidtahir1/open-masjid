@@ -222,6 +222,20 @@ function Kiosk({
     setScreen('idle'); setPhone(''); setPhoneError(false); setKids([]); setFamilyName('')
   }, [])
 
+  // Fullscreen can only be requested from a user gesture, so we trigger it on
+  // the first tap (leaving the idle screen) rather than on load. Best-effort —
+  // iPads locked via Guided Access / Add-to-Home-Screen are already fullscreen.
+  const beginFromIdle = () => {
+    try {
+      const el = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }
+      if (!document.fullscreenElement) {
+        const req = el.requestFullscreen?.bind(el) ?? el.webkitRequestFullscreen?.bind(el)
+        void req?.()?.catch?.(() => {})
+      }
+    } catch { /* unsupported */ }
+    setScreen('phone')
+  }
+
   // inactivity → return to idle
   useEffect(() => {
     if (idleTimer.current) clearTimeout(idleTimer.current)
@@ -287,7 +301,7 @@ function Kiosk({
   if (screen === 'idle')
     return (
       <Screen>
-        <div onClick={() => setScreen('phone')} style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer', position: 'relative', animation: 'scrFade .32s cubic-bezier(.22,.61,.36,1)' }}>
+        <div onClick={beginFromIdle} style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer', position: 'relative', animation: 'scrFade .32s cubic-bezier(.22,.61,.36,1)' }}>
           <div style={{ padding: 'clamp(28px,5vh,52px) clamp(28px,5vw,60px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div
               onClick={(e) => e.stopPropagation()}
