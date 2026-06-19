@@ -5,7 +5,6 @@ import { api, toId } from './api'
 import SchoolTabs from './SchoolTabs'
 import './sunday-school.css'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 type Doc = { id: number | string; [k: string]: any }
 const idStr = (v: unknown): string => String(typeof v === 'object' && v !== null && 'id' in v ? (v as any).id : v)
 
@@ -61,32 +60,32 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
   useEffect(() => { reload() }, [reload])
 
   const place = async (studentId: string | number, classId: string) => {
-    if (!classId) return
-    setError('')
+    if (!classId || busy) return
+    setBusy(true); setError('')
     try {
       await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: toId(studentId), class: toId(classId), status: 'active' }) })
       await reload()
-    } catch (e) { setError((e as Error).message || 'Couldn’t place that student.') }
+    } catch (e) { setError((e as Error).message || 'Couldn’t place that student.') } finally { setBusy(false) }
   }
 
   const withdraw = async (enrollmentId: string | number) => {
-    if (!confirm('Withdraw this student from the class?')) return
-    setError('')
+    if (busy || !confirm('Withdraw this student from the class?')) return
+    setBusy(true); setError('')
     try {
       await api(`/enrollments/${toId(enrollmentId)}`, { method: 'PATCH', body: JSON.stringify({ status: 'withdrawn' }) })
       await reload()
-    } catch (e) { setError((e as Error).message || 'Withdraw failed.') }
+    } catch (e) { setError((e as Error).message || 'Withdraw failed.') } finally { setBusy(false) }
   }
 
-  // Move = withdraw the current enrollment + create a new active one (history preserved).
-  const move = async (enrollmentId: string | number, studentId: string, newClassId: string) => {
-    if (!newClassId) return
-    setError('')
+  // Move = re-point the existing enrollment's class (matches ClassDetailClient; avoids the
+  // unique (tenant, student, class) index that withdraw+re-create would hit on re-entry).
+  const move = async (enrollmentId: string | number, newClassId: string) => {
+    if (!newClassId || busy) return
+    setBusy(true); setError('')
     try {
-      await api(`/enrollments/${toId(enrollmentId)}`, { method: 'PATCH', body: JSON.stringify({ status: 'withdrawn' }) })
-      await api('/enrollments', { method: 'POST', body: JSON.stringify({ student: toId(studentId), class: toId(newClassId), status: 'active' }) })
+      await api(`/enrollments/${toId(enrollmentId)}`, { method: 'PATCH', body: JSON.stringify({ class: toId(newClassId) }) })
       await reload()
-    } catch (e) { setError((e as Error).message || 'Move failed.') }
+    } catch (e) { setError((e as Error).message || 'Move failed.') } finally { setBusy(false) }
   }
 
   const addNew = async () => {
@@ -179,7 +178,7 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
                       <div key={r.enrollmentId} className="ss-row">
                         <span className="ss-row__name">{r.name}</span>
                         <span style={{ display: 'inline-flex', gap: 8 }}>
-                          <select className="ss-select" style={{ maxWidth: 150 }} defaultValue="" onChange={(e) => move(r.enrollmentId, r.studentId, e.target.value)}>
+                          <select className="ss-select" style={{ maxWidth: 150 }} defaultValue="" onChange={(e) => move(r.enrollmentId, e.target.value)}>
                             <option value="">Move to…</option>
                             {classes.filter((x) => idStr(x.id) !== cid).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
                           </select>
