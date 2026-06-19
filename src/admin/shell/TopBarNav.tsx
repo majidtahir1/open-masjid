@@ -41,8 +41,14 @@ const ExternalIcon = ({ size = 14 }: { size?: number }) => (
 export default function TopBarNav() {
   const { user } = useAuth()
   const u = (user ?? {}) as ShellUser
+  // Auth resolves asynchronously on mount. Until we actually know the role,
+  // DON'T guess: a 'staff' fallback would paint a restrictive menu (hiding
+  // Community/Programs for an admin) that only corrects once auth resolves,
+  // which reads as items flickering in on refresh. Gate the role-dependent
+  // nav on a resolved role instead.
+  const roleResolved = typeof u.role === 'string'
   const role: Role = u.role ?? 'staff'
-  const items: NavItem[] = visibleFor(role)
+  const items: NavItem[] = roleResolved ? visibleFor(role) : []
 
   const email = u.email ?? ''
   const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || email || 'Account'
