@@ -12,6 +12,12 @@ import { Announcements } from './collections/Announcements'
 import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
+import { Terms } from './collections/Terms'
+import { SchoolClasses } from './collections/SchoolClasses'
+import { Students } from './collections/Students'
+import { Enrollments } from './collections/Enrollments'
+import { ClassSessions } from './collections/ClassSessions'
+import { AttendanceRecords } from './collections/AttendanceRecords'
 import { NudgeStates } from './collections/NudgeStates'
 import { MembershipTiers } from './collections/MembershipTiers'
 import { Donations } from './collections/Donations'
@@ -85,36 +91,16 @@ export default buildConfig({
       titleSuffix: ' — OpenMasjid',
     },
     components: {
-      // Sidebar order intent (top → bottom), achieved via CSS `order` in NavOrder:
-      //   1. Dashboard
-      //   2. Prayer group        (native)
-      //   3. Donations           (custom link, slotted between Prayer and Content)
-      //   4. Content group       (native)
-      //   5. Library group       (native — Media)
-      //   6. View public site    (custom)
-      //   7. Site Settings       (custom, margin-top:auto pins it to the bottom)
-      //
-      // Billing has been removed from the sidebar entirely; it lives as a tab
-      // inside the tenant edit page (Site Settings → Billing tab) so masjid
-      // admins don't have to look at it day-to-day.
-      beforeNavLinks: [
-        '/src/admin/BillingBanner#default',
-        '/src/admin/onboarding/OnboardingBanner#default',
-        '/src/admin/DashboardLink#default',
-        '/src/admin/donations/DonationsNav#default',
-        '/src/admin/membership/MembershipNav#default',
-      ],
-      afterNavLinks: [
-        '/src/admin/ViewPublicSiteLink#default',
-        '/src/admin/ProfileLink#default',
-        '/src/admin/SiteSettingsCluster#default',
-      ],
+      // The sidebar is replaced by the custom top-bar shell. Because Payload
+      // only renders before/afterNavLinks from its default sidebar Nav, those
+      // slots are gone — navigation (incl. Donations, Membership, Programs,
+      // View site, Profile, Site Settings) now lives in TopBarNav / the account
+      // menu, and the billing + onboarding banners are re-homed into the
+      // AdminBanners provider below. The Hide*Nav / NavOrder helpers are also
+      // retired: there is no native sidebar left to reorder or hide.
+      Nav: '/src/admin/shell/TopBarNav#default',
       header: [
         '/src/admin/Favicon#default',
-        '/src/admin/HideTenantsNav#default',
-        '/src/admin/donations/HideDonationsCollections#default',
-        '/src/admin/HideMediaAndPeopleNav#default',
-        '/src/admin/NavOrder#default',
         '/src/admin/TenantThemeStyle#default',
       ],
       graphics: {
@@ -130,7 +116,11 @@ export default buildConfig({
         // the cleanest way to keep the built-in admin shell intact while
         // fully owning the login UI.
       },
-      providers: ['/src/admin/ansari/AnsariProvider#default'],
+      providers: [
+        '/src/admin/AdminBanners#default',
+        '/src/admin/ansari/AnsariProvider#default',
+        '/src/admin/shell/CommandPaletteProvider#default',
+      ],
     },
   },
   // Order matters — Payload renders sidebar groups in the order their first
@@ -161,6 +151,12 @@ export default buildConfig({
     Donations,
     MembershipTiers,
     Members,
+    Terms,
+    SchoolClasses,
+    Students,
+    Enrollments,
+    ClassSessions,
+    AttendanceRecords,
     Media,
     Users,
     Tenants,

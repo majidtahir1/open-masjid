@@ -34,19 +34,21 @@ import {
   CalendarPlus,
   ChevronRight,
   Clock,
-  Image as ImageIcon,
+  FileText,
+  GraduationCap,
   Megaphone,
+  Monitor,
+  Images,
   Users,
 } from 'lucide-react'
 
 import { OnboardingShell } from './onboarding/OnboardingShell'
-import { computeMilestoneStates } from '@/lib/onboarding'
+import { computeMilestoneStates, doneCount } from '@/lib/onboarding'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -59,7 +61,7 @@ type UserLite = {
   email?: string
   firstName?: string
   lastName?: string
-  role?: 'platformOwner' | 'admin' | 'staff'
+  role?: 'platformOwner' | 'admin' | 'staff' | 'kioskManager'
   tenant?: TenantRef
   onboardingWelcomeSeenAt?: string | null
 } | null
@@ -399,17 +401,14 @@ async function TenantDashboard({
     ? `/admin/collections/${scheduleCollection}/${schedule.id}`
     : `/admin/collections/${scheduleCollection}`
 
-  // If prayer-schedules isn't registered yet, point the quick-action button
-  // at the legacy collection so the link still resolves.
-  const newScheduleHref =
-    schedule?.collectionSlug === 'prayer-times'
-      ? '/admin/collections/prayer-times/create'
-      : '/admin/collections/prayer-schedules/create'
-
   const displayName = greetingName(user)
+  const setupDone = doneCount(onboardingStates)
+  const isAdmin = user.role === 'admin'
+  const isKiosk = user.role === 'kioskManager'
 
   return (
-    <div className="p-8 md:p-10 max-w-[1400px] mx-auto space-y-8">
+    <div className="om-dashboard-hub min-h-screen bg-[#F7F8F8] px-6 py-10 md:px-14 md:py-11">
+      <div className="mx-auto max-w-[1180px] space-y-9">
       <OnboardingShell
         initialStates={onboardingStates}
         publicUrl={publicUrl}
@@ -418,218 +417,200 @@ async function TenantDashboard({
         brandingInitial={brandingInitial}
         identityInitial={identityInitial}
       />
-      <header className="flex items-center justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl md:text-5xl font-semibold text-foreground">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1
+            className="text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-[#0F1E4A]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             Salam, {displayName}
           </h1>
-          <div className="flex flex-wrap items-center gap-2 text-base text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[15px] text-[#747C7C]">
             <span>Managing</span>
-            <Badge variant="secondary" className="gap-1 text-base px-3 py-1.5">
-              <Building className="size-4" aria-hidden />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6F5F7] px-3 py-1.5 font-semibold text-[#175F6B]">
+              <Building className="size-3.5" aria-hidden />
               {tenantName}
-            </Badge>
+            </span>
           </div>
         </div>
-        {tenantLogo && (
-          <img
-            src={tenantLogo.url}
-            alt={tenantLogo.alt}
-            className="h-20 md:h-24 w-auto object-contain shrink-0"
-          />
-        )}
+        <div className="flex items-center gap-3">
+          {isAdmin && setupDone >= onboardingStates.length && (
+            <span className="inline-flex items-center gap-2 rounded-[10px] border border-[#DDE1E1] bg-white px-3.5 py-2.5 text-[14.5px] text-[#3A3F3F]">
+              <span className="size-2 rounded-full bg-[#4C8B5B]" aria-hidden />
+              Setup checklist · {setupDone} of {onboardingStates.length} done
+            </span>
+          )}
+          {tenantLogo && (
+            <img
+              src={tenantLogo.url}
+              alt={tenantLogo.alt}
+              className="h-12 w-auto object-contain shrink-0"
+            />
+          )}
+        </div>
       </header>
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-        {/* Active prayer schedule */}
-        <Card>
-          <CardHeader className="p-6 md:p-8">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Clock className="size-5 text-secondary" aria-hidden />
-                  Active Prayer Schedule
-                </CardTitle>
-                {schedule ? (
-                  <CardDescription className="text-base text-muted-foreground">
-                    {schedule.name}
-                  </CardDescription>
-                ) : (
-                  <CardDescription className="text-base text-muted-foreground">
-                    Nothing active yet
-                  </CardDescription>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
-            {schedule ? (
-              <div className="space-y-1">
-                <div className="grid grid-cols-[80px_1fr_1fr] gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground pb-2 border-b border-border">
-                  <div>Prayer</div>
-                  <div>Adhan</div>
-                  <div>Iqamah</div>
-                </div>
-                {schedule.rows.map((r, i) => (
-                  <div
-                    key={r.prayer}
-                    className={`grid grid-cols-[80px_1fr_1fr] gap-2 text-base py-2.5 text-foreground ${
-                      i < schedule.rows.length - 1 ? 'border-b border-border/60' : ''
-                    }`}
-                  >
-                    <div className="font-medium">{r.prayer}</div>
-                    <div className="text-muted-foreground">{r.adhan}</div>
-                    <div>{r.iqamah}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="italic text-muted-foreground text-base">
-                No schedule set yet. Create one to populate the public prayer times page.
-              </p>
-            )}
-          </CardContent>
-          <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
-            <Button variant="ghost" size="sm" asChild className="text-base">
-              <Link href={scheduleEditHref}>
-                Update schedule
-                <ChevronRight aria-hidden />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Upcoming events */}
-        <Card>
-          <CardHeader className="p-6 md:p-8">
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <CalendarPlus className="size-5 text-secondary" aria-hidden />
-              Upcoming Events
-            </CardTitle>
-            <CardDescription className="text-base text-muted-foreground">
-              {eventsRes.docs.length > 0
-                ? `${eventsRes.docs.length} upcoming`
-                : 'Nothing scheduled'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
-            {eventsRes.docs.length > 0 ? (
-              <ul className="space-y-0">
-                {(
-                  eventsRes.docs as Array<{
-                    id: string | number
-                    title?: string
-                    when?: string
-                    startDate?: string
-                  }>
-                ).map((e, i) => (
-                  <li
-                    key={e.id}
-                    className={`py-2.5 ${
-                      i < eventsRes.docs.length - 1 ? 'border-b border-border/60' : ''
-                    }`}
-                  >
-                    <Link
-                      href={`/admin/collections/events/${e.id}`}
-                      className="block group"
-                    >
-                      <p className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {e.title || '(untitled)'}
-                      </p>
-                      <p className="text-base text-muted-foreground mt-0.5">
-                        {e.startDate ? formatWhen(e.startDate) : e.when || 'No date set'}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="italic text-muted-foreground text-base">
-                No upcoming published events.
-              </p>
-            )}
-          </CardContent>
-          <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
-            <Button variant="ghost" size="sm" asChild className="text-base">
-              <Link href="/admin/collections/events/create">
-                Add event
-                <ChevronRight aria-hidden />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Active announcements */}
-        <Card>
-          <CardHeader className="p-6 md:p-8">
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Megaphone className="size-5 text-secondary" aria-hidden />
-              Active Announcements
-            </CardTitle>
-            <CardDescription className="text-base text-muted-foreground">
-              Live across the public site
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 md:p-8 pt-0 md:pt-0">
-            <p className="text-6xl md:text-7xl font-bold text-foreground leading-none">
-              {announcementsRes.totalDocs}
-            </p>
-            <p className="text-base text-muted-foreground mt-2">
-              {announcementsRes.totalDocs === 1
-                ? 'announcement is live'
-                : 'announcements are live'}
-            </p>
-          </CardContent>
-          <CardFooter className="p-6 md:p-8 pt-0 md:pt-0">
-            <Button variant="ghost" size="sm" asChild className="text-base">
-              <Link href="/admin/collections/announcements">
-                View announcements
-                <ChevronRight aria-hidden />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-
-      <Separator />
-
-      {/* Quick actions.
-          `setTenantFromUser` hook on each collection pre-fills the tenant on
-          save for non-platformOwner users; platformOwners pick a tenant on the
-          form. With drafts enabled on Events/Announcements/Pages/HeroSlides/
-          Services, a fresh create saves as Draft until the admin clicks
-          Publish — giving them a safe preview loop. */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Quick actions
+      {/* Jump back in — role-aware quick actions.
+          `setTenantFromUser` hooks pre-fill the tenant on save for non-platform
+          users; create forms save as Draft until Publish. */}
+      <section className="space-y-3.5">
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9CA4A4]">
+          Jump back in
         </h2>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <QuickActionCard
-            href="/admin/collections/events/create"
-            icon={<CalendarPlus className="h-5 w-5" aria-hidden />}
-            title="New Event"
-            description="Class, program, or gathering"
-          />
-          <QuickActionCard
-            href="/admin/collections/announcements/create"
-            icon={<Megaphone className="h-5 w-5" aria-hidden />}
-            title="New Announcement"
-            description="Short notice for the site banner"
-          />
-          <QuickActionCard
-            href={newScheduleHref}
-            icon={<Clock className="h-5 w-5" aria-hidden />}
-            title="New Prayer Schedule"
-            description="Seasonal iqamah + adhan range"
-          />
-          <QuickActionCard
-            href="/admin/collections/hero-slides/create"
-            icon={<ImageIcon className="h-5 w-5" aria-hidden />}
-            title="New Hero Slide"
-            description="Homepage hero card"
-          />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {isKiosk ? (
+            <>
+              <QuickActionCard
+                href="/admin/collections/prayer-display-content"
+                icon={<Monitor className="h-5 w-5" aria-hidden />}
+                title="Update prayer display"
+                description="Edit the prayer screen content"
+              />
+              <QuickActionCard
+                href="/admin/collections/carousel-slides"
+                icon={<Images className="h-5 w-5" aria-hidden />}
+                title="Manage carousel"
+                description="Slides shown between prayers"
+              />
+              <QuickActionCard
+                href="/admin/collections/kiosks"
+                icon={<Monitor className="h-5 w-5" aria-hidden />}
+                title="Manage kiosks"
+                description="Registered display devices"
+              />
+            </>
+          ) : (
+            <>
+              <QuickActionCard
+                href="/admin/collections/events/create"
+                icon={<CalendarPlus className="h-5 w-5" aria-hidden />}
+                title="Add event"
+                description="Class, program, or gathering"
+                featured
+              />
+              <QuickActionCard
+                href="/admin/collections/forms/create"
+                icon={<FileText className="h-5 w-5" aria-hidden />}
+                title="Create form"
+                description="Signup or registration form"
+              />
+              <QuickActionCard
+                href="/admin/sunday-school"
+                icon={<GraduationCap className="h-5 w-5" aria-hidden />}
+                title="Review programs"
+                description="Weekend & Quran school"
+              />
+            </>
+          )}
         </div>
       </section>
+
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+        {/* Active prayer schedule */}
+        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6">
+          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E]">
+            <Clock className="size-[18px]" aria-hidden />
+            <span className="text-[15.5px] font-semibold text-[#141616]">Active Prayer Schedule</span>
+          </div>
+          {schedule ? (
+            <div>
+              <div className="grid grid-cols-[70px_1fr_1fr] gap-2 border-b border-[#EEF0F0] pb-2 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#9CA4A4]">
+                <div>Prayer</div>
+                <div>Adhan</div>
+                <div>Iqamah</div>
+              </div>
+              {schedule.rows.map((r, i) => (
+                <div
+                  key={r.prayer}
+                  className={`grid grid-cols-[70px_1fr_1fr] gap-2 py-2 text-[14.5px] ${
+                    i < schedule.rows.length - 1 ? 'border-b border-[#F2F3F3]' : ''
+                  }`}
+                >
+                  <div className="font-medium text-[#3A3F3F]">{r.prayer}</div>
+                  <div className="text-[#747C7C]">{r.adhan}</div>
+                  <div className="text-[#141616]">{r.iqamah}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[14.5px] leading-[1.6] text-[#747C7C]">
+              No schedule set yet. Create one to populate the public prayer times page.
+            </p>
+          )}
+          <Link
+            href={scheduleEditHref}
+            className="mt-4 inline-flex items-center gap-1 text-[14.5px] font-semibold text-[#1E7E8E]"
+          >
+            Update schedule
+            <ChevronRight className="size-3.5" aria-hidden />
+          </Link>
+        </div>
+
+        {/* Upcoming events */}
+        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6">
+          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E]">
+            <CalendarPlus className="size-[18px]" aria-hidden />
+            <span className="text-[15.5px] font-semibold text-[#141616]">Upcoming Events</span>
+            <span className="ml-auto text-[13.5px] text-[#9CA4A4]">
+              {eventsRes.docs.length > 0 ? `${eventsRes.docs.length} upcoming` : 'None'}
+            </span>
+          </div>
+          {eventsRes.docs.length > 0 ? (
+            <ul>
+              {(
+                eventsRes.docs as Array<{
+                  id: string | number
+                  title?: string
+                  when?: string
+                  startDate?: string
+                }>
+              ).map((e, i) => (
+                <li
+                  key={e.id}
+                  className={i < eventsRes.docs.length - 1 ? 'mb-3' : undefined}
+                >
+                  <Link href={`/admin/collections/events/${e.id}`} className="block">
+                    <p className="text-[14.5px] font-medium text-[#3A3F3F]">
+                      {e.title || '(untitled)'}
+                    </p>
+                    <p className="mt-0.5 text-[13.5px] text-[#9CA4A4]">
+                      {e.startDate ? formatWhen(e.startDate) : e.when || 'No date set'}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[14.5px] leading-[1.6] text-[#747C7C]">No upcoming published events.</p>
+          )}
+        </div>
+
+        {/* Active announcements */}
+        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6">
+          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E]">
+            <Megaphone className="size-[18px]" aria-hidden />
+            <span className="text-[15.5px] font-semibold text-[#141616]">Active Announcements</span>
+          </div>
+          <p
+            className="text-[54px] font-medium leading-none text-[#0F1E4A]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {announcementsRes.totalDocs}
+          </p>
+          <p className="mt-1.5 text-[14.5px] text-[#747C7C]">
+            {announcementsRes.totalDocs === 1 ? 'announcement is live' : 'announcements are live'}
+          </p>
+        </div>
+      </div>
+
+      <p className="flex items-center gap-1.5 pt-1 text-[14px] text-[#9CA4A4]">
+        Tip — press
+        <kbd className="rounded-[6px] bg-[#EEF0F0] px-1.5 py-0.5 text-[12.5px] font-semibold text-[#545B5B]">
+          ⌘K
+        </kbd>
+        to jump anywhere or run an action.
+      </p>
+      </div>
     </div>
   )
 }
@@ -639,24 +620,35 @@ function QuickActionCard({
   icon,
   title,
   description,
+  featured = false,
 }: {
   href: string
   icon: React.ReactNode
   title: string
   description: string
+  /** Navy filled card used to highlight the primary action. */
+  featured?: boolean
 }) {
+  if (featured) {
+    return (
+      <Link
+        href={href}
+        className="block rounded-[13px] bg-[#0F1E4A] p-[21px] text-white transition-transform duration-200 hover:-translate-y-0.5"
+      >
+        <span className="text-[#F0C88C] [&_svg]:size-[22px]">{icon}</span>
+        <div className="mt-[18px] text-[16.5px] font-semibold">{title}</div>
+        <div className="mt-0.5 text-[14px] text-[#9FAAD0]">{description}</div>
+      </Link>
+    )
+  }
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-lg border border-border bg-white p-4 transition-colors hover:border-primary hover:bg-accent/50"
+      className="block rounded-[13px] border border-[#DDE1E1] bg-white p-[21px] transition duration-200 hover:border-[#BEE4E9] hover:shadow-[0_6px_18px_rgba(19,46,48,0.08)]"
     >
-      <span className="grid h-10 w-10 place-items-center rounded-md bg-secondary/10 text-secondary group-hover:bg-primary/10 group-hover:text-primary">
-        {icon}
-      </span>
-      <span className="flex min-w-0 flex-col">
-        <span className="text-base font-semibold text-foreground">{title}</span>
-        <span className="text-sm text-muted-foreground">{description}</span>
-      </span>
+      <span className="text-[#1E7E8E] [&_svg]:size-[22px]">{icon}</span>
+      <div className="mt-[18px] text-[16.5px] font-semibold text-[#141616]">{title}</div>
+      <div className="mt-0.5 text-[14px] text-[#747C7C]">{description}</div>
     </Link>
   )
 }

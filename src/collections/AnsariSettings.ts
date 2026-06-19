@@ -7,7 +7,7 @@ import {
   tenantScopedRead,
   tenantScopedUpdate,
 } from '../access/tenantScoped'
-import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForNonPlatformOwner } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { RULE_IDS } from '../ansari/ruleIds'
 
@@ -19,7 +19,9 @@ export const AnsariSettings: CollectionConfig = {
     description:
       'Proactive nudge preferences for this masjid: which nudges are on, quiet hours, and the weekly digest slot.',
     useAsTitle: 'id',
-    hidden: hideForKioskManager,
+    // Tenants manage these from Site Settings → Ansari (a custom tab). The raw
+    // collection stays in the sidebar for platform owners only (testing).
+    hidden: hideForNonPlatformOwner,
   },
   // Deliberately NOT wrapped with withBillingLock — settings should remain editable when billing-locked.
   access: {

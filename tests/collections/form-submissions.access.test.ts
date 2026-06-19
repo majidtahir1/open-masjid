@@ -11,8 +11,12 @@ describe('FormSubmissions access', () => {
     expect(callAccess('update', { role: 'platformOwner' })).toBe(false)
     expect(callAccess('delete', { role: 'platformOwner' })).toBe(false)
   })
-  it('tenant-scopes reads', () => {
+  it('tenant-scopes reads for admin', () => {
     expect(callAccess('read', { id: 'u', role: 'admin', tenant: { id: 't' } }))
       .toEqual({ tenant: { equals: 't' } })
+  })
+  it('denies read to teacher and school_admin', () => {
+    expect(callAccess('read', { id: 'u', role: 'teacher', tenant: { id: 't' } })).toBe(false)
+    expect(callAccess('read', { id: 'u', role: 'school_admin', tenant: { id: 't' } })).toBe(false)
   })
 })

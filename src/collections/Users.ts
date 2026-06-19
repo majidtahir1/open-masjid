@@ -294,10 +294,12 @@ export const Users: CollectionConfig = {
         { label: 'Admin (full access within one tenant)', value: 'admin' },
         { label: 'Staff (content only within one tenant)', value: 'staff' },
         { label: 'Kiosk Manager (kiosk content only within one tenant)', value: 'kioskManager' },
+        { label: 'School Admin (Sunday school across one tenant)', value: 'school_admin' },
+        { label: 'Teacher (own Sunday school classes only)', value: 'teacher' },
       ],
       admin: {
         description:
-          'Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content.',
+          'Platform Owner manages every masjid and the platform itself. Admin can change settings, branding, and users within one masjid. Staff can add/edit content (events, prayer times, announcements) but cannot change settings or manage users. Kiosk Manager can only manage kiosk displays and slide content. School Admin manages the Sunday school (terms, classes, students, attendance) within one masjid. Teacher can only mark attendance for their assigned classes.',
         components: {
           Field: '/src/fields/SelectField#default',
         },
@@ -348,6 +350,17 @@ export const Users: CollectionConfig = {
           if (!user) return false
           return user.role === 'platformOwner'
         },
+      },
+    },
+    {
+      name: 'managedPrograms',
+      type: 'relationship',
+      relationTo: 'terms',
+      hasMany: true,
+      index: true,
+      admin: {
+        description: 'Programs this School Admin manages. They get full access to the classes, students, and attendance within these programs only.',
+        condition: (data) => data?.role === 'school_admin',
       },
     },
     {

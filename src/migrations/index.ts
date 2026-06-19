@@ -33,6 +33,14 @@ import * as migration_20260604_090000_blog_api_scopes from './20260604_090000_bl
 import * as migration_20260604_205205_demo_mode from './20260604_205205_demo_mode';
 import * as migration_20260610_174850_form_submissions_trash from './20260610_174850_form_submissions_trash';
 import * as migration_20260611_210334_proactive_nudge_engine from './20260611_210334_proactive_nudge_engine';
+import * as migration_20260616_210336_sunday_school_attendance from './20260616_210336_sunday_school_attendance';
+import * as migration_20260617_171316_term_holidays from './20260617_171316_term_holidays';
+import * as migration_20260617_174206_class_status from './20260617_174206_class_status';
+import * as migration_20260617_212605_form_school_registration from './20260617_212605_form_school_registration';
+import * as migration_20260617_225620_term_meeting_days from './20260617_225620_term_meeting_days';
+import * as migration_20260618_041107_registration_program_targeting from './20260618_041107_registration_program_targeting';
+import * as migration_20260618_044149_user_managed_programs from './20260618_044149_user_managed_programs';
+import * as migration_20260619_033918_checkin_kiosk_attendance_timestamps from './20260619_033918_checkin_kiosk_attendance_timestamps';
 
 export const migrations = [
   {
@@ -208,6 +216,46 @@ export const migrations = [
   {
     up: migration_20260611_210334_proactive_nudge_engine.up,
     down: migration_20260611_210334_proactive_nudge_engine.down,
-    name: '20260611_210334_proactive_nudge_engine'
+    name: '20260611_210334_proactive_nudge_engine',
+  },
+  {
+    up: migration_20260616_210336_sunday_school_attendance.up,
+    down: migration_20260616_210336_sunday_school_attendance.down,
+    name: '20260616_210336_sunday_school_attendance',
+  },
+  {
+    up: migration_20260617_171316_term_holidays.up,
+    down: migration_20260617_171316_term_holidays.down,
+    name: '20260617_171316_term_holidays',
+  },
+  {
+    up: migration_20260617_174206_class_status.up,
+    down: migration_20260617_174206_class_status.down,
+    name: '20260617_174206_class_status',
+  },
+  {
+    up: migration_20260617_212605_form_school_registration.up,
+    down: migration_20260617_212605_form_school_registration.down,
+    name: '20260617_212605_form_school_registration',
+  },
+  {
+    up: migration_20260617_225620_term_meeting_days.up,
+    down: migration_20260617_225620_term_meeting_days.down,
+    name: '20260617_225620_term_meeting_days',
+  },
+  {
+    up: migration_20260618_041107_registration_program_targeting.up,
+    down: migration_20260618_041107_registration_program_targeting.down,
+    name: '20260618_041107_registration_program_targeting',
+  },
+  {
+    up: migration_20260618_044149_user_managed_programs.up,
+    down: migration_20260618_044149_user_managed_programs.down,
+    name: '20260618_044149_user_managed_programs',
+  },
+  {
+    up: migration_20260619_033918_checkin_kiosk_attendance_timestamps.up,
+    down: migration_20260619_033918_checkin_kiosk_attendance_timestamps.down,
+    name: '20260619_033918_checkin_kiosk_attendance_timestamps'
   },
 ];

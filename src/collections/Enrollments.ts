@@ -1,0 +1,50 @@
+import type { CollectionConfig } from 'payload'
+import { denyKioskManager } from '../access/kioskRoles'
+import { setTenantFromUser } from '../hooks/setTenantFromUser'
+import {
+  readByRole,
+  writeByRole,
+  schoolAdminCreate,
+  teacherEnrollmentsResolve,
+  schoolAdminEnrollmentsRead,
+} from '../access/schoolAccess'
+import { assertEnrollmentProgramScope } from '../hooks/assertProgramScope'
+
+export const Enrollments: CollectionConfig = {
+  slug: 'enrollments',
+  labels: { singular: 'Enrollment', plural: 'Enrollments' },
+  admin: {
+    enableListViewSelectAPI: true,
+    group: 'Programs',
+    hidden: true,
+    useAsTitle: 'id',
+    defaultColumns: ['student', 'class', 'status', 'enrolledAt'],
+    description: 'Joins a student to a class for a term (the roster).',
+  },
+  access: {
+    read: denyKioskManager(readByRole({ teacher: teacherEnrollmentsResolve, schoolAdmin: schoolAdminEnrollmentsRead })),
+    create: denyKioskManager(schoolAdminCreate),
+    update: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminEnrollmentsRead })),
+    delete: denyKioskManager(writeByRole({ schoolAdmin: schoolAdminEnrollmentsRead })),
+  },
+  hooks: { beforeValidate: [assertEnrollmentProgramScope], beforeChange: [setTenantFromUser] },
+  fields: [
+    { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true, admin: { hidden: true } },
+    { name: 'student', type: 'relationship', relationTo: 'students', required: true, index: true },
+    { name: 'class', type: 'relationship', relationTo: 'school-classes', required: true, index: true },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'active',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Withdrawn', value: 'withdrawn' },
+      ],
+    },
+    { name: 'enrolledAt', type: 'date', defaultValue: () => new Date().toISOString() },
+  ],
+  indexes: [{ fields: ['tenant', 'student', 'class'], unique: true }],
+}
+
+export default Enrollments

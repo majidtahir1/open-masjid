@@ -1,7 +1,15 @@
 // src/collections/FormSubmissions.ts
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
 import { tenantScopedRead } from '../access/tenantScoped'
 import { denyKioskManager } from '../access/kioskRoles'
+import { createStudentFromRegistration } from '../hooks/createStudentFromRegistration'
+
+/** School roles must not access raw form submissions (contain guardian PII from every form). */
+const submissionsRead: Access = (args) => {
+  const role = (args.req.user as { role?: string } | null | undefined)?.role
+  if (role === 'teacher' || role === 'school_admin') return false
+  return tenantScopedRead(args)
+}
 
 export const FormSubmissions: CollectionConfig = {
   slug: 'form-submissions',
@@ -24,7 +32,10 @@ export const FormSubmissions: CollectionConfig = {
     create: denyKioskManager(() => false),
     update: denyKioskManager(() => false),
     delete: denyKioskManager(() => false),
-    read: denyKioskManager(tenantScopedRead),
+    read: denyKioskManager(submissionsRead),
+  },
+  hooks: {
+    afterChange: [createStudentFromRegistration],
   },
   fields: [
     { name: 'tenant', type: 'relationship', relationTo: 'tenants', required: true, index: true,
