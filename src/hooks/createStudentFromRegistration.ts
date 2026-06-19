@@ -1,5 +1,16 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
+import {
+  mapParticipantToStudent,
+  participantsFromSubmission,
+  resolveAutoEnrollClassId,
+} from '../lib/school-enroll'
+
+// Postgres relationship ids are integers; numeric-looking strings ("94") are
+// rejected on create, so coerce all-digit ids back to numbers.
+const relId = (v: string | number): string | number =>
+  typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : v
+
 const str = (data: Record<string, unknown>, key: string): string | undefined => {
   const v = data[key]
   if (v == null) return undefined
@@ -96,6 +107,21 @@ export function mapRegistrationFields(
   return result
 }
 
+type FormSchemaShape = {
+  steps?: { fields?: { name?: string; label?: string; type?: string }[] }[]
+}
+
+/** Return the repeatable-group fields declared in the form schema. */
+function schemaGroups(schema: FormSchemaShape | null | undefined): { name?: string }[] {
+  const groups: { name?: string }[] = []
+  for (const step of schema?.steps ?? []) {
+    for (const f of step.fields ?? []) {
+      if (f?.type === 'repeatable-group') groups.push(f)
+    }
+  }
+  return groups
+}
+
 export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
   doc,
   operation,
@@ -109,7 +135,8 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
   type RegForm = {
     schoolRegistration?: boolean
     registrationProgram?: unknown
-    schema?: { steps?: { fields?: { name?: string; label?: string; type?: string }[] }[] }
+    registration?: { participantModel?: string }
+    schema?: FormSchemaShape
     title?: string
     name?: string
   }
@@ -128,30 +155,96 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
 
   if (form?.schoolRegistration !== true) return doc
 
-  const programId =
+  const programIdRaw =
     form.registrationProgram == null
       ? null
       : typeof form.registrationProgram === 'object'
         ? (form.registrationProgram as { id: string | number }).id
         : (form.registrationProgram as string | number)
+  const programId = programIdRaw == null ? null : relId(programIdRaw)
 
   const submissionData = (doc.data ?? {}) as Record<string, unknown>
-  const tenantId = typeof doc.tenant === 'object' ? (doc.tenant as { id: string | number }).id : doc.tenant
-  const studentData = mapRegistrationFields(submissionData, tenantId, programId)
-  if (!studentData) return doc
+  const tenantRaw =
+    typeof doc.tenant === 'object' ? (doc.tenant as { id: string | number }).id : (doc.tenant as string | number)
+  const tenantId = relId(tenantRaw)
 
-  // Snapshot every registration answer onto the student for the read-only
-  // "Registration details" panel — generic, so any form field is captured.
-  studentData.registrationDetails = buildRegistrationDetails(
-    submissionData,
-    form.schema,
-    form.title ?? form.name ?? null,
-  )
+  // children model: the single repeatable-group's name is the participant key.
+  const groupKey =
+    form.registration?.participantModel === 'children'
+      ? (schemaGroups(form.schema)[0]?.name ?? null)
+      : null
+  const participants = participantsFromSubmission(submissionData, groupKey)
 
-  try {
-    await (req.payload as any).create({ collection: 'students', data: studentData, overrideAccess: true, req })
-  } catch (err) {
-    req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to create student')
+  // Payload's create/find data is strictly typed per slug; our data uses coerced
+  // relation ids and a generic shape, so route through an untyped handle (as the
+  // original hook did with `(req.payload as any).create`).
+  const payload = req.payload as any
+
+  // Resolve the program's ACTIVE classes once (single-class auto-enroll / default class).
+  let activeClassIds: (string | number)[] = []
+  if (programId != null) {
+    try {
+      const res = await payload.find({
+        collection: 'school-classes',
+        where: { and: [{ tenant: { equals: tenantId } }, { term: { equals: programId } }, { status: { equals: 'active' } }] },
+        depth: 0,
+        overrideAccess: true,
+        req,
+        limit: 0,
+      })
+      activeClassIds = res.docs.map((c: { id: string | number }) => c.id)
+    } catch (err) {
+      req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to load active classes')
+    }
+
+    // No classes yet: create a single default class so registrants land somewhere.
+    if (activeClassIds.length === 0) {
+      try {
+        const def = await payload.create({
+          collection: 'school-classes',
+          overrideAccess: true,
+          req,
+          data: { tenant: tenantId, term: programId, name: form.title ?? 'General', status: 'active' },
+        })
+        activeClassIds = [def.id]
+      } catch (err) {
+        req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to create default class')
+      }
+    }
+  }
+
+  const autoClassId = resolveAutoEnrollClassId(activeClassIds)
+
+  for (const p of participants) {
+    const studentData = mapParticipantToStudent(p, submissionData, tenantId, programId)
+    if (!studentData) continue
+
+    // Snapshot every registration answer (shared + per-participant) onto the
+    // student for the read-only "Registration details" panel.
+    studentData.registrationDetails = buildRegistrationDetails(
+      { ...submissionData, ...p },
+      form.schema,
+      form.title ?? form.name ?? null,
+    )
+
+    try {
+      const student = await payload.create({
+        collection: 'students',
+        data: studentData,
+        overrideAccess: true,
+        req,
+      })
+      if (autoClassId != null) {
+        await payload.create({
+          collection: 'enrollments',
+          overrideAccess: true,
+          req,
+          data: { tenant: tenantId, student: relId(student.id), class: relId(autoClassId), status: 'active' },
+        })
+      }
+    } catch (err) {
+      req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to create student')
+    }
   }
 
   return doc
