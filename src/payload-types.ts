@@ -738,6 +738,9 @@ export interface Form {
    * Which program registrants are signed up for.
    */
   registrationProgram?: (number | null) | Term;
+  registration?: {
+    participantModel?: ('children' | 'self') | null;
+  };
   /**
    * Shown above the form on the public page.
    */
@@ -1830,7 +1833,7 @@ export interface Student {
    */
   age?: number | null;
   /**
-   * Assigned by admin during placement.
+   * From registration (or set by admin); used for placement.
    */
   gradeLevel?: string | null;
   guardians?:
@@ -2701,6 +2704,11 @@ export interface FormsSelect<T extends boolean = true> {
   status?: T;
   schoolRegistration?: T;
   registrationProgram?: T;
+  registration?:
+    | T
+    | {
+        participantModel?: T;
+      };
   description?: T;
   schema?: T;
   settings?:

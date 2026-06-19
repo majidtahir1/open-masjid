@@ -42,6 +42,7 @@ import * as migration_20260618_041107_registration_program_targeting from './202
 import * as migration_20260618_044149_user_managed_programs from './20260618_044149_user_managed_programs';
 import * as migration_20260619_033918_checkin_kiosk_attendance_timestamps from './20260619_033918_checkin_kiosk_attendance_timestamps';
 import * as migration_20260619_130822_student_registration_details from './20260619_130822_student_registration_details';
+import * as migration_20260619_195749_program_form_registration_settings from './20260619_195749_program_form_registration_settings';
 
 export const migrations = [
   {
@@ -262,6 +263,11 @@ export const migrations = [
   {
     up: migration_20260619_130822_student_registration_details.up,
     down: migration_20260619_130822_student_registration_details.down,
-    name: '20260619_130822_student_registration_details'
+    name: '20260619_130822_student_registration_details',
+  },
+  {
+    up: migration_20260619_195749_program_form_registration_settings.up,
+    down: migration_20260619_195749_program_form_registration_settings.down,
+    name: '20260619_195749_program_form_registration_settings'
   },
 ];
