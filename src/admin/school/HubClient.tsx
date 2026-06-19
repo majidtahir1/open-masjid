@@ -81,7 +81,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
               <div className="ss-stat__num">{summary.unplacedCount}</div>
               <div className="ss-stat__label">awaiting a class</div>
               {summary.unplacedCount > 0 && canSetup && (
-                <Link className="ss-stat__link" href="/admin/programs/setup?step=4">Place them →</Link>
+                <Link className="ss-stat__link" href="/admin/programs/enrollment">Place them →</Link>
               )}
             </div>
           </div>

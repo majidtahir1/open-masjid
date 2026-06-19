@@ -88,7 +88,7 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
           <span>
             {data.attention.teacherlessClasses > 0 && <Link href="/admin/programs/classes">{data.attention.teacherlessClasses} class(es) without a teacher</Link>}
             {data.attention.teacherlessClasses > 0 && data.attention.unplacedStudents > 0 && ' · '}
-            {data.attention.unplacedStudents > 0 && <Link href="/admin/programs/setup?step=4">{data.attention.unplacedStudents} student(s) to place</Link>}
+            {data.attention.unplacedStudents > 0 && <Link href={`/admin/programs/enrollment${progQ}`}>{data.attention.unplacedStudents} student(s) to place</Link>}
           </span>
         </div>
       )}
