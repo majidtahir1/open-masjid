@@ -19,6 +19,16 @@ export default function AnsariWidget() {
   const [tool, setTool] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // On mobile the widget opens as a right-side drawer instead of a floating panel.
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 859px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   // Self-gate: only render the launcher for tenant admins.
   useEffect(() => {
@@ -125,8 +135,14 @@ export default function AnsariWidget() {
 
   return (
     <>
-      {expanded && <div className={styles.backdrop} onClick={() => setView('docked')} />}
-      <section className={expanded ? `${styles.panel} ${styles.expanded}` : styles.panel}>
+      {(expanded || isMobile) && (
+        <div className={styles.backdrop} onClick={() => setView(isMobile ? 'closed' : 'docked')} />
+      )}
+      <section
+        className={[styles.panel, expanded && styles.expanded, isMobile && styles.drawer]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <header className={styles.hdr}>
           <div className={styles.avatar}>A</div>
           <div className={styles.meta}>
@@ -146,9 +162,11 @@ export default function AnsariWidget() {
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
           </button>
-          <button onClick={() => setView(expanded ? 'docked' : 'expanded')} title={expanded ? 'Restore' : 'Expand'}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-          </button>
+          {!isMobile && (
+            <button onClick={() => setView(expanded ? 'docked' : 'expanded')} title={expanded ? 'Restore' : 'Expand'}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+          )}
           <button onClick={() => setView('closed')} title="Close">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>

@@ -380,9 +380,43 @@
   border-top: 1px solid #f5c6c3;
 }
 
-/* ---- mobile: docked and expanded panels go near-fullscreen ---- */
-@media (max-width: 480px) {
-  .panel,
+/* Mobile: lift the launcher above the bottom tab bar (84px) so it doesn't sit
+   under it, and open the chat as a right-side drawer (see .drawer). */
+@media (max-width: 859px) {
+  .launcher {
+    bottom: 100px;
+    right: 16px;
+  }
+}
+
+/* ---- mobile drawer: full-height panel sliding in from the right ---- */
+.drawer {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: min(420px, 90vw);
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+  transform: none;
+  z-index: 60;
+  animation: ansari-drawer-in 0.24s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes ansari-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* ---- (legacy) very-small-screen panel sizing; the drawer class takes over
+   on mobile, this only affects the rare non-drawer case ---- */
+@media (max-width: 360px) {
+  .panel:not(.drawer),
   .expanded {
     inset: 8px;
     right: 8px;

@@ -2,7 +2,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { platformOwnerOnly, tenantScopedRead } from '../access/tenantScoped'
-import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
+import { denyKioskManager, hideForNonPlatformOwner } from '../access/kioskRoles'
 
 export const NudgeStates: CollectionConfig = {
   slug: 'nudge-states',
@@ -11,7 +11,9 @@ export const NudgeStates: CollectionConfig = {
     group: 'Ansari',
     description: 'Dedup + lifecycle bookkeeping for proactive nudges. Managed by the engine.',
     defaultColumns: ['rule', 'dedupKey', 'status', 'emittedAt'],
-    hidden: hideForKioskManager,
+    // Internal engine bookkeeping — only useful to platform owners for testing.
+    // Tenants never see it in the sidebar.
+    hidden: hideForNonPlatformOwner,
   },
   access: {
     read: denyKioskManager(tenantScopedRead),

@@ -4,6 +4,9 @@ export interface ProgramRef {
   startDate?: string | null
 }
 
+/** Cookie that persists the last-selected Sunday-school program across pages. */
+export const PROGRAM_COOKIE = 'om_school_program'
+
 /**
  * Pick the selected program id from a `?program=` value and the tenant's
  * programs. The requested id wins if it exists; `'new'` means create mode

@@ -19,6 +19,15 @@ export const hideForKioskManager = ({ user }: { user: unknown }) =>
   (user as { role?: string } | null | undefined)?.role === 'kioskManager'
 
 /**
+ * Use as a collection's `admin.hidden` value to remove its sidebar entry for
+ * everyone except platform owners. Tenant users never see the raw collection
+ * in the nav; platform owners keep it for testing/debugging. Access controls
+ * still govern the API independently — this only declutters the sidebar.
+ */
+export const hideForNonPlatformOwner = ({ user }: { user: unknown }) =>
+  (user as { role?: string } | null | undefined)?.role !== 'platformOwner'
+
+/**
  * Allow kioskManager read-only access (tenant-scoped); defer to inner for everything else.
  */
 export const allowKioskManagerRead = (inner: Access): Access => (args) => {

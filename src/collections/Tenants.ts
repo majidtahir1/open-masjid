@@ -396,6 +396,25 @@ export const Tenants: CollectionConfig = {
               ],
             },
             {
+              name: 'checkinKiosk',
+              type: 'group',
+              label: 'Parent Check-in Kiosk',
+              admin: {
+                description: 'Settings for the parent self check-in iPad (drop-off / pickup).',
+              },
+              fields: [
+                {
+                  name: 'pin',
+                  type: 'text',
+                  label: 'Staff setup PIN',
+                  admin: {
+                    description:
+                      'A 4–6 digit PIN a staff member enters once to bind an iPad to a program. Share with staff only. Leave blank to disable kiosk setup.',
+                  },
+                },
+              ],
+            },
+            {
               name: 'prayerCalc',
               type: 'group',
               label: 'Calculation Method',
@@ -770,6 +789,24 @@ export const Tenants: CollectionConfig = {
                   access: { update: platformOwnerFieldUpdate },
                 },
               ],
+            },
+          ],
+        },
+        {
+          label: 'Ansari',
+          description: "Proactive nudge preferences for Ansari, this masjid's assistant.",
+          fields: [
+            {
+              name: 'ansariSettingsPanel',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '/src/admin/AnsariSettingsTab#default',
+                },
+                // Kiosk managers can't read/write ansari-settings; hide the tab.
+                condition: (_data, _siblingData, { user }) =>
+                  (user as { role?: string } | null | undefined)?.role !== 'kioskManager',
+              },
             },
           ],
         },

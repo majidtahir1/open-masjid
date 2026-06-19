@@ -505,3 +505,66 @@ aside.nav,
   background-color: var(--icp-navy-900);
   color: #F7F8F8;
 }
+
+/* =========================================================================
+ * Top-bar admin shell — promote Payload's Nav slot to a full-width bar and
+ * flow content beneath it. Depends on Payload template class names; update
+ * here if a Payload upgrade renames them (see also NavOrder history).
+ * NOTE: this block is intentionally appended last so its `aside.nav`
+ * background (navy-700) overrides the earlier sidebar `aside.nav` (navy-900).
+ * ========================================================================= */
+.template-default {
+  display: block; /* stack the top bar above the content (no left sidebar) */
+}
+/* TopBarNav fills Payload's Nav slot and renders as a bare <nav data-om-topbar>
+   child here (NOT Payload's default aside.nav), so target it directly. It sits
+   in normal flow as a full-width 62px bar; make it sticky so it stays pinned
+   while content scrolls, and keep overflow visible so mega-menus can escape. */
+.template-default > nav[data-om-topbar] {
+  /* `!important` overrides TopBarNav's inline `position: relative` so the bar
+     pins to the top instead of scrolling away on long list/edit pages. */
+  position: sticky !important;
+  top: 0;
+  z-index: 60;
+  overflow: visible;
+}
+.template-default__wrap {
+  margin-left: 0 !important;
+  width: 100% !important;
+  /* No padding-top: the bar is in normal flow, so the content already begins
+     directly beneath it. (A padding-top here double-counted the bar height and
+     left an empty white band under it.) */
+}
+/* Payload's mobile sidebar toggler is replaced by our own hamburger. */
+.nav-toggler { display: none !important; }
+
+/* The top bar owns the logo, search, and account menu, so Payload's default
+   app-header (gravatar + breadcrumb strip) is redundant and leaves an empty
+   white band directly under the bar. Hide it. Document save/publish controls
+   live in the view body (.doc-controls / .collection-edit), not the
+   app-header, so editing collection docs is unaffected. */
+.app-header {
+  display: none !important;
+}
+
+/* Dashboard hub cards are tappable surfaces, not inline text links — strip
+   Payload's default anchor underline inside the hub so they read as cards. */
+.om-dashboard-hub a {
+  text-decoration: none !important;
+}
+
+/* =========================================================================
+ * Mobile shell (< 860px) — the MobileShell bottom tab bar is position:fixed,
+ * so reserve space at the bottom of the page content so it isn't obscured.
+ * The Create sheet uses this slide-up keyframe.
+ * ========================================================================= */
+@keyframes om-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 859px) {
+  .template-default__wrap {
+    padding-bottom: 90px;
+  }
+}

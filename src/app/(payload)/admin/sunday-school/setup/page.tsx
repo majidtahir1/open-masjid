@@ -10,7 +10,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
-import { resolveProgramId } from '@/lib/program-context'
+import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
 import SetupWizard from '@/admin/school/SetupWizard'
 
@@ -53,7 +53,7 @@ export default async function SundaySchoolSetupPage({ searchParams }: { searchPa
     req,
   })
   const createMode = (sp.program === 'new' || programsRes.docs.length === 0) && role !== 'school_admin'
-  const selectedId = createMode ? null : resolveProgramId(sp.program, programsRes.docs as any)
+  const selectedId = createMode ? null : await selectedProgramId(sp.program, programsRes.docs as any)
 
   return (
     <DefaultTemplate

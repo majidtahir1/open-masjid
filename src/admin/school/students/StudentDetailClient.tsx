@@ -15,6 +15,18 @@ interface Guardian {
   isPrimary: boolean
 }
 
+const fmtClock = (iso: string | null): string => {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime())
+    ? '—'
+    : d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}
+const fmtDay = (ymd: string): string => {
+  const d = new Date(`${ymd}T00:00:00`)
+  return Number.isNaN(d.getTime()) ? ymd : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
 const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => {
   const router = useRouter()
 
@@ -28,6 +40,7 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
   const [guardians, setGuardians] = useState<Guardian[]>([])
   const [enrollments, setEnrollments] = useState<any[]>([])
   const [attendanceHistory, setAttendanceHistory] = useState<{ date: string; status: string }[]>([])
+  const [checkinLog, setCheckinLog] = useState<{ date: string; inAt: string | null; outAt: string | null; source: string | null }[]>([])
   const [attendanceSummary, setAttendanceSummary] = useState<{ total: number; present: number; rate: number }>({ total: 0, present: 0, rate: 0 })
   const [msg, setMsg] = useState('')
   const [error, setError] = useState('')
@@ -78,6 +91,19 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
         date: String(r.session?.date ?? r.date ?? '').slice(0, 10),
         status: r.status ?? '',
       })),
+    )
+
+    // Check-in / check-out audit log: sessions where the student was checked in
+    // or out (via the parent kiosk or staff), newest first.
+    setCheckinLog(
+      sorted
+        .filter((r: any) => r.checkInAt || r.checkOutAt)
+        .map((r: any) => ({
+          date: String(r.session?.date ?? r.date ?? '').slice(0, 10),
+          inAt: r.checkInAt ?? null,
+          outAt: r.checkOutAt ?? null,
+          source: r.checkInBy ?? null,
+        })),
     )
   }, [studentId])
 
@@ -338,6 +364,31 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
               </div>
             ))}
           </>
+        )}
+      </div>
+
+      {/* Check-in / check-out audit log */}
+      <div className="ss-card ss-panel" style={{ marginTop: 16 }}>
+        <p className="ss-eyebrow">Check-in / check-out log</p>
+        {checkinLog.length === 0 ? (
+          <p className="ss-emptyline">No check-ins recorded yet.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="ss-row" style={{ fontSize: 12, color: 'var(--theme-elevation-500)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+              <span style={{ flex: 1 }}>Date</span>
+              <span style={{ width: 96, textAlign: 'right' }}>In</span>
+              <span style={{ width: 96, textAlign: 'right' }}>Out</span>
+              <span style={{ width: 72, textAlign: 'right' }}>Source</span>
+            </div>
+            {checkinLog.map((rec, idx) => (
+              <div key={idx} className="ss-row">
+                <span className="ss-row__name" style={{ flex: 1 }}>{fmtDay(rec.date)}</span>
+                <span style={{ width: 96, textAlign: 'right', color: rec.inAt ? 'var(--ss-teal-500, #2e8b57)' : 'var(--theme-elevation-400)' }}>{fmtClock(rec.inAt)}</span>
+                <span style={{ width: 96, textAlign: 'right' }}>{fmtClock(rec.outAt)}</span>
+                <span style={{ width: 72, textAlign: 'right', fontSize: 12, color: 'var(--theme-elevation-500)' }}>{rec.source ?? '—'}</span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

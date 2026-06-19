@@ -67,24 +67,15 @@ import { default as default_b265241eae706a0b7cddb9ba85c0aab9 } from '../../../..
 import { default as default_446124d7ee8ac8871d34efe9e97a216f } from '../../../../src/admin/SiteSettingsBrandingField'
 import { default as default_cc3379bc86beb1c39f1499840395f332 } from '../../../../src/admin/TeamPanel'
 import { default as default_980fed5703db1f4b51a0b7179e8c7ab9 } from '../../../../src/admin/BillingTabIntro'
+import { default as default_777e0d2a096f74b28463a185c1e1893c } from '../../../../src/admin/AnsariSettingsTab'
 import { default as default_ed26a91d770179c222166a676f958f4e } from '../../../../src/admin/CreateTenantPanel'
+import { default as default_1143ba710966547ad1716e7a1de48f4b } from '../../../../src/admin/shell/TopBarNav'
 import { default as default_8d9715685632f939d0a836c0618cb610 } from '../../../../src/admin/Favicon'
-import { default as default_e6dc4b83494c22fa406b3732cb1236fd } from '../../../../src/admin/HideTenantsNav'
-import { default as default_658c7ea3707a6bc2089ab24ef81b7161 } from '../../../../src/admin/donations/HideDonationsCollections'
-import { default as default_e8732dd03ff52626e7596a7e0450d743 } from '../../../../src/admin/HideMediaAndPeopleNav'
-import { default as default_5a77304c25d095fa2525a732ca036e46 } from '../../../../src/admin/NavOrder'
 import { default as default_93bdb0b944d761991c1e0bf71b7ac82d } from '../../../../src/admin/TenantThemeStyle'
 import { default as default_275cbc8e6d8d51ca630c8afc4d6aa690 } from '../../../../src/admin/Logo'
-import { default as default_2ac4bb8ffa17c8d2042a2b7d9273d9ca } from '../../../../src/admin/ViewPublicSiteLink'
-import { default as default_ff3409c169dfdc444cb9eac594ede6a8 } from '../../../../src/admin/ProfileLink'
-import { default as default_01d61330f15c28209a242e90a2460c7d } from '../../../../src/admin/SiteSettingsCluster'
-import { default as default_01bbfbfd80ab6abe9b51ff2e0e76733f } from '../../../../src/admin/BillingBanner'
-import { default as default_8cbcecd357807e8c27e7c48ba30ad9a1 } from '../../../../src/admin/onboarding/OnboardingBanner'
-import { default as default_49e1c5ed48865df0cbb5b3e87cbdc079 } from '../../../../src/admin/DashboardLink'
-import { default as default_88163b0148bba3b80a9d3df09283cc03 } from '../../../../src/admin/donations/DonationsNav'
-import { default as default_4ce2b6d430be17aa881be5628d11e397 } from '../../../../src/admin/membership/MembershipNav'
-import { default as default_dd804e3394bca869aeef1b539d7ad2d0 } from '../../../../src/admin/school/SundaySchoolNav'
+import { default as default_f0062b5c80d58396faf1076b2aea8915 } from '../../../../src/admin/AdminBanners'
 import { default as default_de0558b1f50970bcd7a35a4756342e14 } from '../../../../src/admin/ansari/AnsariProvider'
+import { default as default_f8689e4ba7cbc603a2ec91345825a0c7 } from '../../../../src/admin/shell/CommandPaletteProvider'
 import { default as default_0e40dcc78d39e577ce0ac8f99e5b93ee } from '../../../../src/admin/Dashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -159,24 +150,15 @@ export const importMap = {
   "/src/admin/SiteSettingsBrandingField#default": default_446124d7ee8ac8871d34efe9e97a216f,
   "/src/admin/TeamPanel#default": default_cc3379bc86beb1c39f1499840395f332,
   "/src/admin/BillingTabIntro#default": default_980fed5703db1f4b51a0b7179e8c7ab9,
+  "/src/admin/AnsariSettingsTab#default": default_777e0d2a096f74b28463a185c1e1893c,
   "/src/admin/CreateTenantPanel#default": default_ed26a91d770179c222166a676f958f4e,
+  "/src/admin/shell/TopBarNav#default": default_1143ba710966547ad1716e7a1de48f4b,
   "/src/admin/Favicon#default": default_8d9715685632f939d0a836c0618cb610,
-  "/src/admin/HideTenantsNav#default": default_e6dc4b83494c22fa406b3732cb1236fd,
-  "/src/admin/donations/HideDonationsCollections#default": default_658c7ea3707a6bc2089ab24ef81b7161,
-  "/src/admin/HideMediaAndPeopleNav#default": default_e8732dd03ff52626e7596a7e0450d743,
-  "/src/admin/NavOrder#default": default_5a77304c25d095fa2525a732ca036e46,
   "/src/admin/TenantThemeStyle#default": default_93bdb0b944d761991c1e0bf71b7ac82d,
   "/src/admin/Logo#default": default_275cbc8e6d8d51ca630c8afc4d6aa690,
-  "/src/admin/ViewPublicSiteLink#default": default_2ac4bb8ffa17c8d2042a2b7d9273d9ca,
-  "/src/admin/ProfileLink#default": default_ff3409c169dfdc444cb9eac594ede6a8,
-  "/src/admin/SiteSettingsCluster#default": default_01d61330f15c28209a242e90a2460c7d,
-  "/src/admin/BillingBanner#default": default_01bbfbfd80ab6abe9b51ff2e0e76733f,
-  "/src/admin/onboarding/OnboardingBanner#default": default_8cbcecd357807e8c27e7c48ba30ad9a1,
-  "/src/admin/DashboardLink#default": default_49e1c5ed48865df0cbb5b3e87cbdc079,
-  "/src/admin/donations/DonationsNav#default": default_88163b0148bba3b80a9d3df09283cc03,
-  "/src/admin/membership/MembershipNav#default": default_4ce2b6d430be17aa881be5628d11e397,
-  "/src/admin/school/SundaySchoolNav#default": default_dd804e3394bca869aeef1b539d7ad2d0,
+  "/src/admin/AdminBanners#default": default_f0062b5c80d58396faf1076b2aea8915,
   "/src/admin/ansari/AnsariProvider#default": default_de0558b1f50970bcd7a35a4756342e14,
+  "/src/admin/shell/CommandPaletteProvider#default": default_f8689e4ba7cbc603a2ec91345825a0c7,
   "/src/admin/Dashboard#default": default_0e40dcc78d39e577ce0ac8f99e5b93ee,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
