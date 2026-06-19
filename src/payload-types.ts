@@ -394,6 +394,15 @@ export interface Tenant {
     salahManualClearedAt?: string | null;
   };
   /**
+   * Settings for the parent self check-in iPad (drop-off / pickup).
+   */
+  checkinKiosk?: {
+    /**
+     * A 4–6 digit PIN a staff member enters once to bind an iPad to a program. Share with staff only. Leave blank to disable kiosk setup.
+     */
+    pin?: string | null;
+  };
+  /**
    * Select the calculation convention your community follows. ISNA is the default in North America.
    */
   prayerCalc?: {
@@ -1870,6 +1879,18 @@ export interface AttendanceRecord {
   status: 'present' | 'absent' | 'late' | 'excused';
   markedBy?: (number | null) | User;
   markedAt?: string | null;
+  /**
+   * When the child was checked in (parent kiosk or staff).
+   */
+  checkInAt?: string | null;
+  /**
+   * When the child was checked out at pickup.
+   */
+  checkOutAt?: string | null;
+  /**
+   * How the check-in was recorded.
+   */
+  checkInBy?: ('kiosk' | 'staff') | null;
   note?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -2936,6 +2957,9 @@ export interface AttendanceRecordsSelect<T extends boolean = true> {
   status?: T;
   markedBy?: T;
   markedAt?: T;
+  checkInAt?: T;
+  checkOutAt?: T;
+  checkInBy?: T;
   note?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3064,6 +3088,11 @@ export interface TenantsSelect<T extends boolean = true> {
         salahHoldoverMinutes?: T;
         salahManualUntil?: T;
         salahManualClearedAt?: T;
+      };
+  checkinKiosk?:
+    | T
+    | {
+        pin?: T;
       };
   prayerCalc?:
     | T

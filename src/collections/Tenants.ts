@@ -396,6 +396,25 @@ export const Tenants: CollectionConfig = {
               ],
             },
             {
+              name: 'checkinKiosk',
+              type: 'group',
+              label: 'Parent Check-in Kiosk',
+              admin: {
+                description: 'Settings for the parent self check-in iPad (drop-off / pickup).',
+              },
+              fields: [
+                {
+                  name: 'pin',
+                  type: 'text',
+                  label: 'Staff setup PIN',
+                  admin: {
+                    description:
+                      'A 4–6 digit PIN a staff member enters once to bind an iPad to a program. Share with staff only. Leave blank to disable kiosk setup.',
+                  },
+                },
+              ],
+            },
+            {
               name: 'prayerCalc',
               type: 'group',
               label: 'Calculation Method',

@@ -38,7 +38,11 @@ export const AttendanceRecords: CollectionConfig = {
       setTenantFromUser,
       ({ data, req, operation }) => {
         if (operation === 'create' || operation === 'update') {
-          return { ...data, markedBy: req.user?.id, markedAt: new Date().toISOString() }
+          const next: Record<string, unknown> = { ...data, markedAt: new Date().toISOString() }
+          // Kiosk writes run with overrideAccess and no user — don't clobber an
+          // existing markedBy with undefined when a parent re-touches a record.
+          if (req.user?.id) next.markedBy = req.user.id
+          return next
         }
         return data
       },
@@ -61,6 +65,25 @@ export const AttendanceRecords: CollectionConfig = {
     },
     { name: 'markedBy', type: 'relationship', relationTo: 'users', admin: { readOnly: true } },
     { name: 'markedAt', type: 'date', admin: { readOnly: true } },
+    {
+      name: 'checkInAt',
+      type: 'date',
+      admin: { readOnly: true, description: 'When the child was checked in (parent kiosk or staff).' },
+    },
+    {
+      name: 'checkOutAt',
+      type: 'date',
+      admin: { readOnly: true, description: 'When the child was checked out at pickup.' },
+    },
+    {
+      name: 'checkInBy',
+      type: 'select',
+      admin: { readOnly: true, description: 'How the check-in was recorded.' },
+      options: [
+        { label: 'Kiosk', value: 'kiosk' },
+        { label: 'Staff', value: 'staff' },
+      ],
+    },
     { name: 'note', type: 'text' },
   ],
   indexes: [{ fields: ['tenant', 'session', 'student'], unique: true }],
