@@ -1853,6 +1853,18 @@ export interface Student {
    * The program this student registered for (set at registration). A placement hint — students are not owned by a program.
    */
   registeredProgram?: (number | null) | Term;
+  /**
+   * Snapshot of the original registration form answers (all fields), captured at submission time.
+   */
+  registrationDetails?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   status: 'active' | 'inactive';
   /**
    * Attendance history for this student.
@@ -2915,6 +2927,7 @@ export interface StudentsSelect<T extends boolean = true> {
   emergencyContact?: T;
   member?: T;
   registeredProgram?: T;
+  registrationDetails?: T;
   status?: T;
   attendance?: T;
   updatedAt?: T;

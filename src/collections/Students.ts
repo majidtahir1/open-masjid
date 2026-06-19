@@ -72,6 +72,14 @@ export const Students: CollectionConfig = {
       admin: { description: 'The program this student registered for (set at registration). A placement hint — students are not owned by a program.' },
     },
     {
+      name: 'registrationDetails',
+      type: 'json',
+      admin: {
+        readOnly: true,
+        description: 'Snapshot of the original registration form answers (all fields), captured at submission time.',
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,
