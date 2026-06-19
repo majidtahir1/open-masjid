@@ -66,6 +66,15 @@ export const Students: CollectionConfig = {
       admin: { description: 'Optional link to a paying Member (reserved for future tuition).' },
     },
     {
+      name: 'programSubscription',
+      type: 'relationship',
+      relationTo: 'program-subscriptions',
+      admin: {
+        readOnly: true,
+        description: 'Family tuition subscription this student was registered under.',
+      },
+    },
+    {
       name: 'registeredProgram',
       type: 'relationship',
       relationTo: 'terms',

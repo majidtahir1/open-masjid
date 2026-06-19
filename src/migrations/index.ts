@@ -44,6 +44,7 @@ import * as migration_20260619_033918_checkin_kiosk_attendance_timestamps from '
 import * as migration_20260619_130822_student_registration_details from './20260619_130822_student_registration_details';
 import * as migration_20260619_195749_program_form_registration_settings from './20260619_195749_program_form_registration_settings';
 import * as migration_20260619_201100_program_tuition_pricing from './20260619_201100_program_tuition_pricing';
+import * as migration_20260619_201516_program_subscriptions from './20260619_201516_program_subscriptions';
 
 export const migrations = [
   {
@@ -274,6 +275,11 @@ export const migrations = [
   {
     up: migration_20260619_201100_program_tuition_pricing.up,
     down: migration_20260619_201100_program_tuition_pricing.down,
-    name: '20260619_201100_program_tuition_pricing'
+    name: '20260619_201100_program_tuition_pricing',
+  },
+  {
+    up: migration_20260619_201516_program_subscriptions.up,
+    down: migration_20260619_201516_program_subscriptions.down,
+    name: '20260619_201516_program_subscriptions'
   },
 ];
