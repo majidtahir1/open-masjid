@@ -152,6 +152,16 @@ export default function CheckinKiosk() {
     })
   }, [])
 
+  const unbind = useCallback(() => {
+    try {
+      localStorage.removeItem(LS.token)
+      localStorage.removeItem(LS.program)
+      localStorage.removeItem(LS.tenant)
+    } catch { /* */ }
+    setToken(null)
+    setBound(false)
+  }, [])
+
   if (!ready) return <div style={{ width: '100vw', height: '100vh', background: t.screenBg }} />
 
   return (
@@ -163,7 +173,7 @@ export default function CheckinKiosk() {
       `}</style>
       {bound && token ? (
         <Kiosk
-          t={t} theme={theme} toggleTheme={toggleTheme}
+          t={t} theme={theme} toggleTheme={toggleTheme} onUnbind={unbind}
           token={token} programName={programName} tenantName={tenantName}
         />
       ) : (
@@ -187,11 +197,16 @@ export default function CheckinKiosk() {
 /* ============================================================ kiosk screens */
 
 function Kiosk({
-  t, theme, toggleTheme, token, programName, tenantName,
+  t, theme, toggleTheme, onUnbind, token, programName, tenantName,
 }: {
-  t: Theme; theme: 'day' | 'focus'; toggleTheme: () => void
+  t: Theme; theme: 'day' | 'focus'; toggleTheme: () => void; onUnbind: () => void
   token: string; programName: string; tenantName: string
 }) {
+  // Discreet staff escape hatch: long-press (1.5s) the masjid name on the idle
+  // screen to clear this device's binding and return to Staff setup.
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const startHold = () => { holdTimer.current = setTimeout(onUnbind, 1500) }
+  const cancelHold = () => { if (holdTimer.current) clearTimeout(holdTimer.current) }
   const [screen, setScreen] = useState<'idle' | 'phone' | 'children'>('idle')
   const [phone, setPhone] = useState('')
   const [phoneError, setPhoneError] = useState(false)
@@ -273,7 +288,14 @@ function Kiosk({
       <Screen>
         <div onClick={() => setScreen('phone')} style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer', position: 'relative', animation: 'scrFade .32s cubic-bezier(.22,.61,.36,1)' }}>
           <div style={{ padding: 'clamp(28px,5vh,52px) clamp(28px,5vw,60px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontFamily: FR, fontWeight: 500, fontSize: 26, color: t.ink }}>{tenantName}</div>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={startHold}
+              onPointerUp={cancelHold}
+              onPointerLeave={cancelHold}
+              title="Hold to change kiosk settings"
+              style={{ fontFamily: FR, fontWeight: 500, fontSize: 26, color: t.ink, userSelect: 'none', cursor: 'default' }}
+            >{tenantName}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
               <div style={{ fontSize: 15, color: t.faint, fontWeight: 500 }}>{todayStr()}</div>
               <div
