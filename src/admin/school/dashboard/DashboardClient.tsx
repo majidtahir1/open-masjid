@@ -2,7 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Users, GraduationCap, Percent, CalendarCheck, AlertTriangle, ClipboardCheck, Wand2 } from 'lucide-react'
+import { Users, GraduationCap, Percent, CalendarCheck, AlertTriangle, ClipboardCheck, Wand2, UserCheck, Tablet } from 'lucide-react'
 import SchoolTabs from '../SchoolTabs'
 import SessionTimeline from '../SessionTimeline'
 import Donut from '../charts/Donut'
@@ -70,6 +70,8 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
 
       <div className="ss-actions" style={{ margin: '16px 0 0' }}>
         <Link className="ss-btn" href={`/admin/take-attendance${progQ}`}><ClipboardCheck size={18} /> Take attendance</Link>
+        <Link className="ss-btn ss-btn--ghost" href={`/admin/sunday-school/whos-here${progQ}`}><UserCheck size={18} /> Who&apos;s here</Link>
+        <a className="ss-btn ss-btn--ghost" href="/checkin" target="_blank" rel="noreferrer"><Tablet size={18} /> Check-in kiosk</a>
         <Link className="ss-btn ss-btn--ghost" href={`/admin/sunday-school/setup${progQ}`}><Wand2 size={18} /> Edit program</Link>
       </div>
 

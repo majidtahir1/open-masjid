@@ -2,7 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, GraduationCap, Users, ClipboardList, Wand2 } from 'lucide-react'
+import { LayoutDashboard, GraduationCap, Users, ClipboardList, Wand2, UserCheck } from 'lucide-react'
 import ProgramPicker from './ProgramPicker'
 
 // `soon: true` marks a tab whose route isn't built yet — rendered disabled so
@@ -13,6 +13,7 @@ const TABS: Tab[] = [
   { href: '/admin/sunday-school/classes', label: 'Classes', icon: GraduationCap },
   { href: '/admin/sunday-school/students', label: 'Students', icon: Users },
   { href: '/admin/sunday-school/attendance', label: 'Attendance', icon: ClipboardList },
+  { href: '/admin/sunday-school/whos-here', label: "Who's here", icon: UserCheck },
   { href: '/admin/sunday-school/setup', label: 'Setup', icon: Wand2 },
 ]
 
