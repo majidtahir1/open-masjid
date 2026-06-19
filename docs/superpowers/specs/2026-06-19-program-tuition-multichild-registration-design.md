@@ -13,7 +13,7 @@
 
 Masjid programs charge a **recurring monthly fee**. Parents register **all their children at once** through a dedicated multi-child flow and pay a **single monthly family subscription**. The only thing that differs between programs is **how each child's price is determined**:
 
-- **Sunday school** — a **flat** monthly price per child (does not vary by class). Parents provide the child's **grade**.
+- **Sunday school** — **per-program** pricing: one monthly price set at the program level, charged per child (does not vary by class). Parents provide the child's **grade**.
 - **Qur'an Academy** — **per-class** pricing (level-based classes: hifdh, nazirah, qaidah, …). Parents pick the class at registration; the price follows the class. The pick is the **requested placement**, not an auto-enrollment.
 
 **Every school registration creates the student in an "unenrolled" state; an admin then places them into the right program/class** via the new **Enrollment hub** (§9). Registration never auto-enrolls — for any program. This sidesteps level/assessment and capacity mismatches: the admin confirms placement and adjusts billing manually if it differs from the requested class.
@@ -26,7 +26,7 @@ Both apply an **automatic percentage multi-child (sibling) discount** within a p
 
 ### Goals
 - One **dedicated multi-child registration flow** for paid programs: family info once → add N children → one checkout.
-- **Per-program pricing model:** flat (Sunday school) or per-class (Qur'an Academy), as a setting.
+- **Pricing model setting:** **per-program** (one program-level price — Sunday school) or **per-class** (price on each class — Qur'an Academy).
 - **One Stripe customer + one monthly subscription per family**, one line item per child.
 - **Automatic percentage sibling discount**, configured **on the form**, applied **within a program**.
 - **Handed-out promo codes** (Stripe) that combine with the sibling discount.
@@ -47,14 +47,14 @@ Both apply an **automatic percentage multi-child (sibling) discount** within a p
 | Decision | Choice |
 |---|---|
 | Registration UX | **Dedicated multi-child flow** (custom, not the generic form), used by all paid programs |
-| Pricing model | **Per-program setting**: flat per-child (Sunday school) or per-class (Qur'an Academy) |
+| Pricing model | Per-program setting: **per-program** (one program-level monthly price — Sunday school) or **per-class** (price on each class — Qur'an Academy) |
 | Cadence | **Monthly** |
 | Billing entity | **One Stripe customer per family** (key = guardian email) |
 | Subscription shape | **One monthly subscription, one line item per child** |
 | Class selection at registration | **Per-class programs** capture the **requested class** (drives price + placement hint). Flat programs capture **grade**. |
 | Enrollment / placement | **Always admin-placed** — every registration produces an **unenrolled** student; admin enrolls via the new **Enrollment hub** (§9). Placement is **removed from Setup**. No auto-enroll, any program. |
 | Sibling discount | **Automatic, percentage-off by child rank**, configured **on the form**, **within a program** |
-| Which child discounted | Most-expensive line pays full; **discount rolls down** to lower-priced children (trivial when flat) |
+| Which child discounted | Most-expensive line pays full; **discount rolls down** to lower-priced children (trivial under per-program pricing, where all children are the same price) |
 | Promo codes | **Stripe promotion codes** (`allow_promotion_codes`); sibling discount is computed pricing so it doesn't consume Stripe's discount slot |
 | Cross-program discount | Handed-out coupon codes only |
 | Class change / add child later / lapsed payment | **Manual** for v1 |
@@ -69,7 +69,7 @@ A dedicated paid flow (separate route/component from the generic `/forms/[slug]`
 2. **Add children** — repeatable per child:
    - always: name, age, **grade**, allergies;
    - **per-class programs only:** select a **class** from the program's priced classes.
-3. **Review** — line items (child → flat price *or* class price), the **computed sibling discount**, optional **promo code**, **monthly total**.
+3. **Review** — line items (child → program price *or* class price), the **computed sibling discount**, optional **promo code**, **monthly total**.
 4. **Checkout** — Stripe **subscription** checkout (reuses membership flow) against one family customer.
 5. **Confirmation** — each student is created in an **unenrolled** state on webhook confirmation; an admin places (enrolls) them afterward.
 
@@ -81,7 +81,7 @@ The generic free form remains for any non-tuition / free registrations (events, 
 
 Prefer extending/mirroring the **membership** collections over bespoke ones.
 
-- **Program (`terms`)** — `pricingModel`: `flat` | `per-class`; for `flat`, a program-level `tuitionCents` (monthly).
+- **Program (`terms`)** — `pricingModel`: `per-program` | `per-class`; for `per-program`, a program-level `tuitionCents` (monthly).
 - **`school-classes`** — for `per-class` programs, `tuitionCents` (monthly) + Stripe recurring **price id**.
 - **Registration form** — `multiChildDiscount`: enabled + **percentage tiers by child rank** (2nd child X%, 3rd+ Y%); admin enters per form. (Cadence fixed monthly in v1.)
 - **Family/tuition record** — one per family subscription (mirrors `members`): guardian email, `stripeCustomerId`, `stripeSubscriptionId`, `status`, `currentPeriodEnd`, tenant. Forward-compatible with a future `families` entity.
@@ -95,7 +95,7 @@ Exact shapes finalized at planning time.
 ## 6. Billing & Stripe
 
 - **One Stripe customer per family** (lookup-or-create by guardian email).
-- **One monthly subscription**, **one line item per child** (flat program price, or the child's class price).
+- **One monthly subscription**, **one line item per child** (the program-level price for per-program, or the child's class price for per-class).
 - **Sibling discount = computed line-item pricing** (amounts reduced by us), leaving Stripe's discount slot free for **promo codes** (`allow_promotion_codes`).
 - **Webhook** (reuse `membership-webhook.ts` patterns): on subscription active → create each student **unenrolled** (with grade / requested-class hints) and the family/tuition record. **No automatic enrollment** — admin places afterward, any program. On status change → update the record. Lapsed/canceled → record updated; enrollment changes **manual** in v1.
 - Reuse `membership-stripe.ts` / `membership-checkout.ts` patterns and the existing Stripe **billing portal** (future family self-service).
@@ -105,7 +105,7 @@ Exact shapes finalized at planning time.
 ## 7. Discount logic
 
 - Configured **on the form** as **percentage-off tiers by child rank**.
-- Children ranked by price **descending**; most expensive pays full; configured percentages apply to subsequent children (with flat pricing, ranking is moot — e.g. 2nd child X% off the flat fee).
+- Children ranked by price **descending**; most expensive pays full; configured percentages apply to subsequent children (under per-program pricing all children are the same price, so ranking is moot — e.g. 2nd child X% off the program fee).
 - Applies **within one program** only.
 - Computed at checkout, baked into per-child line-item amounts.
 - **Handed-out coupon codes** (Stripe promotion codes) combine on top for ad-hoc / cross-program deals.
@@ -156,9 +156,9 @@ Since most registrations arrive via the form (producing a steady stream of unenr
 ## 12. Open inputs to confirm (masjid)
 
 1. **Sibling discount percentages** per child rank (2nd child __%, 3rd+ __%) — per program/form.
-2. **Sunday school flat monthly price**; **Qur'an Academy monthly price per class**.
+2. **Sunday school program-level monthly price**; **Qur'an Academy monthly price per class**.
 3. Confirm **most-expensive-pays-full / discount-rolls-down** convention.
-4. Confirm **Sunday school also gets the multi-child flow + sibling discount** (assumed here), just with flat pricing.
+4. Confirm **Sunday school also gets the multi-child flow + sibling discount** (assumed here), just with per-program pricing.
 
 These are data/config, not blockers for building the mechanism.
 
