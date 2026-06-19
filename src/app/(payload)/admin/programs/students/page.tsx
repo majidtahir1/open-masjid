@@ -10,21 +10,20 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
-import { importMap } from '../../../importMap'
-import ClassDetailClient from '@/admin/school/classes/ClassDetailClient'
+import { importMap } from '../../importMap'
+import StudentsClient from '@/admin/school/students/StudentsClient'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
 
-export default async function ClassDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export default async function StudentsPage() {
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl(`/admin/sunday-school/classes/${id}`))
+  if (!user) redirect(loginUrl('/admin/programs/students'))
 
   const role = (user as { role?: string }).role
-  if (!role || !ROLES.has(role)) redirect('/admin/sunday-school')
+  if (!role || !ROLES.has(role)) redirect('/admin/programs')
 
   const payload = await getPayload({ config, importMap })
   const req = await createLocalReq({ user }, payload)
@@ -49,7 +48,7 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
       user={user}
       visibleEntities={visibleEntities}
     >
-      <ClassDetailClient classId={id} />
+      <StudentsClient />
     </DefaultTemplate>
   )
 }

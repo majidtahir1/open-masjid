@@ -28,7 +28,7 @@ const idOf = (v: unknown): string | number | null =>
 export default async function SundaySchoolHubPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl('/admin/sunday-school'))
+  if (!user) redirect(loginUrl('/admin/programs'))
 
   const role = (user as { role?: string }).role
   if (!role || !HUB_ROLES.has(role)) redirect('/admin')

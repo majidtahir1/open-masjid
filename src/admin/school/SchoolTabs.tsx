@@ -9,12 +9,12 @@ import ProgramPicker from './ProgramPicker'
 // there are no dead links. Drop the flag when the route exists.
 type Tab = { href: string; label: string; icon: React.ComponentType<{ size?: number }>; exact?: boolean; soon?: boolean }
 const TABS: Tab[] = [
-  { href: '/admin/sunday-school', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/sunday-school/classes', label: 'Classes', icon: GraduationCap },
-  { href: '/admin/sunday-school/students', label: 'Students', icon: Users },
-  { href: '/admin/sunday-school/attendance', label: 'Attendance', icon: ClipboardList },
-  { href: '/admin/sunday-school/whos-here', label: "Who's here", icon: UserCheck },
-  { href: '/admin/sunday-school/setup', label: 'Setup', icon: Wand2 },
+  { href: '/admin/programs', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/admin/programs/classes', label: 'Classes', icon: GraduationCap },
+  { href: '/admin/programs/students', label: 'Students', icon: Users },
+  { href: '/admin/programs/attendance', label: 'Attendance', icon: ClipboardList },
+  { href: '/admin/programs/whos-here', label: "Who's here", icon: UserCheck },
+  { href: '/admin/programs/setup', label: 'Setup', icon: Wand2 },
 ]
 
 const SchoolTabs: React.FC = () => {

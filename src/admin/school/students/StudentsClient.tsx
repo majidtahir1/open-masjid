@@ -151,7 +151,7 @@ const StudentsClient: React.FC = () => {
               return (
                 <Link
                   key={s.id}
-                  href={`/admin/sunday-school/students/${s.id}`}
+                  href={`/admin/programs/students/${s.id}`}
                   className="ss-row"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >

@@ -114,7 +114,7 @@ const ClassesClient: React.FC<{ termId: string | null; termName: string | null }
             {visible.map((c) => (
               <Link
                 key={c.id}
-                href={`/admin/sunday-school/classes/${c.id}`}
+                href={`/admin/programs/classes/${c.id}`}
                 className="ss-row"
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >

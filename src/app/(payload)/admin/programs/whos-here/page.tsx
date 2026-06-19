@@ -1,34 +1,33 @@
+/**
+ * Custom admin route: Who's Here
+ *
+ * A staff list view (not the kiosk) of who is currently checked in / out for a
+ * program on a given day, derived from attendance check-in/out timestamps.
+ */
 import { redirect } from 'next/navigation'
-import {
-  createLocalReq,
-  getPayload,
-  isEntityHidden,
-  type SanitizedPermissions,
-  type VisibleEntities,
-} from 'payload'
+import { createLocalReq, getPayload, isEntityHidden, type SanitizedPermissions, type VisibleEntities } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
 import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
-import ClassesClient from '@/admin/school/classes/ClassesClient'
+import WhosHere from '@/admin/school/WhosHere'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
-
+const ROLES = new Set(['platformOwner', 'admin', 'school_admin', 'teacher'])
 const idOf = (v: unknown): string | number | null =>
   v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
-export default async function ClassesPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
+export default async function WhosHerePage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl('/admin/sunday-school/classes'))
+  if (!user) redirect(loginUrl('/admin/programs/whos-here'))
 
   const role = (user as { role?: string }).role
-  if (!role || !ROLES.has(role)) redirect('/admin/sunday-school')
+  if (!role || !ROLES.has(role)) redirect('/admin')
 
   const payload = await getPayload({ config, importMap })
   const req = await createLocalReq({ user }, payload)
@@ -43,7 +42,6 @@ export default async function ClassesPage({ searchParams }: { searchParams: Prom
   }
 
   const tenantId = idOf((user as { tenant?: unknown }).tenant)
-
   const programsRes = await payload.find({
     collection: 'terms',
     where: { ...(tenantId ? { tenant: { equals: tenantId } } : {}) },
@@ -53,7 +51,6 @@ export default async function ClassesPage({ searchParams }: { searchParams: Prom
     req,
   })
   const selectedId = await selectedProgramId(sp.program, programsRes.docs as any)
-  const term = selectedId != null ? (programsRes.docs.find((p: any) => String(p.id) === String(selectedId)) ?? null) : null
 
   return (
     <DefaultTemplate
@@ -66,7 +63,7 @@ export default async function ClassesPage({ searchParams }: { searchParams: Prom
       user={user}
       visibleEntities={visibleEntities}
     >
-      <ClassesClient termId={term ? String(term.id) : null} termName={term?.name ?? null} />
+      <WhosHere programId={selectedId != null ? String(selectedId) : null} />
     </DefaultTemplate>
   )
 }

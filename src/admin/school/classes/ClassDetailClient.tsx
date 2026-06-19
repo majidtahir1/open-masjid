@@ -87,7 +87,7 @@ const ClassDetailClient: React.FC<{ classId: string }> = ({ classId }) => {
     }
     if (!confirm('Delete this class? This cannot be undone.')) return
     await api(`/school-classes/${classId}`, { method: 'DELETE' })
-    router.push('/admin/sunday-school/classes')
+    router.push('/admin/programs/classes')
   }
 
   const setSessionStatus = async (id: string | number, status: string) => {
@@ -129,7 +129,7 @@ const ClassDetailClient: React.FC<{ classId: string }> = ({ classId }) => {
       <SchoolTabs />
       <Link
         className="ss-btn ss-btn--ghost ss-btn--small"
-        href="/admin/sunday-school/classes"
+        href="/admin/programs/classes"
         style={{ marginBottom: 12 }}
       >
         <ArrowLeft size={15} /> All classes

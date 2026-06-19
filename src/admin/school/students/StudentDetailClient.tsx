@@ -145,7 +145,7 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
     if (!confirm('Delete this student? This cannot be undone.')) return
     try {
       await api(`/students/${studentId}`, { method: 'DELETE' })
-      router.push('/admin/sunday-school/students')
+      router.push('/admin/programs/students')
     } catch (e: any) {
       setError(e.message || 'Delete failed.')
     }
@@ -188,7 +188,7 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
 
       <Link
         className="ss-btn ss-btn--ghost ss-btn--small"
-        href="/admin/sunday-school/students"
+        href="/admin/programs/students"
         style={{ marginBottom: 12 }}
       >
         <ArrowLeft size={15} /> All students

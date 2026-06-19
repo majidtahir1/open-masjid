@@ -37,7 +37,7 @@ const ProgramPicker: React.FC = () => {
   const selected = resolveProgramId(requested, programs)
 
   const go = (value: string) => {
-    if (value === 'new') { router.push('/admin/sunday-school/setup?program=new'); return }
+    if (value === 'new') { router.push('/admin/programs/setup?program=new'); return }
     // Persist the choice so other school pages default to it without a ?program.
     document.cookie = `${PROGRAM_COOKIE}=${encodeURIComponent(value)}; path=/admin; max-age=${60 * 60 * 24 * 180}; samesite=lax`
     const next = new URLSearchParams(Array.from(params.entries()))
