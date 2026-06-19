@@ -75,6 +75,10 @@ export function mapRegistrationFields(
     if (!Number.isNaN(ageNum)) result.age = ageNum
   }
 
+  // Grade (e.g. Sunday school): parents supply it at registration; admins place by it.
+  const grade = str(data, 'student_grade') ?? str(data, 'grade')
+  if (grade) result.gradeLevel = grade
+
   const allergies = str(data, 'allergies')
   if (allergies) result.allergiesNotes = allergies
 

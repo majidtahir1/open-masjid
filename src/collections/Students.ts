@@ -44,7 +44,7 @@ export const Students: CollectionConfig = {
     { name: 'firstName', type: 'text', required: true },
     { name: 'lastName', type: 'text', required: true },
     { name: 'age', type: 'number', min: 0, max: 25, admin: { description: 'Captured at registration.' } },
-    { name: 'gradeLevel', type: 'text', admin: { description: 'Assigned by admin during placement.' } },
+    { name: 'gradeLevel', type: 'text', admin: { description: 'From registration (or set by admin); used for placement.' } },
     {
       name: 'guardians',
       type: 'array',
