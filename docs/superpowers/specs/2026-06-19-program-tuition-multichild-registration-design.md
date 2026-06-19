@@ -24,7 +24,9 @@ Paid programs check out via Stripe: **one-time** payment, or a **monthly family 
 
 **Built generically.** Sunday school and Qur'an Academy are **examples**, not special cases — all behavior is driven by the per-program/per-form config above, so the same mechanism fits free or paid, one-time or recurring, adult-self or guardian-for-children programs (camps, weekend academies, adult halaqas, etc.).
 
-**Placement:** for **class-based** programs, every registration creates the participant **unenrolled**; an admin places them via the **Enrollment hub** (§9) — never auto-enrolled. This sidesteps level/capacity mismatches; billing is adjusted manually if placement differs from a requested class.
+**Placement:** when a program has **≥2 active classes**, registration creates the participant **unenrolled** and an admin places them via the **Enrollment hub** (§9). When a program has **exactly one class**, there's no choice — **auto-enroll** into it (skip the queue). This sidesteps level/capacity mismatches where a choice exists; billing is adjusted manually if placement differs from a requested class.
+
+**Simple programs stay low-friction.** The uniform program → class → session model is kept (attendance, the check-in kiosk, and reporting all hang off sessions). For a program with no meaningful classes (e.g. an adult weekly meeting), the admin defines no classes and the system **auto-creates one default class** + generates sessions from the meeting day(s); single-class auto-enroll then applies. So the admin effectively just sets *name + meeting day + fee*.
 
 When a paid program has **multiple participants** (e.g. siblings), an **automatic percentage discount** (configured on the form, within the program) applies, and **handed-out Stripe promotion codes** can stack on top.
 
@@ -65,7 +67,8 @@ When a paid program has **multiple participants** (e.g. siblings), an **automati
 | Billing entity (recurring) | **One Stripe customer per family** (key = guardian email) |
 | Subscription shape (recurring) | **One monthly subscription, one line item per participant** |
 | Class selection at registration | **Per-class programs** capture the **requested class** (drives price + placement hint); class-based programs capture **grade**. |
-| Enrollment / placement | **Always admin-placed** — every registration produces an **unenrolled** student; admin enrolls via the new **Enrollment hub** (§9). Placement is **removed from Setup**. No auto-enroll, any program. |
+| Enrollment / placement | **≥2 classes:** registration produces an **unenrolled** student; admin places via the **Enrollment hub** (§9). **Exactly 1 class:** **auto-enroll** (no placement). Placement is **removed from Setup**. |
+| Simple programs | Uniform program→class→session model kept; if no classes defined, **auto-create one default class** + sessions (admin just sets name + meeting day + fee). |
 | Sibling discount | **Automatic, percentage-off by child rank**, configured **on the form**, **within a program** |
 | Which child discounted | Most-expensive line pays full; **discount rolls down** to lower-priced children (trivial under per-program pricing, where all children are the same price) |
 | Promo codes | **Stripe promotion codes** (`allow_promotion_codes`); sibling discount is computed pricing so it doesn't consume Stripe's discount slot |
@@ -108,7 +111,7 @@ Exact shapes finalized at planning time.
 - **One Stripe customer per family** (lookup-or-create by guardian email).
 - **One monthly subscription**, **one line item per child** (the program-level price for per-program, or the child's class price for per-class).
 - **Sibling discount = computed line-item pricing** (amounts reduced by us), leaving Stripe's discount slot free for **promo codes** (`allow_promotion_codes`).
-- **Webhook** (reuse `membership-webhook.ts` patterns): on subscription active → create each student **unenrolled** (with grade / requested-class hints) and the family/tuition record. **No automatic enrollment** — admin places afterward, any program. On status change → update the record. Lapsed/canceled → record updated; enrollment changes **manual** in v1.
+- **Webhook** (reuse `membership-webhook.ts` patterns): on subscription active → create each student and the family/tuition record. Enrollment: **auto-enroll** if the program has one class; otherwise create **unenrolled** (with grade / requested-class hints) for admin placement. On status change → update the record. Lapsed/canceled → record updated; enrollment changes **manual** in v1.
 - Reuse `membership-stripe.ts` / `membership-checkout.ts` patterns and the existing Stripe **billing portal** (future family self-service).
 
 ---
@@ -140,7 +143,7 @@ Exact shapes finalized at planning time.
 Since most registrations arrive via the form (producing a steady stream of unenrolled students), placement is an **ongoing operational workflow**, not a one-time setup step. Promote it to a dedicated, re-enterable tab.
 
 - **Route/nav:** a top-level **"Enrollment"** tab in the Programs nav (alongside Students / Classes / Attendance / Who's here), program-scoped via the picker.
-- **Zone 1 — Needs placement:** live queue of unenrolled students for the program (active, `registeredProgram` = this program, no active enrollment), each with placement **hints** — grade (Sunday school) and **requested class** (Qur'an Academy) — plus a registration-details peek. Actions: **Place into &lt;class&gt;**, a **"place as requested"** shortcut for Qur'an Academy, and the **inline "Add & enroll a new student"** (moved out of Setup).
+- **Zone 1 — Needs placement:** live queue of unenrolled students for the program (active, `registeredProgram` = this program, no active enrollment), each with placement **hints** — grade (Sunday school) and **requested class** (Qur'an Academy) — plus a registration-details peek. Actions: **Place into &lt;class&gt;**, a **"place as requested"** shortcut for Qur'an Academy, and the **inline "Add & enroll a new student"** (moved out of Setup). *(Single-class programs auto-enroll and never appear here.)*
 - **Zone 2 — Class rosters:** per active class, who's enrolled, with **move between classes** and **withdraw**.
 - **Setup change:** **remove the placement step** from the Setup wizard (Setup = program config only: dates, meeting days, classes, teachers). Repoint the dashboard **"N students to place"** banner to the Enrollment tab.
 - **Semantics (assumed — confirm):** "move" = withdraw the old enrollment (status `withdrawn`, history kept) + create a new active one; **capacity is informational** (don't block over-capacity placement).
