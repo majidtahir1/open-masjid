@@ -44,7 +44,7 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
           <p className="ss-eyebrow">Programs</p>
           <h1 className="ss-empty__title">No program yet</h1>
           <p className="ss-empty__body">Set up a program to unlock the dashboard.</p>
-          <Link className="ss-btn" href="/admin/sunday-school/setup?step=1">Start setup</Link>
+          <Link className="ss-btn" href="/admin/programs/setup?step=1">Start setup</Link>
         </section>
       </div>
     )
@@ -70,9 +70,9 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
 
       <div className="ss-actions" style={{ margin: '16px 0 0' }}>
         <Link className="ss-btn" href={`/admin/take-attendance${progQ}`}><ClipboardCheck size={18} /> Take attendance</Link>
-        <Link className="ss-btn ss-btn--ghost" href={`/admin/sunday-school/whos-here${progQ}`}><UserCheck size={18} /> Who&apos;s here</Link>
+        <Link className="ss-btn ss-btn--ghost" href={`/admin/programs/whos-here${progQ}`}><UserCheck size={18} /> Who&apos;s here</Link>
         <a className="ss-btn ss-btn--ghost" href="/checkin" target="_blank" rel="noreferrer"><Tablet size={18} /> Check-in kiosk</a>
-        <Link className="ss-btn ss-btn--ghost" href={`/admin/sunday-school/setup${progQ}`}><Wand2 size={18} /> Edit program</Link>
+        <Link className="ss-btn ss-btn--ghost" href={`/admin/programs/setup${progQ}`}><Wand2 size={18} /> Edit program</Link>
       </div>
 
       <div className="ss-stats">
@@ -86,9 +86,9 @@ const DashboardClient: React.FC<{ data: DashboardData }> = ({ data }) => {
         <div className="ss-attention">
           <AlertTriangle size={16} />
           <span>
-            {data.attention.teacherlessClasses > 0 && <Link href="/admin/sunday-school/classes">{data.attention.teacherlessClasses} class(es) without a teacher</Link>}
+            {data.attention.teacherlessClasses > 0 && <Link href="/admin/programs/classes">{data.attention.teacherlessClasses} class(es) without a teacher</Link>}
             {data.attention.teacherlessClasses > 0 && data.attention.unplacedStudents > 0 && ' · '}
-            {data.attention.unplacedStudents > 0 && <Link href="/admin/sunday-school/setup?step=4">{data.attention.unplacedStudents} student(s) to place</Link>}
+            {data.attention.unplacedStudents > 0 && <Link href="/admin/programs/setup?step=4">{data.attention.unplacedStudents} student(s) to place</Link>}
           </span>
         </div>
       )}

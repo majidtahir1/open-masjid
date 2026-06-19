@@ -219,7 +219,7 @@ const WhosHere: React.FC<{ programId: string | null }> = ({ programId }) => {
             return (
               <div key={r.studentId} className="ss-row">
                 <span className="ss-row__name" style={{ flex: 1 }}>
-                  <a href={`/admin/sunday-school/students/${r.studentId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{r.name}</a>
+                  <a href={`/admin/programs/students/${r.studentId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{r.name}</a>
                   {r.classNames.length > 0 && (
                     <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-500)', marginTop: 2 }}>{r.classNames.join(', ')}</span>
                   )}

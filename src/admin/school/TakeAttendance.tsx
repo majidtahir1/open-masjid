@@ -240,7 +240,7 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
       )}
 
       <div className="ss-foot">
-        <Link className="ss-btn ss-btn--ghost" href="/admin/sunday-school"><ArrowLeft size={17} /> Dashboard</Link>
+        <Link className="ss-btn ss-btn--ghost" href="/admin/programs"><ArrowLeft size={17} /> Dashboard</Link>
       </div>
     </div>
   )

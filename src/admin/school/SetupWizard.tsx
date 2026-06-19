@@ -72,7 +72,7 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
 
   const goto = (s: number) => {
     setStep(s)
-    router.replace(`/admin/sunday-school/setup?step=${s}${progId ? `&program=${progId}` : ''}`)
+    router.replace(`/admin/programs/setup?step=${s}${progId ? `&program=${progId}` : ''}`)
   }
 
   if (!ready) return <div className="ss-root"><p className="ss-emptyline">Loading…</p></div>
@@ -122,7 +122,7 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
                   <span><b>{summary.teacherlessCount}</b> classes need a teacher</span>
                 </div>
                 <div className="ss-foot" style={{ justifyContent: 'center' }}>
-                  <button className="ss-btn" onClick={() => router.push('/admin/sunday-school')}>Go to dashboard</button>
+                  <button className="ss-btn" onClick={() => router.push('/admin/programs')}>Go to dashboard</button>
                 </div>
               </div>
             </div>

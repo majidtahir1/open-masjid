@@ -12,7 +12,7 @@ import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
 import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
-import AttendanceClient from '@/admin/school/attendance/AttendanceClient'
+import ClassesClient from '@/admin/school/classes/ClassesClient'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -22,13 +22,13 @@ const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
 const idOf = (v: unknown): string | number | null =>
   v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
-export default async function AttendancePage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
+export default async function ClassesPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl('/admin/sunday-school/attendance'))
+  if (!user) redirect(loginUrl('/admin/programs/classes'))
 
   const role = (user as { role?: string }).role
-  if (!role || !ROLES.has(role)) redirect('/admin/sunday-school')
+  if (!role || !ROLES.has(role)) redirect('/admin/programs')
 
   const payload = await getPayload({ config, importMap })
   const req = await createLocalReq({ user }, payload)
@@ -53,6 +53,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
     req,
   })
   const selectedId = await selectedProgramId(sp.program, programsRes.docs as any)
+  const term = selectedId != null ? (programsRes.docs.find((p: any) => String(p.id) === String(selectedId)) ?? null) : null
 
   return (
     <DefaultTemplate
@@ -65,7 +66,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
       user={user}
       visibleEntities={visibleEntities}
     >
-      <AttendanceClient programId={selectedId != null ? String(selectedId) : null} />
+      <ClassesClient termId={term ? String(term.id) : null} termName={term?.name ?? null} />
     </DefaultTemplate>
   )
 }

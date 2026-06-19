@@ -12,24 +12,23 @@ import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
 import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
-import SetupWizard from '@/admin/school/SetupWizard'
+import AttendanceClient from '@/admin/school/attendance/AttendanceClient'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-const SETUP_ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
+const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
 
 const idOf = (v: unknown): string | number | null =>
   v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
-export default async function SundaySchoolSetupPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
+export default async function AttendancePage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl('/admin/sunday-school/setup'))
+  if (!user) redirect(loginUrl('/admin/programs/attendance'))
 
   const role = (user as { role?: string }).role
-  if (!role || !SETUP_ROLES.has(role)) redirect('/admin/sunday-school')
-  if (role === 'school_admin' && sp.program === 'new') redirect('/admin/sunday-school')
+  if (!role || !ROLES.has(role)) redirect('/admin/programs')
 
   const payload = await getPayload({ config, importMap })
   const req = await createLocalReq({ user }, payload)
@@ -44,6 +43,7 @@ export default async function SundaySchoolSetupPage({ searchParams }: { searchPa
   }
 
   const tenantId = idOf((user as { tenant?: unknown }).tenant)
+
   const programsRes = await payload.find({
     collection: 'terms',
     where: { ...(tenantId ? { tenant: { equals: tenantId } } : {}) },
@@ -52,8 +52,7 @@ export default async function SundaySchoolSetupPage({ searchParams }: { searchPa
     depth: 0,
     req,
   })
-  const createMode = (sp.program === 'new' || programsRes.docs.length === 0) && role !== 'school_admin'
-  const selectedId = createMode ? null : await selectedProgramId(sp.program, programsRes.docs as any)
+  const selectedId = await selectedProgramId(sp.program, programsRes.docs as any)
 
   return (
     <DefaultTemplate
@@ -66,7 +65,7 @@ export default async function SundaySchoolSetupPage({ searchParams }: { searchPa
       user={user}
       visibleEntities={visibleEntities}
     >
-      <SetupWizard programId={selectedId != null ? String(selectedId) : null} createMode={createMode} />
+      <AttendanceClient programId={selectedId != null ? String(selectedId) : null} />
     </DefaultTemplate>
   )
 }

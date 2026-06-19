@@ -51,7 +51,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
             sessions created automatically, so you never schedule them by hand.
           </p>
           {canSetup && (
-            <Link className="ss-btn" href="/admin/sunday-school/setup?step=1">
+            <Link className="ss-btn" href="/admin/programs/setup?step=1">
               <CalendarPlus size={18} /> Start setup
             </Link>
           )}
@@ -81,7 +81,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
               <div className="ss-stat__num">{summary.unplacedCount}</div>
               <div className="ss-stat__label">awaiting a class</div>
               {summary.unplacedCount > 0 && canSetup && (
-                <Link className="ss-stat__link" href="/admin/sunday-school/setup?step=4">Place them →</Link>
+                <Link className="ss-stat__link" href="/admin/programs/setup?step=4">Place them →</Link>
               )}
             </div>
           </div>
@@ -94,7 +94,7 @@ const HubClient: React.FC<{ summary: HubSummary; canSetup: boolean }> = ({ summa
 
           <div className="ss-actions">
             {canSetup && (
-              <Link className="ss-btn" href={`/admin/sunday-school/setup?step=${resume}`}>
+              <Link className="ss-btn" href={`/admin/programs/setup?step=${resume}`}>
                 <ArrowRight size={18} /> Continue setup
               </Link>
             )}
