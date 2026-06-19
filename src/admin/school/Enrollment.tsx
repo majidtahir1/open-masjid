@@ -40,6 +40,10 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
   const [guardian, setGuardian] = useState('')
   const [newClass, setNewClass] = useState('')
   const [busy, setBusy] = useState(false)
+  // which queue rows have their registration snapshot expanded
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const toggleExpanded = (sid: string) =>
+    setExpanded((prev) => { const n = new Set(prev); if (n.has(sid)) n.delete(sid); else n.add(sid); return n })
 
   const reload = useCallback(async () => {
     if (!programId) { setClasses([]); setUnplaced([]); setEnrollments([]); return }
@@ -165,19 +169,46 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
             {unplaced.length === 0 ? (
               <p className="ss-emptyline">{loading ? 'Loading…' : 'Everyone registered is placed. 🎉'}</p>
             ) : (
-              unplaced.map((s) => (
-                <div key={s.id} className="ss-row">
-                  <span className="ss-row__name">
-                    {s.fullName ?? `${s.firstName} ${s.lastName}`}
-                    {s.gradeLevel ? <span style={{ color: 'var(--theme-elevation-500)' }}> · grade {s.gradeLevel}</span> : null}
-                    {s.age ? <span style={{ color: 'var(--theme-elevation-500)' }}> · age {s.age}</span> : null}
-                  </span>
-                  <select className="ss-select" style={{ maxWidth: 180 }} defaultValue="" onChange={(e) => place(s.id, e.target.value)}>
-                    <option value="">Place in…</option>
-                    {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-              ))
+              unplaced.map((s) => {
+                const sid = idStr(s.id)
+                const det = s.registrationDetails && Array.isArray(s.registrationDetails.fields) ? s.registrationDetails : null
+                const open = expanded.has(sid)
+                return (
+                  <div key={s.id}>
+                    <div className="ss-row">
+                      <span className="ss-row__name">
+                        <a href={`/admin/programs/students/${sid}`} className="ss-link" style={{ color: 'var(--theme-text)', textDecoration: 'underline', textDecorationColor: 'var(--theme-elevation-200)' }}>
+                          {s.fullName ?? `${s.firstName} ${s.lastName}`}
+                        </a>
+                        {s.gradeLevel ? <span style={{ color: 'var(--theme-elevation-500)' }}> · grade {s.gradeLevel}</span> : null}
+                        {s.age ? <span style={{ color: 'var(--theme-elevation-500)' }}> · age {s.age}</span> : null}
+                      </span>
+                      <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                        {det && (
+                          <button className="ss-btn ss-btn--ghost ss-btn--small" onClick={() => toggleExpanded(sid)}>
+                            {open ? 'Hide' : 'Registration'}
+                          </button>
+                        )}
+                        <select className="ss-select" style={{ maxWidth: 180 }} defaultValue="" onChange={(e) => place(s.id, e.target.value)}>
+                          <option value="">Place in…</option>
+                          {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                      </span>
+                    </div>
+                    {open && det && (
+                      <div style={{ margin: '0 0 12px', padding: '10px 14px', background: 'var(--theme-elevation-50)', borderRadius: 8, border: '1px solid var(--theme-elevation-100)' }}>
+                        {det.formName && <p style={{ fontSize: 12, color: 'var(--theme-elevation-500)', margin: '0 0 8px' }}>From “{det.formName}”</p>}
+                        {det.fields.map((f: { label: string; value: string }, i: number) => (
+                          <div key={i} style={{ display: 'flex', gap: 12, fontSize: 13, padding: '2px 0' }}>
+                            <span style={{ flex: '0 0 38%', color: 'var(--theme-elevation-600)' }}>{f.label}</span>
+                            <span style={{ flex: 1, whiteSpace: 'pre-wrap' }}>{f.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
             )}
           </div>
 
@@ -232,7 +263,7 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
                 {visible.map((r) => (
                   <div key={r.enrollmentId} className="ss-row">
                     <span className="ss-row__name" style={{ flex: 1 }}>
-                      {r.name}
+                      <a href={`/admin/programs/students/${r.studentId}`} style={{ color: 'var(--theme-text)', textDecoration: 'underline', textDecorationColor: 'var(--theme-elevation-200)' }}>{r.name}</a>
                       <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-500)', marginTop: 2 }}>{r.className}</span>
                     </span>
                     <span className={`ss-pill${r.status === 'withdrawn' ? ' ss-pill--muted' : ''}`} style={{ marginRight: 8 }}>{r.status}</span>
