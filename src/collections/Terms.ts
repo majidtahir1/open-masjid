@@ -65,6 +65,24 @@ export const Terms: CollectionConfig = {
       admin: { description: 'Days the program meets each week. Sessions are created on every selected day.' },
     },
     {
+      name: 'pricingModel',
+      type: 'select',
+      defaultValue: 'per-program',
+      options: [
+        { label: 'Per program (one price)', value: 'per-program' },
+        { label: 'Per class', value: 'per-class' },
+      ],
+    },
+    {
+      name: 'tuitionCents',
+      type: 'number',
+      min: 0,
+      admin: {
+        description: 'Monthly price for the whole program (per-program pricing).',
+        condition: (_, sib) => sib?.pricingModel === 'per-program',
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

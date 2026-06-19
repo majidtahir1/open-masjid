@@ -862,6 +862,17 @@ export interface Form {
   };
   payment?: {
     enabled?: boolean | null;
+    paymentModel?: ('free' | 'one-time' | 'monthly') | null;
+    /**
+     * Percentage off by child rank. e.g. rank 2 = 25 (2nd child 25% off).
+     */
+    multiChildDiscount?:
+      | {
+          rank: number;
+          percentOff: number;
+          id?: string | null;
+        }[]
+      | null;
     mode?: ('fixed' | 'suggested') | null;
     priceCents?: number | null;
     suggestedAmountsCents?:
@@ -910,6 +921,11 @@ export interface Term {
    * Days the program meets each week. Sessions are created on every selected day.
    */
   meetingDays: ('sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday')[];
+  pricingModel?: ('per-program' | 'per-class') | null;
+  /**
+   * Monthly price for the whole program (per-program pricing).
+   */
+  tuitionCents?: number | null;
   status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
@@ -1731,6 +1747,10 @@ export interface SchoolClass {
    * Informational only — not enforced.
    */
   capacity?: number | null;
+  /**
+   * Monthly price for this class (per-class pricing).
+   */
+  tuitionCents?: number | null;
   /**
    * Archived classes are hidden from the live list but keep their history.
    */
@@ -2747,6 +2767,14 @@ export interface FormsSelect<T extends boolean = true> {
     | T
     | {
         enabled?: T;
+        paymentModel?: T;
+        multiChildDiscount?:
+          | T
+          | {
+              rank?: T;
+              percentOff?: T;
+              id?: T;
+            };
         mode?: T;
         priceCents?: T;
         suggestedAmountsCents?:
@@ -2890,6 +2918,8 @@ export interface TermsSelect<T extends boolean = true> {
         id?: T;
       };
   meetingDays?: T;
+  pricingModel?: T;
+  tuitionCents?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2906,6 +2936,7 @@ export interface SchoolClassesSelect<T extends boolean = true> {
   gradeLevel?: T;
   room?: T;
   capacity?: T;
+  tuitionCents?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

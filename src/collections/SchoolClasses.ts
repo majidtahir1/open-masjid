@@ -43,6 +43,7 @@ export const SchoolClasses: CollectionConfig = {
     { name: 'gradeLevel', type: 'text' },
     { name: 'room', type: 'text' },
     { name: 'capacity', type: 'number', min: 0, admin: { description: 'Informational only — not enforced.' } },
+    { name: 'tuitionCents', type: 'number', min: 0, admin: { description: 'Monthly price for this class (per-class pricing).' } },
     {
       name: 'status',
       type: 'select',

@@ -332,6 +332,26 @@ export const Forms: CollectionConfig = {
       fields: [
         { name: 'enabled', type: 'checkbox', defaultValue: false },
         {
+          name: 'paymentModel',
+          type: 'select',
+          defaultValue: 'free',
+          options: [
+            { label: 'Free', value: 'free' },
+            { label: 'One-time', value: 'one-time' },
+            { label: 'Monthly recurring', value: 'monthly' },
+          ],
+        },
+        {
+          name: 'multiChildDiscount',
+          type: 'array',
+          labels: { singular: 'Discount tier', plural: 'Discount tiers' },
+          admin: { description: 'Percentage off by child rank. e.g. rank 2 = 25 (2nd child 25% off).' },
+          fields: [
+            { name: 'rank', type: 'number', required: true, min: 2 },
+            { name: 'percentOff', type: 'number', required: true, min: 0, max: 100 },
+          ],
+        },
+        {
           name: 'mode',
           type: 'select',
           defaultValue: 'suggested',
