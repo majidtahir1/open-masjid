@@ -18,6 +18,8 @@ const FIELD_DESCRIPTIONS: Record<FieldTypeId, string> = {
   'checkbox-group': 'Multiple checkbox selections',
   'consent': 'Mandatory agree/consent checkbox',
   'page-break': 'Split form into multiple steps',
+  'section': 'Group fields under a heading',
+  'repeatable-group': 'A repeatable set of fields (e.g. add another child)',
 }
 
 interface AddFieldPopoverProps {
@@ -55,8 +57,13 @@ export default function AddFieldPopover({ onAdd, onClose }: AddFieldPopoverProps
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  const filtered = FIELD_TYPES.filter((ft) =>
-    ft.label.toLowerCase().includes(search.trim().toLowerCase()),
+  // section + repeatable-group exist in the schema but their builder authoring
+  // UI lands in a later task; hide them from the picker until then.
+  const NOT_YET_AUTHORABLE: ReadonlySet<FieldTypeId> = new Set(['section', 'repeatable-group'])
+  const filtered = FIELD_TYPES.filter(
+    (ft) =>
+      !NOT_YET_AUTHORABLE.has(ft.id) &&
+      ft.label.toLowerCase().includes(search.trim().toLowerCase()),
   )
 
   return (

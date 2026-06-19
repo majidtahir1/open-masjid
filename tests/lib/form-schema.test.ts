@@ -8,11 +8,63 @@ import {
 } from '@/lib/form-schema'
 
 describe('FIELD_TYPES', () => {
-  it('exposes the 12 v1 field types in a stable order', () => {
+  it('exposes the field types in a stable order', () => {
     expect(FIELD_TYPES.map((t) => t.id)).toEqual([
       'short-text','email','phone','long-text','number','date',
       'dropdown','radio','multiselect','checkbox-group','consent','page-break',
+      'section','repeatable-group',
     ])
+  })
+})
+
+describe('repeatable-group schema', () => {
+  const groupSchema = {
+    steps: [{ id: 's1', fields: [
+      { type: 'short-text', id: 'g1', name: 'guardian_name', label: 'Guardian', required: true },
+      { type: 'repeatable-group', id: 'p', name: 'participants', label: 'Children', itemLabel: 'Child', min: 1, max: 10, fields: [
+        { type: 'short-text', id: 'f1', name: 'student_first_name', label: 'First', required: true },
+        { type: 'short-text', id: 'f2', name: 'student_last_name', label: 'Last', required: true },
+      ] },
+    ] }],
+  }
+
+  it('accepts a valid group schema', () => {
+    expect(validateSchema(groupSchema).success).toBe(true)
+  })
+
+  it('rejects duplicate names across group + top level', () => {
+    const bad = JSON.parse(JSON.stringify(groupSchema))
+    bad.steps[0].fields[1].fields[0].name = 'guardian_name'
+    expect(validateSchema(bad).success).toBe(false)
+  })
+
+  it('validates submission into a nested participants array', () => {
+    const r = validateSubmission(groupSchema as any, {
+      guardian_name: 'Rahman',
+      participants: [
+        { student_first_name: 'Aisha', student_last_name: 'Abbasi' },
+        { student_first_name: 'Yusuf', student_last_name: 'Abbasi' },
+      ],
+    })
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect(r.data.guardian_name).toBe('Rahman')
+      expect((r.data.participants as any[]).length).toBe(2)
+      expect((r.data.participants as any[])[0].student_first_name).toBe('Aisha')
+    }
+  })
+
+  it('fails when a required field inside an item is empty', () => {
+    const r = validateSubmission(groupSchema as any, {
+      guardian_name: 'Rahman',
+      participants: [{ student_first_name: '', student_last_name: 'Abbasi' }],
+    })
+    expect(r.ok).toBe(false)
+  })
+
+  it('fails when fewer than min items', () => {
+    const r = validateSubmission(groupSchema as any, { guardian_name: 'R', participants: [] })
+    expect(r.ok).toBe(false)
   })
 })
 

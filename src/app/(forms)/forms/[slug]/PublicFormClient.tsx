@@ -85,6 +85,8 @@ export function PublicFormClient({ form, closed }: Props) {
   function validateStep(): boolean {
     const stepErrors: Record<string, string> = {}
     for (const f of currentFields) {
+      // Structural / non-input field types carry no per-field validation here.
+      if (f.type === 'section' || f.type === 'repeatable-group') continue
       const val = values[f.name]
       const isEmpty =
         val === undefined ||

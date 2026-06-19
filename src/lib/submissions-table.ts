@@ -63,7 +63,8 @@ export function buildColumnSpecs(
 
   const fields = (schema?.steps ?? []).flatMap((s) => s.fields)
   for (const f of fields) {
-    if (f.type === 'page-break') continue
+    // Structural / non-input field types produce no column here.
+    if (f.type === 'page-break' || f.type === 'section' || f.type === 'repeatable-group') continue
     const base = { id: `field:${f.name}`, label: f.label, fieldName: f.name, fieldType: f.type }
     if (OPTION_TYPES.has(f.type)) {
       specs.push({ ...base, kind: 'options', options: 'options' in f ? f.options : [] })

@@ -14,6 +14,8 @@ export const FIELD_TYPES = [
   { id: 'checkbox-group', label: 'Checkbox group', hasOptions: true },
   { id: 'consent', label: 'Consent', hasOptions: false },
   { id: 'page-break', label: 'Page break', hasOptions: false },
+  { id: 'section', label: 'Section', hasOptions: false },
+  { id: 'repeatable-group', label: 'Repeatable group', hasOptions: false },
 ] as const
 
 export type FieldTypeId = (typeof FIELD_TYPES)[number]['id']
@@ -31,7 +33,9 @@ const FieldBase = {
   placeholder: z.string().optional(),
 }
 
-const FieldSchema = z.discriminatedUnion('type', [
+// Leaf (input) field members — these may appear at the top level and inside a
+// repeatable-group's `fields`. They never contain nested structural types.
+const LeafFieldMembers = [
   z.object({ type: z.literal('short-text'), ...FieldBase }),
   z.object({ type: z.literal('email'), ...FieldBase }),
   z.object({ type: z.literal('phone'), ...FieldBase }),
@@ -43,7 +47,26 @@ const FieldSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('multiselect'), ...FieldBase, options: z.array(Option).min(1) }),
   z.object({ type: z.literal('checkbox-group'), ...FieldBase, options: z.array(Option).min(1) }),
   z.object({ type: z.literal('consent'), ...FieldBase, required: z.literal(true) }),
+] as const
+
+const LeafFieldSchema = z.discriminatedUnion('type', LeafFieldMembers)
+export type LeafField = z.infer<typeof LeafFieldSchema>
+
+const FieldSchema = z.discriminatedUnion('type', [
+  ...LeafFieldMembers,
   z.object({ type: z.literal('page-break'), id: z.string().min(1), name: z.string().regex(FieldNameRegex) }),
+  z.object({ type: z.literal('section'), id: z.string().min(1), name: z.string().regex(FieldNameRegex), label: z.string().optional() }),
+  z.object({
+    type: z.literal('repeatable-group'),
+    id: z.string().min(1),
+    name: z.string().regex(FieldNameRegex),
+    label: z.string().optional(),
+    itemLabel: z.string().optional(),
+    min: z.number().int().min(0).optional(),
+    max: z.number().int().min(1).optional(),
+    // child fields are leaf inputs only — no nested groups/sections/page-breaks
+    fields: z.array(LeafFieldSchema).min(1),
+  }),
 ])
 export type Field = z.infer<typeof FieldSchema>
 
@@ -61,13 +84,22 @@ export interface ValidateSchemaErr { success: false; error: string }
 export function validateSchema(input: unknown): ValidateSchemaOk | ValidateSchemaErr {
   const r = FormSchemaZ.safeParse(input)
   if (!r.success) return { success: false, error: r.error.message }
-  // Cross-field rule: field names must be unique across all steps
+  // Cross-field rule: field names must be unique across all steps. A
+  // repeatable-group's name and its child names share one namespace.
   const names = new Set<string>()
   for (const step of r.data.steps) {
     for (const f of step.fields) {
-      if (f.type === 'page-break') continue
+      if (f.type === 'page-break' || f.type === 'section') continue
       if (names.has(f.name)) return { success: false, error: `Duplicate field name: ${f.name}` }
       names.add(f.name)
+      if (f.type === 'repeatable-group') {
+        // Zod guarantees child fields are leaf (input) types only; here we just
+        // enforce that the group name + child names share one namespace.
+        for (const child of f.fields) {
+          if (names.has(child.name)) return { success: false, error: `Duplicate field name: ${child.name}` }
+          names.add(child.name)
+        }
+      }
     }
   }
   return { success: true, schema: r.data }
@@ -78,6 +110,66 @@ export interface SubmissionErr { ok: false; errors: Record<string, string> }
 
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+/**
+ * Validate a flat set of leaf fields against a raw value map, writing cleaned
+ * values into `out` and field-keyed messages into `errors`. Shared by the
+ * top-level submission pass and per-item repeatable-group validation.
+ */
+function validateItem(
+  fields: readonly LeafField[],
+  raw: Record<string, unknown>,
+  out: Record<string, unknown>,
+  errors: Record<string, string>,
+  keyPrefix = '',
+): void {
+  for (const f of fields) {
+    const errKey = keyPrefix + f.name
+    const v = raw[f.name]
+    const present = v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)
+    if (f.required && !present) { errors[errKey] = 'Required'; continue }
+    if (!present) continue
+
+    switch (f.type) {
+      case 'short-text': case 'long-text': case 'phone':
+        if (typeof v !== 'string') errors[errKey] = 'Must be text'
+        else out[f.name] = v.trim()
+        break
+      case 'email':
+        if (typeof v !== 'string' || !EmailRegex.test(v)) errors[errKey] = 'Invalid email'
+        else out[f.name] = v.trim().toLowerCase()
+        break
+      case 'number': {
+        const n = typeof v === 'number' ? v : Number(v)
+        if (Number.isNaN(n)) { errors[errKey] = 'Must be a number'; break }
+        if (f.min !== undefined && n < f.min) errors[errKey] = `Min ${f.min}`
+        else if (f.max !== undefined && n > f.max) errors[errKey] = `Max ${f.max}`
+        else out[f.name] = n
+        break
+      }
+      case 'date':
+        if (typeof v !== 'string' || Number.isNaN(Date.parse(v))) errors[errKey] = 'Invalid date'
+        else out[f.name] = v
+        break
+      case 'dropdown': case 'radio':
+        if (!f.options.find((o) => o.value === v)) errors[errKey] = 'Invalid option'
+        else out[f.name] = v
+        break
+      case 'multiselect': case 'checkbox-group': {
+        if (!Array.isArray(v)) { errors[errKey] = 'Must be a list'; break }
+        const valid = f.options.map((o) => o.value)
+        const bad = (v as unknown[]).find((x) => !valid.includes(x as string))
+        if (bad !== undefined) errors[errKey] = 'Invalid option'
+        else out[f.name] = v
+        break
+      }
+      case 'consent':
+        if (v !== true) errors[errKey] = 'Required'
+        else out[f.name] = true
+        break
+    }
+  }
+}
+
 export function validateSubmission(
   schema: FormSchema,
   raw: Record<string, unknown>,
@@ -86,50 +178,31 @@ export function validateSubmission(
   const out: Record<string, unknown> = {}
 
   for (const step of schema.steps) for (const f of step.fields) {
-    if (f.type === 'page-break') continue
-    const v = raw[f.name]
-    const present = v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)
-    if (f.required && !present) { errors[f.name] = 'Required'; continue }
-    if (!present) continue
+    if (f.type === 'page-break' || f.type === 'section') continue
 
-    switch (f.type) {
-      case 'short-text': case 'long-text': case 'phone':
-        if (typeof v !== 'string') errors[f.name] = 'Must be text'
-        else out[f.name] = v.trim()
-        break
-      case 'email':
-        if (typeof v !== 'string' || !EmailRegex.test(v)) errors[f.name] = 'Invalid email'
-        else out[f.name] = v.trim().toLowerCase()
-        break
-      case 'number': {
-        const n = typeof v === 'number' ? v : Number(v)
-        if (Number.isNaN(n)) { errors[f.name] = 'Must be a number'; break }
-        if (f.min !== undefined && n < f.min) errors[f.name] = `Min ${f.min}`
-        else if (f.max !== undefined && n > f.max) errors[f.name] = `Max ${f.max}`
-        else out[f.name] = n
-        break
-      }
-      case 'date':
-        if (typeof v !== 'string' || Number.isNaN(Date.parse(v))) errors[f.name] = 'Invalid date'
-        else out[f.name] = v
-        break
-      case 'dropdown': case 'radio':
-        if (!f.options.find((o) => o.value === v)) errors[f.name] = 'Invalid option'
-        else out[f.name] = v
-        break
-      case 'multiselect': case 'checkbox-group': {
-        if (!Array.isArray(v)) { errors[f.name] = 'Must be a list'; break }
-        const valid = f.options.map((o) => o.value)
-        const bad = (v as unknown[]).find((x) => !valid.includes(x as string))
-        if (bad !== undefined) errors[f.name] = 'Invalid option'
-        else out[f.name] = v
-        break
-      }
-      case 'consent':
-        if (v !== true) errors[f.name] = 'Required'
-        else out[f.name] = true
-        break
+    if (f.type === 'repeatable-group') {
+      const rawItems = raw[f.name]
+      const items = Array.isArray(rawItems) ? rawItems : []
+      const min = f.min ?? 0
+      if (items.length < min) { errors[f.name] = `Add at least ${min}`; continue }
+      if (f.max !== undefined && items.length > f.max) { errors[f.name] = `Add at most ${f.max}`; continue }
+      const cleaned: Record<string, unknown>[] = []
+      items.forEach((item, i) => {
+        const itemOut: Record<string, unknown> = {}
+        validateItem(
+          f.fields,
+          (item ?? {}) as Record<string, unknown>,
+          itemOut,
+          errors,
+          `${f.name}.${i}.`,
+        )
+        cleaned.push(itemOut)
+      })
+      out[f.name] = cleaned
+      continue
     }
+
+    validateItem([f], raw, out, errors)
   }
 
   if (Object.keys(errors).length) return { ok: false, errors }

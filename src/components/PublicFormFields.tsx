@@ -20,7 +20,9 @@ export function PublicFormFields({ fields, values, errors, onChange }: Props) {
   return (
     <div className="om-pf-fields">
       {fields.map((f) => {
-        if (f.type === 'page-break') return null
+        // section + repeatable-group rendering arrives in a later task; for now
+        // they are non-rendering like page-break so flat forms are unaffected.
+        if (f.type === 'page-break' || f.type === 'section' || f.type === 'repeatable-group') return null
         const err = errors[f.name]
         const hasError = err !== undefined && err !== ''
         const v = values[f.name]

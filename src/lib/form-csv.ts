@@ -25,7 +25,7 @@ export function submissionsToCsv(
   const includePayment = opts?.includePayment ?? true
   const fieldCols: Array<{ name: string; label: string }> = []
   for (const step of schema.steps) for (const f of step.fields) {
-    if (f.type === 'page-break') continue
+    if (f.type === 'page-break' || f.type === 'section' || f.type === 'repeatable-group') continue
     fieldCols.push({ name: f.name, label: f.label })
   }
   const paymentHeader = includePayment ? ['Payment', 'Amount', 'Currency'] : []
