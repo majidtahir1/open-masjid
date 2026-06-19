@@ -18,6 +18,31 @@ interface FieldCardProps {
 function FieldPreview({ field }: { field: Field }) {
   if (field.type === 'page-break') return null
 
+  if (field.type === 'section') {
+    return (
+      <div className="fb-preview-section">
+        <span className="fb-preview-placeholder">Visual section heading — groups the fields below it.</span>
+      </div>
+    )
+  }
+
+  if (field.type === 'repeatable-group') {
+    const itemLabel = field.itemLabel || 'item'
+    const count = field.fields.length
+    const bounds =
+      field.min != null || field.max != null
+        ? ` (${field.min ?? 0}${field.max != null ? `–${field.max}` : '+'})`
+        : ''
+    return (
+      <div className="fb-preview-group">
+        <span className="fb-preview-placeholder">
+          Repeatable {itemLabel}{bounds} — {count} child field{count === 1 ? '' : 's'}.
+          {count === 0 ? ' Add fields below.' : ''}
+        </span>
+      </div>
+    )
+  }
+
   switch (field.type) {
     case 'short-text':
     case 'email':

@@ -13,6 +13,8 @@ import {
   LayoutList,
   Shield,
   SeparatorHorizontal,
+  Heading,
+  Copy,
 } from 'lucide-react'
 import type { FieldTypeId } from '@/lib/form-schema'
 
@@ -49,6 +51,10 @@ export default function FieldTypeIcon({ type, size = 16, className }: FieldTypeI
       return <Shield {...props} />
     case 'page-break':
       return <SeparatorHorizontal {...props} />
+    case 'section':
+      return <Heading {...props} />
+    case 'repeatable-group':
+      return <Copy {...props} />
     default:
       return <Type {...props} />
   }
