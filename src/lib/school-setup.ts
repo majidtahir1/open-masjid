@@ -41,10 +41,9 @@ const idOf = (v: unknown): string | number =>
  * Which wizard step to resume at. Never returns 3 (Teachers) — that step is
  * skippable, so it must never block resume. Returns 5 when setup is complete.
  */
-export function firstIncompleteStep(s: HubSummary): 1 | 2 | 4 | 5 {
+export function firstIncompleteStep(s: HubSummary): 1 | 2 | 5 {
   if (!s.term) return 1
   if (s.classCount === 0) return 2
-  if (s.unplacedCount > 0) return 4
   return 5
 }
 
