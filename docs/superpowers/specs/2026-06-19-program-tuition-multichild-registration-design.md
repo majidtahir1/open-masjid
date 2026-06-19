@@ -11,28 +11,36 @@
 
 ## 1. Summary
 
-Masjid programs charge a **recurring monthly fee**. Parents register **all their children at once** through a dedicated multi-child flow and pay a **single monthly family subscription**. The only thing that differs between programs is **how each child's price is determined**:
+Masjid programs need **configurable registration + billing**. There is **one dedicated, configurable program-registration flow**; each program sets a few independent knobs:
 
-- **per-program** pricing — one monthly price set at the program level, charged per child (does not vary by class). Parents provide the child's **grade**. *Example: Sunday school.*
-- **per-class** pricing — price set on each class (e.g. level-based classes: hifdh, nazirah, qaidah, …). Parents pick the class at registration; the price follows the class. The pick is the **requested placement**, not an auto-enrollment. *Example: Qur'an Academy.*
+- **Payment model** — `free`, `one-time`, or `monthly recurring`.
+- **Participant model** — `self` (an adult registers themselves) or `children` (a guardian registers one or more children — a repeatable section).
+- **Pricing model** (when paid) — how each participant's price is set:
+  - **per-program** — one price at the program level, same for everyone. *Example: Sunday school (monthly).*
+  - **per-class** — price set on each class; the participant picks a class and the price follows. The pick is a **requested placement**, not an auto-enrollment. *Example: Qur'an Academy (monthly).*
+- **Fields / sections** — configurable per program (see *Form flexibility*, §10), so e.g. an adults program omits the child/guardian sections.
 
-**This is built generically.** Sunday school and Qur'an Academy are **examples**, not special cases — each program's behavior (pricing model, whether parents pick a class, discount tiers, prices) is driven entirely by **per-program / per-form configuration**, so the same mechanism fits any paid program (summer camps, weekend academies, etc.). Both example programs are **paid monthly** — neither is free.
+Paid programs check out via Stripe: **one-time** payment, or a **monthly family subscription** (reusing the existing **membership subscription** infra) for recurring. **Free** programs skip checkout.
 
-**Every school registration creates the student in an "unenrolled" state; an admin then places them into the right program/class** via the new **Enrollment hub** (§9). Registration never auto-enrolls — for any program. This sidesteps level/assessment and capacity mismatches: the admin confirms placement and adjusts billing manually if it differs from the requested class.
+**Built generically.** Sunday school and Qur'an Academy are **examples**, not special cases — all behavior is driven by the per-program/per-form config above, so the same mechanism fits free or paid, one-time or recurring, adult-self or guardian-for-children programs (camps, weekend academies, adult halaqas, etc.).
 
-Both apply an **automatic percentage multi-child (sibling) discount** within a program, and accept **handed-out coupon codes** (Stripe promotion codes) on top. This reuses the platform's existing **membership subscription** infrastructure (Stripe subscriptions + webhooks), not the one-time forms payment path.
+**Placement:** for **class-based** programs, every registration creates the participant **unenrolled**; an admin places them via the **Enrollment hub** (§9) — never auto-enrolled. This sidesteps level/capacity mismatches; billing is adjusted manually if placement differs from a requested class.
+
+When a paid program has **multiple participants** (e.g. siblings), an **automatic percentage discount** (configured on the form, within the program) applies, and **handed-out Stripe promotion codes** can stack on top.
 
 ---
 
 ## 2. Goals & non-goals
 
 ### Goals
-- One **dedicated multi-child registration flow** for paid programs: family info once → add N children → one checkout.
-- **Pricing model setting:** **per-program** (one program-level price — Sunday school) or **per-class** (price on each class — Qur'an Academy).
-- **One Stripe customer + one monthly subscription per family**, one line item per child.
-- **Automatic percentage sibling discount**, configured **on the form**, applied **within a program**.
-- **Handed-out promo codes** (Stripe) that combine with the sibling discount.
-- On payment: **auto-create each student in an "unenrolled" state** (with grade, and requested class for per-class programs, as placement hints) + the family/tuition record. **Admin places into a class for all programs** — no auto-enrollment.
+- One **dedicated, configurable program-registration flow** driven by per-program config.
+- **Payment model** per program: `free` | `one-time` | `monthly recurring`.
+- **Participant model** per program: `self` (adult) | `children` (guardian registers ≥1, repeatable).
+- **Pricing model** (when paid): **per-program** or **per-class**.
+- **Configurable fields/sections** per program (sections toggle by participant model; custom fields reuse form-builder field types).
+- For recurring: **one Stripe customer + one monthly subscription per family**, one line item per participant; for one-time: a single Stripe payment; for free: no checkout.
+- **Automatic percentage multi-participant (sibling) discount**, configured **on the form**, **within a program**; **Stripe promo codes** stack on top.
+- For **class-based** programs: registration **creates participants unenrolled** (with grade / requested-class hints); **admin places** — no auto-enrollment.
 
 ### Non-goals (v1)
 - Mid-stream "add a child later" automation — manual.
@@ -48,12 +56,15 @@ Both apply an **automatic percentage multi-child (sibling) discount** within a p
 
 | Decision | Choice |
 |---|---|
-| Registration UX | **Dedicated multi-child flow** (custom, not the generic form), used by all paid programs |
-| Pricing model | Per-program setting: **per-program** (one program-level monthly price — Sunday school) or **per-class** (price on each class — Qur'an Academy) |
-| Cadence | **Monthly** |
-| Billing entity | **One Stripe customer per family** (key = guardian email) |
-| Subscription shape | **One monthly subscription, one line item per child** |
-| Class selection at registration | **Per-class programs** capture the **requested class** (drives price + placement hint). Flat programs capture **grade**. |
+| Registration UX | **Dedicated, configurable program-registration flow** (option B — purpose-built, not extending the generic form builder). *Pending your confirm.* |
+| Payment model | Per-program: **free** \| **one-time** \| **monthly recurring** |
+| Participant model | Per-program: **self** (adult) \| **children** (guardian registers ≥1, repeatable) |
+| Pricing model (when paid) | **per-program** (one program-level price) or **per-class** (price on each class) |
+| Recurring cadence | **Monthly** (v1) |
+| Fields / sections | **Configurable per program**; sections toggle by participant model; custom fields reuse form-builder field types |
+| Billing entity (recurring) | **One Stripe customer per family** (key = guardian email) |
+| Subscription shape (recurring) | **One monthly subscription, one line item per participant** |
+| Class selection at registration | **Per-class programs** capture the **requested class** (drives price + placement hint); class-based programs capture **grade**. |
 | Enrollment / placement | **Always admin-placed** — every registration produces an **unenrolled** student; admin enrolls via the new **Enrollment hub** (§9). Placement is **removed from Setup**. No auto-enroll, any program. |
 | Sibling discount | **Automatic, percentage-off by child rank**, configured **on the form**, **within a program** |
 | Which child discounted | Most-expensive line pays full; **discount rolls down** to lower-priced children (trivial under per-program pricing, where all children are the same price) |
@@ -63,17 +74,15 @@ Both apply an **automatic percentage multi-child (sibling) discount** within a p
 
 ---
 
-## 4. Registration UX (multi-child flow)
+## 4. Registration UX
 
-A dedicated paid flow (separate route/component from the generic `/forms/[slug]`), used by any paid program:
+A dedicated, configurable flow (separate route/component from the generic `/forms/[slug]`). Sections render from the program config (§10). Example below is the `children`, paid model:
 
-1. **Family info** — guardian name, **email** (family key), phone, address, authorized pickups, etc. Entered once.
-2. **Add children** — repeatable per child:
-   - always: name, age, **grade**, allergies;
-   - **per-class programs only:** select a **class** from the program's priced classes.
-3. **Review** — line items (child → program price *or* class price), the **computed sibling discount**, optional **promo code**, **monthly total**.
-4. **Checkout** — Stripe **subscription** checkout (reuses membership flow) against one family customer.
-5. **Confirmation** — each student is created in an **unenrolled** state on webhook confirmation; an admin places (enrolls) them afterward.
+1. **Guardian / family info** — guardian name, **email** (family key), phone, address, authorized pickups, etc. Entered once. *(Omitted for `self` — the adult is the contact.)*
+2. **Add children** — repeatable per child (always: name, age, **grade**, allergies; **per-class programs:** select a **class**). *(For `self`: a single participant section, no repetition.)*
+3. **Review** — line items (participant → program price *or* class price), the **computed sibling discount**, optional **promo code**, total. *(Free programs: no totals.)*
+4. **Checkout** — per payment model: **subscription** (recurring, reuses membership flow), **one-time** Stripe payment, or **none** (free).
+5. **Confirmation** — for class-based programs, each participant is created **unenrolled** on confirmation; an admin places them afterward.
 
 The existing generic forms feature (`/forms/[slug]`) stays for **free / non-tuition** signups (events, RSVPs, volunteer sign-ups, etc.) — a separate path from paid program registration. (Paid programs do **not** use it.)
 
@@ -140,7 +149,24 @@ Since most registrations arrive via the form (producing a steady stream of unenr
 
 ---
 
-## 10. Forward-compatibility (north star, not built now)
+## 10. Form flexibility & sections
+
+Registration is **section-based and config-driven**, not a fixed form. A program's registration assembles from sections that toggle on its participant / payment / pricing config:
+
+- **Participant section** (always) — for `self`: the adult's own details; for `children`: a **repeatable** child section ("add another child").
+- **Guardian / family section** — present for `children` (guardian name, **email** = family key, phone, address, authorized pickups). Omitted for `self`.
+- **Class selection** — only for `per-class` programs (participant picks a priced class).
+- **Class-program fields** — e.g. grade, allergies — for class-based programs; omitted otherwise.
+- **Payment section** — none (free), one-time, or subscription, per the payment model.
+- **Custom fields** — programs add extra questions reusing the existing **form-builder field types** (text, email, phone, number, date, dropdown, radio, multiselect, checkbox, consent); captured into the `registrationDetails` snapshot as today.
+
+So an **adults program** = `participant: self` with no guardian/child/grade sections; a **kids program** = `participant: children` with guardian + repeatable child sections.
+
+**Approach (option B — pending confirm):** a purpose-built configurable registration component that renders these sections from config and reuses form-builder field primitives for custom fields — rather than extending the flat generic form builder to do repeatable sections, per-option pricing, and subscriptions.
+
+---
+
+## 11. Forward-compatibility (north star, not built now)
 
 - **Family records:** promote guardian-email grouping into a real `families`/household entity owning students + Stripe customer + subscription; backfill from distinct guardian emails.
 - **Parent portal:** Stripe billing portal (already used for memberships) + an OpenMasjid "your children" view (attendance, check-in log, progress).
@@ -149,13 +175,13 @@ Since most registrations arrive via the form (producing a steady stream of unenr
 
 ---
 
-## 11. Reused infrastructure
+## 12. Reused infrastructure
 
 `membership-tiers`, `members`, `membership-checkout.ts`, `membership-webhook.ts`, `membership-stripe.ts`, `membership-aggregates.ts`, the Stripe billing portal (`/api/membership/portal`), Stripe Connect wiring. The tuition subscription mirrors the membership subscription lifecycle.
 
 ---
 
-## 12. Open inputs to confirm (masjid)
+## 13. Open inputs to confirm (masjid)
 
 1. **Sibling discount percentages** per child rank (2nd child __%, 3rd+ __%) — per program/form.
 2. **Sunday school program-level monthly price**; **Qur'an Academy monthly price per class**.
@@ -164,8 +190,10 @@ Since most registrations arrive via the form (producing a steady stream of unenr
 
 These are data/config, not blockers for building the mechanism.
 
+**Open decision (you, not masjid):** confirm the architecture — **option B** (purpose-built configurable registration flow, recommended) vs **option A** (extend the generic form builder). The spec assumes B.
+
 ---
 
-## 13. Out of scope (this spec)
+## 14. Out of scope (this spec)
 
 **In scope of PR #140** (this whole effort): registration-details snapshot, grade→`gradeLevel` mapping, multi-child tuition subsystem, and the Enrollment hub. **Future / not in #140:** class-change automation, mid-stream child adds, lapsed-payment enrollment automation, the `families` entity, parent portal, and the in-app coupon manager.
