@@ -87,6 +87,36 @@ describe('buildColumnSpecs', () => {
   it('handles a null schema (meta columns only)', () => {
     expect(buildColumnSpecs(null, { paymentEnabled: false }).map((s) => s.id)).toEqual(['submittedAt'])
   })
+
+  it('expands a repeatable-group into per-item child columns', () => {
+    const groupSchema: FormSchema = {
+      steps: [
+        {
+          id: 's1',
+          fields: [
+            { type: 'short-text', id: 'g1', name: 'guardian', label: 'Guardian', required: false },
+            {
+              type: 'repeatable-group', id: 'gr', name: 'children', label: 'Children', itemLabel: 'Child',
+              max: 2,
+              fields: [
+                { type: 'short-text', id: 'c1', name: 'child_first', label: 'First', required: false },
+                { type: 'number', id: 'c2', name: 'child_grade', label: 'Grade', required: false },
+              ],
+            },
+          ] as FormSchema['steps'][0]['fields'],
+        },
+      ],
+    }
+    const specs = buildColumnSpecs(groupSchema, { paymentEnabled: false })
+    expect(specs.map((s) => s.id)).toEqual([
+      'submittedAt', 'field:guardian',
+      'field:children.0.child_first', 'field:children.0.child_grade',
+      'field:children.1.child_first', 'field:children.1.child_grade',
+    ])
+    // Per-item child columns carry the child's filter kind.
+    expect(specs.find((s) => s.id === 'field:children.0.child_grade')?.kind).toBe('numberRange')
+    expect(specs.find((s) => s.id === 'field:children.0.child_first')?.label).toContain('Child 1')
+  })
 })
 
 describe('getCellValue', () => {
@@ -99,6 +129,19 @@ describe('getCellValue', () => {
   })
   it('returns undefined for missing answers', () => {
     expect(getCellValue({ ...row, data: {} }, spec('field:meal'))).toBeUndefined()
+  })
+
+  it('reads nested repeatable-group child values via dotted fieldName', () => {
+    const groupRow: SubmissionRowData = {
+      id: 'g',
+      data: { children: [{ child_first: 'Yusuf', child_grade: 3 }, { child_first: 'Maryam', child_grade: 5 }] },
+    }
+    const c1: ColumnSpec = { id: 'field:children.0.child_first', label: 'Child 1 — First', kind: 'text', fieldName: 'children.0.child_first' }
+    const c2: ColumnSpec = { id: 'field:children.1.child_grade', label: 'Child 2 — Grade', kind: 'numberRange', fieldName: 'children.1.child_grade' }
+    const missing: ColumnSpec = { id: 'field:children.5.child_first', label: 'x', kind: 'text', fieldName: 'children.5.child_first' }
+    expect(getCellValue(groupRow, c1)).toBe('Yusuf')
+    expect(getCellValue(groupRow, c2)).toBe(5)
+    expect(getCellValue(groupRow, missing)).toBeUndefined()
   })
 })
 

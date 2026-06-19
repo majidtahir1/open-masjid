@@ -44,6 +44,25 @@ describe('detectFieldRenames', () => {
     expect(detectFieldRenames(null, valid)).toEqual([])
     expect(detectFieldRenames(valid, { steps: 'nope' })).toEqual([])
   })
+
+  it('detects a renamed repeatable-group child, scoped to its group', () => {
+    const withChild = (childName: string): FormSchema => ({
+      steps: [
+        {
+          id: 's1',
+          fields: [
+            {
+              type: 'repeatable-group', id: 'gr', name: 'children', label: 'Children',
+              fields: [{ type: 'short-text', id: 'c1', name: childName, label: childName, required: false }],
+            },
+          ] as FormSchema['steps'][0]['fields'],
+        },
+      ],
+    })
+    expect(detectFieldRenames(withChild('first'), withChild('child_first'))).toEqual([
+      { from: 'first', to: 'child_first', group: 'children' },
+    ])
+  })
 })
 
 describe('applyRenames', () => {
@@ -83,5 +102,41 @@ describe('applyRenames', () => {
     ])
     expect(r.changed).toBe(true)
     expect(r.data).toEqual({ guests: 0, consent: false })
+  })
+
+  it('re-keys a child field inside every item of a repeatable-group', () => {
+    const data = {
+      guardian: 'Aisha',
+      children: [
+        { first: 'Yusuf', grade: 3 },
+        { first: 'Maryam', grade: 5 },
+      ],
+    }
+    const r = applyRenames(data, [{ from: 'first', to: 'child_first', group: 'children' }])
+    expect(r.changed).toBe(true)
+    expect(r.data).toEqual({
+      guardian: 'Aisha',
+      children: [
+        { child_first: 'Yusuf', grade: 3 },
+        { child_first: 'Maryam', grade: 5 },
+      ],
+    })
+  })
+
+  it('applies a top-level and a group-child rename together', () => {
+    const data = { guardian: 'Aisha', kids: [{ first: 'Yusuf' }] }
+    const r = applyRenames(data, [
+      { from: 'guardian', to: 'parent_name' },
+      { from: 'first', to: 'child_first', group: 'kids' },
+    ])
+    expect(r.changed).toBe(true)
+    expect(r.data).toEqual({ parent_name: 'Aisha', kids: [{ child_first: 'Yusuf' }] })
+  })
+
+  it('is a no-op when a group-child rename targets an absent group', () => {
+    const data = { guardian: 'Aisha' }
+    const r = applyRenames(data, [{ from: 'first', to: 'child_first', group: 'children' }])
+    expect(r.changed).toBe(false)
+    expect(r.data).toBe(data)
   })
 })

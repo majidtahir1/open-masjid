@@ -106,12 +106,46 @@ export default function SubmissionDrawer({
             </p>
           ) : (
             <dl className="svd-answers">
-              {fields.map((f) => (
-                <div key={f.id} style={{ display: 'contents' }}>
-                  <dt>{f.label}</dt>
-                  <dd>{formatCellValue(row.data?.[f.name])}</dd>
-                </div>
-              ))}
+              {fields.map((f) => {
+                if (f.type === 'repeatable-group') {
+                  const raw = row.data?.[f.name]
+                  const items = Array.isArray(raw) ? raw : []
+                  const itemLabel = f.itemLabel || f.label || f.name
+                  return (
+                    <div key={f.id} style={{ display: 'contents' }}>
+                      <dt>{f.label || f.name}</dt>
+                      <dd>
+                        {items.length === 0 ? (
+                          '—'
+                        ) : (
+                          <ol style={{ margin: 0, paddingLeft: 18 }}>
+                            {items.map((item, i) => {
+                              const obj = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
+                              return (
+                                <li key={i} style={{ marginBottom: i < items.length - 1 ? 6 : 0 }}>
+                                  <div style={{ fontWeight: 600 }}>{`${itemLabel} ${i + 1}`}</div>
+                                  {f.fields.map((child) => (
+                                    <div key={child.id} style={{ fontSize: 13 }}>
+                                      <span style={{ color: 'var(--theme-elevation-500)' }}>{child.label}: </span>
+                                      {formatCellValue(obj[child.name])}
+                                    </div>
+                                  ))}
+                                </li>
+                              )
+                            })}
+                          </ol>
+                        )}
+                      </dd>
+                    </div>
+                  )
+                }
+                return (
+                  <div key={f.id} style={{ display: 'contents' }}>
+                    <dt>{f.label}</dt>
+                    <dd>{formatCellValue(row.data?.[f.name])}</dd>
+                  </div>
+                )
+              })}
             </dl>
           )}
         </div>
