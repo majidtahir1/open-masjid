@@ -1,6 +1,6 @@
 # Paid Programs: Tuition & Multi-Child Registration — Feature Spec
 
-**Status:** Draft (brainstorm complete; awaiting masjid pricing inputs)
+**Status:** Design complete — ready for implementation planning (prices/discounts are admin-entered config, not build prerequisites)
 **Date:** 2026-06-19
 **Author:** Brainstormed with Majid Tahir
 **Product area:** OpenMasjid → Programs (Sunday school, Qur'an Academy, …)
@@ -191,14 +191,15 @@ So an **adults program** = `participant: self` with no guardian/child/grade sect
 
 ---
 
-## 13. Open inputs to confirm (masjid)
+## 13. Runtime configuration (admin-entered — not build prerequisites)
 
-1. **Sibling discount percentages** per child rank (2nd child __%, 3rd+ __%) — per program/form.
-2. **Sunday school program-level monthly price**; **Qur'an Academy monthly price per class**.
-3. Confirm **most-expensive-pays-full / discount-rolls-down** convention.
-4. Confirm **Sunday school also gets the multi-child flow + sibling discount** (assumed here), just with per-program pricing.
+Prices and discounts are **data entered by admins** in the form/program config, not hardcoded — so the build does **not** wait on the masjid's numbers; it just provides the fields to capture them:
 
-These are data/config, not blockers for building the mechanism.
+- **Per-program** monthly price; **per-class** monthly prices.
+- **Multi-participant discount**: percentage tiers by rank (e.g. 2nd participant X%, 3rd+ Y%).
+- Whether a given program enables the discount, its participant/payment/pricing model — all per-program config.
+
+(Fixed design rules, not config: most-expensive pays full / discount rolls down; recurring cadence = monthly for v1.)
 
 **Architecture: decided — option A** (extend the existing form builder with configurable sections + repeatable sections + priced options + payment models). One place for all form creation; build additively without regressing existing forms.
 
