@@ -8,11 +8,19 @@
  */
 import type { Field } from '@/lib/form-schema'
 
+export interface ProgramClassOption {
+  id: string | number
+  name: string
+  tuitionCents: number | null
+}
+
 interface Props {
   fields: Field[]
   values: Record<string, unknown>
   errors: Record<string, string>
   onChange: (name: string, value: unknown) => void
+  /** Active classes of the bound program — options for `class-select` fields. */
+  programClasses?: ProgramClassOption[]
   /**
    * Change handler for a child field inside a repeatable-group item.
    * Required only when the rendered fields include a repeatable-group.
@@ -34,6 +42,7 @@ export function PublicFormFields({
   onGroupChange,
   onGroupAdd,
   onGroupRemove,
+  programClasses = [],
 }: Props) {
   return (
     <div className="om-pf-fields">
@@ -105,6 +114,7 @@ export function PublicFormFields({
                           childHasError,
                           childErrorId,
                           `f-${f.id}-${index}-${child.id}`,
+                          programClasses,
                         )}
                         {childHasError && (
                           <p
@@ -153,7 +163,7 @@ export function PublicFormFields({
             {'helpText' in f && f.helpText && (
               <p className="om-pf-help">{f.helpText}</p>
             )}
-            {renderControl(f, v, (val) => onChange(f.name, val), hasError, errorId, `f-${f.id}`)}
+            {renderControl(f, v, (val) => onChange(f.name, val), hasError, errorId, `f-${f.id}`, programClasses)}
             {hasError && (
               <p
                 id={errorId}
@@ -171,6 +181,13 @@ export function PublicFormFields({
   )
 }
 
+function formatClassLabel(name: string, tuitionCents: number | null): string {
+  if (tuitionCents === null || tuitionCents === undefined) return name
+  const dollars = tuitionCents / 100
+  const amount = Number.isInteger(dollars) ? String(dollars) : dollars.toFixed(2)
+  return `${name} — $${amount}/mo`
+}
+
 function renderControl(
   f: Field,
   v: unknown,
@@ -178,6 +195,7 @@ function renderControl(
   hasError: boolean,
   errorId: string,
   inputId: string,
+  programClasses: ProgramClassOption[] = [],
 ) {
   const ariaProps = hasError
     ? { 'aria-invalid': true as const, 'aria-describedby': errorId }
@@ -326,6 +344,23 @@ function renderControl(
         </div>
       )
     }
+
+    case 'class-select':
+      return (
+        <select
+          id={inputId}
+          value={String(v ?? '')}
+          onChange={(e) => onChange(e.target.value)}
+          {...ariaProps}
+        >
+          <option value="">Choose…</option>
+          {programClasses.map((c) => (
+            <option key={String(c.id)} value={String(c.id)}>
+              {formatClassLabel(c.name, c.tuitionCents)}
+            </option>
+          ))}
+        </select>
+      )
 
     case 'consent':
       return (

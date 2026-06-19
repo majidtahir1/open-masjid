@@ -111,6 +111,13 @@ function FieldPreview({ field }: { field: Field }) {
           I agree to the terms
         </div>
       )
+    case 'class-select':
+      return (
+        <div className="fb-preview-input" style={{ justifyContent: 'space-between' }}>
+          <span className="fb-preview-placeholder">Class — options come from the program&rsquo;s classes</span>
+          <FieldTypeIcon type="class-select" size={14} />
+        </div>
+      )
     default:
       return null
   }

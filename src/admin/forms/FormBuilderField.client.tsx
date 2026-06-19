@@ -104,6 +104,17 @@ function makeDefaultField(typeId: FieldTypeId, existingNames: Set<string>): Fiel
   if (typeId === 'consent') {
     return { type: 'consent', ...common, label: 'I agree', required: true as const }
   }
+  if (typeId === 'class-select') {
+    // Default name `class` so it matches the per-class pricing key (the admin
+    // may keep it). Options come from the bound program's classes at render.
+    return {
+      type: 'class-select',
+      id: common.id,
+      name: uniqueName('class', existingNames),
+      label: 'Class',
+      required: true,
+    }
+  }
   const hasOptions = FIELD_TYPES.find((t) => t.id === typeId)?.hasOptions ?? false
   if (hasOptions) {
     return {

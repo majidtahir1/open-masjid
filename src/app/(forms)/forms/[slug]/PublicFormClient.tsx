@@ -18,6 +18,7 @@ import { flattenStepsForOnePerPage } from '@/lib/form-appearance'
 import type { Form } from '@/payload-types'
 import type { FormSchema } from '@/lib/form-schema'
 import type { Appearance } from '@/lib/form-appearance'
+import type { ProgramClass } from './page'
 
 /** Augmented Form type that includes the appearance group added in V2. */
 type FormWithAppearance = Form & { appearance?: Appearance | null }
@@ -25,9 +26,11 @@ type FormWithAppearance = Form & { appearance?: Appearance | null }
 interface Props {
   form: Form
   closed: boolean
+  /** Active classes of the bound program — options for class-select fields. */
+  programClasses?: ProgramClass[]
 }
 
-export function PublicFormClient({ form, closed }: Props) {
+export function PublicFormClient({ form, closed, programClasses = [] }: Props) {
   const schema = form.schema as FormSchema
   const formExt = form as FormWithAppearance
 
@@ -348,6 +351,7 @@ export function PublicFormClient({ form, closed }: Props) {
         onGroupChange={onGroupChange}
         onGroupAdd={addItem}
         onGroupRemove={removeItem}
+        programClasses={programClasses}
       />
 
       {showEnterHint && (

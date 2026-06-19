@@ -48,7 +48,7 @@ export function submissionsToCsv(
       for (let i = 0; i < maxItems; i++) {
         for (const child of f.fields) {
           fieldCols.push({
-            label: `${itemLabel} ${i + 1} — ${child.label}`,
+            label: `${itemLabel} ${i + 1} — ${child.label ?? child.name}`,
             get: (data) => {
               const items = data[groupName]
               const item = Array.isArray(items) ? items[i] : undefined
@@ -61,7 +61,7 @@ export function submissionsToCsv(
       }
       continue
     }
-    fieldCols.push({ label: f.label, get: (data) => data[f.name] })
+    fieldCols.push({ label: f.label ?? f.name, get: (data) => data[f.name] })
   }
   const paymentHeader = includePayment ? ['Payment', 'Amount', 'Currency'] : []
   const header = ['Submitted at', 'Email', ...paymentHeader, ...fieldCols.map((c) => c.label)]

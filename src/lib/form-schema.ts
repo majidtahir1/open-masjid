@@ -13,6 +13,7 @@ export const FIELD_TYPES = [
   { id: 'multiselect', label: 'Multi-select', hasOptions: true },
   { id: 'checkbox-group', label: 'Checkbox group', hasOptions: true },
   { id: 'consent', label: 'Consent', hasOptions: false },
+  { id: 'class-select', label: 'Class', hasOptions: false },
   { id: 'page-break', label: 'Page break', hasOptions: false },
   { id: 'section', label: 'Section', hasOptions: false },
   { id: 'repeatable-group', label: 'Repeatable group', hasOptions: false },
@@ -47,6 +48,16 @@ const LeafFieldMembers = [
   z.object({ type: z.literal('multiselect'), ...FieldBase, options: z.array(Option).min(1) }),
   z.object({ type: z.literal('checkbox-group'), ...FieldBase, options: z.array(Option).min(1) }),
   z.object({ type: z.literal('consent'), ...FieldBase, required: z.literal(true) }),
+  // Per-participant class selector. Options are resolved at render time from the
+  // bound program's classes — never stored statically in the schema.
+  z.object({
+    type: z.literal('class-select'),
+    id: z.string().min(1),
+    name: z.string().regex(FieldNameRegex),
+    label: z.string().optional(),
+    required: z.boolean().default(false),
+    helpText: z.string().optional(),
+  }),
 ] as const
 
 const LeafFieldSchema = z.discriminatedUnion('type', LeafFieldMembers)
@@ -165,6 +176,13 @@ function validateItem(
       case 'consent':
         if (v !== true) errors[errKey] = 'Required'
         else out[f.name] = true
+        break
+      case 'class-select':
+        // Value is a class id (string). Options are program-derived, so we
+        // accept any non-empty string here; placement-time validation owns
+        // checking the id against the program's live classes.
+        if (typeof v !== 'string') errors[errKey] = 'Invalid class'
+        else out[f.name] = v
         break
     }
   }

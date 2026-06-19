@@ -25,10 +25,18 @@ interface PublicFormRecord {
   title?: string | null
   description?: unknown
   status?: 'published' | 'closed' | string | null
+  schoolRegistration?: boolean | null
+  registrationProgram?: string | number | { id: string | number } | null
   settings?: {
     capacity?: number | null
   } | null
   appearance?: Appearance | null
+}
+
+export interface ProgramClass {
+  id: string | number
+  name: string
+  tuitionCents: number | null
 }
 
 export default async function FormPage({
@@ -79,6 +87,39 @@ export default async function FormPage({
 
   const closed = form.status === 'closed' || isFull
 
+  // For per-class registration programs, load the program's ACTIVE classes so
+  // the public form can render the per-participant class selector. Non-
+  // registration forms (no schoolRegistration / no program) get an empty list.
+  let programClasses: ProgramClass[] = []
+  const programRaw = form.registrationProgram
+  const programId =
+    programRaw && typeof programRaw === 'object' && 'id' in programRaw
+      ? programRaw.id
+      : (programRaw as string | number | null)
+  if (form.schoolRegistration === true && programId) {
+    const classesResult = await payload.find({
+      collection: 'school-classes',
+      where: {
+        and: [
+          { term: { equals: programId } },
+          { status: { equals: 'active' } },
+        ],
+      },
+      limit: 1000,
+      depth: 0,
+      select: { name: true, tuitionCents: true },
+      overrideAccess: true,
+    })
+    programClasses = classesResult.docs.map((c) => {
+      const doc = c as { id: string | number; name?: string | null; tuitionCents?: number | null }
+      return {
+        id: doc.id,
+        name: doc.name ?? '',
+        tuitionCents: doc.tuitionCents ?? null,
+      }
+    })
+  }
+
   // Background CSS from form.appearance (gradient overrides solid color)
   const backgroundCss = computeBackgroundCss(form.appearance ?? undefined)
 
@@ -98,7 +139,7 @@ export default async function FormPage({
             <RichText data={form.description as never} className="om-pf-description" />
           ) : null}
         </header>
-        <PublicFormClient form={form as any} closed={closed} />
+        <PublicFormClient form={form as any} closed={closed} programClasses={programClasses} />
       </div>
     </section>
   )

@@ -11,7 +11,7 @@ describe('FIELD_TYPES', () => {
   it('exposes the field types in a stable order', () => {
     expect(FIELD_TYPES.map((t) => t.id)).toEqual([
       'short-text','email','phone','long-text','number','date',
-      'dropdown','radio','multiselect','checkbox-group','consent','page-break',
+      'dropdown','radio','multiselect','checkbox-group','consent','class-select','page-break',
       'section','repeatable-group',
     ])
   })
@@ -65,6 +65,39 @@ describe('repeatable-group schema', () => {
   it('fails when fewer than min items', () => {
     const r = validateSubmission(groupSchema as any, { guardian_name: 'R', participants: [] })
     expect(r.ok).toBe(false)
+  })
+})
+
+describe('class-select field', () => {
+  const groupWithClass = {
+    steps: [{ id: 's1', fields: [
+      { type: 'repeatable-group', id: 'p', name: 'participants', label: 'Children', itemLabel: 'Child', min: 1, fields: [
+        { type: 'short-text', id: 'f1', name: 'student_first_name', label: 'First', required: true },
+        { type: 'class-select', id: 'f2', name: 'class', label: 'Class', required: true },
+      ] },
+    ] }],
+  }
+
+  it('validateSchema accepts a class-select inside a repeatable-group', () => {
+    expect(validateSchema(groupWithClass).success).toBe(true)
+  })
+
+  it('validateSubmission stores the selected class id under its name', () => {
+    const r = validateSubmission(groupWithClass as any, {
+      participants: [{ student_first_name: 'Aisha', class: '42' }],
+    })
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect((r.data.participants as any[])[0].class).toBe('42')
+    }
+  })
+
+  it('validateSubmission errors when required class-select is empty', () => {
+    const r = validateSubmission(groupWithClass as any, {
+      participants: [{ student_first_name: 'Aisha', class: '' }],
+    })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.errors['participants.0.class']).toBeDefined()
   })
 })
 

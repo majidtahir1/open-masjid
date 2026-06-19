@@ -17,6 +17,7 @@ const FIELD_DESCRIPTIONS: Record<FieldTypeId, string> = {
   'multiselect': 'Multiple choices from a list',
   'checkbox-group': 'Multiple checkbox selections',
   'consent': 'Mandatory agree/consent checkbox',
+  'class-select': 'Pick a class — options come from the program',
   'page-break': 'Split form into multiple steps',
   'section': 'Group fields under a heading',
   'repeatable-group': 'A repeatable set of fields (e.g. add another child)',

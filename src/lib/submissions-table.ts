@@ -58,7 +58,7 @@ const OPTION_TYPES: ReadonlySet<string> = new Set(['dropdown', 'radio', 'multise
 // How many item slots to expand a repeatable-group into when it has no `max`.
 const DEFAULT_GROUP_ITEMS = 3
 
-type LeafLikeField = { type: FieldTypeId; name: string; label: string; options?: ColumnOption[] }
+type LeafLikeField = { type: FieldTypeId; name: string; label?: string; options?: ColumnOption[] }
 
 /** Build the type-aware ColumnSpec for one leaf input field at the given id/label. */
 function leafSpec(f: LeafLikeField, id: string, label: string, fieldName: string): ColumnSpec {
@@ -92,12 +92,12 @@ export function buildColumnSpecs(
       for (let i = 0; i < count; i++) {
         for (const child of f.fields) {
           const fieldName = `${f.name}.${i}.${child.name}`
-          specs.push(leafSpec(child, `field:${fieldName}`, `${itemLabel} ${i + 1} — ${child.label}`, fieldName))
+          specs.push(leafSpec(child, `field:${fieldName}`, `${itemLabel} ${i + 1} — ${child.label ?? child.name}`, fieldName))
         }
       }
       continue
     }
-    specs.push(leafSpec(f as LeafLikeField, `field:${f.name}`, f.label, f.name))
+    specs.push(leafSpec(f as LeafLikeField, `field:${f.name}`, f.label ?? f.name, f.name))
   }
 
   if (opts.paymentEnabled) {

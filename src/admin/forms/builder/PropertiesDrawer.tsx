@@ -184,6 +184,64 @@ function GeneralTab({ field, onChange }: GeneralTabProps) {
     )
   }
 
+  if (field.type === 'class-select') {
+    const classField = field
+    return (
+      <div className="fb-drawer-body">
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Label</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={classField.label ?? ''}
+            onChange={(e) => onChange({ ...classField, label: e.target.value })}
+            placeholder="Class"
+          />
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Field name</label>
+          <input
+            className="fb-drawer-input fb-drawer-input--mono"
+            type="text"
+            value={classField.name}
+            onChange={(e) => onChange({ ...classField, name: e.target.value })}
+            placeholder="class"
+          />
+          <p className="fb-drawer-note">
+            Keep this as <code>class</code> so per-class pricing can read each participant&rsquo;s class.
+          </p>
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Help text</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={classField.helpText ?? ''}
+            onChange={(e) => onChange({ ...classField, helpText: e.target.value })}
+            placeholder="Optional hint below the field"
+          />
+        </div>
+        <p className="fb-drawer-note">
+          Options are pulled from the bound program&rsquo;s active classes — there&rsquo;s nothing to configure here.
+        </p>
+
+        <div className="fb-drawer-section-divider" />
+        <div className="fb-drawer-section-title">Behavior</div>
+        <div className="fb-drawer-toggle-row">
+          <span className="fb-drawer-toggle-label">Required</span>
+          <label className="fb-drawer-toggle">
+            <input
+              type="checkbox"
+              checked={!!classField.required}
+              onChange={(e) => onChange({ ...classField, required: e.target.checked })}
+            />
+            <span className="fb-drawer-toggle-slider" />
+          </label>
+        </div>
+      </div>
+    )
+  }
+
   const currentField = field as Extract<Field, { label: string }>
 
   function handleLabelChange(newLabel: string) {
@@ -381,7 +439,12 @@ interface ValidationTabProps {
 }
 
 function ValidationTab({ field, onChange }: ValidationTabProps) {
-  if (field.type === 'page-break' || field.type === 'section' || field.type === 'repeatable-group') {
+  if (
+    field.type === 'page-break' ||
+    field.type === 'section' ||
+    field.type === 'repeatable-group' ||
+    field.type === 'class-select'
+  ) {
     return (
       <div className="fb-drawer-body">
         <p className="fb-drawer-note">No validation options for this field type.</p>
