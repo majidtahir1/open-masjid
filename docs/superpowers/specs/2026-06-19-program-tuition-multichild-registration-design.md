@@ -13,8 +13,10 @@
 
 Masjid programs charge a **recurring monthly fee**. Parents register **all their children at once** through a dedicated multi-child flow and pay a **single monthly family subscription**. The only thing that differs between programs is **how each child's price is determined**:
 
-- **Sunday school** — **per-program** pricing: one monthly price set at the program level, charged per child (does not vary by class). Parents provide the child's **grade**.
-- **Qur'an Academy** — **per-class** pricing (level-based classes: hifdh, nazirah, qaidah, …). Parents pick the class at registration; the price follows the class. The pick is the **requested placement**, not an auto-enrollment.
+- **per-program** pricing — one monthly price set at the program level, charged per child (does not vary by class). Parents provide the child's **grade**. *Example: Sunday school.*
+- **per-class** pricing — price set on each class (e.g. level-based classes: hifdh, nazirah, qaidah, …). Parents pick the class at registration; the price follows the class. The pick is the **requested placement**, not an auto-enrollment. *Example: Qur'an Academy.*
+
+**This is built generically.** Sunday school and Qur'an Academy are **examples**, not special cases — each program's behavior (pricing model, whether parents pick a class, discount tiers, prices) is driven entirely by **per-program / per-form configuration**, so the same mechanism fits any paid program (summer camps, weekend academies, etc.). Both example programs are **paid monthly** — neither is free.
 
 **Every school registration creates the student in an "unenrolled" state; an admin then places them into the right program/class** via the new **Enrollment hub** (§9). Registration never auto-enrolls — for any program. This sidesteps level/assessment and capacity mismatches: the admin confirms placement and adjusts billing manually if it differs from the requested class.
 
@@ -63,7 +65,7 @@ Both apply an **automatic percentage multi-child (sibling) discount** within a p
 
 ## 4. Registration UX (multi-child flow)
 
-A dedicated paid flow (separate route/component from the generic `/forms/[slug]`), used by both programs:
+A dedicated paid flow (separate route/component from the generic `/forms/[slug]`), used by any paid program:
 
 1. **Family info** — guardian name, **email** (family key), phone, address, authorized pickups, etc. Entered once.
 2. **Add children** — repeatable per child:
@@ -73,7 +75,7 @@ A dedicated paid flow (separate route/component from the generic `/forms/[slug]`
 4. **Checkout** — Stripe **subscription** checkout (reuses membership flow) against one family customer.
 5. **Confirmation** — each student is created in an **unenrolled** state on webhook confirmation; an admin places (enrolls) them afterward.
 
-The generic free form remains for any non-tuition / free registrations (events, RSVPs, etc.).
+The existing generic forms feature (`/forms/[slug]`) stays for **free / non-tuition** signups (events, RSVPs, volunteer sign-ups, etc.) — a separate path from paid program registration. (Paid programs do **not** use it.)
 
 ---
 
