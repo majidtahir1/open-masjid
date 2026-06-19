@@ -21,6 +21,8 @@ export interface KioskChild {
   firstName: string
   grade: string | null
   classes: string[]
+  /** False when the child is enrolled in the program but no class meets today. */
+  hasToday: boolean
   status: ChildStatus
   checkInAt: string | null
   checkOutAt: string | null
@@ -192,14 +194,18 @@ export async function findFamily(
   const children: KioskChild[] = []
   for (const s of matched) {
     const { sessionIds, classNames } = await studentTodaySessions(payload, tenantId, ctx, idOf(s.id))
-    if (!sessionIds.length) continue // not enrolled in anything meeting today in this program
-    const st = await childStatusFor(payload, tenantId, idOf(s.id), sessionIds)
+    if (!classNames.length) continue // not enrolled in this program at all
+    const hasToday = sessionIds.length > 0
+    const st = hasToday
+      ? await childStatusFor(payload, tenantId, idOf(s.id), sessionIds)
+      : { status: 'none' as ChildStatus, checkInAt: null, checkOutAt: null }
     children.push({
       id: idOf(s.id),
       name: s.fullName || [s.firstName, s.lastName].filter(Boolean).join(' '),
       firstName: s.firstName || s.fullName || 'Student',
       grade: s.gradeLevel ?? null,
       classes: Array.from(new Set(classNames)),
+      hasToday,
       status: st.status,
       checkInAt: st.checkInAt,
       checkOutAt: st.checkOutAt,

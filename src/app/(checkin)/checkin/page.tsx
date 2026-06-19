@@ -64,6 +64,7 @@ interface Child {
   firstName: string
   grade: string | null
   classes: string[]
+  hasToday: boolean
   status: ChildStatus
   checkInAt: string | null
   checkOutAt: string | null
@@ -271,7 +272,7 @@ function Kiosk({
     } catch { /* keep optimistic */ } finally { setBusy(false) }
   }
 
-  const checkable = kids.filter((k) => k.status !== 'in')
+  const checkable = kids.filter((k) => k.hasToday && k.status !== 'in')
   const checkAll = async () => {
     if (busy || !checkable.length) return
     setBusy(true)
@@ -388,26 +389,37 @@ function Kiosk({
             )}
 
             {kids.map((kid) => {
-              const cfg =
-                kid.status === 'none'
-                  ? { pillText: 'Not yet arrived', pillColor: t.faint, pillBg: t.chipBg, dot: '○', btnLabel: 'Check in', btnBg: t.brand, btnColor: t.brandText, btnBorder: 'none', btnShadow: t.btnShadow, action: 'in' as const, Icon: Check }
-                  : kid.status === 'in'
-                  ? { pillText: `Checked in ${fmtTime(kid.checkInAt)}`, pillColor: t.good, pillBg: t.goodSoft, dot: '●', btnLabel: 'Check out', btnBg: t.warn, btnColor: t.warnText, btnBorder: 'none', btnShadow: 'none', action: 'out' as const, Icon: OutIcon }
-                  : { pillText: `Checked out ${fmtTime(kid.checkOutAt)}`, pillColor: t.sub, pillBg: t.chipBg, dot: '◌', btnLabel: 'Check in again', btnBg: 'transparent', btnColor: t.brand, btnBorder: `1.5px solid ${t.brand}`, btnShadow: 'none', action: 'in' as const, Icon: Check }
               const meta = [kid.grade, kid.classes.join(', ')].filter(Boolean).join(' · ')
+              const pill = !kid.hasToday
+                ? { text: 'No class today', color: t.faint, bg: t.chipBg, dot: '—' }
+                : kid.status === 'none'
+                ? { text: 'Not yet arrived', color: t.faint, bg: t.chipBg, dot: '○' }
+                : kid.status === 'in'
+                ? { text: `Checked in ${fmtTime(kid.checkInAt)}`, color: t.good, bg: t.goodSoft, dot: '●' }
+                : { text: `Checked out ${fmtTime(kid.checkOutAt)}`, color: t.sub, bg: t.chipBg, dot: '◌' }
+              const btn =
+                kid.status === 'in'
+                  ? { label: 'Check out', bg: t.warn, color: t.warnText, border: 'none', shadow: 'none', action: 'out' as const, Icon: OutIcon }
+                  : kid.status === 'out'
+                  ? { label: 'Check in again', bg: 'transparent', color: t.brand, border: `1.5px solid ${t.brand}`, shadow: 'none', action: 'in' as const, Icon: Check }
+                  : { label: 'Check in', bg: t.brand, color: t.brandText, border: 'none', shadow: t.btnShadow, action: 'in' as const, Icon: Check }
               return (
-                <div key={kid.id} style={{ background: t.card, border: `1px solid ${t.cardLine}`, borderRadius: 18, padding: '26px 30px', display: 'flex', alignItems: 'center', gap: 22, boxShadow: theme === 'day' ? '0 2px 8px rgba(19,46,48,.05)' : 'none' }}>
+                <div key={kid.id} style={{ background: t.card, border: `1px solid ${t.cardLine}`, borderRadius: 18, padding: '26px 30px', display: 'flex', alignItems: 'center', gap: 22, boxShadow: theme === 'day' ? '0 2px 8px rgba(19,46,48,.05)' : 'none', opacity: kid.hasToday ? 1 : 0.7 }}>
                   <div style={{ flex: 'none', width: 62, height: 62, borderRadius: '50%', background: t.brandSoft, color: t.brand, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FR, fontWeight: 500, fontSize: 26 }}>{kid.name[0]}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 30, color: t.ink, letterSpacing: '-.01em' }}>{kid.name}</div>
                     {meta && <div style={{ fontSize: 15, color: t.sub, marginTop: 4 }}>{meta}</div>}
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 13, padding: '6px 13px', borderRadius: 999, background: cfg.pillBg, color: cfg.pillColor, fontSize: 14.5, fontWeight: 600 }}>
-                      <span style={{ fontSize: 11 }}>{cfg.dot}</span>{cfg.pillText}
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 13, padding: '6px 13px', borderRadius: 999, background: pill.bg, color: pill.color, fontSize: 14.5, fontWeight: 600 }}>
+                      <span style={{ fontSize: 11 }}>{pill.dot}</span>{pill.text}
                     </div>
                   </div>
-                  <div onClick={doCheck(kid, cfg.action)} style={{ flex: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, minWidth: 200, height: 66, padding: '0 28px', borderRadius: 14, fontSize: 19, fontWeight: 600, cursor: 'pointer', background: cfg.btnBg, color: cfg.btnColor, border: cfg.btnBorder, boxShadow: cfg.btnShadow }}>
-                    <cfg.Icon />{cfg.btnLabel}
-                  </div>
+                  {kid.hasToday ? (
+                    <div onClick={doCheck(kid, btn.action)} style={{ flex: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, minWidth: 200, height: 66, padding: '0 28px', borderRadius: 14, fontSize: 19, fontWeight: 600, cursor: 'pointer', background: btn.bg, color: btn.color, border: btn.border, boxShadow: btn.shadow }}>
+                      <btn.Icon />{btn.label}
+                    </div>
+                  ) : (
+                    <div style={{ flex: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, height: 66, padding: '0 28px', borderRadius: 14, fontSize: 15, fontWeight: 500, color: t.faint, border: `1px dashed ${t.cardLine}` }}>No class today</div>
+                  )}
                 </div>
               )
             })}
