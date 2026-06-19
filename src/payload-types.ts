@@ -1922,6 +1922,7 @@ export interface ProgramSubscription {
   stripeSubscriptionStatus?: string | null;
   status: 'active' | 'past_due' | 'canceled';
   currentPeriodEnd?: string | null;
+  canceledAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -3015,6 +3016,7 @@ export interface ProgramSubscriptionsSelect<T extends boolean = true> {
   stripeSubscriptionStatus?: T;
   status?: T;
   currentPeriodEnd?: T;
+  canceledAt?: T;
   createdAt?: T;
   updatedAt?: T;
 }

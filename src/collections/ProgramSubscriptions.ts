@@ -104,6 +104,11 @@ export const ProgramSubscriptions: CollectionConfig = {
       admin: { readOnly: true },
     },
     {
+      name: 'canceledAt',
+      type: 'date',
+      admin: { readOnly: true },
+    },
+    {
       name: 'createdAt',
       type: 'date',
       admin: { readOnly: true },
