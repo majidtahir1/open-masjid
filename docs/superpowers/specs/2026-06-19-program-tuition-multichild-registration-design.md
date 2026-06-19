@@ -4,7 +4,8 @@
 **Date:** 2026-06-19
 **Author:** Brainstormed with Majid Tahir
 **Product area:** OpenMasjid → Programs (Sunday school, Qur'an Academy, …)
-**Related:** parent check-in kiosk (shipped), registration-details (PR #140), `docs/superpowers/specs/2026-06-18-parent-checkin-kiosk-design.md`
+**Implementation:** **PR #140** is the umbrella for this whole effort — registration-details snapshot, the grade→`gradeLevel` mapping, the multi-child tuition subsystem, and the Enrollment hub (§9).
+**Related:** parent check-in kiosk (shipped), `docs/superpowers/specs/2026-06-18-parent-checkin-kiosk-design.md`
 
 ---
 
@@ -15,7 +16,7 @@ Masjid programs charge a **recurring monthly fee**. Parents register **all their
 - **Sunday school** — a **flat** monthly price per child (does not vary by class). Parents provide the child's **grade**.
 - **Qur'an Academy** — **per-class** pricing (level-based classes: hifdh, nazirah, qaidah, …). Parents pick the class at registration; the price follows the class. The pick is the **requested placement**, not an auto-enrollment.
 
-**Every school registration creates the student in an "unenrolled" state; an admin then places them into the right program/class** (the existing "unplaced students" → Setup Step-4 placement). Registration never auto-enrolls — for any program. This sidesteps level/assessment and capacity mismatches: the admin confirms placement and adjusts billing manually if it differs from the requested class.
+**Every school registration creates the student in an "unenrolled" state; an admin then places them into the right program/class** via the new **Enrollment hub** (§9). Registration never auto-enrolls — for any program. This sidesteps level/assessment and capacity mismatches: the admin confirms placement and adjusts billing manually if it differs from the requested class.
 
 Both apply an **automatic percentage multi-child (sibling) discount** within a program, and accept **handed-out coupon codes** (Stripe promotion codes) on top. This reuses the platform's existing **membership subscription** infrastructure (Stripe subscriptions + webhooks), not the one-time forms payment path.
 
@@ -51,7 +52,7 @@ Both apply an **automatic percentage multi-child (sibling) discount** within a p
 | Billing entity | **One Stripe customer per family** (key = guardian email) |
 | Subscription shape | **One monthly subscription, one line item per child** |
 | Class selection at registration | **Per-class programs** capture the **requested class** (drives price + placement hint). Flat programs capture **grade**. |
-| Enrollment / placement | **Always admin-placed** — every registration produces an **unenrolled** student; admin enrolls via the existing Setup Step-4 placement. No auto-enroll, any program. |
+| Enrollment / placement | **Always admin-placed** — every registration produces an **unenrolled** student; admin enrolls via the new **Enrollment hub** (§9). Placement is **removed from Setup**. No auto-enroll, any program. |
 | Sibling discount | **Automatic, percentage-off by child rank**, configured **on the form**, **within a program** |
 | Which child discounted | Most-expensive line pays full; **discount rolls down** to lower-priced children (trivial when flat) |
 | Promo codes | **Stripe promotion codes** (`allow_promotion_codes`); sibling discount is computed pricing so it doesn't consume Stripe's discount slot |
@@ -85,7 +86,7 @@ Prefer extending/mirroring the **membership** collections over bespoke ones.
 - **Registration form** — `multiChildDiscount`: enabled + **percentage tiers by child rank** (2nd child X%, 3rd+ Y%); admin enters per form. (Cadence fixed monthly in v1.)
 - **Family/tuition record** — one per family subscription (mirrors `members`): guardian email, `stripeCustomerId`, `stripeSubscriptionId`, `status`, `currentPeriodEnd`, tenant. Forward-compatible with a future `families` entity.
 - **`students`** — link to the family/tuition record; store `gradeLevel` (all programs) and, for per-class programs, the **requested class** (a placement hint, like `registeredProgram`); reuse the `registrationDetails` snapshot (PR #140). Created **unenrolled** = the existing "unplaced" state (active student, no active `enrollments` row).
-- **`enrollments`** — created by **admin** during placement for **all** programs (registration never auto-enrolls). Reuses `unplacedForProgram` / Setup Step-4.
+- **`enrollments`** — created by **admin** during placement for **all** programs (registration never auto-enrolls), in the Enrollment hub (§9); reuses `unplacedForProgram`.
 
 Exact shapes finalized at planning time.
 
@@ -123,7 +124,21 @@ Exact shapes finalized at planning time.
 
 ---
 
-## 9. Forward-compatibility (north star, not built now)
+## 9. Enrollment hub (placement) — first-class admin view
+
+Since most registrations arrive via the form (producing a steady stream of unenrolled students), placement is an **ongoing operational workflow**, not a one-time setup step. Promote it to a dedicated, re-enterable tab.
+
+- **Route/nav:** a top-level **"Enrollment"** tab in the Programs nav (alongside Students / Classes / Attendance / Who's here), program-scoped via the picker.
+- **Zone 1 — Needs placement:** live queue of unenrolled students for the program (active, `registeredProgram` = this program, no active enrollment), each with placement **hints** — grade (Sunday school) and **requested class** (Qur'an Academy) — plus a registration-details peek. Actions: **Place into &lt;class&gt;**, a **"place as requested"** shortcut for Qur'an Academy, and the **inline "Add & enroll a new student"** (moved out of Setup).
+- **Zone 2 — Class rosters:** per active class, who's enrolled, with **move between classes** and **withdraw**.
+- **Setup change:** **remove the placement step** from the Setup wizard (Setup = program config only: dates, meeting days, classes, teachers). Repoint the dashboard **"N students to place"** banner to the Enrollment tab.
+- **Semantics (assumed — confirm):** "move" = withdraw the old enrollment (status `withdrawn`, history kept) + create a new active one; **capacity is informational** (don't block over-capacity placement).
+- **Independence:** this is valuable **today**, independent of the tuition subsystem — it just promotes the existing manual placement out of Setup. Can land earlier within PR #140.
+- **Students tab stays the directory** (edit details); Enrollment is the class-assignment workflow.
+
+---
+
+## 10. Forward-compatibility (north star, not built now)
 
 - **Family records:** promote guardian-email grouping into a real `families`/household entity owning students + Stripe customer + subscription; backfill from distinct guardian emails.
 - **Parent portal:** Stripe billing portal (already used for memberships) + an OpenMasjid "your children" view (attendance, check-in log, progress).
@@ -132,13 +147,13 @@ Exact shapes finalized at planning time.
 
 ---
 
-## 10. Reused infrastructure
+## 11. Reused infrastructure
 
 `membership-tiers`, `members`, `membership-checkout.ts`, `membership-webhook.ts`, `membership-stripe.ts`, `membership-aggregates.ts`, the Stripe billing portal (`/api/membership/portal`), Stripe Connect wiring. The tuition subscription mirrors the membership subscription lifecycle.
 
 ---
 
-## 11. Open inputs to confirm (masjid)
+## 12. Open inputs to confirm (masjid)
 
 1. **Sibling discount percentages** per child rank (2nd child __%, 3rd+ __%) — per program/form.
 2. **Sunday school flat monthly price**; **Qur'an Academy monthly price per class**.
@@ -149,6 +164,6 @@ These are data/config, not blockers for building the mechanism.
 
 ---
 
-## 12. Out of scope (this spec)
+## 13. Out of scope (this spec)
 
-The small Sunday-school **grade → `gradeLevel`** mapping for the generic form rides with PR #140. Class-change automation, mid-stream child adds, lapsed-payment enrollment automation, the `families` entity, parent portal, and in-app coupon manager are all future.
+**In scope of PR #140** (this whole effort): registration-details snapshot, grade→`gradeLevel` mapping, multi-child tuition subsystem, and the Enrollment hub. **Future / not in #140:** class-change automation, mid-stream child adds, lapsed-payment enrollment automation, the `families` entity, parent portal, and the in-app coupon manager.
