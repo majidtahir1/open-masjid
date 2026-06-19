@@ -13,6 +13,11 @@ type Payload = any
 const idOf = (v: unknown): string =>
   String(typeof v === 'object' && v !== null && 'id' in v ? (v as any).id : v)
 
+// Postgres uses integer relation ids; Payload's relationship validation rejects
+// numeric-looking strings ("94"), so coerce all-digit ids back to numbers for
+// writes. Non-numeric ids (e.g. Mongo ObjectIds) pass through unchanged.
+const relId = (v: string): string | number => (/^\d+$/.test(v) ? Number(v) : v)
+
 export type ChildStatus = 'none' | 'in' | 'out'
 
 export interface KioskChild {
@@ -248,7 +253,7 @@ export async function applyCheck(
       else
         await payload.create({
           collection: 'attendance-records',
-          data: { tenant: tenantId, session: sessionId, student: studentId, ...data },
+          data: { tenant: relId(String(tenantId)), session: relId(sessionId), student: relId(studentId), ...data },
           overrideAccess: true,
         })
     } else {
