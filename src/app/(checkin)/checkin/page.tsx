@@ -341,27 +341,25 @@ function Kiosk({
             <div onClick={goIdle} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 18px', borderRadius: 12, background: t.chipBg, border: `1px solid ${t.cardLine}`, color: t.sub, fontSize: 16, fontWeight: 600, cursor: 'pointer' }}><Back />Cancel</div>
             <div style={{ fontFamily: FR, fontWeight: 500, fontSize: 20, color: t.ink }}>{tenantName}</div>
           </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: -18 }}>
-            <div style={{ fontFamily: FR, fontWeight: 500, fontSize: 'clamp(30px,4.4vw,42px)', color: t.ink }}>Enter your phone number</div>
-            <div style={{ fontSize: 18, color: t.sub, marginTop: 8 }}>We&apos;ll find your family — only your own children appear.</div>
-            <div style={{ marginTop: 26, fontFamily: IN, fontSize: 54, fontWeight: 600, letterSpacing: '.04em', color: phone.length ? t.ink : t.faint, minHeight: 66 }}>{fmtPhone(phone)}</div>
-            <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'repeat(3,116px)', gap: 14 }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 16px 24px' }}>
+            <div style={{ fontFamily: FR, fontWeight: 500, fontSize: 'clamp(26px,4.4vw,42px)', color: t.ink, textAlign: 'center' }}>Enter your phone number</div>
+            <div style={{ fontSize: 'clamp(15px,2vh,18px)', color: t.sub, marginTop: 8, textAlign: 'center' }}>We&apos;ll find your family — only your own children appear.</div>
+            <div style={{ marginTop: 'clamp(10px,2vh,24px)', fontFamily: IN, fontSize: 'clamp(34px,6vh,52px)', fontWeight: 600, letterSpacing: '.04em', color: phone.length ? t.ink : t.faint, minHeight: 'clamp(42px,7vh,62px)' }}>{fmtPhone(phone)}</div>
+            <div style={{ marginTop: 'clamp(8px,1.6vh,18px)', display: 'grid', gridTemplateColumns: 'repeat(3, clamp(82px,11vw,112px))', gap: 'clamp(8px,1.4vh,14px)' }}>
               {keys.map((k) => {
                 const act = k === 'Clear' || k === '⌫'
                 return (
-                  <div key={k} onClick={press(k)} style={{ height: 84, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: act ? 22 : 30, fontWeight: 600, borderRadius: 18, cursor: 'pointer', userSelect: 'none', background: act ? 'transparent' : t.keyBg, color: act ? t.faint : t.keyColor, border: `1px solid ${act ? 'transparent' : t.keyLine}` }}>{k}</div>
+                  <div key={k} onClick={press(k)} style={{ height: 'clamp(54px,8.5vh,80px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: act ? 22 : 30, fontWeight: 600, borderRadius: 18, cursor: 'pointer', userSelect: 'none', background: act ? 'transparent' : t.keyBg, color: act ? t.faint : t.keyColor, border: `1px solid ${act ? 'transparent' : t.keyLine}` }}>{k}</div>
                 )
               })}
             </div>
             {phoneError && (
-              <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 11, padding: '13px 20px', borderRadius: 12, background: t.dangerSoft, color: t.danger, fontSize: 16, fontWeight: 500, maxWidth: 560, textAlign: 'center' }}>
+              <div style={{ marginTop: 'clamp(12px,2vh,22px)', display: 'flex', alignItems: 'center', gap: 11, padding: '13px 20px', borderRadius: 12, background: t.dangerSoft, color: t.danger, fontSize: 16, fontWeight: 500, maxWidth: 560, textAlign: 'center' }}>
                 No family found with that number. Check with a volunteer, or try again.
               </div>
             )}
-            <div style={{ marginTop: 24 }}>
-              <div onClick={onContinue} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, height: 70, padding: '0 42px', borderRadius: 16, fontSize: 21, fontWeight: 600, cursor: can ? 'pointer' : 'default', background: can ? t.brand : t.chipBg, color: can ? t.brandText : t.faint, opacity: can ? 1 : 0.6 }}>
-                {busy ? 'Checking…' : 'Continue'} <Arrow s={22} />
-              </div>
+            <div onClick={onContinue} style={{ marginTop: 'clamp(12px,2vh,22px)', display: 'inline-flex', alignItems: 'center', gap: 12, height: 'clamp(54px,7.5vh,68px)', padding: '0 42px', borderRadius: 16, fontSize: 21, fontWeight: 600, cursor: can ? 'pointer' : 'default', background: can ? t.brand : t.chipBg, color: can ? t.brandText : t.faint, opacity: can ? 1 : 0.6 }}>
+              {busy ? 'Checking…' : 'Continue'} <Arrow s={22} />
             </div>
           </div>
         </div>
