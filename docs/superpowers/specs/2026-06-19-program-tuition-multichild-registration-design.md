@@ -56,7 +56,7 @@ When a paid program has **multiple participants** (e.g. siblings), an **automati
 
 | Decision | Choice |
 |---|---|
-| Registration UX | **Dedicated, configurable program-registration flow** (option B — purpose-built, not extending the generic form builder). *Pending your confirm.* |
+| Registration UX | **Extend the existing form builder** (option A — chosen): registration is a form built in the one form tool, with new configurable **section** capabilities. One place for all form creation. |
 | Payment model | Per-program: **free** \| **one-time** \| **monthly recurring** |
 | Participant model | Per-program: **self** (adult) \| **children** (guardian registers ≥1, repeatable) |
 | Pricing model (when paid) | **per-program** (one program-level price) or **per-class** (price on each class) |
@@ -76,7 +76,7 @@ When a paid program has **multiple participants** (e.g. siblings), an **automati
 
 ## 4. Registration UX
 
-A dedicated, configurable flow (separate route/component from the generic `/forms/[slug]`). Sections render from the program config (§10). Example below is the `children`, paid model:
+A **form built in the existing form builder** (served like other forms, e.g. `/forms/[slug]`), using the new section capabilities (§10). Sections render from the form/program config. Example below is the `children`, paid model:
 
 1. **Guardian / family info** — guardian name, **email** (family key), phone, address, authorized pickups, etc. Entered once. *(Omitted for `self` — the adult is the contact.)*
 2. **Add children** — repeatable per child (always: name, age, **grade**, allergies; **per-class programs:** select a **class**). *(For `self`: a single participant section, no repetition.)*
@@ -94,7 +94,7 @@ Prefer extending/mirroring the **membership** collections over bespoke ones.
 
 - **Program (`terms`)** — `pricingModel`: `per-program` | `per-class`; for `per-program`, a program-level `tuitionCents` (monthly).
 - **`school-classes`** — for `per-class` programs, `tuitionCents` (monthly) + Stripe recurring **price id**.
-- **Registration form** — `multiChildDiscount`: enabled + **percentage tiers by child rank** (2nd child X%, 3rd+ Y%); admin enters per form. (Cadence fixed monthly in v1.)
+- **Forms (`forms` + `form-schema`)** — extend with: **sections** + a **repeatable section** field type (→ nested submission data, a participants array); a **priced-option / class field**; payment model `free | one-time | monthly recurring` (extends `forms.payment`); and registration settings (`participantModel`, `pricingModel`, target program, `multiChildDiscount`: percentage tiers by rank). All additive — flat forms unaffected.
 - **Family/tuition record** — one per family subscription (mirrors `members`): guardian email, `stripeCustomerId`, `stripeSubscriptionId`, `status`, `currentPeriodEnd`, tenant. Forward-compatible with a future `families` entity.
 - **`students`** — link to the family/tuition record; store `gradeLevel` (all programs) and, for per-class programs, the **requested class** (a placement hint, like `registeredProgram`); reuse the `registrationDetails` snapshot (PR #140). Created **unenrolled** = the existing "unplaced" state (active student, no active `enrollments` row).
 - **`enrollments`** — created by **admin** during placement for **all** programs (registration never auto-enrolls), in the Enrollment hub (§9); reuses `unplacedForProgram`.
@@ -162,7 +162,17 @@ Registration is **section-based and config-driven**, not a fixed form. A program
 
 So an **adults program** = `participant: self` with no guardian/child/grade sections; a **kids program** = `participant: children` with guardian + repeatable child sections.
 
-**Approach (option B — pending confirm):** a purpose-built configurable registration component that renders these sections from config and reuses form-builder field primitives for custom fields — rather than extending the flat generic form builder to do repeatable sections, per-option pricing, and subscriptions.
+**Approach (option A — chosen):** add these as **new capabilities in the existing form builder**, so registration is just a (richer) form and there's one place for all form creation. New primitives to add:
+
+- **Sections** — group fields; show/hide by config.
+- **Repeatable section** — the core new primitive (the child section repeats: "add another child"). Submissions become **nested** (a participants array) rather than flat.
+- **Priced option / class field** — a choice whose selection carries a price (per-class), feeding the computed total.
+- **Payment model on the form** — extend `forms.payment` from one-time-only to `free | one-time | monthly recurring` (recurring reuses the membership subscription infra).
+- **Registration settings on the form** — participant model, pricing model, discount tiers, target program.
+
+**Backward compatibility:** all additive — existing flat forms keep working (one implicit section, one-time/free payment unchanged). The submission→student mapping (`createStudentFromRegistration`) iterates the repeatable participant section to create N students, reads the guardian/family section once, and snapshots each participant into `registrationDetails`.
+
+**Build note:** this is the larger build (vs. a purpose-built flow), but it's the agreed long-term foundation. Suggest **phasing**: land the section/repeatable + payment-model primitives needed for the first programs, then generalize. Must not regress the existing simple forms.
 
 ---
 
@@ -190,7 +200,7 @@ So an **adults program** = `participant: self` with no guardian/child/grade sect
 
 These are data/config, not blockers for building the mechanism.
 
-**Open decision (you, not masjid):** confirm the architecture — **option B** (purpose-built configurable registration flow, recommended) vs **option A** (extend the generic form builder). The spec assumes B.
+**Architecture: decided — option A** (extend the existing form builder with configurable sections + repeatable sections + priced options + payment models). One place for all form creation; build additively without regressing existing forms.
 
 ---
 
