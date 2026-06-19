@@ -17,3 +17,10 @@ export function computeSiblingDiscount(pricesCents: number[], tiers: DiscountTie
   })
   return out
 }
+
+export interface PricingContext { pricingModel: 'per-program' | 'per-class'; programTuitionCents: number; classPrices: Record<string, number> }
+
+export function participantPricesCents(participants: Record<string, unknown>[], ctx: PricingContext): number[] {
+  return participants.map((p) =>
+    ctx.pricingModel === 'per-class' ? (ctx.classPrices[String(p.class)] ?? 0) : ctx.programTuitionCents)
+}
