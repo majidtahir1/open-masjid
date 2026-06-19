@@ -36,7 +36,21 @@ export function PublicFormClient({ form, closed }: Props) {
     ? flattenStepsForOnePerPage(schema)
     : schema
 
-  const [values, setValues] = useState<Record<string, unknown>>({})
+  // Seed an empty item ([{}]) for every repeatable-group so the group renders
+  // one item card on load. Flat forms have no groups → empty initial values,
+  // exactly as before.
+  const [values, setValues] = useState<Record<string, unknown>>(() => {
+    const init: Record<string, unknown> = {}
+    for (const step of effectiveSchema.steps) {
+      for (const f of step.fields) {
+        if (f.type === 'repeatable-group') {
+          const count = Math.max(1, f.min ?? 1)
+          init[f.name] = Array.from({ length: count }, () => ({}))
+        }
+      }
+    }
+    return init
+  })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
@@ -82,11 +96,79 @@ export function PublicFormClient({ form, closed }: Props) {
     }
   }
 
+  /** Read the current items array for a group (always returns a fresh array reference for safe mutation). */
+  function groupItems(groupName: string): Record<string, unknown>[] {
+    const cur = values[groupName]
+    return Array.isArray(cur) ? (cur as Record<string, unknown>[]) : [{}]
+  }
+
+  /** Edit one child field of one item; immutable — replaces the item and the array. */
+  function onGroupChange(groupName: string, index: number, childName: string, val: unknown) {
+    setValues((prev) => {
+      const arr = Array.isArray(prev[groupName]) ? (prev[groupName] as Record<string, unknown>[]) : [{}]
+      const nextArr = arr.map((item, i) => (i === index ? { ...item, [childName]: val } : item))
+      return { ...prev, [groupName]: nextArr }
+    })
+    const errKey = `${groupName}.${index}.${childName}`
+    if (errors[errKey]) {
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next[errKey]
+        return next
+      })
+    }
+  }
+
+  function addItem(groupName: string) {
+    setValues((prev) => {
+      const arr = Array.isArray(prev[groupName]) ? (prev[groupName] as Record<string, unknown>[]) : [{}]
+      return { ...prev, [groupName]: [...arr, {}] }
+    })
+  }
+
+  function removeItem(groupName: string, index: number) {
+    setValues((prev) => {
+      const arr = Array.isArray(prev[groupName]) ? (prev[groupName] as Record<string, unknown>[]) : [{}]
+      return { ...prev, [groupName]: arr.filter((_, i) => i !== index) }
+    })
+    // Drop any errors keyed to the removed item.
+    setErrors((prev) => {
+      const next: Record<string, string> = {}
+      const removedPrefix = `${groupName}.${index}.`
+      for (const [k, v] of Object.entries(prev)) {
+        if (!k.startsWith(removedPrefix)) next[k] = v
+      }
+      return next
+    })
+  }
+
   function validateStep(): boolean {
     const stepErrors: Record<string, string> = {}
     for (const f of currentFields) {
-      // Structural / non-input field types carry no per-field validation here.
-      if (f.type === 'section' || f.type === 'repeatable-group') continue
+      // section is purely visual.
+      if (f.type === 'section') continue
+      // repeatable-group: validate item count >= min and each item's required children.
+      if (f.type === 'repeatable-group') {
+        const items = groupItems(f.name)
+        const min = f.min ?? 0
+        if (items.length < min) {
+          stepErrors[f.name] = `Add at least ${min} ${(f.itemLabel ?? 'item').toLowerCase()}${min === 1 ? '' : 's'}`
+        }
+        items.forEach((item, index) => {
+          for (const child of f.fields) {
+            const cv = item?.[child.name]
+            const childEmpty =
+              cv === undefined ||
+              cv === null ||
+              cv === '' ||
+              (Array.isArray(cv) && (cv as unknown[]).length === 0)
+            if (child.required && childEmpty) {
+              stepErrors[`${f.name}.${index}.${child.name}`] = 'Required'
+            }
+          }
+        })
+        continue
+      }
       const val = values[f.name]
       const isEmpty =
         val === undefined ||
@@ -263,6 +345,9 @@ export function PublicFormClient({ form, closed }: Props) {
         values={values}
         errors={errors}
         onChange={setValue}
+        onGroupChange={onGroupChange}
+        onGroupAdd={addItem}
+        onGroupRemove={removeItem}
       />
 
       {showEnterHint && (
