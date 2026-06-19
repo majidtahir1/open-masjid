@@ -22,6 +22,12 @@ export function hasRequiredRegistrationFields(schema: FormSchema): boolean {
   return REGISTRATION_FIELD_DEFS.every((d) => names.has(d.name))
 }
 
+/** A children-model registration form must contain exactly one repeatable-group (the participant section). */
+export function hasParticipantGroup(schema: FormSchema): boolean {
+  const groups = schema.steps.flatMap((s) => s.fields).filter((f) => f.type === 'repeatable-group')
+  return groups.length === 1
+}
+
 /**
  * Return the schema with both required student-name fields present, prepended
  * to the first step. Idempotent: returns the SAME reference when nothing is

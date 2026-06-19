@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ensureStudentFields, hasRequiredRegistrationFields, REGISTRATION_FIELD_DEFS } from '@/lib/registration-fields'
+import { ensureStudentFields, hasParticipantGroup, hasRequiredRegistrationFields, REGISTRATION_FIELD_DEFS } from '@/lib/registration-fields'
 import type { FormSchema } from '@/lib/form-schema'
 
 const empty: FormSchema = { steps: [{ id: 's1', fields: [] }] }
@@ -42,6 +42,27 @@ describe('ensureStudentFields', () => {
   it('assigns ids from the generator', () => {
     const out = ensureStudentFields(empty, counter())
     expect((out.steps[0].fields[0] as any).id).toBe('gen-1')
+  })
+})
+
+describe('hasParticipantGroup', () => {
+  const group = {
+    type: 'repeatable-group', id: 'p', name: 'participants', label: 'Children', fields: [
+      { type: 'short-text', id: 'f1', name: 'student_first_name', label: 'First', required: true },
+    ],
+  }
+  it('true with exactly one repeatable-group', () => {
+    const s = { steps: [{ id: 's1', fields: [group] }] } as unknown as FormSchema
+    expect(hasParticipantGroup(s)).toBe(true)
+  })
+  it('false with zero repeatable-groups', () => {
+    expect(hasParticipantGroup(empty)).toBe(false)
+  })
+  it('false with two repeatable-groups', () => {
+    const s = {
+      steps: [{ id: 's1', fields: [group, { ...group, id: 'p2', name: 'others' }] }],
+    } as unknown as FormSchema
+    expect(hasParticipantGroup(s)).toBe(false)
   })
 })
 

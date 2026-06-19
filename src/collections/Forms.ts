@@ -10,7 +10,7 @@ import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateSchema } from '../lib/form-schema'
 import { applyRenames, detectFieldRenames } from '../lib/form-schema-migrate'
-import { hasRequiredRegistrationFields } from '../lib/registration-fields'
+import { hasParticipantGroup, hasRequiredRegistrationFields } from '../lib/registration-fields'
 
 const slugify = (v: string): string =>
   v.toLowerCase().trim()
@@ -67,6 +67,13 @@ export const Forms: CollectionConfig = {
         }
         if (data.schoolRegistration === true && !data.registrationProgram) {
           throw new Error('A registration form must have a program selected (For program).')
+        }
+        if (
+          data.schoolRegistration === true &&
+          data.registration?.participantModel === 'children' &&
+          !hasParticipantGroup(r.schema)
+        ) {
+          throw new Error('A children registration form must contain exactly one repeatable participant group.')
         }
       }
       return data
@@ -152,6 +159,22 @@ export const Forms: CollectionConfig = {
         description: 'Which program registrants are signed up for.',
         condition: (data) => data?.schoolRegistration === true,
       },
+    },
+    {
+      name: 'registration',
+      type: 'group',
+      admin: { condition: (_, sib) => sib?.schoolRegistration === true },
+      fields: [
+        {
+          name: 'participantModel',
+          type: 'select',
+          defaultValue: 'children',
+          options: [
+            { label: 'Children (guardian registers ≥1 child)', value: 'children' },
+            { label: 'Self (an adult registers themselves)', value: 'self' },
+          ],
+        },
+      ],
     },
     {
       name: 'submissionsCount',
