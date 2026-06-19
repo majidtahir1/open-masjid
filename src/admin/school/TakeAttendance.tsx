@@ -20,13 +20,19 @@ const fmtSession = (s: Doc): string => {
   return iso === new Date().toISOString().slice(0, 10) ? `${label} · today` : label
 }
 
+const fmtClock = (iso: string | null | undefined): string => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}
+
 const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) => {
   const [classes, setClasses] = useState<Doc[]>([])
   const [classId, setClassId] = useState<string>('')
   const [sessions, setSessions] = useState<Doc[]>([])
   const [session, setSession] = useState<Doc | null>(null)
   const [roster, setRoster] = useState<Doc[]>([])
-  const [marks, setMarks] = useState<Record<string, { id?: string | number; status: Status }>>({})
+  const [marks, setMarks] = useState<Record<string, { id?: string | number; status: Status; checkInAt?: string | null; checkOutAt?: string | null }>>({})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -53,10 +59,10 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
       const att = await api(
         `/attendance-records?where[session][equals]=${sess.id}&limit=500&depth=0`,
       )
-      const m: Record<string, { id: string | number; status: Status }> = {}
+      const m: Record<string, { id: string | number; status: Status; checkInAt?: string | null; checkOutAt?: string | null }> = {}
       for (const a of att.docs) {
         const sid = typeof a.student === 'object' ? a.student.id : a.student
-        m[String(sid)] = { id: a.id, status: a.status }
+        m[String(sid)] = { id: a.id, status: a.status, checkInAt: a.checkInAt ?? null, checkOutAt: a.checkOutAt ?? null }
       }
       setMarks(m)
     } catch (e: any) {
@@ -118,7 +124,8 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
           body: JSON.stringify({ session: toId(session.id), student: toId(studentId), status }),
         }).then((r) => r.doc)
       }
-      setMarks((prev) => ({ ...prev, [key]: { id: saved.id, status } }))
+      // Preserve kiosk check-in/out times when the teacher overrides the status.
+      setMarks((prev) => ({ ...prev, [key]: { ...prev[key], id: saved.id, status } }))
     } catch (e: any) {
       setError(e?.message ?? 'Failed to save attendance.')
     } finally {
@@ -198,10 +205,20 @@ const TakeAttendance: React.FC<{ programId: string | null }> = ({ programId }) =
           )}
           <div className="ss-card" style={{ padding: '8px 14px', animation: 'none' }}>
             {roster.map((st) => {
-              const cur = marks[String(st.id)]?.status
+              const mk = marks[String(st.id)]
+              const cur = mk?.status
+              const inT = fmtClock(mk?.checkInAt)
+              const outT = fmtClock(mk?.checkOutAt)
               return (
                 <div key={st.id} className="ss-row">
-                  <span className="ss-row__name">{st.fullName ?? `${st.firstName ?? ''} ${st.lastName ?? ''}`.trim()}</span>
+                  <span className="ss-row__name">
+                    {st.fullName ?? `${st.firstName ?? ''} ${st.lastName ?? ''}`.trim()}
+                    {(inT || outT) && (
+                      <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-500)', marginTop: 2 }}>
+                        {inT && `In ${inT}`}{inT && outT && ' · '}{outT && `Out ${outT}`}
+                      </span>
+                    )}
+                  </span>
                   <span className="ss-status">
                     {STATUSES.map((s) => (
                       <button
