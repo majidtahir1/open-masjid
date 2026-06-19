@@ -215,11 +215,12 @@ function Kiosk({
   const [familyName, setFamilyName] = useState('')
   const [kids, setKids] = useState<Child[]>([])
   const [toast, setToast] = useState<{ name: string; kind: 'in' | 'out' } | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const goIdle = useCallback(() => {
-    setScreen('idle'); setPhone(''); setPhoneError(false); setKids([]); setFamilyName('')
+    setScreen('idle'); setPhone(''); setPhoneError(false); setKids([]); setFamilyName(''); setActionError(null)
   }, [])
 
   // Fullscreen can only be requested from a user gesture, so we trigger it on
@@ -271,10 +272,13 @@ function Kiosk({
   const applyResult = (id: string, r: { status: ChildStatus; checkInAt: string | null; checkOutAt: string | null }) =>
     setKids((ks) => ks.map((k) => (k.id === id ? { ...k, status: r.status, checkInAt: r.checkInAt, checkOutAt: r.checkOutAt } : k)))
 
+  const failMsg = "Couldn't save — please try again, or see a volunteer."
+
   const doCheck = (kid: Child, action: 'in' | 'out') => async () => {
     if (busy) return
-    setBusy(true)
-    // optimistic
+    setBusy(true); setActionError(null)
+    // optimistic, with a snapshot so we can roll back on failure
+    const prev = { status: kid.status, checkInAt: kid.checkInAt, checkOutAt: kid.checkOutAt }
     const now = new Date().toISOString()
     applyResult(kid.id, action === 'in'
       ? { status: 'in', checkInAt: now, checkOutAt: null }
@@ -282,18 +286,28 @@ function Kiosk({
     showToast(kid.firstName, action)
     try {
       const r = await api('check', { studentId: kid.id, action })
-      if (r.ok) applyResult(kid.id, r)
-    } catch { /* keep optimistic */ } finally { setBusy(false) }
+      if (r && r.ok) applyResult(kid.id, r)
+      else { applyResult(kid.id, prev); setToast(null); setActionError(failMsg) }
+    } catch {
+      applyResult(kid.id, prev); setToast(null); setActionError(failMsg)
+    } finally { setBusy(false) }
   }
 
   const checkable = kids.filter((k) => k.hasToday && k.status !== 'in')
   const checkAll = async () => {
     if (busy || !checkable.length) return
-    setBusy(true)
+    setBusy(true); setActionError(null)
     showToast(`${checkable.length} children`, 'in')
+    let failed = 0
     for (const kid of checkable) {
-      try { const r = await api('check', { studentId: kid.id, action: 'in' }); if (r.ok) applyResult(kid.id, r) } catch { /* */ }
+      const prev = { status: kid.status, checkInAt: kid.checkInAt, checkOutAt: kid.checkOutAt }
+      try {
+        const r = await api('check', { studentId: kid.id, action: 'in' })
+        if (r && r.ok) applyResult(kid.id, r)
+        else { applyResult(kid.id, prev); failed++ }
+      } catch { applyResult(kid.id, prev); failed++ }
     }
+    if (failed) { setToast(null); setActionError(failMsg) }
     setBusy(false)
   }
 
@@ -393,6 +407,12 @@ function Kiosk({
           </div>
           <div onClick={goIdle} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '13px 24px', borderRadius: 12, background: t.chipBg, border: `1px solid ${t.cardLine}`, color: t.sub, fontSize: 16, fontWeight: 600, cursor: 'pointer' }}>Done</div>
         </div>
+
+        {actionError && (
+          <div style={{ margin: '14px clamp(28px,5vw,44px) 0', padding: '13px 20px', borderRadius: 12, background: t.dangerSoft, color: t.danger, fontSize: 16, fontWeight: 500, textAlign: 'center' }}>
+            {actionError}
+          </div>
+        )}
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px clamp(28px,5vw,44px) 30px', display: 'flex', justifyContent: 'center' }}>
           <div style={{ flex: 1, maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 16 }}>

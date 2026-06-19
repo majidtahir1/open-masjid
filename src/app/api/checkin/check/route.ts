@@ -28,11 +28,14 @@ export async function POST(req: Request) {
   const payload = await getPayloadClient()
   if (!payload) return NextResponse.json({ error: 'unavailable' }, { status: 503 })
 
-  // Confirm the student belongs to this tenant before writing.
+  // Confirm the student belongs to this tenant before writing. findByID may
+  // populate `tenant` as a nested object, so read its id rather than stringify.
   const student = await payload
     .findByID({ collection: 'students', id: studentId, overrideAccess: true })
     .catch(() => null)
-  if (!student || String((student as any).tenant) !== String(claims.tenantId)) {
+  const stTenant = (student as any)?.tenant
+  const stTenantId = stTenant && typeof stTenant === 'object' ? stTenant.id : stTenant
+  if (!student || String(stTenantId) !== String(claims.tenantId)) {
     return NextResponse.json({ error: 'unknown-student' }, { status: 404 })
   }
 
