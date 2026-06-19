@@ -21,10 +21,10 @@ const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl(`/admin/sunday-school/students/${id}`))
+  if (!user) redirect(loginUrl(`/admin/programs/students/${id}`))
 
   const role = (user as { role?: string }).role
-  if (!role || !ROLES.has(role)) redirect('/admin/sunday-school')
+  if (!role || !ROLES.has(role)) redirect('/admin/programs')
 
   const payload = await getPayload({ config, importMap })
   const req = await createLocalReq({ user }, payload)

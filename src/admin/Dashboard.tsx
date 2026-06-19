@@ -495,7 +495,7 @@ async function TenantDashboard({
                 description="Signup or registration form"
               />
               <QuickActionCard
-                href="/admin/sunday-school"
+                href="/admin/programs"
                 icon={<GraduationCap className="h-5 w-5" aria-hidden />}
                 title="Review programs"
                 description="Weekend & Quran school"

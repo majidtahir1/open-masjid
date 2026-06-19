@@ -165,7 +165,7 @@ async function main() {
 
   writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2))
   console.log(`\n✓ Done. Manifest written to ${MANIFEST}`)
-  console.log('  Visit /admin/sunday-school to see the dashboard.')
+  console.log('  Visit /admin/programs to see the dashboard.')
   process.exit(0)
 }
 
