@@ -111,6 +111,16 @@ type FormSchemaShape = {
   steps?: { fields?: { name?: string; label?: string; type?: string }[] }[]
 }
 
+type RegForm = {
+  schoolRegistration?: boolean
+  registrationProgram?: unknown
+  registration?: { participantModel?: string }
+  schema?: FormSchemaShape
+  title?: string
+  name?: string
+  payment?: { paymentModel?: string }
+}
+
 /** Return the repeatable-group fields declared in the form schema. */
 function schemaGroups(schema: FormSchemaShape | null | undefined): { name?: string }[] {
   const groups: { name?: string }[] = []
@@ -122,38 +132,61 @@ function schemaGroups(schema: FormSchemaShape | null | undefined): { name?: stri
   return groups
 }
 
-export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
-  doc,
-  operation,
-  req,
-}) => {
-  if (operation !== 'create') return doc
-
-  const formId = typeof doc.form === 'object' ? doc.form?.id : doc.form
-  if (!formId) return doc
-
-  type RegForm = {
-    schoolRegistration?: boolean
-    registrationProgram?: unknown
-    registration?: { participantModel?: string }
-    schema?: FormSchemaShape
-    title?: string
-    name?: string
-  }
-  let form: RegForm | null = null
+/** Load + verify the school-registration form for a submission, or null. */
+async function loadRegistrationForm(
+  payload: any,
+  formId: string | number,
+  req?: unknown,
+): Promise<RegForm | null> {
   try {
-    form = (await req.payload.findByID({
+    return (await payload.findByID({
       collection: 'forms',
       id: formId,
       depth: 0,
       overrideAccess: true,
-      req,
+      ...(req ? { req } : {}),
     })) as unknown as RegForm
   } catch {
-    return doc
+    return null
   }
+}
 
-  if (form?.schoolRegistration !== true) return doc
+export interface MaterializeStudentsOpts {
+  /** When set, each created student is linked to this family tuition subscription. */
+  programSubscriptionId?: string | number
+  /** Payload request (transaction context) — passed when called from a hook. */
+  req?: unknown
+}
+
+/**
+ * Create the N students (one per participant) for a confirmed registration
+ * submission: resolves the program's active classes (creating a default class
+ * when none exist), auto-enrolls when the program has exactly one class, and
+ * snapshots each participant's registration answers. Optionally links each
+ * student to a family tuition `programSubscription`.
+ *
+ * Shared by the afterChange hook (free programs, at submit) and the tuition
+ * webhook (paid programs, after payment). Returns the created student ids.
+ */
+export async function materializeStudentsFromSubmission(
+  payloadArg: any,
+  submission: { id?: string | number; form?: unknown; data?: unknown; tenant?: unknown },
+  opts: MaterializeStudentsOpts = {},
+): Promise<(string | number)[]> {
+  // Payload's create/find data is strictly typed per slug; our data uses coerced
+  // relation ids and a generic shape, so route through an untyped handle.
+  const payload = payloadArg as any
+  const req = opts.req
+  const reqArg = req ? { req } : {}
+  const createdIds: (string | number)[] = []
+
+  const formId = typeof submission.form === 'object'
+    ? (submission.form as { id?: string | number })?.id
+    : (submission.form as string | number)
+  if (!formId) return createdIds
+
+  const form = await loadRegistrationForm(payload, formId, req)
+  if (form?.schoolRegistration !== true) return createdIds
 
   const programIdRaw =
     form.registrationProgram == null
@@ -163,9 +196,11 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
         : (form.registrationProgram as string | number)
   const programId = programIdRaw == null ? null : relId(programIdRaw)
 
-  const submissionData = (doc.data ?? {}) as Record<string, unknown>
+  const submissionData = (submission.data ?? {}) as Record<string, unknown>
   const tenantRaw =
-    typeof doc.tenant === 'object' ? (doc.tenant as { id: string | number }).id : (doc.tenant as string | number)
+    typeof submission.tenant === 'object'
+      ? (submission.tenant as { id: string | number }).id
+      : (submission.tenant as string | number)
   const tenantId = relId(tenantRaw)
 
   // children model: the single repeatable-group's name is the participant key.
@@ -174,11 +209,6 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
       ? (schemaGroups(form.schema)[0]?.name ?? null)
       : null
   const participants = participantsFromSubmission(submissionData, groupKey)
-
-  // Payload's create/find data is strictly typed per slug; our data uses coerced
-  // relation ids and a generic shape, so route through an untyped handle (as the
-  // original hook did with `(req.payload as any).create`).
-  const payload = req.payload as any
 
   // Resolve the program's ACTIVE classes once (single-class auto-enroll / default class).
   let activeClassIds: (string | number)[] = []
@@ -189,12 +219,12 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
         where: { and: [{ tenant: { equals: tenantId } }, { term: { equals: programId } }, { status: { equals: 'active' } }] },
         depth: 0,
         overrideAccess: true,
-        req,
         limit: 0,
+        ...reqArg,
       })
       activeClassIds = res.docs.map((c: { id: string | number }) => c.id)
     } catch (err) {
-      req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to load active classes')
+      payload.logger?.error?.({ err, submissionId: submission.id }, 'materializeStudentsFromSubmission: failed to load active classes')
     }
 
     // No classes yet: create a single default class so registrants land somewhere.
@@ -203,12 +233,12 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
         const def = await payload.create({
           collection: 'school-classes',
           overrideAccess: true,
-          req,
           data: { tenant: tenantId, term: programId, name: form.title ?? 'General', status: 'active' },
+          ...reqArg,
         })
         activeClassIds = [def.id]
       } catch (err) {
-        req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to create default class')
+        payload.logger?.error?.({ err, submissionId: submission.id }, 'materializeStudentsFromSubmission: failed to create default class')
       }
     }
   }
@@ -227,25 +257,53 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
       form.title ?? form.name ?? null,
     )
 
+    if (opts.programSubscriptionId != null) {
+      studentData.programSubscription = relId(opts.programSubscriptionId)
+    }
+
     try {
       const student = await payload.create({
         collection: 'students',
         data: studentData,
         overrideAccess: true,
-        req,
+        ...reqArg,
       })
+      createdIds.push(student.id)
       if (autoClassId != null) {
         await payload.create({
           collection: 'enrollments',
           overrideAccess: true,
-          req,
           data: { tenant: tenantId, student: relId(student.id), class: relId(autoClassId), status: 'active' },
+          ...reqArg,
         })
       }
     } catch (err) {
-      req.payload.logger.error({ err, submissionId: doc.id }, 'createStudentFromRegistration: failed to create student')
+      payload.logger?.error?.({ err, submissionId: submission.id }, 'materializeStudentsFromSubmission: failed to create student')
     }
   }
 
+  return createdIds
+}
+
+export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
+  doc,
+  operation,
+  req,
+}) => {
+  if (operation !== 'create') return doc
+
+  const formId = typeof doc.form === 'object' ? doc.form?.id : doc.form
+  if (!formId) return doc
+
+  const form = await loadRegistrationForm(req.payload, formId, req)
+  if (form?.schoolRegistration !== true) return doc
+
+  // Paid programs (one-time | monthly) defer student creation to the payment
+  // webhook — students are materialized only after payment succeeds. Free (or
+  // unset) programs materialize immediately at submit.
+  const paymentModel = form.payment?.paymentModel
+  if (paymentModel === 'one-time' || paymentModel === 'monthly') return doc
+
+  await materializeStudentsFromSubmission(req.payload, doc, { req })
   return doc
 }
