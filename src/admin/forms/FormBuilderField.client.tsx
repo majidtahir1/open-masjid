@@ -24,7 +24,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { Field, FieldTypeId, FormSchema, LeafField } from '@/lib/form-schema'
 import { FIELD_TYPES } from '@/lib/form-schema'
-import { ensureStudentFields, hasRequiredRegistrationFields } from '@/lib/registration-fields'
+import { REGISTRATION_FIELD_DEFS, ensureParticipantGroupFields, ensureStudentFields, hasRequiredRegistrationFields } from '@/lib/registration-fields'
 import { PLATFORM_DOMAIN } from '@/lib/tenant-parse'
 import FieldCard from './builder/FieldCard'
 import AddFieldPopover from './builder/AddFieldPopover'
@@ -263,12 +263,23 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
   // student-name fields exist in the builder — injected instantly so the admin
   // sees them without saving. The guard makes this a no-op once the fields are
   // present, so it cannot loop.
+  //
+  // Where the fields land depends on the participant model:
+  //   - 'children' → the fields are PER-CHILD, so seed them inside the single
+  //     participant repeatable-group (never top-level). If no group exists yet
+  //     this is a no-op until the admin adds one (which arrives pre-seeded).
+  //   - self / unset → keep the legacy top-level injection.
   const { value: isSchoolReg } = useField<boolean>({ path: 'schoolRegistration' })
+  const { value: participantModel } = useField<string>({ path: 'registration.participantModel' })
   useEffect(() => {
-    if (isSchoolReg && !hasRequiredRegistrationFields(schema)) {
+    if (!isSchoolReg || hasRequiredRegistrationFields(schema)) return
+    if (participantModel === 'children') {
+      const next = ensureParticipantGroupFields(schema, randomId)
+      if (next !== schema) setValue(next)
+    } else {
       setValue(ensureStudentFields(schema, randomId))
     }
-  }, [isSchoolReg, schema, setValue])
+  }, [isSchoolReg, participantModel, schema, setValue])
 
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null)
   const [popoverAt, setPopoverAt] = useState<PopoverPosition | null>(null)
@@ -328,23 +339,44 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
         return
       }
 
+      // A new participant group on a children registration form arrives
+      // pre-seeded with the two required per-child name fields, so the admin
+      // isn't stuck building it by hand.
+      let toInsert = field
+      if (
+        field.type === 'repeatable-group' &&
+        isSchoolReg &&
+        participantModel === 'children'
+      ) {
+        toInsert = {
+          ...field,
+          fields: [
+            ...REGISTRATION_FIELD_DEFS.map(
+              (d) =>
+                ({ type: 'short-text', id: randomId(), name: d.name, label: d.label, required: true }) as LeafField,
+            ),
+            ...field.fields,
+          ],
+        }
+      }
+
       const nextSteps = schema.steps.map((step, si) => {
         if (si !== position.stepIndex) return step
         const fields = [...step.fields]
         if (position.afterFieldId === null) {
-          fields.unshift(field)
+          fields.unshift(toInsert)
         } else {
           const idx = fields.findIndex((f) => f.id === position.afterFieldId)
-          fields.splice(idx + 1, 0, field)
+          fields.splice(idx + 1, 0, toInsert)
         }
         return { ...step, fields }
       })
 
       updateSchema({ ...schema, steps: nextSteps })
-      setSelectedFieldId(field.id)
+      setSelectedFieldId(toInsert.id)
       setPopoverAt(null)
     },
-    [schema, updateSchema],
+    [schema, updateSchema, isSchoolReg, participantModel],
   )
 
   const duplicateField = useCallback(

@@ -366,6 +366,9 @@ export const Forms: CollectionConfig = {
             { label: 'Fixed price', value: 'fixed' },
             { label: 'Suggested amounts', value: 'suggested' },
           ],
+          // Legacy one-time pricing — hidden on registration forms, whose
+          // pricing comes from the program/class tuition + paymentModel.
+          admin: { condition: (data) => data?.schoolRegistration !== true },
         },
         // Stored in cents; the DollarCents component shows an editable $ input.
         {
@@ -374,7 +377,7 @@ export const Forms: CollectionConfig = {
           min: 0,
           label: 'Price',
           admin: {
-            condition: (_, sib) => sib?.mode === 'fixed' && sib?.enabled,
+            condition: (data, sib) => data?.schoolRegistration !== true && sib?.mode === 'fixed' && sib?.enabled,
             description: 'Dollars, e.g. enter 25 for $25.',
             components: { Field: '/src/admin/forms/fields/DollarCents#default' },
           },
@@ -393,13 +396,13 @@ export const Forms: CollectionConfig = {
               admin: { description: 'Dollars', components: { Field: '/src/admin/forms/fields/DollarCents#default' } },
             },
           ],
-          admin: { condition: (_, sib) => sib?.mode === 'suggested' && sib?.enabled },
+          admin: { condition: (data, sib) => data?.schoolRegistration !== true && sib?.mode === 'suggested' && sib?.enabled },
         },
         {
           name: 'allowCustomAmount',
           type: 'checkbox',
           defaultValue: true,
-          admin: { condition: (_, sib) => sib?.mode === 'suggested' && sib?.enabled },
+          admin: { condition: (data, sib) => data?.schoolRegistration !== true && sib?.mode === 'suggested' && sib?.enabled },
         },
         {
           name: 'currency',
