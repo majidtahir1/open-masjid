@@ -145,6 +145,7 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
     })
   }, [enrollments, search, classFilter, statusFilter])
 
+  const enrolledCount = useMemo(() => enrollments.filter((r) => r.status === 'active').length, [enrollments])
   const visibleIds = useMemo(() => visible.map((r) => String(r.enrollmentId)), [visible])
   const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id))
   const toggleAll = () => setSelected((prev) => {
@@ -170,7 +171,7 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
 
       <div className="ss-actions" style={{ margin: '14px 0 0', alignItems: 'center' }}>
         {tabBtn('placement', 'Waiting for Placement', unplaced.length)}
-        {tabBtn('students', 'Enrolled Students')}
+        {tabBtn('students', 'Enrolled Students', enrolledCount)}
         <button className="ss-btn ss-btn--ghost ss-btn--small" onClick={() => reload()} disabled={loading} style={{ marginLeft: 'auto' }}>
           <RefreshCw size={15} /> Refresh
         </button>
