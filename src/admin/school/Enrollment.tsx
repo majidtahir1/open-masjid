@@ -169,8 +169,8 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
       </header>
 
       <div className="ss-actions" style={{ margin: '14px 0 0', alignItems: 'center' }}>
-        {tabBtn('placement', 'Placement', unplaced.length)}
-        {tabBtn('students', 'Students')}
+        {tabBtn('placement', 'Waiting for Placement', unplaced.length)}
+        {tabBtn('students', 'Enrolled Students')}
         <button className="ss-btn ss-btn--ghost ss-btn--small" onClick={() => reload()} disabled={loading} style={{ marginLeft: 'auto' }}>
           <RefreshCw size={15} /> Refresh
         </button>
