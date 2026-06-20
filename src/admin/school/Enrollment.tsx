@@ -34,6 +34,10 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
   const [search, setSearch] = useState('')
   const [classFilter, setClassFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState<'active' | 'withdrawn' | 'all'>('active')
+  // bulk selection (by enrollment id)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const toggleRow = (id: string) => setSelected((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const clearSel = () => setSelected(new Set())
   // add-student modal
   const [addOpen, setAddOpen] = useState(false)
   const [first, setFirst] = useState('')
@@ -93,33 +97,27 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
     } catch (e) { setError((e as Error).message || 'Couldn’t place that student.') } finally { setBusy(false) }
   }
 
-  const withdraw = async (enrollmentId: string | number) => {
-    if (busy || !confirm('Withdraw this student from the class?')) return
+  // Run an action over each selected enrollment, then clear + reload.
+  const runBulk = async (action: (id: string | number) => Promise<void>, label: string) => {
+    if (busy || selected.size === 0) return
     setBusy(true); setError('')
     try {
-      await api(`/enrollments/${toId(enrollmentId)}`, { method: 'PATCH', body: JSON.stringify({ status: 'withdrawn' }) })
+      for (const id of selected) await action(id)
+      clearSel()
       await reload()
-    } catch (e) { setError((e as Error).message || 'Withdraw failed.') } finally { setBusy(false) }
+    } catch (e) { setError((e as Error).message || `${label} failed.`) } finally { setBusy(false) }
   }
-
-  const reEnroll = async (enrollmentId: string | number) => {
-    if (busy) return
-    setBusy(true); setError('')
-    try {
-      await api(`/enrollments/${toId(enrollmentId)}`, { method: 'PATCH', body: JSON.stringify({ status: 'active' }) })
-      await reload()
-    } catch (e) { setError((e as Error).message || 'Re-enroll failed.') } finally { setBusy(false) }
+  const bulkWithdraw = () => {
+    if (!confirm(`Withdraw ${selected.size} student(s) from their class?`)) return
+    runBulk(async (id) => { await api(`/enrollments/${toId(id)}`, { method: 'PATCH', body: JSON.stringify({ status: 'withdrawn' }) }) }, 'Withdraw')
   }
-
-  // Move = re-point the existing enrollment's class (matches ClassDetailClient; avoids the
-  // unique (tenant, student, class) index that withdraw+re-create would hit on re-entry).
-  const move = async (enrollmentId: string | number, newClassId: string) => {
-    if (!newClassId || busy) return
-    setBusy(true); setError('')
-    try {
-      await api(`/enrollments/${toId(enrollmentId)}`, { method: 'PATCH', body: JSON.stringify({ class: toId(newClassId) }) })
-      await reload()
-    } catch (e) { setError((e as Error).message || 'Move failed.') } finally { setBusy(false) }
+  const bulkReEnroll = () =>
+    runBulk(async (id) => { await api(`/enrollments/${toId(id)}`, { method: 'PATCH', body: JSON.stringify({ status: 'active' }) }) }, 'Re-enroll')
+  // Move = re-point each enrollment's class (single PATCH; matches ClassDetailClient, avoids the
+  // unique (tenant, student, class) index a withdraw+re-create would hit on re-entry).
+  const bulkMove = (newClassId: string) => {
+    if (!newClassId) return
+    runBulk(async (id) => { await api(`/enrollments/${toId(id)}`, { method: 'PATCH', body: JSON.stringify({ class: toId(newClassId) }) }) }, 'Move')
   }
 
   const addNew = async () => {
@@ -146,6 +144,15 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
       return true
     })
   }, [enrollments, search, classFilter, statusFilter])
+
+  const visibleIds = useMemo(() => visible.map((r) => String(r.enrollmentId)), [visible])
+  const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id))
+  const toggleAll = () => setSelected((prev) => {
+    const n = new Set(prev)
+    if (allSelected) visibleIds.forEach((id) => n.delete(id))
+    else visibleIds.forEach((id) => n.add(id))
+    return n
+  })
 
   const tabBtn = (key: 'placement' | 'students', label: string, badge?: number) => (
     <button className={`ss-btn ss-btn--small ${tab === key ? '' : 'ss-btn--ghost'}`} onClick={() => setTab(key)}>
@@ -231,6 +238,7 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
       {/* ---------- STUDENTS TAB ---------- */}
       {programId && tab === 'students' && (
         <div className="ss-card ss-panel" style={{ marginTop: 16 }}>
+          {/* filters */}
           <div className="ss-actions" style={{ margin: '0 0 12px', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
             {STATUS_FILTERS.map((t) => (
               <button
@@ -251,32 +259,44 @@ const Enrollment: React.FC<{ programId: string | null }> = ({ programId }) => {
             </span>
           </div>
 
+          {/* bulk action bar */}
+          {selected.size > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '10px 12px', marginBottom: 12, borderRadius: 8, background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-150)' }}>
+              <strong style={{ fontSize: 13 }}>{selected.size} selected</strong>
+              <select className="ss-select" style={{ maxWidth: 180 }} value="" disabled={busy} onChange={(e) => bulkMove(e.target.value)}>
+                <option value="">Change class…</option>
+                {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <button className="ss-btn ss-btn--ghost ss-btn--small" disabled={busy} onClick={bulkWithdraw}>Withdraw</button>
+              <button className="ss-btn ss-btn--ghost ss-btn--small" disabled={busy} onClick={bulkReEnroll}>Re-enroll</button>
+              <button className="ss-btn ss-btn--ghost ss-btn--small" disabled={busy} onClick={clearSel} style={{ marginLeft: 'auto' }}>Clear</button>
+            </div>
+          )}
+
           {visible.length === 0 ? (
             <p className="ss-emptyline">
               {loading ? 'Loading…' : enrollments.length === 0 ? 'No enrollments yet.' : 'No students match these filters.'}
             </p>
           ) : (
             <>
-              {visible.map((r) => (
-                <div key={r.enrollmentId} className="ss-row">
-                  <span className="ss-row__name" style={{ flex: 1 }}>
-                    <a href={`/admin/programs/students/${r.studentId}`} style={{ color: 'var(--theme-text)', textDecoration: 'underline', textDecorationColor: 'var(--theme-elevation-200)' }}>{r.name}</a>
-                    <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-500)', marginTop: 2 }}>{r.className}</span>
-                  </span>
-                  <span className={`ss-pill${r.status === 'withdrawn' ? ' ss-pill--muted' : ''}`} style={{ marginRight: 8 }}>{r.status}</span>
-                  {r.status === 'active' ? (
-                    <span style={{ display: 'inline-flex', gap: 8 }}>
-                      <select className="ss-select" style={{ maxWidth: 150 }} defaultValue="" onChange={(e) => move(r.enrollmentId, e.target.value)}>
-                        <option value="">Move to…</option>
-                        {classes.filter((x) => idStr(x.id) !== r.classId).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-                      </select>
-                      <button className="ss-btn ss-btn--ghost ss-btn--small" disabled={busy} onClick={() => withdraw(r.enrollmentId)}>Withdraw</button>
+              <div className="ss-row" style={{ alignItems: 'center' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flex: 1, color: 'var(--theme-elevation-600)', fontSize: 12 }}>
+                  <input type="checkbox" checked={allSelected} onChange={toggleAll} /> Select all ({visible.length})
+                </label>
+              </div>
+              {visible.map((r) => {
+                const rid = String(r.enrollmentId)
+                return (
+                  <div key={r.enrollmentId} className="ss-row" style={{ alignItems: 'center' }}>
+                    <input type="checkbox" checked={selected.has(rid)} onChange={() => toggleRow(rid)} style={{ marginRight: 12 }} />
+                    <span className="ss-row__name" style={{ flex: 1 }}>
+                      <a href={`/admin/programs/students/${r.studentId}`} style={{ color: 'var(--theme-text)', textDecoration: 'underline', textDecorationColor: 'var(--theme-elevation-200)' }}>{r.name}</a>
+                      <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-500)', marginTop: 2 }}>{r.className}</span>
                     </span>
-                  ) : (
-                    <button className="ss-btn ss-btn--ghost ss-btn--small" disabled={busy} onClick={() => reEnroll(r.enrollmentId)}>Re-enroll</button>
-                  )}
-                </div>
-              ))}
+                    <span className={`ss-pill${r.status === 'withdrawn' ? ' ss-pill--muted' : ''}`}>{r.status}</span>
+                  </div>
+                )
+              })}
               <div style={{ textAlign: 'right', fontSize: 12, color: 'var(--theme-elevation-500)', marginTop: 8 }}>{visible.length} of {enrollments.length}</div>
             </>
           )}
