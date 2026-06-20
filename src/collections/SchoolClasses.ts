@@ -43,18 +43,12 @@ export const SchoolClasses: CollectionConfig = {
     { name: 'gradeLevel', type: 'text' },
     { name: 'room', type: 'text' },
     { name: 'capacity', type: 'number', min: 0, admin: { description: 'Informational only — not enforced.' } },
-    { name: 'tuitionCents', type: 'number', min: 0, admin: { hidden: true } },
     {
-      name: 'tuition',
+      name: 'tuitionCents',
       type: 'number',
-      virtual: true,
       min: 0,
       label: 'Monthly tuition',
-      admin: { description: 'Dollars per month for this class (per-class pricing). E.g. enter 90 for $90/mo.', step: 1 },
-      hooks: {
-        afterRead: [({ siblingData }) => { const c = (siblingData as { tuitionCents?: number | null })?.tuitionCents; return typeof c === 'number' ? c / 100 : undefined }],
-        beforeValidate: [({ value, siblingData }) => { if (typeof value === 'number' && Number.isFinite(value)) (siblingData as { tuitionCents?: number }).tuitionCents = Math.round(value * 100); return value }],
-      },
+      admin: { description: 'Dollars per month for this class (per-class pricing). E.g. enter 90 for $90/mo.', components: { Field: '/src/admin/forms/fields/DollarCents#default' } },
     },
     {
       name: 'status',

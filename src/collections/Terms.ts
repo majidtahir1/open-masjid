@@ -77,22 +77,11 @@ export const Terms: CollectionConfig = {
       name: 'tuitionCents',
       type: 'number',
       min: 0,
-      admin: { hidden: true },
-    },
-    {
-      name: 'tuition',
-      type: 'number',
-      virtual: true,
-      min: 0,
       label: 'Monthly tuition',
       admin: {
         description: 'Dollars per month for the whole program (per-program pricing). E.g. enter 50 for $50/mo.',
         condition: (_, sib) => sib?.pricingModel === 'per-program',
-        step: 1,
-      },
-      hooks: {
-        afterRead: [({ siblingData }) => { const c = (siblingData as { tuitionCents?: number | null })?.tuitionCents; return typeof c === 'number' ? c / 100 : undefined }],
-        beforeValidate: [({ value, siblingData }) => { if (typeof value === 'number' && Number.isFinite(value)) (siblingData as { tuitionCents?: number }).tuitionCents = Math.round(value * 100); return value }],
+        components: { Field: '/src/admin/forms/fields/DollarCents#default' },
       },
     },
     {

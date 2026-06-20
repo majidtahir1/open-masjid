@@ -367,26 +367,16 @@ export const Forms: CollectionConfig = {
             { label: 'Suggested amounts', value: 'suggested' },
           ],
         },
-        // Persisted in cents (hidden); admins enter dollars via the virtual `price`.
+        // Stored in cents; the DollarCents component shows an editable $ input.
         {
           name: 'priceCents',
           type: 'number',
-          admin: { hidden: true },
-        },
-        {
-          name: 'price',
-          type: 'number',
-          virtual: true,
           min: 0,
           label: 'Price',
           admin: {
             condition: (_, sib) => sib?.mode === 'fixed' && sib?.enabled,
             description: 'Dollars, e.g. enter 25 for $25.',
-            step: 1,
-          },
-          hooks: {
-            afterRead: [({ siblingData }) => { const c = (siblingData as { priceCents?: number | null })?.priceCents; return typeof c === 'number' ? c / 100 : undefined }],
-            beforeValidate: [({ value, siblingData }) => { if (typeof value === 'number' && Number.isFinite(value)) (siblingData as { priceCents?: number }).priceCents = Math.round(value * 100); return value }],
+            components: { Field: '/src/admin/forms/fields/DollarCents#default' },
           },
         },
         {
@@ -394,19 +384,13 @@ export const Forms: CollectionConfig = {
           type: 'array',
           labels: { singular: 'Suggested amount', plural: 'Suggested amounts' },
           fields: [
-            { name: 'amount', type: 'number', min: 0, admin: { hidden: true } },
             {
-              name: 'dollars',
+              name: 'amount',
               type: 'number',
-              virtual: true,
               required: true,
               min: 0,
               label: 'Amount',
-              admin: { description: 'Dollars', step: 1 },
-              hooks: {
-                afterRead: [({ siblingData }) => { const c = (siblingData as { amount?: number | null })?.amount; return typeof c === 'number' ? c / 100 : undefined }],
-                beforeValidate: [({ value, siblingData }) => { if (typeof value === 'number' && Number.isFinite(value)) (siblingData as { amount?: number }).amount = Math.round(value * 100); return value }],
-              },
+              admin: { description: 'Dollars', components: { Field: '/src/admin/forms/fields/DollarCents#default' } },
             },
           ],
           admin: { condition: (_, sib) => sib?.mode === 'suggested' && sib?.enabled },

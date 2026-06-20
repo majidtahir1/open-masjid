@@ -876,18 +876,16 @@ export interface Form {
         }[]
       | null;
     mode?: ('fixed' | 'suggested') | null;
-    priceCents?: number | null;
     /**
      * Dollars, e.g. enter 25 for $25.
      */
-    price?: number | null;
+    priceCents?: number | null;
     suggestedAmountsCents?:
       | {
-          amount?: number | null;
           /**
            * Dollars
            */
-          dollars: number;
+          amount: number;
           id?: string | null;
         }[]
       | null;
@@ -932,11 +930,10 @@ export interface Term {
    */
   meetingDays: ('sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday')[];
   pricingModel?: ('per-program' | 'per-class') | null;
-  tuitionCents?: number | null;
   /**
    * Dollars per month for the whole program (per-program pricing). E.g. enter 50 for $50/mo.
    */
-  tuition?: number | null;
+  tuitionCents?: number | null;
   status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
@@ -1758,11 +1755,10 @@ export interface SchoolClass {
    * Informational only — not enforced.
    */
   capacity?: number | null;
-  tuitionCents?: number | null;
   /**
    * Dollars per month for this class (per-class pricing). E.g. enter 90 for $90/mo.
    */
-  tuition?: number | null;
+  tuitionCents?: number | null;
   /**
    * Archived classes are hidden from the live list but keep their history.
    */
@@ -2817,12 +2813,10 @@ export interface FormsSelect<T extends boolean = true> {
             };
         mode?: T;
         priceCents?: T;
-        price?: T;
         suggestedAmountsCents?:
           | T
           | {
               amount?: T;
-              dollars?: T;
               id?: T;
             };
         allowCustomAmount?: T;
@@ -2962,7 +2956,6 @@ export interface TermsSelect<T extends boolean = true> {
   meetingDays?: T;
   pricingModel?: T;
   tuitionCents?: T;
-  tuition?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2980,7 +2973,6 @@ export interface SchoolClassesSelect<T extends boolean = true> {
   room?: T;
   capacity?: T;
   tuitionCents?: T;
-  tuition?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
