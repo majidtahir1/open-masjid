@@ -316,8 +316,8 @@ export function PublicFormClient({ form, closed, programClasses = [] }: Props) {
         : 'Continue →'
 
   // Suggested amounts: extract the `amount` value from each row
-  const suggestedAmountsCents =
-    form.payment?.suggestedAmountsCents?.map((row) => row.amount) ?? []
+  const suggestedAmountsCents: number[] =
+    form.payment?.suggestedAmountsCents?.map((row) => row.amount).filter((a): a is number => typeof a === 'number') ?? []
 
   // Determine if current step is a single-field text-like step (for Enter hint)
   const showEnterHint =

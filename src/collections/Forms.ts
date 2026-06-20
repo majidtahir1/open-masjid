@@ -58,22 +58,29 @@ export const Forms: CollectionConfig = {
     delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
-    beforeChange: [setTenantFromUser, async ({ data }) => {
+    beforeChange: [setTenantFromUser, async ({ data, originalDoc }) => {
       if (data?.schema) {
         const r = validateSchema(data.schema)
         if (!r.success) throw new Error(`Invalid form schema: ${r.error}`)
-        if (data.schoolRegistration === true && !hasRequiredRegistrationFields(r.schema)) {
-          throw new Error('A registration form must keep the Student first name and Student last name fields.')
+      }
+      // Registration invariants are only enforced at PUBLISH — drafts can be
+      // saved while still being built (e.g. before the participant group exists).
+      const orig = originalDoc as Record<string, any> | undefined
+      const status = (data?.status ?? orig?.status) as string | undefined
+      const schoolReg = data?.schoolRegistration ?? orig?.schoolRegistration
+      if (status === 'published' && schoolReg === true) {
+        const rawSchema = data?.schema ?? orig?.schema
+        const sr = rawSchema ? validateSchema(rawSchema) : null
+        const parsed = sr && sr.success ? sr.schema : null
+        if (!parsed || !hasRequiredRegistrationFields(parsed)) {
+          throw new Error('Before publishing: a registration form must include the Student first name and Student last name fields.')
         }
-        if (data.schoolRegistration === true && !data.registrationProgram) {
-          throw new Error('A registration form must have a program selected (For program).')
+        if (!(data?.registrationProgram ?? orig?.registrationProgram)) {
+          throw new Error('Before publishing: select a program for this registration form (For program).')
         }
-        if (
-          data.schoolRegistration === true &&
-          data.registration?.participantModel === 'children' &&
-          !hasParticipantGroup(r.schema)
-        ) {
-          throw new Error('A children registration form must contain exactly one repeatable participant group.')
+        const participantModel = data?.registration?.participantModel ?? orig?.registration?.participantModel
+        if (participantModel === 'children' && !hasParticipantGroup(parsed)) {
+          throw new Error('Before publishing: a children registration form must contain a repeatable participant group.')
         }
       }
       return data
@@ -144,7 +151,7 @@ export const Forms: CollectionConfig = {
       name: 'schoolRegistration',
       type: 'checkbox',
       defaultValue: false,
-      label: 'Sunday school registration form',
+      label: 'Program registration form',
       admin: {
         position: 'sidebar',
         description: 'Submissions create an unplaced student you can place into a class.',
@@ -360,16 +367,47 @@ export const Forms: CollectionConfig = {
             { label: 'Suggested amounts', value: 'suggested' },
           ],
         },
+        // Persisted in cents (hidden); admins enter dollars via the virtual `price`.
         {
           name: 'priceCents',
           type: 'number',
-          admin: { condition: (_, sib) => sib?.mode === 'fixed' && sib?.enabled },
+          admin: { hidden: true },
+        },
+        {
+          name: 'price',
+          type: 'number',
+          virtual: true,
+          min: 0,
+          label: 'Price',
+          admin: {
+            condition: (_, sib) => sib?.mode === 'fixed' && sib?.enabled,
+            description: 'Dollars, e.g. enter 25 for $25.',
+            step: 1,
+          },
+          hooks: {
+            afterRead: [({ siblingData }) => { const c = (siblingData as { priceCents?: number | null })?.priceCents; return typeof c === 'number' ? c / 100 : undefined }],
+            beforeValidate: [({ value, siblingData }) => { if (typeof value === 'number' && Number.isFinite(value)) (siblingData as { priceCents?: number }).priceCents = Math.round(value * 100); return value }],
+          },
         },
         {
           name: 'suggestedAmountsCents',
           type: 'array',
+          labels: { singular: 'Suggested amount', plural: 'Suggested amounts' },
           fields: [
-            { name: 'amount', type: 'number', required: true, min: 0 },
+            { name: 'amount', type: 'number', min: 0, admin: { hidden: true } },
+            {
+              name: 'dollars',
+              type: 'number',
+              virtual: true,
+              required: true,
+              min: 0,
+              label: 'Amount',
+              admin: { description: 'Dollars', step: 1 },
+              hooks: {
+                afterRead: [({ siblingData }) => { const c = (siblingData as { amount?: number | null })?.amount; return typeof c === 'number' ? c / 100 : undefined }],
+                beforeValidate: [({ value, siblingData }) => { if (typeof value === 'number' && Number.isFinite(value)) (siblingData as { amount?: number }).amount = Math.round(value * 100); return value }],
+              },
+            },
           ],
           admin: { condition: (_, sib) => sib?.mode === 'suggested' && sib?.enabled },
         },
