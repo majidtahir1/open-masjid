@@ -13,12 +13,14 @@ import { PublicFormFields } from '@/components/PublicFormFields'
 import { PublicFormProgress } from '@/components/PublicFormProgress'
 import { PublicFormSuccess } from '@/components/PublicFormSuccess'
 import { PublicFormPaymentBlock } from '@/components/PublicFormPaymentBlock'
+import { PublicFormTuitionSummary, type SummaryParticipant } from '@/components/PublicFormTuitionSummary'
 import RichText from '@/components/RichText'
 import { flattenStepsForOnePerPage } from '@/lib/form-appearance'
+import type { DiscountTier } from '@/lib/tuition-pricing'
 import type { Form } from '@/payload-types'
-import type { FormSchema } from '@/lib/form-schema'
+import type { FormSchema, Field } from '@/lib/form-schema'
 import type { Appearance } from '@/lib/form-appearance'
-import type { ProgramClass } from './page'
+import type { ProgramClass, ProgramPricing } from './page'
 
 /** Augmented Form type that includes the appearance group added in V2. */
 type FormWithAppearance = Form & { appearance?: Appearance | null }
@@ -28,9 +30,29 @@ interface Props {
   closed: boolean
   /** Active classes of the bound program — options for class-select fields. */
   programClasses?: ProgramClass[]
+  /** Program pricing model + per-program tuition; null for non-registration forms. */
+  programPricing?: ProgramPricing | null
 }
 
-export function PublicFormClient({ form, closed, programClasses = [] }: Props) {
+/** First repeatable-group field in the schema (the participant group), if any. */
+function findParticipantGroup(schema: FormSchema): Extract<Field, { type: 'repeatable-group' }> | null {
+  for (const step of schema.steps) {
+    for (const f of step.fields) {
+      if (f.type === 'repeatable-group') return f
+    }
+  }
+  return null
+}
+
+/** Name of the first class-select field within a list of fields, if any. */
+function classSelectName(fields: readonly Field[]): string | null {
+  for (const f of fields) {
+    if (f.type === 'class-select' && 'name' in f) return f.name
+  }
+  return null
+}
+
+export function PublicFormClient({ form, closed, programClasses = [], programPricing = null }: Props) {
   const schema = form.schema as FormSchema
   const formExt = form as FormWithAppearance
 
@@ -319,6 +341,43 @@ export function PublicFormClient({ form, closed, programClasses = [] }: Props) {
   const suggestedAmountsCents: number[] =
     form.payment?.suggestedAmountsCents?.map((row) => row.amount).filter((a): a is number => typeof a === 'number') ?? []
 
+  // ─── Registration tuition summary ────────────────────────────────────────────
+  // A paid registration form shows a live tuition breakdown (program price ×
+  // participants − sibling discounts) instead of the legacy donation block.
+  const isRegistration = form.schoolRegistration === true
+  const paymentModel = form.payment?.paymentModel ?? 'free'
+  const showTuition =
+    isRegistration && (paymentModel === 'monthly' || paymentModel === 'one-time') && programPricing !== null
+
+  let tuitionParticipants: SummaryParticipant[] = []
+  if (showTuition) {
+    const participantModel = form.registration?.participantModel ?? 'self'
+    if (participantModel === 'children') {
+      const group = findParticipantGroup(effectiveSchema)
+      const groupName = group?.name
+      const classKey = group ? classSelectName(group.fields) : null
+      const items = groupName && Array.isArray(values[groupName]) ? (values[groupName] as Record<string, unknown>[]) : []
+      tuitionParticipants = items.map((it, i) => {
+        const first = String(it.student_first_name ?? '').trim()
+        const last = String(it.student_last_name ?? '').trim()
+        const name = `${first} ${last}`.trim()
+        const classVal = classKey ? it[classKey] : null
+        return { label: name || `Child ${i + 1}`, classId: classVal != null ? String(classVal) : null }
+      })
+    } else {
+      const classKey = classSelectName(effectiveSchema.steps.flatMap((s) => s.fields))
+      const first = String(values.student_first_name ?? '').trim()
+      const last = String(values.student_last_name ?? '').trim()
+      const classVal = classKey ? values[classKey] : null
+      tuitionParticipants = [{ label: `${first} ${last}`.trim() || 'Registration', classId: classVal != null ? String(classVal) : null }]
+    }
+  }
+
+  const classPrices: Record<string, number> = Object.fromEntries(
+    programClasses.map((c) => [String(c.id), c.tuitionCents ?? 0]),
+  )
+  const discountTiers = (form.payment?.multiChildDiscount ?? []) as DiscountTier[]
+
   // Determine if current step is a single-field text-like step (for Enter hint)
   const showEnterHint =
     displayMode === 'one-per-page' &&
@@ -358,8 +417,22 @@ export function PublicFormClient({ form, closed, programClasses = [] }: Props) {
         <div className="om-pf-enter-hint" aria-hidden="true">Press Enter ↵ to continue</div>
       )}
 
-      {/* Payment block — rendered on the last step only when payment is enabled */}
-      {isLast && form.payment?.enabled && (
+      {/* Paid registration form: live tuition summary (program price, sibling
+          discounts) — the actual charge is recomputed server-side at submit. */}
+      {isLast && showTuition && programPricing && (
+        <PublicFormTuitionSummary
+          paymentModel={paymentModel as 'monthly' | 'one-time'}
+          pricingModel={programPricing.pricingModel}
+          programTuitionCents={programPricing.tuitionCents ?? 0}
+          classPrices={classPrices}
+          tiers={discountTiers}
+          participants={tuitionParticipants}
+          currency={form.payment?.currency ?? undefined}
+        />
+      )}
+
+      {/* Legacy donation/payment block — non-registration forms only. */}
+      {isLast && !isRegistration && form.payment?.enabled && (
         <PublicFormPaymentBlock
           mode={form.payment.mode ?? 'fixed'}
           priceCents={form.payment.priceCents ?? undefined}

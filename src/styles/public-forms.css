@@ -204,6 +204,95 @@
   line-height: 1.45;
 }
 
+/* ─── Repeatable group (e.g. one card per child) ─────────────────────────── */
+
+.om-pf-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.om-pf-group-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* Each item is a bordered card so it reads as one self-contained child. */
+.om-pf-group-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: var(--pf-border);
+  border-radius: var(--pf-radius-card);
+  padding: 18px 20px;
+  background: #fcfcfd;
+}
+
+/* Header row: item label on the left, trash icon on the right, separated from
+   the fields below by a hairline rule. */
+.om-pf-group-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eceef1;
+}
+
+.om-pf-group-item-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.om-pf-group-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 5px;
+  margin: -5px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  font-family: inherit;
+}
+
+.om-pf-group-remove:hover {
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+.om-pf-group-remove svg {
+  display: block;
+}
+
+.om-pf-group-add {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--pf-brand);
+  border: 1.5px dashed color-mix(in srgb, var(--pf-brand) 40%, #cbd5e1);
+  border-radius: var(--pf-radius-input);
+  padding: 10px 18px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+
+.om-pf-group-add:hover {
+  background: var(--pf-brand-tint);
+  border-color: var(--pf-brand);
+}
+
 /* ─── Input controls ─────────────────────────────────────────────────────── */
 
 .om-pf-card input[type='text'],
@@ -505,6 +594,108 @@
 
 .om-pf-pay-custom input[type='number'] {
   margin-top: 4px;
+}
+
+/* ─── Tuition summary (paid registration forms) ──────────────────────────── */
+
+.om-pf-tuition {
+  background: #f7f8fa;
+  border: var(--pf-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.om-pf-tuition-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.om-pf-tuition-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.om-pf-tuition-period {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.om-pf-tuition-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.om-pf-tuition-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9375rem;
+  color: #374151;
+}
+
+.om-pf-tuition-line-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.om-pf-tuition-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--pf-brand);
+  background: var(--pf-brand-tint);
+  border: 1px solid color-mix(in srgb, var(--pf-brand) 25%, transparent);
+  border-radius: 99px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.om-pf-tuition-line-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.om-pf-tuition-strike {
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-size: 0.8125rem;
+}
+
+.om-pf-tuition-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #e2e5ea;
+  padding-top: 12px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+.om-pf-tuition-note {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.45;
 }
 
 /* ─── Success card ───────────────────────────────────────────────────────── */

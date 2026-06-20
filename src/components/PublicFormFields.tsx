@@ -63,7 +63,7 @@ export function PublicFormFields({
         // fields, with per-item Remove and a single Add-another button.
         if (f.type === 'repeatable-group') {
           const items = (Array.isArray(values[f.name]) ? (values[f.name] as Record<string, unknown>[]) : [{}])
-          const itemLabel = f.itemLabel ?? 'Item'
+          const itemLabel = (f.itemLabel && f.itemLabel.trim()) || 'Item'
           const min = f.min ?? 0
           const max = f.max
           const canRemove = items.length > min
@@ -82,8 +82,25 @@ export function PublicFormFields({
                         type="button"
                         className="om-pf-group-remove"
                         onClick={() => onGroupRemove?.(f.name, index)}
+                        aria-label={`Remove ${itemLabel.toLowerCase()} ${index + 1}`}
+                        title={`Remove ${itemLabel.toLowerCase()} ${index + 1}`}
                       >
-                        Remove
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
                       </button>
                     )}
                   </div>

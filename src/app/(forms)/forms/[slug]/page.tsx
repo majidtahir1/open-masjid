@@ -39,6 +39,13 @@ export interface ProgramClass {
   tuitionCents: number | null
 }
 
+/** Program-level pricing the public form needs to show the tuition summary. */
+export interface ProgramPricing {
+  pricingModel: 'per-program' | 'per-class'
+  /** Per-program monthly tuition (cents). Ignored when pricingModel is per-class. */
+  tuitionCents: number | null
+}
+
 export default async function FormPage({
   params,
 }: {
@@ -91,12 +98,27 @@ export default async function FormPage({
   // the public form can render the per-participant class selector. Non-
   // registration forms (no schoolRegistration / no program) get an empty list.
   let programClasses: ProgramClass[] = []
+  let programPricing: ProgramPricing | null = null
   const programRaw = form.registrationProgram
   const programId =
     programRaw && typeof programRaw === 'object' && 'id' in programRaw
       ? programRaw.id
       : (programRaw as string | number | null)
   if (form.schoolRegistration === true && programId) {
+    // Load the program's pricing model + per-program tuition so the public
+    // form can show the tuition summary (the actual charge is recomputed
+    // server-side at submit; this is the display-only mirror).
+    const program = (await payload.findByID({
+      collection: 'terms',
+      id: programId,
+      overrideAccess: true,
+    }).catch(() => null)) as { pricingModel?: string | null; tuitionCents?: number | null } | null
+    if (program) {
+      programPricing = {
+        pricingModel: program.pricingModel === 'per-class' ? 'per-class' : 'per-program',
+        tuitionCents: program.tuitionCents ?? null,
+      }
+    }
     const classesResult = await payload.find({
       collection: 'school-classes',
       where: {
@@ -139,7 +161,12 @@ export default async function FormPage({
             <RichText data={form.description as never} className="om-pf-description" />
           ) : null}
         </header>
-        <PublicFormClient form={form as any} closed={closed} programClasses={programClasses} />
+        <PublicFormClient
+          form={form as any}
+          closed={closed}
+          programClasses={programClasses}
+          programPricing={programPricing}
+        />
       </div>
     </section>
   )
