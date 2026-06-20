@@ -11,6 +11,7 @@ import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateSchema } from '../lib/form-schema'
 import { applyRenames, detectFieldRenames } from '../lib/form-schema-migrate'
 import { hasParticipantGroup, hasRequiredRegistrationFields } from '../lib/registration-fields'
+import { cascadeDeleteFormSubmissions } from '../hooks/cascadeDeleteFormSubmissions'
 
 const slugify = (v: string): string =>
   v.toLowerCase().trim()
@@ -35,6 +36,14 @@ export const Forms: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'lastSubmission', 'updatedAt'],
     components: {
+      // Hides the list-view row-selection column so there's no bulk delete;
+      // form deletion is funneled through the form page's count-aware dialog.
+      beforeListTable: ['/src/admin/forms/HideFormsBulkSelect#default'],
+      edit: {
+        // Replaces the native delete with a count-aware confirmation (warns how
+        // many submissions cascade-delete with the form). Hides #action-delete.
+        editMenuItems: ['/src/admin/forms/DeleteFormMenuItem#default'],
+      },
       views: {
         edit: {
           // Spreadsheet of this form's submissions.
@@ -58,6 +67,7 @@ export const Forms: CollectionConfig = {
     delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
+    beforeDelete: [cascadeDeleteFormSubmissions],
     beforeChange: [setTenantFromUser, async ({ data, originalDoc }) => {
       if (data?.schema) {
         const r = validateSchema(data.schema)
