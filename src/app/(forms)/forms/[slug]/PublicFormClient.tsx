@@ -345,7 +345,7 @@ export function PublicFormClient({ form, closed, programClasses = [], programPri
   // A paid registration form shows a live tuition breakdown (program price ×
   // participants − sibling discounts) instead of the legacy donation block.
   const isRegistration = form.schoolRegistration === true
-  const paymentModel = form.payment?.paymentModel ?? 'free'
+  const paymentModel = programPricing?.paymentModel ?? 'free'
   const showTuition =
     isRegistration && (paymentModel === 'monthly' || paymentModel === 'one-time') && programPricing !== null
 
@@ -376,7 +376,7 @@ export function PublicFormClient({ form, closed, programClasses = [], programPri
   const classPrices: Record<string, number> = Object.fromEntries(
     programClasses.map((c) => [String(c.id), c.tuitionCents ?? 0]),
   )
-  const discountTiers = (form.payment?.multiChildDiscount ?? []) as DiscountTier[]
+  const discountTiers = (programPricing?.tiers ?? []) as DiscountTier[]
 
   // Determine if current step is a single-field text-like step (for Enter hint)
   const showEnterHint =
@@ -427,7 +427,7 @@ export function PublicFormClient({ form, closed, programClasses = [], programPri
           classPrices={classPrices}
           tiers={discountTiers}
           participants={tuitionParticipants}
-          currency={form.payment?.currency ?? undefined}
+          currency={programPricing.currency}
         />
       )}
 

@@ -37,6 +37,8 @@ async function resolveRegistrationPricing(opts: {
   totalCents: number
   programId: string | number | null
   programName: string
+  paymentModel: 'free' | 'one-time' | 'monthly'
+  currency: string
 } | null> {
   const { payload, tenantId, form, submissionData } = opts
 
@@ -91,7 +93,8 @@ async function resolveRegistrationPricing(opts: {
   const participants = participantsFromSubmission(submissionData, groupKey)
 
   const base = participantPricesCents(participants, ctx)
-  const tiers = (form.payment?.multiChildDiscount ?? []) as DiscountTier[]
+  // Sibling-discount tiers + cadence + currency are program-level pricing policy.
+  const tiers = (program.multiChildDiscount ?? []) as DiscountTier[]
   const discountedCents = computeSiblingDiscount(base, tiers)
   const totalCents = discountedCents.reduce((sum, c) => sum + c, 0)
 
@@ -100,6 +103,8 @@ async function resolveRegistrationPricing(opts: {
     totalCents,
     programId,
     programName: form.title ?? 'Program',
+    paymentModel: (program.paymentModel ?? 'free') as 'free' | 'one-time' | 'monthly',
+    currency: (program.currency as string) ?? 'usd',
   }
 }
 
@@ -173,21 +178,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   const f = form as any
   const submissionData = ((submission as any).data ?? {}) as Record<string, unknown>
-  const currency = f.payment?.currency ?? 'usd'
-  const paymentModel = f.payment?.paymentModel
   const isRegistration = f.schoolRegistration === true
+
+  // Registration forms: pricing, cadence (paymentModel) and currency all come
+  // from the bound program — resolve once. Non-registration forms keep the
+  // form-level currency and the legacy fixed/selected amount path.
+  const regPricing = isRegistration
+    ? await resolveRegistrationPricing({ payload, tenantId: tenant.id, form: f, submissionData })
+    : null
+  const paymentModel = isRegistration ? (regPricing?.paymentModel ?? 'free') : undefined
+  const currency = isRegistration ? (regPricing?.currency ?? 'usd') : (f.payment?.currency ?? 'usd')
 
   // ── Monthly recurring tuition (school registration) ───────────────────────
   // One family subscription (one Stripe customer per guardian email) with one
   // recurring line item per child at the sibling-discounted amount. Students +
   // the family record are created by the tuition webhook after payment.
   if (isRegistration && paymentModel === 'monthly') {
-    const pricing = await resolveRegistrationPricing({
-      payload,
-      tenantId: tenant.id,
-      form: f,
-      submissionData,
-    })
+    const pricing = regPricing
     if (!pricing || pricing.discountedCents.length === 0) {
       payload.logger.error(
         { formId: form.id, submissionId: result.submissionId },
@@ -235,12 +242,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   // selected/fixed amount path is preserved unchanged.
   let amount: number
   if (isRegistration && paymentModel === 'one-time') {
-    const pricing = await resolveRegistrationPricing({
-      payload,
-      tenantId: tenant.id,
-      form: f,
-      submissionData,
-    })
+    const pricing = regPricing
     if (!pricing) {
       payload.logger.error(
         { formId: form.id, submissionId: result.submissionId },

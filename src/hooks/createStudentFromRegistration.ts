@@ -298,10 +298,20 @@ export const createStudentFromRegistration: CollectionAfterChangeHook = async ({
   const form = await loadRegistrationForm(req.payload, formId, req)
   if (form?.schoolRegistration !== true) return doc
 
-  // Paid programs (one-time | monthly) defer student creation to the payment
-  // webhook — students are materialized only after payment succeeds. Free (or
-  // unset) programs materialize immediately at submit.
-  const paymentModel = form.payment?.paymentModel
+  // Pricing/cadence live on the bound program now. Paid programs
+  // (one-time | monthly) defer student creation to the payment webhook —
+  // students are materialized only after payment succeeds. Free (or unset)
+  // programs materialize immediately at submit.
+  const progRaw = form.registrationProgram
+  const programId =
+    progRaw == null ? null : typeof progRaw === 'object' ? (progRaw as { id: string | number }).id : (progRaw as string | number)
+  let paymentModel: string | undefined
+  if (programId != null) {
+    const program = await req.payload
+      .findByID({ collection: 'terms', id: programId, overrideAccess: true, req })
+      .catch(() => null)
+    paymentModel = (program as { paymentModel?: string } | null)?.paymentModel
+  }
   if (paymentModel === 'one-time' || paymentModel === 'monthly') return doc
 
   await materializeStudentsFromSubmission(req.payload, doc, { req })

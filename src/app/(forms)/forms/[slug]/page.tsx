@@ -44,6 +44,11 @@ export interface ProgramPricing {
   pricingModel: 'per-program' | 'per-class'
   /** Per-program monthly tuition (cents). Ignored when pricingModel is per-class. */
   tuitionCents: number | null
+  /** Billing cadence — drives whether/how the tuition summary renders. */
+  paymentModel: 'free' | 'one-time' | 'monthly'
+  /** Sibling-discount tiers (rank → percent off). */
+  tiers: { rank: number; percentOff: number }[]
+  currency: string
 }
 
 export default async function FormPage({
@@ -112,11 +117,25 @@ export default async function FormPage({
       collection: 'terms',
       id: programId,
       overrideAccess: true,
-    }).catch(() => null)) as { pricingModel?: string | null; tuitionCents?: number | null } | null
+    }).catch(() => null)) as {
+      pricingModel?: string | null
+      tuitionCents?: number | null
+      paymentModel?: string | null
+      multiChildDiscount?: { rank?: number | null; percentOff?: number | null }[] | null
+      currency?: string | null
+    } | null
     if (program) {
       programPricing = {
         pricingModel: program.pricingModel === 'per-class' ? 'per-class' : 'per-program',
         tuitionCents: program.tuitionCents ?? null,
+        paymentModel:
+          program.paymentModel === 'monthly' || program.paymentModel === 'one-time'
+            ? program.paymentModel
+            : 'free',
+        tiers: Array.isArray(program.multiChildDiscount)
+          ? program.multiChildDiscount.map((t) => ({ rank: Number(t.rank), percentOff: Number(t.percentOff) }))
+          : [],
+        currency: program.currency ?? 'usd',
       }
     }
     const classesResult = await payload.find({

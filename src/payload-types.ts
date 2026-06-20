@@ -864,17 +864,6 @@ export interface Form {
   };
   payment?: {
     enabled?: boolean | null;
-    paymentModel?: ('free' | 'one-time' | 'monthly') | null;
-    /**
-     * Percentage off by child rank. e.g. rank 2 = 25 (2nd child 25% off).
-     */
-    multiChildDiscount?:
-      | {
-          rank: number;
-          percentOff: number;
-          id?: string | null;
-        }[]
-      | null;
     mode?: ('fixed' | 'suggested') | null;
     /**
      * Dollars, e.g. enter 25 for $25.
@@ -934,6 +923,21 @@ export interface Term {
    * Dollars per month for the whole program (per-program pricing). E.g. enter 50 for $50/mo.
    */
   tuitionCents?: number | null;
+  /**
+   * Billing cadence for registration forms bound to this program.
+   */
+  paymentModel?: ('free' | 'one-time' | 'monthly') | null;
+  /**
+   * Percentage off by child rank, e.g. rank 2 = 25 (2nd child 25% off). Most expensive child pays full.
+   */
+  multiChildDiscount?:
+    | {
+        rank: number;
+        percentOff: number;
+        id?: string | null;
+      }[]
+    | null;
+  currency?: ('usd' | 'cad' | 'gbp') | null;
   status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
@@ -2803,14 +2807,6 @@ export interface FormsSelect<T extends boolean = true> {
     | T
     | {
         enabled?: T;
-        paymentModel?: T;
-        multiChildDiscount?:
-          | T
-          | {
-              rank?: T;
-              percentOff?: T;
-              id?: T;
-            };
         mode?: T;
         priceCents?: T;
         suggestedAmountsCents?:
@@ -2956,6 +2952,15 @@ export interface TermsSelect<T extends boolean = true> {
   meetingDays?: T;
   pricingModel?: T;
   tuitionCents?: T;
+  paymentModel?: T;
+  multiChildDiscount?:
+    | T
+    | {
+        rank?: T;
+        percentOff?: T;
+        id?: T;
+      };
+  currency?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

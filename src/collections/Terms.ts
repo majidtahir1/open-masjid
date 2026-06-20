@@ -85,6 +85,42 @@ export const Terms: CollectionConfig = {
       },
     },
     {
+      name: 'paymentModel',
+      type: 'select',
+      defaultValue: 'free',
+      label: 'How registrants pay',
+      options: [
+        { label: 'Free', value: 'free' },
+        { label: 'One-time', value: 'one-time' },
+        { label: 'Monthly recurring', value: 'monthly' },
+      ],
+      admin: { description: 'Billing cadence for registration forms bound to this program.' },
+    },
+    {
+      name: 'multiChildDiscount',
+      type: 'array',
+      labels: { singular: 'Discount tier', plural: 'Discount tiers' },
+      admin: {
+        description: 'Percentage off by child rank, e.g. rank 2 = 25 (2nd child 25% off). Most expensive child pays full.',
+        condition: (_, sib) => sib?.paymentModel === 'monthly' || sib?.paymentModel === 'one-time',
+      },
+      fields: [
+        { name: 'rank', type: 'number', required: true, min: 2 },
+        { name: 'percentOff', type: 'number', required: true, min: 0, max: 100 },
+      ],
+    },
+    {
+      name: 'currency',
+      type: 'select',
+      defaultValue: 'usd',
+      options: [
+        { label: 'USD', value: 'usd' },
+        { label: 'CAD', value: 'cad' },
+        { label: 'GBP', value: 'gbp' },
+      ],
+      admin: { condition: (_, sib) => sib?.paymentModel === 'monthly' || sib?.paymentModel === 'one-time' },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

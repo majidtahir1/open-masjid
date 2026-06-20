@@ -31,7 +31,7 @@ const StepClasses: React.FC<{ programId: string | null; onBack: () => void; onNe
 
   useEffect(() => {
     if (!programId) return
-    api(`/terms/${programId}?depth=0`).then((t) => setPerClass(t?.pricingModel === 'per-class')).catch(() => {})
+    api(`/terms/${programId}?depth=0`).then((t) => setPerClass(t?.pricingModel === 'per-class' && t?.paymentModel !== 'free')).catch(() => {})
     reload(programId).catch(() => {})
   }, [programId, reload])
 
