@@ -14,6 +14,7 @@ import {
   formatSubmittedAt,
   type SubmissionRowData,
 } from '@/lib/submissions-table'
+import { formatCents } from '@/lib/money'
 
 export interface SubmissionDrawerProps {
   row: SubmissionRowData
@@ -23,13 +24,6 @@ export interface SubmissionDrawerProps {
   onClose: () => void
   /** Called after a successful delete so the parent can drop the row. */
   onDeleted: (id: string | number) => void
-}
-
-function formatAmount(cents: number, currency: string | null | undefined): string {
-  return new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency: (currency ?? 'usd').toUpperCase(),
-  }).format(cents / 100)
 }
 
 export default function SubmissionDrawer({
@@ -159,7 +153,7 @@ export default function SubmissionDrawer({
             <div className="svd-payment">
               {row.amountCents != null && (
                 <div className="svd-payment__amount">
-                  {formatAmount(row.amountCents, row.currency)}
+                  {formatCents(row.amountCents, row.currency)}
                 </div>
               )}
               <div>Status: {row.paymentStatus.replace('_', ' ')}</div>

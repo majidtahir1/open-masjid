@@ -188,14 +188,21 @@ function validateItem(
   }
 }
 
-export function validateSubmission(
-  schema: FormSchema,
+/**
+ * Validate a single list of fields (one step, or the whole form) against a raw
+ * value map. Returns cleaned values and field-keyed error messages. Shared by
+ * the server submission pass (`validateSubmission`) and the client's per-step
+ * "Continue" gate so both enforce the same rules (format, min/max, options) —
+ * not just emptiness.
+ */
+export function validateFields(
+  fields: readonly Field[],
   raw: Record<string, unknown>,
-): SubmissionOk | SubmissionErr {
+): { out: Record<string, unknown>; errors: Record<string, string> } {
   const errors: Record<string, string> = {}
   const out: Record<string, unknown> = {}
 
-  for (const step of schema.steps) for (const f of step.fields) {
+  for (const f of fields) {
     if (f.type === 'page-break' || f.type === 'section') continue
 
     if (f.type === 'repeatable-group') {
@@ -221,6 +228,22 @@ export function validateSubmission(
     }
 
     validateItem([f], raw, out, errors)
+  }
+
+  return { out, errors }
+}
+
+export function validateSubmission(
+  schema: FormSchema,
+  raw: Record<string, unknown>,
+): SubmissionOk | SubmissionErr {
+  const errors: Record<string, string> = {}
+  const out: Record<string, unknown> = {}
+
+  for (const step of schema.steps) {
+    const r = validateFields(step.fields, raw)
+    Object.assign(out, r.out)
+    Object.assign(errors, r.errors)
   }
 
   if (Object.keys(errors).length) return { ok: false, errors }

@@ -12,6 +12,7 @@ import {
   type DiscountTier,
   type PricingContext,
 } from '@/lib/tuition-pricing'
+import { formatCents } from '@/lib/money'
 
 export interface SummaryParticipant {
   /** Display name, e.g. the child's first+last name (falls back to "Child 1"). */
@@ -28,13 +29,6 @@ interface Props {
   tiers: DiscountTier[]
   participants: SummaryParticipant[]
   currency?: string
-}
-
-function formatMoney(cents: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(cents / 100)
 }
 
 export function PublicFormTuitionSummary({
@@ -77,10 +71,10 @@ export function PublicFormTuitionSummary({
               </span>
               <span className="om-pf-tuition-line-amount">
                 {hasDiscount && (
-                  <span className="om-pf-tuition-strike">{formatMoney(full, currency)}</span>
+                  <span className="om-pf-tuition-strike">{formatCents(full, currency)}</span>
                 )}
                 <span>
-                  {formatMoney(net, currency)}
+                  {formatCents(net, currency)}
                   {suffix}
                 </span>
               </span>
@@ -92,7 +86,7 @@ export function PublicFormTuitionSummary({
       <div className="om-pf-tuition-total">
         <span>Total</span>
         <span>
-          {formatMoney(total, currency)}
+          {formatCents(total, currency)}
           {suffix}
         </span>
       </div>

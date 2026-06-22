@@ -18,6 +18,7 @@ import RichText from '@/components/RichText'
 import { flattenStepsForOnePerPage } from '@/lib/form-appearance'
 import type { DiscountTier } from '@/lib/tuition-pricing'
 import type { Form } from '@/payload-types'
+import { validateFields } from '@/lib/form-schema'
 import type { FormSchema, Field } from '@/lib/form-schema'
 import type { Appearance } from '@/lib/form-appearance'
 import type { ProgramClass, ProgramPricing } from './page'
@@ -121,12 +122,6 @@ export function PublicFormClient({ form, closed, programClasses = [], programPri
     }
   }
 
-  /** Read the current items array for a group (always returns a fresh array reference for safe mutation). */
-  function groupItems(groupName: string): Record<string, unknown>[] {
-    const cur = values[groupName]
-    return Array.isArray(cur) ? (cur as Record<string, unknown>[]) : [{}]
-  }
-
   /** Edit one child field of one item; immutable — replaces the item and the array. */
   function onGroupChange(groupName: string, index: number, childName: string, val: unknown) {
     setValues((prev) => {
@@ -168,42 +163,10 @@ export function PublicFormClient({ form, closed, programClasses = [], programPri
   }
 
   function validateStep(): boolean {
-    const stepErrors: Record<string, string> = {}
-    for (const f of currentFields) {
-      // section is purely visual.
-      if (f.type === 'section') continue
-      // repeatable-group: validate item count >= min and each item's required children.
-      if (f.type === 'repeatable-group') {
-        const items = groupItems(f.name)
-        const min = f.min ?? 0
-        if (items.length < min) {
-          stepErrors[f.name] = `Add at least ${min} ${(f.itemLabel ?? 'item').toLowerCase()}${min === 1 ? '' : 's'}`
-        }
-        items.forEach((item, index) => {
-          for (const child of f.fields) {
-            const cv = item?.[child.name]
-            const childEmpty =
-              cv === undefined ||
-              cv === null ||
-              cv === '' ||
-              (Array.isArray(cv) && (cv as unknown[]).length === 0)
-            if (child.required && childEmpty) {
-              stepErrors[`${f.name}.${index}.${child.name}`] = 'Required'
-            }
-          }
-        })
-        continue
-      }
-      const val = values[f.name]
-      const isEmpty =
-        val === undefined ||
-        val === null ||
-        val === '' ||
-        (Array.isArray(val) && (val as unknown[]).length === 0)
-      if (f.required && isEmpty) {
-        stepErrors[f.name] = 'Required'
-      }
-    }
+    // Reuse the same field validation the server runs at submit, so "Continue"
+    // catches format/min/option errors (e.g. a malformed email) on the current
+    // step instead of letting them slip through to the final POST.
+    const { errors: stepErrors } = validateFields(currentFields, values)
     setErrors((prev) => ({ ...prev, ...stepErrors }))
 
     // Move focus to the first errored field so keyboard/SR users land there

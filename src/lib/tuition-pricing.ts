@@ -24,3 +24,16 @@ export function participantPricesCents(participants: Record<string, unknown>[], 
   return participants.map((p) =>
     ctx.pricingModel === 'per-class' ? (ctx.classPrices[String(p.class)] ?? 0) : ctx.programTuitionCents)
 }
+
+/**
+ * Human label per participant — the student's name, falling back to "Child N"
+ * (1-based) when no name was given. Mirrors the public form's tuition summary so
+ * the Stripe checkout line items read the same way the registrant just saw.
+ */
+export function participantLabels(participants: Record<string, unknown>[]): string[] {
+  return participants.map((p, i) => {
+    const first = String(p.student_first_name ?? '').trim()
+    const last = String(p.student_last_name ?? '').trim()
+    return `${first} ${last}`.trim() || `Child ${i + 1}`
+  })
+}

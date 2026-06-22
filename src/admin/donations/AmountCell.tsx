@@ -1,4 +1,5 @@
 import type { DefaultServerCellComponentProps } from 'payload'
+import { formatCents } from '@/lib/money'
 
 /**
  * List-view cell for `donations.amount`. The column stores cents (Stripe
@@ -11,9 +12,6 @@ export default function AmountCell({ cellData, rowData }: DefaultServerCellCompo
     typeof (rowData as { currency?: unknown })?.currency === 'string'
       ? ((rowData as { currency: string }).currency).toUpperCase()
       : 'USD'
-  const formatted = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-  }).format(cents / 100)
+  const formatted = formatCents(cents, currency)
   return <span>{formatted}</span>
 }

@@ -41,6 +41,14 @@ describe('authorizeInvite', () => {
   it('admin/school_admin with no tenant is rejected', () => {
     expect(authorizeInvite({ actingRole: 'admin', actingTenant: null }, { role: 'teacher', tenant: 1 }).ok).toBe(false)
   })
+  it('platformOwner inviting a tenant-scoped role with no tenant is a 400', () => {
+    for (const role of ['admin', 'school_admin', 'staff', 'teacher', 'kioskManager'] as const) {
+      const r = authorizeInvite({ actingRole: 'platformOwner', actingTenant: null }, { role, tenant: null })
+      if (r.ok) throw new Error('expected ok:false')
+      expect(r.ok).toBe(false)
+      expect(r.status).toBe(400)
+    }
+  })
   it('missing role is a 400', () => {
     const r = authorizeInvite({ actingRole: 'platformOwner', actingTenant: null }, { role: undefined, tenant: 1 })
     if (r.ok) throw new Error('expected ok:false')

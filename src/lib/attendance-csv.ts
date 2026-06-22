@@ -1,10 +1,7 @@
-const idOf = (v: unknown): string | number =>
-  typeof v === 'object' && v !== null && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
-const day = (d: unknown) => String(d ?? '').slice(0, 10)
+import { csvCell } from '@/lib/csv'
+import { relId as idOf } from '@/lib/relationship-id'
 
-function csvCell(s: string): string {
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
-}
+const day = (d: unknown) => String(d ?? '').slice(0, 10)
 
 export interface CsvStudent { id: string | number; name: string }
 export interface CsvSession { id: string | number; date: string }

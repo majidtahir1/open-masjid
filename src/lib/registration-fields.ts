@@ -33,6 +33,34 @@ export function hasParticipantGroup(schema: FormSchema): boolean {
   return groups.length === 1
 }
 
+/** Loose schema shape — callers pass Payload form docs whose `schema` is untyped. */
+type SchemaLike = {
+  steps?: Array<{
+    fields?: Array<{ name?: string; type?: string; fields?: Array<{ name?: string; type?: string }> }>
+  }>
+} | null | undefined
+
+/**
+ * Name of the per-participant `class-select` field, resolved by TYPE (not a
+ * hardcoded name), searching both top-level fields and repeatable-group
+ * children. Returns null when the form has no class selector. Pricing and
+ * enrollment must read each participant's chosen class via this name so an
+ * admin renaming the field never silently breaks per-class tuition.
+ */
+export function classSelectFieldName(schema: SchemaLike): string | null {
+  for (const step of schema?.steps ?? []) {
+    for (const f of step.fields ?? []) {
+      if (f?.type === 'class-select' && f.name) return f.name
+      if (f?.type === 'repeatable-group') {
+        for (const child of f.fields ?? []) {
+          if (child?.type === 'class-select' && child.name) return child.name
+        }
+      }
+    }
+  }
+  return null
+}
+
 /**
  * Return the schema with both required student-name fields present, prepended
  * to the first step. Idempotent: returns the SAME reference when nothing is

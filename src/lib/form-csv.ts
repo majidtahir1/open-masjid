@@ -1,12 +1,12 @@
 import type { FormSchema } from './form-schema'
+import { csvCell } from '@/lib/csv'
 
 const escape = (v: unknown): string => {
   if (v === null || v === undefined || v === '') return ''
   if (Array.isArray(v)) return escape(v.join('; '))
   if (typeof v === 'boolean') return v ? 'yes' : ''
   const s = String(v)
-  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
-  return s
+  return csvCell(s)
 }
 
 // A CSV column resolves a single cell from a submission's flat or nested data.

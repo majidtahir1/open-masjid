@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { createStudentFromRegistration, mapRegistrationFields } from '@/hooks/createStudentFromRegistration'
+import {
+  createStudentFromRegistration,
+  materializeStudentsFromSubmission,
+} from '@/hooks/createStudentFromRegistration'
 
 /**
  * Mock payload for the afterChange hook. `findByID` dispatches by collection:
@@ -68,44 +71,91 @@ describe('createStudentFromRegistration afterChange', () => {
   })
 })
 
-describe('mapRegistrationFields', () => {
-  it('maps snake_case fields to Student data', () => {
-    const data = {
-      student_first_name: 'Aisha',
-      student_last_name: 'Khan',
-      student_age: '7',
-      guardian_name: 'Sara Khan',
-      guardian_phone: '555-1212',
-      guardian_email: 'sara@example.com',
-      allergies: 'peanuts',
-    }
-    expect(mapRegistrationFields(data, 9)).toEqual({
+describe('materializeStudentsFromSubmission — class enrollment', () => {
+  function makeMatPayload(form: Record<string, unknown>, classes: { id: number }[]) {
+    const findByID = vi.fn(async () => form)
+    const find = vi.fn(async (a: any) =>
+      a?.collection === 'school-classes' ? { docs: classes } : { docs: [] },
+    )
+    let nextStudentId = 100
+    const create = vi.fn(async (a: any) => ({
+      id: a.collection === 'students' ? nextStudentId++ : 1,
+      ...a.data,
+    }))
+    const logger = { error: vi.fn() }
+    return { findByID, find, create, logger } as any
+  }
+
+  const childForm = {
+    schoolRegistration: true,
+    registrationProgram: 77,
+    registration: { participantModel: 'children' },
+    title: 'Sunday School',
+    // class-select field deliberately NOT named "class" to prove resolution is by type.
+    schema: {
+      steps: [
+        {
+          fields: [
+            {
+              type: 'repeatable-group',
+              name: 'participants',
+              label: 'Children',
+              fields: [
+                { type: 'short-text', name: 'student_first_name', label: 'First' },
+                { type: 'short-text', name: 'student_last_name', label: 'Last' },
+                { type: 'class-select', name: 'classroom', label: 'Class' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  }
+
+  const enrollClasses = (payload: any): unknown[] =>
+    payload.create.mock.calls
+      .filter((c: any[]) => c[0]?.collection === 'enrollments')
+      .map((c: any[]) => c[0].data.class)
+
+  it('enrolls each child in their CHOSEN class for a multi-class program', async () => {
+    const payload = makeMatPayload(childForm, [{ id: 10 }, { id: 20 }, { id: 30 }])
+    const submission = {
+      id: 5,
+      form: 42,
       tenant: 9,
-      firstName: 'Aisha',
-      lastName: 'Khan',
-      age: 7,
-      allergiesNotes: 'peanuts',
-      status: 'active',
-      guardians: [{ name: 'Sara Khan', phone: '555-1212', email: 'sara@example.com', isPrimary: true }],
-    })
+      data: {
+        participants: [
+          { student_first_name: 'A', student_last_name: 'K', classroom: '20' },
+          { student_first_name: 'B', student_last_name: 'K', classroom: '30' },
+        ],
+      },
+    }
+    await materializeStudentsFromSubmission(payload, submission, {})
+    expect(enrollClasses(payload)).toEqual([20, 30])
   })
-  it('requires both student name fields', () => {
-    expect(mapRegistrationFields({ student_first_name: 'Aisha' }, 9)).toBeNull()
-    expect(mapRegistrationFields({ student_last_name: 'Khan' }, 9)).toBeNull()
+
+  it('does NOT enroll when the chosen class is foreign/invalid', async () => {
+    const payload = makeMatPayload(childForm, [{ id: 10 }, { id: 20 }])
+    const submission = {
+      id: 5,
+      form: 42,
+      tenant: 9,
+      data: { participants: [{ student_first_name: 'A', student_last_name: 'K', classroom: '999' }] },
+    }
+    await materializeStudentsFromSubmission(payload, submission, {})
+    expect(enrollClasses(payload)).toHaveLength(0)
   })
-  it('omits optional fields when absent', () => {
-    const result = mapRegistrationFields({ student_first_name: 'Ali', student_last_name: 'Hassan' }, 9)
-    expect(result).toMatchObject({ firstName: 'Ali', lastName: 'Hassan', tenant: 9, status: 'active' })
-    expect(result).not.toHaveProperty('age')
-    expect(result).not.toHaveProperty('allergiesNotes')
-    expect(result).not.toHaveProperty('guardians')
-  })
-  it('includes registeredProgram when provided', () => {
-    const r = mapRegistrationFields({ student_first_name: 'Ali', student_last_name: 'Hassan' }, 9, 55)
-    expect(r).toMatchObject({ firstName: 'Ali', lastName: 'Hassan', registeredProgram: 55 })
-  })
-  it('omits registeredProgram when not provided', () => {
-    const r = mapRegistrationFields({ student_first_name: 'Ali', student_last_name: 'Hassan' }, 9)
-    expect(r).not.toHaveProperty('registeredProgram')
+
+  it('snapshots registration details without stringifying the participant group', async () => {
+    const payload = makeMatPayload(childForm, [{ id: 10 }])
+    const submission = {
+      id: 5,
+      form: 42,
+      tenant: 9,
+      data: { participants: [{ student_first_name: 'A', student_last_name: 'K' }] },
+    }
+    await materializeStudentsFromSubmission(payload, submission, {})
+    const studentCreate = payload.create.mock.calls.find((c: any[]) => c[0]?.collection === 'students')
+    expect(JSON.stringify(studentCreate![0].data.registrationDetails)).not.toContain('[object Object]')
   })
 })

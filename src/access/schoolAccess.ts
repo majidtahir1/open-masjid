@@ -1,4 +1,5 @@
 import type { Access, PayloadRequest } from 'payload'
+import { relId as idOf } from '@/lib/relationship-id'
 
 /** Extract a tenant id from a user's tenant field (object or primitive). */
 const getTenantId = (tenant: unknown): string | number | null => {
@@ -56,9 +57,6 @@ export { getTenantId, roleOf, tenantOf, WRITE_ROLES }
 export type { PayloadRequest }
 
 // ---- async teacher-scoped access helpers ----
-
-const idOf = (v: unknown): string | number =>
-  typeof v === 'object' && v !== null && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
 /** Class ids the teacher is assigned to (empty array if none). */
 async function teacherClassIds(req: PayloadRequest): Promise<(string | number)[]> {
@@ -132,7 +130,7 @@ export const teacherAttendanceRead: Access = teacherOr(async (req) => {
 /** Program (term) ids a school_admin manages — read straight off the user. */
 export function managedProgramIds(user: unknown): (string | number)[] {
   const mp = (user as { managedPrograms?: unknown[] } | null | undefined)?.managedPrograms ?? []
-  return mp.map((p) => idOf(p))
+  return mp.map((p) => idOf(p)).filter((id): id is string | number => id != null)
 }
 
 /** Class ids belonging to a school_admin's managed programs (empty if none). */
@@ -162,7 +160,7 @@ export const teacherStudentsResolve: Resolve = async (req) => {
     const res = await (req.payload as any).find({
       collection: 'enrollments', where: { class: { in: classIds }, status: { equals: 'active' } }, limit: 5000, depth: 0, overrideAccess: true, req,
     })
-    studentIds = (res.docs as { student: unknown }[]).map((d) => idOf(d.student))
+    studentIds = (res.docs as { student: unknown }[]).map((d) => idOf(d.student)).filter((id): id is string | number => id != null)
   }
   return { id: { in: studentIds } }
 }
@@ -193,7 +191,7 @@ export const schoolAdminStudentsRead: Resolve = async (req) => {
     const res = await (req.payload as any).find({
       collection: 'enrollments', where: { class: { in: classIds }, status: { equals: 'active' } }, limit: 5000, depth: 0, overrideAccess: true, req,
     })
-    studentIds = (res.docs as { student: unknown }[]).map((d) => idOf(d.student))
+    studentIds = (res.docs as { student: unknown }[]).map((d) => idOf(d.student)).filter((id): id is string | number => id != null)
   }
   return { or: [{ id: { in: studentIds } }, { registeredProgram: { in: programIds } }] }
 }

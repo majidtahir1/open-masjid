@@ -10,10 +10,12 @@ import { createTuitionCheckout } from '@/lib/tuition-checkout'
 import {
   computeSiblingDiscount,
   participantPricesCents,
+  participantLabels,
   type DiscountTier,
   type PricingContext,
 } from '@/lib/tuition-pricing'
 import { participantsFromSubmission } from '@/lib/school-enroll'
+import { classSelectFieldName } from '@/lib/registration-fields'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -34,6 +36,7 @@ async function resolveRegistrationPricing(opts: {
   submissionData: Record<string, unknown>
 }): Promise<{
   discountedCents: number[]
+  participantLabels: string[]
   totalCents: number
   programId: string | number | null
   programName: string
@@ -92,7 +95,16 @@ async function resolveRegistrationPricing(opts: {
       : null
   const participants = participantsFromSubmission(submissionData, groupKey)
 
-  const base = participantPricesCents(participants, ctx)
+  // Per-class pricing reads each participant's class under a stable `class` key.
+  // The class-select field name is admin-editable, so resolve it by TYPE and
+  // normalize before pricing — otherwise a renamed field prices every child $0.
+  const classKey = classSelectFieldName(form.schema)
+  const priced =
+    classKey && classKey !== 'class'
+      ? participants.map((p) => ({ ...p, class: p[classKey] }))
+      : participants
+
+  const base = participantPricesCents(priced, ctx)
   // Sibling-discount tiers + cadence + currency are program-level pricing policy.
   const tiers = (program.multiChildDiscount ?? []) as DiscountTier[]
   const discountedCents = computeSiblingDiscount(base, tiers)
@@ -100,6 +112,7 @@ async function resolveRegistrationPricing(opts: {
 
   return {
     discountedCents,
+    participantLabels: participantLabels(priced),
     totalCents,
     programId,
     programName: form.title ?? 'Program',
@@ -215,6 +228,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
         guardianName:
           typeof submissionData.guardian_name === 'string' ? submissionData.guardian_name : undefined,
         discountedCents: pricing.discountedCents,
+        participantLabels: pricing.participantLabels,
         currency,
         programName: pricing.programName,
         tenantId: String(tenant.id),

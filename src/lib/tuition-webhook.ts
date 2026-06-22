@@ -132,6 +132,18 @@ export async function handleTuitionEvent(
 
       const programId = md.programId ? Number(md.programId) : null
 
+      // Fetch the submission BEFORE creating the (billed) subscription row. If
+      // this read fails we must NOT proceed — otherwise the family is billed but
+      // their students are never materialized, and the idempotency branch above
+      // would skip materialization on every retry. Letting the error propagate
+      // makes Stripe redeliver the whole event (no subscription row exists yet).
+      const submission = await payload.findByID({
+        collection: 'form-submissions',
+        id: md.submissionId,
+        depth: 0,
+        overrideAccess: true,
+      })
+
       const created = await payload.create({
         collection: 'program-subscriptions',
         data: {
@@ -151,22 +163,9 @@ export async function handleTuitionEvent(
 
       // Materialize the registration's students now that payment succeeded,
       // linking each to the family subscription.
-      let submission: any = null
-      try {
-        submission = await payload.findByID({
-          collection: 'form-submissions',
-          id: md.submissionId,
-          depth: 0,
-          overrideAccess: true,
-        })
-      } catch {
-        submission = null
-      }
-      if (submission) {
-        await materializeStudentsFromSubmission(payload, submission, {
-          programSubscriptionId: created.id,
-        })
-      }
+      await materializeStudentsFromSubmission(payload, submission, {
+        programSubscriptionId: created.id,
+      })
       return
     }
 

@@ -7,16 +7,9 @@
  * along with each child's current in/out status.
  */
 import { normalizePhone, tenantDayRangeUtc } from './kiosk'
+import { relIdStr as idOf, toWriteId as relId } from '../relationship-id'
 
 type Payload = any
-
-const idOf = (v: unknown): string =>
-  String(typeof v === 'object' && v !== null && 'id' in v ? (v as any).id : v)
-
-// Postgres uses integer relation ids; Payload's relationship validation rejects
-// numeric-looking strings ("94"), so coerce all-digit ids back to numbers for
-// writes. Non-numeric ids (e.g. Mongo ObjectIds) pass through unchanged.
-const relId = (v: string): string | number => (/^\d+$/.test(v) ? Number(v) : v)
 
 export type ChildStatus = 'none' | 'in' | 'out'
 
@@ -184,17 +177,24 @@ export async function findFamily(
   if (phone.length < 10) return { familyName: '', children: [] }
 
   // Guardian phones may be stored in varied formats — fetch active students and
-  // match on the normalized number in JS.
-  const students = await payload.find({
-    collection: 'students',
-    where: { and: [{ tenant: { equals: tenantId } }, { status: { equals: 'active' } }] },
-    depth: 0,
-    limit: 2000,
-    overrideAccess: true,
-  })
-  const matched = students.docs.filter((s: any) =>
-    Array.isArray(s.guardians) && s.guardians.some((g: any) => normalizePhone(g?.phone) === phone),
-  )
+  // match on the normalized number in JS. Paginate through all pages so large
+  // tenants (>1 page) don't silently drop matching families past a fixed cap.
+  const matched: any[] = []
+  for (let page = 1; ; page += 1) {
+    const students = await payload.find({
+      collection: 'students',
+      where: { and: [{ tenant: { equals: tenantId } }, { status: { equals: 'active' } }] },
+      depth: 0,
+      limit: 500,
+      page,
+      overrideAccess: true,
+    })
+    for (const s of students.docs as any[]) {
+      if (Array.isArray(s.guardians) && s.guardians.some((g: any) => normalizePhone(g?.phone) === phone))
+        matched.push(s)
+    }
+    if (!students.hasNextPage) break
+  }
 
   const children: KioskChild[] = []
   for (const s of matched) {

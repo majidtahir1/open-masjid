@@ -1,8 +1,8 @@
 import type { CollectionBeforeValidateHook } from 'payload'
 import { Forbidden } from 'payload'
+import { relId as idOf } from '@/lib/relationship-id'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const idOf = (v: unknown) => (typeof v === 'object' && v !== null && 'id' in v ? (v as { id: unknown }).id : v)
 
 /**
  * Scope attendance writes to the actor's allowed sessions:
@@ -20,8 +20,8 @@ export const assertSessionScope: CollectionBeforeValidateHook = async ({ data, r
   const classDoc = session?.class as { teachers?: unknown[]; term?: unknown } | undefined
 
   if (user.role === 'teacher') {
-    const teacherIds = (classDoc?.teachers ?? []).map(idOf)
-    if (!teacherIds.includes(user.id)) throw new Forbidden(req.t)
+    const teacherIds = (classDoc?.teachers ?? []).map(idOf).map(String)
+    if (!teacherIds.includes(String(user.id))) throw new Forbidden(req.t)
   } else {
     const termId = idOf(classDoc?.term)
     const managed = (user.managedPrograms ?? []).map(idOf)

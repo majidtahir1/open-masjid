@@ -26,6 +26,17 @@ describe('mapParticipantToStudent', () => {
   it('returns null without first+last name', () => {
     expect(mapParticipantToStudent({ student_first_name: 'A' }, {}, 1, null)).toBeNull()
   })
+  it('falls back to a `grade` field for gradeLevel', () => {
+    const r = mapParticipantToStudent(
+      { student_first_name: 'Yusuf', student_last_name: 'Khan', grade: 'Grade 1' },
+      {}, 1, null,
+    )
+    expect(r?.gradeLevel).toBe('Grade 1')
+  })
+  it('omits gradeLevel when no grade field present', () => {
+    const r = mapParticipantToStudent({ student_first_name: 'Sara', student_last_name: 'Ali' }, {}, 1, null)
+    expect(r?.gradeLevel).toBeUndefined()
+  })
 })
 
 describe('resolveAutoEnrollClassId', () => {

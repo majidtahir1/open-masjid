@@ -13,14 +13,12 @@ import { loginUrl } from '@/lib/login-redirect'
 import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
 import AttendanceClient from '@/admin/school/attendance/AttendanceClient'
+import { relId as idOf } from '@/lib/relationship-id'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
-
-const idOf = (v: unknown): string | number | null =>
-  v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
 export default async function AttendancePage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams

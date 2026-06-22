@@ -2,6 +2,7 @@ import type Stripe from 'stripe'
 import type { Payload } from 'payload'
 import { sendFormNotifications } from './form-notifications'
 import { relationshipId, tenantIdForConnectedAccount } from './stripe-connect-binding'
+import { materializeStudentsFromSubmission } from '@/hooks/createStudentFromRegistration'
 
 interface Args {
   event: Stripe.Event
@@ -75,4 +76,11 @@ export async function handleFormSubmissionEvent({ event, payload }: Args) {
     overrideAccess: true,
   })
   await sendFormNotifications({ form: form as any, submission: fresh as any })
+
+  // Paid registration (one-time): materialize the registration's students now
+  // that payment has succeeded — monthly tuition is handled by handleTuitionEvent
+  // instead. No-ops for non-registration forms. Guarded for once-only execution
+  // by the `paymentStatus === 'paid'` early-return above (this block runs only
+  // on the transition into paid).
+  await materializeStudentsFromSubmission(payload, fresh as any, {})
 }

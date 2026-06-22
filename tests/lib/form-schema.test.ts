@@ -2,8 +2,10 @@
 import { describe, it, expect } from 'vitest'
 import {
   FormSchema,
+  Field,
   validateSchema,
   validateSubmission,
+  validateFields,
   FIELD_TYPES,
 } from '@/lib/form-schema'
 
@@ -149,5 +151,51 @@ describe('validateSubmission', () => {
   it('rejects multiselect values not in option list', () => {
     const r = validateSubmission(schema, { email: 'x@y.com', name: 'A', roles: ['c'] })
     expect(r.ok).toBe(false)
+  })
+})
+
+describe('validateFields (per-step validation)', () => {
+  const fields: Field[] = [
+    { type: 'email', id: 'f1', name: 'email', label: 'Email', required: true },
+    { type: 'number', id: 'f2', name: 'attendees', label: 'Attendees', required: true, min: 1 },
+    { type: 'short-text', id: 'f3', name: 'note', label: 'Note', required: false },
+  ]
+
+  it('returns no errors when the step fields are all valid', () => {
+    const { errors } = validateFields(fields, { email: 'a@b.com', attendees: 3 })
+    expect(errors).toEqual({})
+  })
+
+  it('flags an invalid email format (not just emptiness)', () => {
+    const { errors } = validateFields(fields, { email: 'not-an-email', attendees: 3 })
+    expect(errors.email).toBe('Invalid email')
+  })
+
+  it('flags a number below its min', () => {
+    const { errors } = validateFields(fields, { email: 'a@b.com', attendees: 0 })
+    expect(errors.attendees).toBe('Min 1')
+  })
+
+  it('flags missing required fields', () => {
+    const { errors } = validateFields(fields, {})
+    expect(errors.email).toBe('Required')
+    expect(errors.attendees).toBe('Required')
+  })
+
+  it('validates required children inside a repeatable-group with indexed keys', () => {
+    const groupFields: Field[] = [
+      {
+        type: 'repeatable-group', id: 'g1', name: 'children', label: 'Children', min: 1,
+        fields: [
+          { type: 'short-text', id: 'c1', name: 'student_first_name', label: 'First', required: true },
+          { type: 'number', id: 'c2', name: 'age', label: 'Age', required: false, min: 1 },
+        ],
+      },
+    ]
+    const { errors } = validateFields(groupFields, {
+      children: [{ student_first_name: '', age: 0 }],
+    })
+    expect(errors['children.0.student_first_name']).toBe('Required')
+    expect(errors['children.0.age']).toBe('Min 1')
   })
 })

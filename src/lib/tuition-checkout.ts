@@ -2,41 +2,16 @@
  * Tuition subscription checkout — the recurring-billing counterpart to
  * `membership-checkout.ts` / `membership-stripe.ts`.
  *
- * Pure builder (`buildTuitionLineItems`) is unit-tested; the Stripe
- * integration shell (`createTuitionCheckout`) is a thin wrapper that mirrors
- * the membership flow: it resolves the per-tenant Connect client, then makes
- * every Stripe call against the connected account via `{ stripeAccount }`.
+ * The Stripe integration shell (`createTuitionCheckout`) is a thin wrapper that
+ * mirrors the membership flow: it resolves the per-tenant Connect client, then
+ * makes every Stripe call against the connected account via `{ stripeAccount }`.
  *
  * Net-new vs membership: tuition bills a *family* as one Stripe customer
  * (keyed by guardian email), with one recurring Price per child created on the
  * connected account (Checkout subscription mode requires price ids). The
  * per-child amounts are already sibling-discounted by the caller (Tasks 2-3).
  */
-import type Stripe from 'stripe'
 import { getStripeForTenant, connectedAccountId } from '@/lib/stripe'
-
-/**
- * Pure: one line item per participant at the discounted amount, with an inline
- * monthly recurring `price_data`. Used to share the per-child amount shape
- * between paths and to unit-test the discount → line-item mapping. Note that
- * Checkout subscription mode itself needs *price ids* (see `createTuitionCheckout`),
- * so this builder's inline `price_data` shape matches `subscriptions.create`.
- */
-export function buildTuitionLineItems(
-  discountedCents: number[],
-  currency: string,
-  programName: string,
-): Stripe.SubscriptionCreateParams.Item[] {
-  return discountedCents.map((amount, i) => ({
-    price_data: {
-      currency,
-      unit_amount: amount,
-      recurring: { interval: 'month' },
-      product_data: { name: `${programName} — child ${i + 1}` },
-    },
-    quantity: 1,
-  })) as unknown as Stripe.SubscriptionCreateParams.Item[]
-}
 
 export interface CreateTuitionCheckoutArgs {
   /** Tenant — drives the Connect client (demo vs live) and connected account. */
@@ -47,6 +22,12 @@ export interface CreateTuitionCheckoutArgs {
   guardianName?: string
   /** Already sibling-discounted per-child amounts, in the smallest currency unit. */
   discountedCents: number[]
+  /**
+   * Per-child display labels (student names), parallel to `discountedCents`.
+   * Used to name each Stripe line item so checkout reads the way the registrant
+   * saw it on the form. Falls back to "child N" when absent/short.
+   */
+  participantLabels?: string[]
   currency: string
   programName: string
   /** Metadata IDs — carried so the webhook can bind + materialize students. */
@@ -79,6 +60,7 @@ export async function createTuitionCheckout(args: CreateTuitionCheckoutArgs): Pr
     guardianEmail,
     guardianName,
     discountedCents,
+    participantLabels,
     currency,
     programName,
     tenantId,
@@ -112,12 +94,13 @@ export async function createTuitionCheckout(args: CreateTuitionCheckoutArgs): Pr
   //    subscription mode requires price ids (inline price_data is rejected).
   const priceIds: string[] = []
   for (let i = 0; i < discountedCents.length; i++) {
+    const label = participantLabels?.[i]?.trim() || `child ${i + 1}`
     const price = await stripe.prices.create(
       {
         currency,
         unit_amount: discountedCents[i],
         recurring: { interval: 'month' },
-        product_data: { name: `${programName} — child ${i + 1}` },
+        product_data: { name: `${programName} — ${label}` },
       },
       { stripeAccount: account },
     )

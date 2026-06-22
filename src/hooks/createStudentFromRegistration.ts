@@ -5,18 +5,8 @@ import {
   participantsFromSubmission,
   resolveAutoEnrollClassId,
 } from '../lib/school-enroll'
-
-// Postgres relationship ids are integers; numeric-looking strings ("94") are
-// rejected on create, so coerce all-digit ids back to numbers.
-const relId = (v: string | number): string | number =>
-  typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : v
-
-const str = (data: Record<string, unknown>, key: string): string | undefined => {
-  const v = data[key]
-  if (v == null) return undefined
-  const s = String(v).trim()
-  return s.length > 0 ? s : undefined
-}
+import { classSelectFieldName } from '../lib/registration-fields'
+import { toWriteId as relId } from '../lib/relationship-id'
 
 const humanize = (s: string): string =>
   s.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -24,7 +14,12 @@ const humanize = (s: string): string =>
 const formatValue = (raw: unknown): string => {
   if (raw == null) return ''
   if (typeof raw === 'boolean') return raw ? 'Yes' : 'No'
-  if (Array.isArray(raw)) return raw.filter((x) => x != null && String(x).trim()).join(', ')
+  if (Array.isArray(raw))
+    // Skip non-primitive entries — a repeatable-group's value is an array of
+    // item objects, which would otherwise stringify to "[object Object]".
+    return raw.filter((x) => x != null && typeof x !== 'object' && String(x).trim()).join(', ')
+  // Structural/group values (objects) are not rendered in the flat details panel.
+  if (typeof raw === 'object') return ''
   return String(raw).trim()
 }
 
@@ -43,7 +38,9 @@ function buildRegistrationDetails(
   const order: string[] = []
   for (const step of schema?.steps ?? []) {
     for (const f of step.fields ?? []) {
-      if (f?.type === 'page-break' || !f?.name) continue
+      // Skip structural fields — they carry no flat answer of their own.
+      if (f?.type === 'page-break' || f?.type === 'section' || f?.type === 'repeatable-group' || !f?.name)
+        continue
       if (f.label) labelByName[f.name] = f.label
       order.push(f.name)
     }
@@ -60,51 +57,6 @@ function buildRegistrationDetails(
     fields.push({ label: labelByName[name] ?? humanize(name), value })
   }
   return { formName, fields }
-}
-
-/**
- * Map a flat submission data object (keyed by form field name) to Student
- * create data, or null if the required name fields are absent.
- *
- * Field names follow the snake_case convention injected by the registration
- * form builder (student_first_name, student_last_name, etc.).
- */
-export function mapRegistrationFields(
-  data: Record<string, unknown>,
-  tenantId: string | number,
-  registeredProgram?: string | number | null,
-): Record<string, unknown> | null {
-  const firstName = str(data, 'student_first_name')
-  const lastName = str(data, 'student_last_name')
-  if (!firstName || !lastName) return null
-
-  const result: Record<string, unknown> = { tenant: tenantId, firstName, lastName, status: 'active' }
-
-  const ageRaw = data['student_age']
-  if (ageRaw != null) {
-    const ageNum = Number(ageRaw)
-    if (!Number.isNaN(ageNum)) result.age = ageNum
-  }
-
-  // Grade (e.g. Sunday school): parents supply it at registration; admins place by it.
-  const grade = str(data, 'student_grade') ?? str(data, 'grade')
-  if (grade) result.gradeLevel = grade
-
-  const allergies = str(data, 'allergies')
-  if (allergies) result.allergiesNotes = allergies
-
-  const guardianName = str(data, 'guardian_name')
-  if (guardianName) {
-    const guardian: Record<string, unknown> = { name: guardianName, isPrimary: true }
-    const phone = str(data, 'guardian_phone')
-    if (phone) guardian.phone = phone
-    const email = str(data, 'guardian_email')
-    if (email) guardian.email = email
-    result.guardians = [guardian]
-  }
-
-  if (registeredProgram != null) result.registeredProgram = registeredProgram
-  return result
 }
 
 type FormSchemaShape = {
@@ -244,10 +196,24 @@ export async function materializeStudentsFromSubmission(
   }
 
   const autoClassId = resolveAutoEnrollClassId(activeClassIds)
+  // The participant may have chosen a class on the form (class-select field).
+  // Resolve that field by type and validate the chosen id against the program's
+  // active classes — this both honors multi-class selections and rejects any
+  // foreign/cross-tenant class id smuggled into a public submission.
+  const classKey = classSelectFieldName(form.schema)
+  const activeClassSet = new Set(activeClassIds.map((id) => String(id)))
 
   for (const p of participants) {
     const studentData = mapParticipantToStudent(p, submissionData, tenantId, programId)
     if (!studentData) continue
+
+    // Chosen class wins (when valid); else fall back to the single auto-enroll
+    // class (only set when the program has exactly one active class).
+    let enrollClassId: string | number | null = autoClassId
+    if (classKey) {
+      const chosen = p[classKey]
+      if (chosen != null && activeClassSet.has(String(chosen))) enrollClassId = relId(chosen as string | number)
+    }
 
     // Snapshot every registration answer (shared + per-participant) onto the
     // student for the read-only "Registration details" panel.
@@ -269,11 +235,11 @@ export async function materializeStudentsFromSubmission(
         ...reqArg,
       })
       createdIds.push(student.id)
-      if (autoClassId != null) {
+      if (enrollClassId != null) {
         await payload.create({
           collection: 'enrollments',
           overrideAccess: true,
-          data: { tenant: tenantId, student: relId(student.id), class: relId(autoClassId), status: 'active' },
+          data: { tenant: tenantId, student: relId(student.id), class: relId(enrollClassId), status: 'active' },
           ...reqArg,
         })
       }

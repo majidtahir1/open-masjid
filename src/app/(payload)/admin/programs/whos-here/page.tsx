@@ -13,13 +13,12 @@ import { loginUrl } from '@/lib/login-redirect'
 import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
 import WhosHere from '@/admin/school/WhosHere'
+import { relId as idOf } from '@/lib/relationship-id'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const ROLES = new Set(['platformOwner', 'admin', 'school_admin', 'teacher'])
-const idOf = (v: unknown): string | number | null =>
-  v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
 export default async function WhosHerePage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams

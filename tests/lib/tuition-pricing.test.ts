@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeSiblingDiscount, participantPricesCents } from '@/lib/tuition-pricing'
+import { computeSiblingDiscount, participantPricesCents, participantLabels } from '@/lib/tuition-pricing'
 
 const tiers = [{ rank: 2, percentOff: 50 }, { rank: 3, percentOff: 100 }]
 
@@ -30,5 +30,21 @@ describe('participantPricesCents', () => {
     expect(participantPricesCents(
       [{ class: '3' }, { class: '8' }], { pricingModel: 'per-class', programTuitionCents: 0, classPrices: { '3': 9000, '8': 6000 } },
     )).toEqual([9000, 6000])
+  })
+})
+
+describe('participantLabels', () => {
+  it('uses the student first + last name when present', () => {
+    expect(participantLabels([
+      { student_first_name: 'Yusuf', student_last_name: 'Rahman' },
+      { student_first_name: 'Maryam', student_last_name: 'Rahman' },
+    ])).toEqual(['Yusuf Rahman', 'Maryam Rahman'])
+  })
+  it('trims and tolerates a missing last name', () => {
+    expect(participantLabels([{ student_first_name: '  Ali  ' }])).toEqual(['Ali'])
+  })
+  it('falls back to "Child N" (1-based) when no name is given', () => {
+    expect(participantLabels([{}, { student_first_name: 'Sara', student_last_name: 'K' }]))
+      .toEqual(['Child 1', 'Sara K'])
   })
 })
