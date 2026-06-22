@@ -173,3 +173,31 @@ describe('validateGuardians', () => {
     expect(validateGuardians({ steps: [{ id: 's1', fields: [] }] }, {})).toEqual({})
   })
 })
+
+import { ensureParticipantGroup } from '@/lib/registration-fields'
+
+describe('ensureParticipantGroup', () => {
+  const mk = () => { let n = 0; return () => `pg-${++n}` }
+  it('creates a Children group with first/last/age/grade when none exists', () => {
+    const next = ensureParticipantGroup({ steps: [{ id: 's1', fields: [] }] }, mk())
+    const g = next.steps.flatMap((s) => s.fields).find((f: any) => f.type === 'repeatable-group' && f.role !== 'guardians') as any
+    expect(g).toBeTruthy()
+    expect(g.fields.map((c: any) => c.name)).toEqual(['student_first_name', 'student_last_name', 'student_age', 'student_grade'])
+    expect(g.fields.find((c: any) => c.name === 'student_age').type).toBe('number')
+  })
+  it('seeds required name fields into an existing participant group', () => {
+    const schema: FormSchema = { steps: [{ id: 's1', fields: [
+      { type: 'repeatable-group', id: 'p', name: 'kids', label: 'Children', min: 1, fields: [
+        { type: 'short-text', id: 'x', name: 'foo', label: 'Foo', required: false },
+      ]},
+    ]}] }
+    const g = (ensureParticipantGroup(schema, mk()).steps[0].fields[0]) as any
+    expect(g.fields.map((c: any) => c.name)).toContain('student_first_name')
+    expect(g.fields.map((c: any) => c.name)).toContain('student_last_name')
+  })
+  it('is idempotent on a full Children group', () => {
+    const make = mk()
+    const a = ensureParticipantGroup({ steps: [{ id: 's1', fields: [] }] }, make)
+    expect(ensureParticipantGroup(a, make)).toBe(a)
+  })
+})

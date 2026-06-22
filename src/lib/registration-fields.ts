@@ -209,3 +209,30 @@ export function ensureParticipantGroupFields(schema: FormSchema, makeId: () => s
   )
   return { ...schema, steps }
 }
+
+/** Ensure a Children (participant) repeatable-group exists with the canonical
+ *  student fields. If a participant group already exists, seed the REQUIRED name
+ *  fields into it (idempotent, via ensureParticipantGroupFields). If none exists,
+ *  CREATE the full Children section: first/last name (required) + age + grade.
+ *  The guardians group is never treated as the participant group. */
+export function ensureParticipantGroup(schema: FormSchema, makeId: () => string): FormSchema {
+  if (participantGroupName(schema)) return ensureParticipantGroupFields(schema, makeId)
+  const group: Field = {
+    type: 'repeatable-group',
+    id: makeId(),
+    name: 'participants',
+    label: 'Children',
+    itemLabel: 'Child',
+    min: 1,
+    fields: [
+      { type: 'short-text', id: makeId(), name: 'student_first_name', label: 'Student first name', required: true },
+      { type: 'short-text', id: makeId(), name: 'student_last_name', label: 'Student last name', required: true },
+      { type: 'number', id: makeId(), name: 'student_age', label: 'Age', required: false },
+      { type: 'short-text', id: makeId(), name: 'student_grade', label: 'Grade', required: false },
+    ],
+  }
+  const steps = schema.steps.length > 0
+    ? schema.steps.map((s, i) => (i === schema.steps.length - 1 ? { ...s, fields: [...s.fields, group] } : s))
+    : [{ id: makeId(), fields: [group] }]
+  return { ...schema, steps }
+}

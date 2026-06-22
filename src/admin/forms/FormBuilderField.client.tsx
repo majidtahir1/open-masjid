@@ -24,7 +24,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { Field, FieldTypeId, FormSchema, LeafField } from '@/lib/form-schema'
 import { FIELD_TYPES } from '@/lib/form-schema'
-import { REGISTRATION_FIELD_DEFS, ensureGuardiansGroup, ensureParticipantGroupFields, ensureStudentFields, hasRequiredRegistrationFields } from '@/lib/registration-fields'
+import { REGISTRATION_FIELD_DEFS, ensureGuardiansGroup, ensureParticipantGroup, ensureStudentFields, hasRequiredRegistrationFields } from '@/lib/registration-fields'
 import { PLATFORM_DOMAIN } from '@/lib/tenant-parse'
 import FieldCard from './builder/FieldCard'
 import AddFieldPopover from './builder/AddFieldPopover'
@@ -274,17 +274,18 @@ export function FormBuilderFieldClient(props: Record<string, unknown>) {
   useEffect(() => {
     if (!isSchoolReg) return
     let next = schema
-    // Seed the student-name fields (into the participant group for children,
-    // top-level for self) when they're missing.
-    if (!hasRequiredRegistrationFields(next)) {
-      next = participantModel === 'children'
-        ? ensureParticipantGroupFields(next, randomId)
-        : ensureStudentFields(next, randomId)
+    if (participantModel === 'children') {
+      // Canonical school-registration scaffold: a typed Guardians section
+      // (parent contact — the kiosk matches on guardians[].phone) followed by a
+      // Children section (each child's name + age + grade). Nothing else, so
+      // guardian/contact info never gets duplicated as loose top-level fields.
+      next = ensureGuardiansGroup(next, randomId)
+      next = ensureParticipantGroup(next, randomId)
+    } else if (!hasRequiredRegistrationFields(next)) {
+      // Self model: the registrant IS the student — top-level student fields,
+      // no guardians section.
+      next = ensureStudentFields(next, randomId)
     }
-    // Seed the typed Guardians block — the kiosk matches parents by
-    // guardians[].phone, so a registration form needs it. NOT gated by
-    // hasRequiredRegistrationFields, or it would never seed once students exist.
-    next = ensureGuardiansGroup(next, randomId)
     if (next !== schema) setValue(next)
   }, [isSchoolReg, participantModel, schema, setValue])
 
