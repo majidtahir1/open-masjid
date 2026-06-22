@@ -158,4 +158,35 @@ describe('materializeStudentsFromSubmission — class enrollment', () => {
     const studentCreate = payload.create.mock.calls.find((c: any[]) => c[0]?.collection === 'students')
     expect(JSON.stringify(studentCreate![0].data.registrationDetails)).not.toContain('[object Object]')
   })
+
+  it('materializes students with guardians from the typed guardians group', async () => {
+    const formWithGuardians = {
+      ...childForm,
+      schema: {
+        steps: [{ fields: [
+          ...childForm.schema.steps[0].fields,
+          {
+            type: 'repeatable-group', name: 'guardians', label: 'Guardians', role: 'guardians',
+            fields: [
+              { type: 'short-text', name: 'g_name', label: 'Name', role: 'guardian_name' },
+              { type: 'phone', name: 'g_phone', label: 'Phone', role: 'guardian_phone' },
+            ],
+          },
+        ]}],
+      },
+    }
+    const payload = makeMatPayload(formWithGuardians, [{ id: 10 }])
+    const submission = {
+      id: 5, form: 42, tenant: 9,
+      data: {
+        participants: [{ student_first_name: 'Bob', student_last_name: 'Smith', classroom: '10' }],
+        guardians: [{ g_name: 'Parent One', g_phone: '(999) 000-0000' }],
+      },
+    }
+    await materializeStudentsFromSubmission(payload, submission, {})
+    const studentCreate = payload.create.mock.calls.find((c: any[]) => c[0]?.collection === 'students')
+    expect(studentCreate![0].data.guardians).toEqual([
+      { name: 'Parent One', phone: '9990000000', isPrimary: true },
+    ])
+  })
 })

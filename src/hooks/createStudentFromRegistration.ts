@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import {
+  guardiansFromSubmission,
   mapParticipantToStudent,
   participantsFromSubmission,
   resolveAutoEnrollClassId,
@@ -152,6 +153,10 @@ export async function materializeStudentsFromSubmission(
       : null
   const participants = participantsFromSubmission(submissionData, groupKey)
 
+  // Guardians are shared per submission — resolve once (by role) and attach the
+  // same set to every child. Empty for forms without a typed guardians group.
+  const guardians = guardiansFromSubmission(form.schema as FormSchema, submissionData)
+
   // Resolve the program's ACTIVE classes once (single-class auto-enroll / default class).
   let activeClassIds: (string | number)[] = []
   if (programId != null) {
@@ -194,7 +199,7 @@ export async function materializeStudentsFromSubmission(
   const activeClassSet = new Set(activeClassIds.map((id) => String(id)))
 
   for (const p of participants) {
-    const studentData = mapParticipantToStudent(p, submissionData, tenantId, programId)
+    const studentData = mapParticipantToStudent(p, submissionData, tenantId, programId, guardians)
     if (!studentData) continue
 
     // Chosen class wins (when valid); else fall back to the single auto-enroll

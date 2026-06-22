@@ -21,7 +21,7 @@ export const GUARDIAN_ROLES = {
  *  section). Backward-compatible: a form without a guardians group resolves to
  *  its only repeatable-group, exactly as before. */
 export function participantGroupName(schema: FormSchema): string | null {
-  const groups = schema.steps
+  const groups = (schema?.steps ?? [])
     .flatMap((s) => s.fields)
     .filter((f) => f.type === 'repeatable-group' && f.role !== GUARDIANS_GROUP_ROLE)
   return groups.length === 1 ? (groups[0] as { name: string }).name : null
@@ -29,7 +29,7 @@ export function participantGroupName(schema: FormSchema): string | null {
 
 /** Name of the guardians-role repeatable-group, or null. */
 export function guardiansGroupName(schema: FormSchema): string | null {
-  for (const step of schema.steps) {
+  for (const step of schema?.steps ?? []) {
     for (const f of step.fields) {
       if (f.type === 'repeatable-group' && f.role === GUARDIANS_GROUP_ROLE) return f.name
     }
