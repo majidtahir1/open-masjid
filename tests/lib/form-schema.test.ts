@@ -154,6 +154,24 @@ describe('validateSubmission', () => {
   })
 })
 
+describe('field role', () => {
+  it('accepts a role on a leaf field and a guardians role on a group', () => {
+    const r = validateSchema({
+      steps: [{ id: 's1', fields: [
+        { type: 'phone', id: 'p1', name: 'g_phone', label: 'Phone', role: 'guardian_phone' },
+        { type: 'repeatable-group', id: 'g1', name: 'guardians', label: 'Guardians', role: 'guardians',
+          fields: [{ type: 'short-text', id: 'n1', name: 'g_name', label: 'Name', role: 'guardian_name' }] },
+      ]}],
+    })
+    expect(r.success).toBe(true)
+    if (r.success) {
+      const group = r.schema.steps[0].fields.find((f) => f.type === 'repeatable-group') as any
+      expect(group.role).toBe('guardians')
+      expect(group.fields[0].role).toBe('guardian_name')
+    }
+  })
+})
+
 describe('validateFields (per-step validation)', () => {
   const fields: Field[] = [
     { type: 'email', id: 'f1', name: 'email', label: 'Email', required: true },

@@ -32,6 +32,9 @@ const FieldBase = {
   required: z.boolean().default(false),
   helpText: z.string().optional(),
   placeholder: z.string().optional(),
+  // Optional semantic role (e.g. 'guardian_phone'). The role is the contract a
+  // structured consumer reads; the label stays free for admins to edit.
+  role: z.string().optional(),
 }
 
 // Leaf (input) field members — these may appear at the top level and inside a
@@ -57,6 +60,7 @@ const LeafFieldMembers = [
     label: z.string().optional(),
     required: z.boolean().default(false),
     helpText: z.string().optional(),
+    role: z.string().optional(),
   }),
 ] as const
 
@@ -73,6 +77,7 @@ const FieldSchema = z.discriminatedUnion('type', [
     name: z.string().regex(FieldNameRegex),
     label: z.string().optional(),
     itemLabel: z.string().optional(),
+    role: z.string().optional(),
     min: z.number().int().min(0).optional(),
     max: z.number().int().min(1).optional(),
     // child fields are leaf inputs only — no nested groups/sections/page-breaks
