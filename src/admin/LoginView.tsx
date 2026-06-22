@@ -18,7 +18,6 @@
  */
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LogIn } from 'lucide-react'
 
@@ -39,7 +38,6 @@ type PayloadLoginResponse = {
 }
 
 export default function LoginView({ redirectTo }: { redirectTo?: string }) {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -70,10 +68,12 @@ export default function LoginView({ redirectTo }: { redirectTo?: string }) {
         return
       }
 
-      // Success — Payload set the cookie; return to where the visitor was
-      // headed, or the dashboard.
-      router.push(safeLoginRedirect(redirectTo))
-      router.refresh()
+      // Success — Payload set the cookie. Navigate with a FULL page load
+      // (not router.push), so Payload's admin AuthProvider re-initializes and
+      // fetches the logged-in user. A client-side push leaves useAuth() without
+      // a user/role, so role-gated chrome (the top-bar nav) renders empty until
+      // a manual refresh.
+      window.location.assign(safeLoginRedirect(redirectTo))
     } catch {
       setError('Could not reach the server. Please try again.')
       setLoading(false)

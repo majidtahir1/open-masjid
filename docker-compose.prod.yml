@@ -114,13 +114,23 @@ services:
     env_file: ${ENV_FILE:-.env}
     environment:
       TZ: America/Chicago
-    command: >
-      sh -c "apk add --no-cache curl tzdata >/dev/null &&
-      printf '%s\n%s\n'
-      '* * * * * curl -fsS -X POST http://app:3000/api/payload-jobs/run -H \"X-Cron-Secret: $$CRON_SECRET\" >> /proc/1/fd/1 2>&1'
-      '0 1 * * * curl -fsS -X POST http://app:3000/api/demo/reset -H \"X-Cron-Secret: $$CRON_SECRET\" >> /proc/1/fd/1 2>&1'
-      > /etc/crontabs/root &&
-      crond -f -L /dev/stdout"
+    # Build the crontab line-by-line with `echo` (single-quoted) rather than a
+    # folded-scalar `printf '%s\n%s\n'`: the folded `>` block + compose's
+    # command-splitting collapsed the `\n` to a literal `n`, mashing both jobs
+    # onto one line so crond errored ("redir error") and neither job ran. A list
+    # form + literal block + echo emits real newlines reliably. `$$CRON_SECRET`
+    # → compose writes a literal `$CRON_SECRET` into the crontab, expanded by
+    # crond's shell from the container env at job time.
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache curl tzdata >/dev/null
+        {
+          echo '* * * * * curl -fsS -X POST http://app:3000/api/payload-jobs/run -H "X-Cron-Secret: $$CRON_SECRET" >> /proc/1/fd/1 2>&1'
+          echo '0 1 * * * curl -fsS -X POST http://app:3000/api/demo/reset -H "X-Cron-Secret: $$CRON_SECRET" >> /proc/1/fd/1 2>&1'
+        } > /etc/crontabs/root
+        crond -f -L /dev/stdout
 
 volumes:
   pgdata:

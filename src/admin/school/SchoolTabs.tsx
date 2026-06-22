@@ -2,19 +2,20 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, GraduationCap, ClipboardList, Wand2, UserCheck, Layers } from 'lucide-react'
+import { LayoutDashboard, GraduationCap, ClipboardList, Layers } from 'lucide-react'
 import ProgramPicker from './ProgramPicker'
 
 // `soon: true` marks a tab whose route isn't built yet — rendered disabled so
 // there are no dead links. Drop the flag when the route exists.
+// Note: "Who's here" lives as a button on the Attendance reports page (all
+// reporting in one spot), and program editing is reached via "Edit program" on
+// the Dashboard — so neither is a top-level tab.
 type Tab = { href: string; label: string; icon: React.ComponentType<{ size?: number }>; exact?: boolean; soon?: boolean }
 const TABS: Tab[] = [
   { href: '/admin/programs', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/programs/classes', label: 'Classes', icon: GraduationCap },
   { href: '/admin/programs/enrollment', label: 'Enrollment', icon: Layers },
-  { href: '/admin/programs/attendance', label: 'Attendance', icon: ClipboardList },
-  { href: '/admin/programs/whos-here', label: "Who's here", icon: UserCheck },
-  { href: '/admin/programs/setup', label: 'Setup', icon: Wand2 },
+  { href: '/admin/programs/attendance', label: 'Attendance reports', icon: ClipboardList },
 ]
 
 const SchoolTabs: React.FC = () => {

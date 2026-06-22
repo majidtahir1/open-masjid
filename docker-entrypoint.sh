@@ -35,8 +35,15 @@ notify() {
   ' "$1" 2>/dev/null || true
 }
 
+# Invoke the Payload CLI binary DIRECTLY — never via `npx`. At container startup
+# (PID 1, no TTY, non-root user) `npx payload migrate` was observed to print only
+# npm's update notice and exit 0 WITHOUT running migrations: a silent no-op that
+# let the server boot against an un-migrated DB (missing columns → 500s on every
+# query touching the new relations). The direct binary call has no such
+# resolve/auto-install layer — it either runs the migration or exits non-zero and
+# trips the loud-failure path below.
 echo "[entrypoint] running payload migrate..."
-if ! npx payload migrate; then
+if ! node node_modules/payload/bin.js migrate; then
   echo "[entrypoint] migration FAILED"
   notify "❌ OpenMasjid: startup migration FAILED on $(hostname). App is NOT serving (container will keep retrying)."
   # Back off so a restart:unless-stopped crash-loop doesn't spam Telegram or
