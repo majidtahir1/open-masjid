@@ -35,11 +35,11 @@ interface Props {
   programPricing?: ProgramPricing | null
 }
 
-/** First repeatable-group field in the schema (the participant group), if any. */
+/** First participant (non-guardians) repeatable-group in the schema, if any. */
 function findParticipantGroup(schema: FormSchema): Extract<Field, { type: 'repeatable-group' }> | null {
   for (const step of schema.steps) {
     for (const f of step.fields) {
-      if (f.type === 'repeatable-group') return f
+      if (f.type === 'repeatable-group' && f.role !== 'guardians') return f
     }
   }
   return null

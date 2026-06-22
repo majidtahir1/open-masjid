@@ -1,12 +1,14 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import {
+  guardiansFromSubmission,
   mapParticipantToStudent,
   participantsFromSubmission,
   resolveAutoEnrollClassId,
 } from '../lib/school-enroll'
-import { classSelectFieldName } from '../lib/registration-fields'
+import { classSelectFieldName, participantGroupName } from '../lib/registration-fields'
 import { toWriteId as relId } from '../lib/relationship-id'
+import type { FormSchema } from '../lib/form-schema'
 
 const humanize = (s: string): string =>
   s.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -71,17 +73,6 @@ type RegForm = {
   title?: string
   name?: string
   payment?: { paymentModel?: string }
-}
-
-/** Return the repeatable-group fields declared in the form schema. */
-function schemaGroups(schema: FormSchemaShape | null | undefined): { name?: string }[] {
-  const groups: { name?: string }[] = []
-  for (const step of schema?.steps ?? []) {
-    for (const f of step.fields ?? []) {
-      if (f?.type === 'repeatable-group') groups.push(f)
-    }
-  }
-  return groups
 }
 
 /** Load + verify the school-registration form for a submission, or null. */
@@ -155,12 +146,16 @@ export async function materializeStudentsFromSubmission(
       : (submission.tenant as string | number)
   const tenantId = relId(tenantRaw)
 
-  // children model: the single repeatable-group's name is the participant key.
+  // children model: the participant (non-guardians) group's name is the key.
   const groupKey =
     form.registration?.participantModel === 'children'
-      ? (schemaGroups(form.schema)[0]?.name ?? null)
+      ? participantGroupName(form.schema as FormSchema)
       : null
   const participants = participantsFromSubmission(submissionData, groupKey)
+
+  // Guardians are shared per submission — resolve once (by role) and attach the
+  // same set to every child. Empty for forms without a typed guardians group.
+  const guardians = guardiansFromSubmission(form.schema as FormSchema, submissionData)
 
   // Resolve the program's ACTIVE classes once (single-class auto-enroll / default class).
   let activeClassIds: (string | number)[] = []
@@ -204,7 +199,7 @@ export async function materializeStudentsFromSubmission(
   const activeClassSet = new Set(activeClassIds.map((id) => String(id)))
 
   for (const p of participants) {
-    const studentData = mapParticipantToStudent(p, submissionData, tenantId, programId)
+    const studentData = mapParticipantToStudent(p, submissionData, tenantId, programId, guardians)
     if (!studentData) continue
 
     // Chosen class wins (when valid); else fall back to the single auto-enroll

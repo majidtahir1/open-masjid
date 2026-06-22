@@ -82,11 +82,7 @@ export function pinMatches(input: string, stored: string | null | undefined): bo
   return timingSafeEqual(a, b)
 }
 
-/** Keep the last 10 digits so "(214) 555-0123" and "2145550123" match. */
-export function normalizePhone(raw: string | null | undefined): string {
-  const digits = String(raw ?? '').replace(/\D/g, '')
-  return digits.length > 10 ? digits.slice(-10) : digits
-}
+export { normalizePhone } from '@/lib/phone'
 
 /**
  * The UTC instant range covering "today" for the tenant's calendar day.

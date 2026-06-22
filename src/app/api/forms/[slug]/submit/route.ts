@@ -15,7 +15,8 @@ import {
   type PricingContext,
 } from '@/lib/tuition-pricing'
 import { participantsFromSubmission } from '@/lib/school-enroll'
-import { classSelectFieldName } from '@/lib/registration-fields'
+import { classSelectFieldName, participantGroupName } from '@/lib/registration-fields'
+import type { FormSchema } from '@/lib/form-schema'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -91,7 +92,7 @@ async function resolveRegistrationPricing(opts: {
   // top-level submission itself for the self model (one participant).
   const groupKey =
     form.registration?.participantModel === 'children'
-      ? (schemaGroups(form.schema)[0]?.name ?? null)
+      ? participantGroupName(form.schema as FormSchema)
       : null
   const participants = participantsFromSubmission(submissionData, groupKey)
 
@@ -119,19 +120,6 @@ async function resolveRegistrationPricing(opts: {
     paymentModel: (program.paymentModel ?? 'free') as 'free' | 'one-time' | 'monthly',
     currency: (program.currency as string) ?? 'usd',
   }
-}
-
-/** Return the repeatable-group fields declared in the form schema. */
-function schemaGroups(
-  schema: { steps?: { fields?: { name?: string; type?: string }[] }[] } | null | undefined,
-): { name?: string }[] {
-  const groups: { name?: string }[] = []
-  for (const step of schema?.steps ?? []) {
-    for (const f of step.fields ?? []) {
-      if (f?.type === 'repeatable-group') groups.push(f)
-    }
-  }
-  return groups
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
