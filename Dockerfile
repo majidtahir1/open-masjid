@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1.7
 
-# -----------------------------------------------------------------------------
-# Stage 1 — deps: install production dependencies with a good build cache.
-# -----------------------------------------------------------------------------
-FROM node:20-alpine AS deps
+# Base image is PINNED BY DIGEST, not the floating `node:20-alpine` tag. The
+# floating tag silently rolled npm forward between deploys, and the newer npm's
+# `npx` no-op'd the startup migration (see docker-entrypoint.sh) — pinning makes
+# every build reproducible. To bump deliberately:
+#   docker buildx imagetools inspect node:20-alpine   # copy the new digest
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS deps
 WORKDIR /app
 
 # Sharp and other native modules benefit from having libc6-compat available.
@@ -15,7 +17,7 @@ RUN npm ci
 # -----------------------------------------------------------------------------
 # Stage 2 — builder: build Next.js (standalone output) + generate Payload types.
 # -----------------------------------------------------------------------------
-FROM node:20-alpine AS builder
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
@@ -35,7 +37,7 @@ RUN npm run build
 # -----------------------------------------------------------------------------
 # Stage 3 — runner: minimal image with just the standalone server + public assets.
 # -----------------------------------------------------------------------------
-FROM node:20-alpine AS runner
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS runner
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat tini
@@ -90,7 +92,7 @@ ENTRYPOINT ["/sbin/tini", "--", "/app/docker-entrypoint.sh"]
 # only for ad-hoc manual use: `docker build --target migrator -t om-migrator .`
 # then `docker run --rm --env-file .env om-migrator`.
 # -----------------------------------------------------------------------------
-FROM node:20-alpine AS migrator
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS migrator
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat tini
@@ -104,4 +106,5 @@ COPY tsconfig.json ./
 ENV NODE_ENV=production
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["npx", "payload", "migrate"]
+# Call the bin directly (not `npx`) — same reason as docker-entrypoint.sh.
+CMD ["node", "node_modules/payload/bin.js", "migrate"]
