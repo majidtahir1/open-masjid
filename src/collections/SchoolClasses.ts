@@ -44,6 +44,13 @@ export const SchoolClasses: CollectionConfig = {
     { name: 'room', type: 'text' },
     { name: 'capacity', type: 'number', min: 0, admin: { description: 'Informational only — not enforced.' } },
     {
+      name: 'tuitionCents',
+      type: 'number',
+      min: 0,
+      label: 'Monthly tuition',
+      admin: { description: 'Dollars per month for this class (per-class pricing). E.g. enter 90 for $90/mo.', components: { Field: '/src/admin/forms/fields/DollarCents#default' } },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

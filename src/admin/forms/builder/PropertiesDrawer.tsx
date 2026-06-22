@@ -112,6 +112,136 @@ function GeneralTab({ field, onChange }: GeneralTabProps) {
     )
   }
 
+  if (field.type === 'section') {
+    const sectionField = field
+    return (
+      <div className="fb-drawer-body">
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Heading</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={sectionField.label ?? ''}
+            onChange={(e) => onChange({ ...sectionField, label: e.target.value })}
+            placeholder="Section heading"
+          />
+        </div>
+        <p className="fb-drawer-note">A section is a visual heading that groups the fields beneath it.</p>
+      </div>
+    )
+  }
+
+  if (field.type === 'repeatable-group') {
+    const groupField = field
+    const numOrUndef = (v: string) => (v === '' ? undefined : Number(v))
+    return (
+      <div className="fb-drawer-body">
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Label</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={groupField.label ?? ''}
+            onChange={(e) => onChange({ ...groupField, label: e.target.value })}
+            placeholder="e.g. Children"
+          />
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Item label</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={groupField.itemLabel ?? ''}
+            onChange={(e) => onChange({ ...groupField, itemLabel: e.target.value })}
+            placeholder="e.g. Child"
+          />
+          <p className="fb-drawer-note">Used on the &ldquo;Add another&hellip;&rdquo; button on the public form.</p>
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Minimum items</label>
+          <input
+            className="fb-drawer-input"
+            type="number"
+            min={0}
+            value={groupField.min ?? ''}
+            onChange={(e) => onChange({ ...groupField, min: numOrUndef(e.target.value) })}
+            placeholder="No minimum"
+          />
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Maximum items</label>
+          <input
+            className="fb-drawer-input"
+            type="number"
+            min={1}
+            value={groupField.max ?? ''}
+            onChange={(e) => onChange({ ...groupField, max: numOrUndef(e.target.value) })}
+            placeholder="No maximum"
+          />
+        </div>
+        <p className="fb-drawer-note">Add the repeated fields (e.g. child name, grade) inside the group on the canvas.</p>
+      </div>
+    )
+  }
+
+  if (field.type === 'class-select') {
+    const classField = field
+    return (
+      <div className="fb-drawer-body">
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Label</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={classField.label ?? ''}
+            onChange={(e) => onChange({ ...classField, label: e.target.value })}
+            placeholder="Class"
+          />
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Field name</label>
+          <input
+            className="fb-drawer-input fb-drawer-input--mono"
+            type="text"
+            value={classField.name}
+            onChange={(e) => onChange({ ...classField, name: e.target.value })}
+            placeholder="class"
+          />
+          <p className="fb-drawer-note">
+            Keep this as <code>class</code> so per-class pricing can read each participant&rsquo;s class.
+          </p>
+        </div>
+        <div className="fb-drawer-field">
+          <label className="fb-drawer-label">Help text</label>
+          <input
+            className="fb-drawer-input"
+            type="text"
+            value={classField.helpText ?? ''}
+            onChange={(e) => onChange({ ...classField, helpText: e.target.value })}
+            placeholder="Optional hint below the field"
+          />
+        </div>
+        <p className="fb-drawer-note">
+          Options are pulled from the bound program&rsquo;s active classes — there&rsquo;s nothing to configure here.
+        </p>
+
+        <div className="fb-drawer-section-divider" />
+        <div className="fb-drawer-section-title">Behavior</div>
+        <div className="fb-drawer-toggle-row">
+          <span className="fb-drawer-toggle-label">Required</span>
+          <label className="fb-drawer-toggle">
+            <input
+              type="checkbox"
+              checked={!!classField.required}
+              onChange={(e) => onChange({ ...classField, required: e.target.checked })}
+            />
+            <span className="fb-drawer-toggle-slider" />
+          </label>
+        </div>
+      </div>
+    )
+  }
+
   const currentField = field as Extract<Field, { label: string }>
 
   function handleLabelChange(newLabel: string) {
@@ -309,10 +439,15 @@ interface ValidationTabProps {
 }
 
 function ValidationTab({ field, onChange }: ValidationTabProps) {
-  if (field.type === 'page-break') {
+  if (
+    field.type === 'page-break' ||
+    field.type === 'section' ||
+    field.type === 'repeatable-group' ||
+    field.type === 'class-select'
+  ) {
     return (
       <div className="fb-drawer-body">
-        <p className="fb-drawer-note">No validation options for page break.</p>
+        <p className="fb-drawer-note">No validation options for this field type.</p>
       </div>
     )
   }

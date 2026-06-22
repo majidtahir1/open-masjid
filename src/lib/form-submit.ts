@@ -8,7 +8,8 @@ import { extractSubmitterName } from './form-submitter-name'
 interface SubmitArgs {
   payload: Payload
   form: { id: string|number; tenant: { id: string|number } | string|number; title: string;
-    status: string; schema: FormSchema; settings?: any; payment?: any }
+    status: string; schema: FormSchema; settings?: any; payment?: any;
+    schoolRegistration?: boolean | null; registrationProgram?: unknown }
   data: Record<string, unknown>
   ip: string
   userAgent: string
@@ -52,7 +53,23 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
   }
 
   // 5. Persist
-  const paymentEnabled = Boolean(form.payment?.enabled)
+  // Donation/payment forms gate checkout on `payment.enabled`. Registration
+  // forms gate on the bound PROGRAM's paymentModel (pricing lives on the
+  // program, not the form) — payment is required only for one-time | monthly.
+  let paymentEnabled = Boolean(form.payment?.enabled)
+  if (form.schoolRegistration === true) {
+    const progRaw = form.registrationProgram
+    const programId =
+      progRaw == null ? null : typeof progRaw === 'object' ? (progRaw as { id: string | number }).id : (progRaw as string | number)
+    let programPaymentModel: string | undefined
+    if (programId != null) {
+      const prog = await payload
+        .findByID({ collection: 'terms', id: programId, overrideAccess: true })
+        .catch(() => null)
+      programPaymentModel = (prog as { paymentModel?: string } | null)?.paymentModel
+    }
+    paymentEnabled = programPaymentModel === 'one-time' || programPaymentModel === 'monthly'
+  }
   const tenantId = typeof form.tenant === 'object' ? form.tenant.id : form.tenant
   const created = await payload.create({
     collection: 'form-submissions',

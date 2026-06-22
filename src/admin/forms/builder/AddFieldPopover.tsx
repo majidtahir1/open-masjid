@@ -17,15 +17,28 @@ const FIELD_DESCRIPTIONS: Record<FieldTypeId, string> = {
   'multiselect': 'Multiple choices from a list',
   'checkbox-group': 'Multiple checkbox selections',
   'consent': 'Mandatory agree/consent checkbox',
+  'class-select': 'Pick a class — options come from the program',
   'page-break': 'Split form into multiple steps',
+  'section': 'Group fields under a heading',
+  'repeatable-group': 'A repeatable set of fields (e.g. add another child)',
 }
+
+// Structural types may only appear at the top level — a repeatable-group's
+// children are leaf inputs only (one nesting level).
+const STRUCTURAL_TYPES: ReadonlySet<FieldTypeId> = new Set([
+  'page-break',
+  'section',
+  'repeatable-group',
+])
 
 interface AddFieldPopoverProps {
   onAdd: (typeId: FieldTypeId) => void
   onClose: () => void
+  /** When true, only leaf input types are offered (adding inside a group). */
+  leafOnly?: boolean
 }
 
-export default function AddFieldPopover({ onAdd, onClose }: AddFieldPopoverProps) {
+export default function AddFieldPopover({ onAdd, onClose, leafOnly = false }: AddFieldPopoverProps) {
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -55,8 +68,10 @@ export default function AddFieldPopover({ onAdd, onClose }: AddFieldPopoverProps
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  const filtered = FIELD_TYPES.filter((ft) =>
-    ft.label.toLowerCase().includes(search.trim().toLowerCase()),
+  const filtered = FIELD_TYPES.filter(
+    (ft) =>
+      (!leafOnly || !STRUCTURAL_TYPES.has(ft.id)) &&
+      ft.label.toLowerCase().includes(search.trim().toLowerCase()),
   )
 
   return (

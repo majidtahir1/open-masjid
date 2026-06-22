@@ -16,14 +16,12 @@ import DashboardClient, { type DashboardData } from '@/admin/school/dashboard/Da
 import TeacherDashboard from '@/admin/school/dashboard/TeacherDashboard'
 import { attendanceTrend, rateByClass, statusBreakdown, enrollmentByClass, dashboardKpis } from '@/lib/school-reports'
 import { unplacedForProgram } from '@/lib/school-setup'
+import { relId as idOf } from '@/lib/relationship-id'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const HUB_ROLES = new Set(['platformOwner', 'admin', 'school_admin', 'teacher'])
-
-const idOf = (v: unknown): string | number | null =>
-  v == null ? null : typeof v === 'object' && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
 
 export default async function SundaySchoolHubPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
   const sp = await searchParams

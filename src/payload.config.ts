@@ -12,6 +12,7 @@ import { Announcements } from './collections/Announcements'
 import { CarouselSlides } from './collections/CarouselSlides'
 import { DonationFunds } from './collections/DonationFunds'
 import { Members } from './collections/Members'
+import { ProgramSubscriptions } from './collections/ProgramSubscriptions'
 import { Terms } from './collections/Terms'
 import { SchoolClasses } from './collections/SchoolClasses'
 import { Students } from './collections/Students'
@@ -154,6 +155,7 @@ export default buildConfig({
     Terms,
     SchoolClasses,
     Students,
+    ProgramSubscriptions,
     Enrollments,
     ClassSessions,
     AttendanceRecords,

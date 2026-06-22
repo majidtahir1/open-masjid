@@ -1,8 +1,8 @@
 import type { CollectionBeforeValidateHook } from 'payload'
 import { Forbidden } from 'payload'
+import { relId as idOf } from '@/lib/relationship-id'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const idOf = (v: unknown) => (typeof v === 'object' && v !== null && 'id' in v ? (v as { id: unknown }).id : v)
 
 /**
  * For a school_admin creating/updating a class, require `data.term` ∈ managedPrograms.

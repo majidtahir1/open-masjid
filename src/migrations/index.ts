@@ -41,6 +41,12 @@ import * as migration_20260617_225620_term_meeting_days from './20260617_225620_
 import * as migration_20260618_041107_registration_program_targeting from './20260618_041107_registration_program_targeting';
 import * as migration_20260618_044149_user_managed_programs from './20260618_044149_user_managed_programs';
 import * as migration_20260619_033918_checkin_kiosk_attendance_timestamps from './20260619_033918_checkin_kiosk_attendance_timestamps';
+import * as migration_20260619_130822_student_registration_details from './20260619_130822_student_registration_details';
+import * as migration_20260619_195749_program_form_registration_settings from './20260619_195749_program_form_registration_settings';
+import * as migration_20260619_201100_program_tuition_pricing from './20260619_201100_program_tuition_pricing';
+import * as migration_20260619_201516_program_subscriptions from './20260619_201516_program_subscriptions';
+import * as migration_20260619_202232_program_subscription_canceled_at from './20260619_202232_program_subscription_canceled_at';
+import * as migration_20260620_150540_move_pricing_to_program from './20260620_150540_move_pricing_to_program';
 
 export const migrations = [
   {
@@ -256,6 +262,36 @@ export const migrations = [
   {
     up: migration_20260619_033918_checkin_kiosk_attendance_timestamps.up,
     down: migration_20260619_033918_checkin_kiosk_attendance_timestamps.down,
-    name: '20260619_033918_checkin_kiosk_attendance_timestamps'
+    name: '20260619_033918_checkin_kiosk_attendance_timestamps',
+  },
+  {
+    up: migration_20260619_130822_student_registration_details.up,
+    down: migration_20260619_130822_student_registration_details.down,
+    name: '20260619_130822_student_registration_details',
+  },
+  {
+    up: migration_20260619_195749_program_form_registration_settings.up,
+    down: migration_20260619_195749_program_form_registration_settings.down,
+    name: '20260619_195749_program_form_registration_settings',
+  },
+  {
+    up: migration_20260619_201100_program_tuition_pricing.up,
+    down: migration_20260619_201100_program_tuition_pricing.down,
+    name: '20260619_201100_program_tuition_pricing',
+  },
+  {
+    up: migration_20260619_201516_program_subscriptions.up,
+    down: migration_20260619_201516_program_subscriptions.down,
+    name: '20260619_201516_program_subscriptions',
+  },
+  {
+    up: migration_20260619_202232_program_subscription_canceled_at.up,
+    down: migration_20260619_202232_program_subscription_canceled_at.down,
+    name: '20260619_202232_program_subscription_canceled_at',
+  },
+  {
+    up: migration_20260620_150540_move_pricing_to_program.up,
+    down: migration_20260620_150540_move_pricing_to_program.down,
+    name: '20260620_150540_move_pricing_to_program'
   },
 ];

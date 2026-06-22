@@ -6,6 +6,7 @@ import { api } from '../api'
 import SchoolTabs from '../SchoolTabs'
 import '../sunday-school.css'
 import { buildAttendanceCsv } from '@/lib/attendance-csv'
+import { relIdStr as idOf } from '@/lib/relationship-id'
 
 interface SchoolClass {
   id: string | number
@@ -43,12 +44,6 @@ const STATUS_TINT: Record<string, React.CSSProperties> = {
   late: { background: 'rgba(240,200,140,0.22)', color: 'var(--ss-gold-700)' },
   excused: { background: 'var(--theme-elevation-100)', color: 'var(--theme-elevation-600)' },
   absent: { background: 'rgba(212,88,76,0.14)', color: 'var(--theme-error-500, #d4584c)' },
-}
-
-function idOf(v: unknown): string | number {
-  if (v == null) return ''
-  if (typeof v === 'object' && 'id' in (v as object)) return (v as { id: string | number }).id
-  return v as string | number
 }
 
 function studentName(s: Student): string {

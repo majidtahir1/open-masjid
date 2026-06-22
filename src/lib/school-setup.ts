@@ -1,3 +1,5 @@
+import { relId as idOf, relIdStr } from '@/lib/relationship-id'
+
 const WEEK_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 const DAY_PLURAL: Record<string, string> = {
   sunday: 'Sundays', monday: 'Mondays', tuesday: 'Tuesdays', wednesday: 'Wednesdays',
@@ -34,17 +36,13 @@ export interface HubSummary {
   unplacedCount: number
 }
 
-const idOf = (v: unknown): string | number =>
-  typeof v === 'object' && v !== null && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
-
 /**
  * Which wizard step to resume at. Never returns 3 (Teachers) — that step is
  * skippable, so it must never block resume. Returns 5 when setup is complete.
  */
-export function firstIncompleteStep(s: HubSummary): 1 | 2 | 4 | 5 {
+export function firstIncompleteStep(s: HubSummary): 1 | 2 | 5 {
   if (!s.term) return 1
   if (s.classCount === 0) return 2
-  if (s.unplacedCount > 0) return 4
   return 5
 }
 
@@ -71,10 +69,8 @@ export function unplacedForProgram(
   enrollments: Array<{ student: unknown; status?: string }>,
   programId: string | number,
 ): RegisteredStudent[] {
-  const idOfRel = (v: unknown): string =>
-    String(typeof v === 'object' && v !== null && 'id' in v ? (v as { id: unknown }).id : v)
-  const placed = new Set(enrollments.filter((e) => e.status === 'active').map((e) => idOfRel(e.student)))
-  return students.filter((s) => idOfRel(s.registeredProgram) === String(programId) && !placed.has(String(s.id)))
+  const placed = new Set(enrollments.filter((e) => e.status === 'active').map((e) => relIdStr(e.student)))
+  return students.filter((s) => relIdStr(s.registeredProgram) === String(programId) && !placed.has(String(s.id)))
 }
 
 /** Pure aggregation of raw docs into the hub summary. */

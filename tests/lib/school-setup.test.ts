@@ -8,8 +8,9 @@ describe('firstIncompleteStep', () => {
   it('term but no classes → step 2', () => {
     expect(firstIncompleteStep({ term: { id: 1 }, classCount: 0, teacherlessCount: 0, placedCount: 0, unplacedCount: 0 } as any)).toBe(2)
   })
-  it('classes but unplaced students remain → step 4', () => {
-    expect(firstIncompleteStep({ term: { id: 1 }, classCount: 2, teacherlessCount: 0, placedCount: 1, unplacedCount: 3 } as any)).toBe(4)
+  it('classes present → done (5); placement is no longer a setup step', () => {
+    // Placement moved to the Enrollment hub, so unplaced students never resume the wizard into step 4.
+    expect(firstIncompleteStep({ term: { id: 1 }, classCount: 2, teacherlessCount: 0, placedCount: 1, unplacedCount: 3 } as any)).toBe(5)
   })
   it('classes and nothing unplaced → done (5)', () => {
     expect(firstIncompleteStep({ term: { id: 1 }, classCount: 2, teacherlessCount: 1, placedCount: 4, unplacedCount: 0 } as any)).toBe(5)

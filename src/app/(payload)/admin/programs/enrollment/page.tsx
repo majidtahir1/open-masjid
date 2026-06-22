@@ -1,26 +1,23 @@
 import { redirect } from 'next/navigation'
-import {
-  createLocalReq,
-  getPayload,
-  isEntityHidden,
-  type SanitizedPermissions,
-  type VisibleEntities,
-} from 'payload'
+import { createLocalReq, getPayload, isEntityHidden, type SanitizedPermissions, type VisibleEntities } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import config from '@payload-config'
 import { getAdminUser } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
+import { selectedProgramId } from '@/lib/program-context.server'
 import { importMap } from '../../importMap'
-import StudentsClient from '@/admin/school/students/StudentsClient'
+import Enrollment from '@/admin/school/Enrollment'
+import { relId as idOf } from '@/lib/relationship-id'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const ROLES = new Set(['platformOwner', 'admin', 'school_admin'])
 
-export default async function StudentsPage() {
+export default async function EnrollmentPage({ searchParams }: { searchParams: Promise<{ program?: string }> }) {
+  const sp = await searchParams
   const { user, permissions } = await getAdminUser()
-  if (!user) redirect(loginUrl('/admin/programs/students'))
+  if (!user) redirect(loginUrl('/admin/programs/enrollment'))
 
   const role = (user as { role?: string }).role
   if (!role || !ROLES.has(role)) redirect('/admin/programs')
@@ -37,6 +34,17 @@ export default async function StudentsPage() {
       .map(({ slug }) => slug),
   }
 
+  const tenantId = idOf((user as { tenant?: unknown }).tenant)
+  const programsRes = await payload.find({
+    collection: 'terms',
+    where: { ...(tenantId ? { tenant: { equals: tenantId } } : {}) },
+    sort: '-startDate',
+    limit: 1000,
+    depth: 0,
+    req,
+  })
+  const selectedId = await selectedProgramId(sp.program, programsRes.docs as any)
+
   return (
     <DefaultTemplate
       i18n={req.i18n}
@@ -48,7 +56,7 @@ export default async function StudentsPage() {
       user={user}
       visibleEntities={visibleEntities}
     >
-      <StudentsClient />
+      <Enrollment programId={selectedId != null ? String(selectedId) : null} />
     </DefaultTemplate>
   )
 }

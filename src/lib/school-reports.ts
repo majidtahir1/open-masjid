@@ -1,5 +1,5 @@
-const idOf = (v: unknown): string | number =>
-  typeof v === 'object' && v !== null && 'id' in v ? (v as { id: string | number }).id : (v as string | number)
+import { relId as idOf } from '@/lib/relationship-id'
+
 const day = (d: unknown) => String(d ?? '').slice(0, 10)
 
 export type Status = 'present' | 'absent' | 'late' | 'excused'

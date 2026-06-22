@@ -4,6 +4,7 @@ import { RefreshCw, Search } from 'lucide-react'
 import { api } from './api'
 import SchoolTabs from './SchoolTabs'
 import './sunday-school.css'
+import { relIdStr as idOf } from '@/lib/relationship-id'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Doc = { id: number | string; [k: string]: any }
@@ -18,9 +19,6 @@ interface Row {
   inAt: string | null
   outAt: string | null
 }
-
-const idOf = (v: unknown): string =>
-  String(typeof v === 'object' && v !== null && 'id' in v ? (v as any).id : v)
 
 /** Local calendar date (YYYY-MM-DD) — matches how sessions are dated, unlike a UTC slice. */
 const localYmd = (d = new Date()): string =>

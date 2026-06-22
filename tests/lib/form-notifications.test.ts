@@ -1,10 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { sendFormNotifications } from '@/lib/form-notifications'
+import { buildSubmissionSummary, sendFormNotifications } from '@/lib/form-notifications'
 
 const fetchSpy = vi.fn()
 beforeEach(() => {
   fetchSpy.mockReset()
   global.fetch = fetchSpy as any
+})
+
+describe('buildSubmissionSummary', () => {
+  it('renders flat fields as key: value (arrays comma-joined)', () => {
+    const out = buildSubmissionSummary({ name: 'Aisha', days: ['sat', 'sun'] })
+    expect(out).toBe('name: Aisha\ndays: sat, sun')
+  })
+
+  it('renders a repeatable-group array as indented numbered sub-lines', () => {
+    const out = buildSubmissionSummary({
+      guardian_name: 'Aisha',
+      children: [
+        { child_first: 'Yusuf', child_grade: '3' },
+        { child_first: 'Maryam', child_grade: '5' },
+      ],
+    })
+    expect(out).not.toContain('[object Object]')
+    expect(out).toContain('children:')
+    expect(out).toContain('  1. child_first: Yusuf, child_grade: 3')
+    expect(out).toContain('  2. child_first: Maryam, child_grade: 5')
+  })
 })
 
 describe('sendFormNotifications', () => {

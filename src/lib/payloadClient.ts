@@ -9,6 +9,7 @@ interface PayloadLike {
     limit?: number
     depth?: number
     sort?: string | string[]
+    select?: Record<string, unknown>
     overrideAccess?: boolean
     draft?: boolean
     user?: unknown

@@ -54,6 +54,9 @@ import { default as default_9d208fc3e187ade5068100a3e10afed7 } from '../../../..
 import { default as default_45a3d8b2ce19feb7415a65d96670b7d7 } from '../../../../src/admin/forms/cells/SubmissionsCountCell'
 import { default as default_e176608bf3596fc9079af3cffe83fc95 } from '../../../../src/admin/forms/cells/LastSubmissionCell'
 import { FormBuilderFieldClient as FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078 } from '../../../../src/admin/forms/FormBuilderField.client'
+import { default as default_9504f2ee5875f5395e4b1f4c662637c7 } from '../../../../src/admin/forms/fields/DollarCents'
+import { default as default_83ccdf45c041005e062d6dd6ff521cf5 } from '../../../../src/admin/forms/HideFormsBulkSelect'
+import { default as default_a788bb21742f9f120837b82d36712023 } from '../../../../src/admin/forms/DeleteFormMenuItem'
 import { default as default_860e8a42638911b606d28103e4da5caf } from '../../../../src/admin/forms/submissions/SubmissionsView'
 import { default as default_2d600a181d8006b240d8cf056631f58b } from '../../../../src/admin/donations/BackToOverview'
 import { default as default_9afa571e6cc08efa56f642a8dcb8b90b } from '../../../../src/admin/donations/FundsListIntro'
@@ -137,6 +140,9 @@ export const importMap = {
   "/src/admin/forms/cells/SubmissionsCountCell#default": default_45a3d8b2ce19feb7415a65d96670b7d7,
   "/src/admin/forms/cells/LastSubmissionCell#default": default_e176608bf3596fc9079af3cffe83fc95,
   "/src/admin/forms/FormBuilderField.client#FormBuilderFieldClient": FormBuilderFieldClient_60824ec082322f47434e69cf2efa5078,
+  "/src/admin/forms/fields/DollarCents#default": default_9504f2ee5875f5395e4b1f4c662637c7,
+  "/src/admin/forms/HideFormsBulkSelect#default": default_83ccdf45c041005e062d6dd6ff521cf5,
+  "/src/admin/forms/DeleteFormMenuItem#default": default_a788bb21742f9f120837b82d36712023,
   "/src/admin/forms/submissions/SubmissionsView#default": default_860e8a42638911b606d28103e4da5caf,
   "/src/admin/donations/BackToOverview#default": default_2d600a181d8006b240d8cf056631f58b,
   "/src/admin/donations/FundsListIntro#default": default_9afa571e6cc08efa56f642a8dcb8b90b,

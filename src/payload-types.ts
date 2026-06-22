@@ -89,6 +89,7 @@ export interface Config {
     terms: Term;
     'school-classes': SchoolClass;
     students: Student;
+    'program-subscriptions': ProgramSubscription;
     enrollments: Enrollment;
     'class-sessions': ClassSession;
     'attendance-records': AttendanceRecord;
@@ -131,6 +132,7 @@ export interface Config {
     terms: TermsSelect<false> | TermsSelect<true>;
     'school-classes': SchoolClassesSelect<false> | SchoolClassesSelect<true>;
     students: StudentsSelect<false> | StudentsSelect<true>;
+    'program-subscriptions': ProgramSubscriptionsSelect<false> | ProgramSubscriptionsSelect<true>;
     enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
     'class-sessions': ClassSessionsSelect<false> | ClassSessionsSelect<true>;
     'attendance-records': AttendanceRecordsSelect<false> | AttendanceRecordsSelect<true>;
@@ -738,6 +740,9 @@ export interface Form {
    * Which program registrants are signed up for.
    */
   registrationProgram?: (number | null) | Term;
+  registration?: {
+    participantModel?: ('children' | 'self') | null;
+  };
   /**
    * Shown above the form on the public page.
    */
@@ -860,9 +865,15 @@ export interface Form {
   payment?: {
     enabled?: boolean | null;
     mode?: ('fixed' | 'suggested') | null;
+    /**
+     * Dollars, e.g. enter 25 for $25.
+     */
     priceCents?: number | null;
     suggestedAmountsCents?:
       | {
+          /**
+           * Dollars
+           */
           amount: number;
           id?: string | null;
         }[]
@@ -907,6 +918,26 @@ export interface Term {
    * Days the program meets each week. Sessions are created on every selected day.
    */
   meetingDays: ('sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday')[];
+  pricingModel?: ('per-program' | 'per-class') | null;
+  /**
+   * Dollars per month for the whole program (per-program pricing). E.g. enter 50 for $50/mo.
+   */
+  tuitionCents?: number | null;
+  /**
+   * Billing cadence for registration forms bound to this program.
+   */
+  paymentModel?: ('free' | 'one-time' | 'monthly') | null;
+  /**
+   * Percentage off by child rank, e.g. rank 2 = 25 (2nd child 25% off). Most expensive child pays full.
+   */
+  multiChildDiscount?:
+    | {
+        rank: number;
+        percentOff: number;
+        id?: string | null;
+      }[]
+    | null;
+  currency?: ('usd' | 'cad' | 'gbp') | null;
   status: 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
@@ -1729,6 +1760,10 @@ export interface SchoolClass {
    */
   capacity?: number | null;
   /**
+   * Dollars per month for this class (per-class pricing). E.g. enter 90 for $90/mo.
+   */
+  tuitionCents?: number | null;
+  /**
    * Archived classes are hidden from the live list but keep their history.
    */
   status: 'active' | 'archived';
@@ -1830,7 +1865,7 @@ export interface Student {
    */
   age?: number | null;
   /**
-   * Assigned by admin during placement.
+   * From registration (or set by admin); used for placement.
    */
   gradeLevel?: string | null;
   guardians?:
@@ -1850,9 +1885,25 @@ export interface Student {
    */
   member?: (number | null) | Member;
   /**
+   * Family tuition subscription this student was registered under.
+   */
+  programSubscription?: (number | null) | ProgramSubscription;
+  /**
    * The program this student registered for (set at registration). A placement hint — students are not owned by a program.
    */
   registeredProgram?: (number | null) | Term;
+  /**
+   * Snapshot of the original registration form answers (all fields), captured at submission time.
+   */
+  registrationDetails?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   status: 'active' | 'inactive';
   /**
    * Attendance history for this student.
@@ -1864,6 +1915,26 @@ export interface Student {
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Family tuition subscriptions billed via Stripe Connect.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "program-subscriptions".
+ */
+export interface ProgramSubscription {
+  id: number;
+  tenant: number | Tenant;
+  guardianEmail: string;
+  program?: (number | null) | Term;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripeSubscriptionStatus?: string | null;
+  status: 'active' | 'past_due' | 'canceled';
+  currentPeriodEnd?: string | null;
+  canceledAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * One student's attendance for one session.
@@ -2211,6 +2282,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'students';
         value: number | Student;
+      } | null)
+    | ({
+        relationTo: 'program-subscriptions';
+        value: number | ProgramSubscription;
       } | null)
     | ({
         relationTo: 'enrollments';
@@ -2689,6 +2764,11 @@ export interface FormsSelect<T extends boolean = true> {
   status?: T;
   schoolRegistration?: T;
   registrationProgram?: T;
+  registration?:
+    | T
+    | {
+        participantModel?: T;
+      };
   description?: T;
   schema?: T;
   settings?:
@@ -2870,6 +2950,17 @@ export interface TermsSelect<T extends boolean = true> {
         id?: T;
       };
   meetingDays?: T;
+  pricingModel?: T;
+  tuitionCents?: T;
+  paymentModel?: T;
+  multiChildDiscount?:
+    | T
+    | {
+        rank?: T;
+        percentOff?: T;
+        id?: T;
+      };
+  currency?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2886,6 +2977,7 @@ export interface SchoolClassesSelect<T extends boolean = true> {
   gradeLevel?: T;
   room?: T;
   capacity?: T;
+  tuitionCents?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2914,11 +3006,30 @@ export interface StudentsSelect<T extends boolean = true> {
   allergiesNotes?: T;
   emergencyContact?: T;
   member?: T;
+  programSubscription?: T;
   registeredProgram?: T;
+  registrationDetails?: T;
   status?: T;
   attendance?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "program-subscriptions_select".
+ */
+export interface ProgramSubscriptionsSelect<T extends boolean = true> {
+  tenant?: T;
+  guardianEmail?: T;
+  program?: T;
+  stripeCustomerId?: T;
+  stripeSubscriptionId?: T;
+  stripeSubscriptionStatus?: T;
+  status?: T;
+  currentPeriodEnd?: T;
+  canceledAt?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

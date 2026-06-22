@@ -39,6 +39,7 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
   const [emergencyContact, setEmergencyContact] = useState('')
   const [guardians, setGuardians] = useState<Guardian[]>([])
   const [enrollments, setEnrollments] = useState<any[]>([])
+  const [regDetails, setRegDetails] = useState<{ formName: string | null; fields: { label: string; value: string }[] } | null>(null)
   const [attendanceHistory, setAttendanceHistory] = useState<{ date: string; status: string }[]>([])
   const [checkinLog, setCheckinLog] = useState<{ date: string; inAt: string | null; outAt: string | null; source: string | null }[]>([])
   const [attendanceSummary, setAttendanceSummary] = useState<{ total: number; present: number; rate: number }>({ total: 0, present: 0, rate: 0 })
@@ -65,6 +66,11 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
             isPrimary: g.isPrimary ?? false,
           }))
         : [],
+    )
+    setRegDetails(
+      doc.registrationDetails && Array.isArray(doc.registrationDetails.fields)
+        ? doc.registrationDetails
+        : null,
     )
 
     const enrRes = await api(
@@ -145,7 +151,7 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
     if (!confirm('Delete this student? This cannot be undone.')) return
     try {
       await api(`/students/${studentId}`, { method: 'DELETE' })
-      router.push('/admin/programs/students')
+      router.push('/admin/programs/enrollment')
     } catch (e: any) {
       setError(e.message || 'Delete failed.')
     }
@@ -188,10 +194,10 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
 
       <Link
         className="ss-btn ss-btn--ghost ss-btn--small"
-        href="/admin/programs/students"
+        href="/admin/programs/enrollment"
         style={{ marginBottom: 12 }}
       >
-        <ArrowLeft size={15} /> All students
+        <ArrowLeft size={15} /> Enrollment
       </Link>
 
       <h1 className="ss-display" style={{ fontSize: 26, marginBottom: 18 }}>
@@ -320,6 +326,28 @@ const StudentDetailClient: React.FC<{ studentId: string }> = ({ studentId }) => 
         >
           + Add guardian
         </button>
+      </div>
+
+      {/* Registration details panel — all answers from the registration form */}
+      <div className="ss-card ss-panel" style={{ marginBottom: 16 }}>
+        <p className="ss-eyebrow">Registration details</p>
+        {!regDetails || regDetails.fields.length === 0 ? (
+          <p className="ss-emptyline">No registration on file (added manually).</p>
+        ) : (
+          <>
+            {regDetails.formName && (
+              <p style={{ fontSize: 13, color: 'var(--theme-elevation-500)', marginBottom: 10 }}>
+                From “{regDetails.formName}”
+              </p>
+            )}
+            {regDetails.fields.map((f, idx) => (
+              <div key={idx} className="ss-row" style={{ alignItems: 'flex-start' }}>
+                <span className="ss-row__name" style={{ flex: '0 0 40%', color: 'var(--theme-elevation-600)' }}>{f.label}</span>
+                <span style={{ flex: 1, textAlign: 'right', whiteSpace: 'pre-wrap' }}>{f.value}</span>
+              </div>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Enrollments panel */}

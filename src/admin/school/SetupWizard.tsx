@@ -1,13 +1,12 @@
 'use client'
 import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CalendarRange, GraduationCap, UserCheck, Users, Check, Sparkles } from 'lucide-react'
+import { CalendarRange, GraduationCap, UserCheck, Check, Sparkles } from 'lucide-react'
 import { api } from './api'
 import { buildHubSummary, firstIncompleteStep, type HubSummary } from '@/lib/school-setup'
 import StepTerm from './steps/StepTerm'
 import StepClasses from './steps/StepClasses'
 import StepTeachers from './steps/StepTeachers'
-import StepStudents from './steps/StepStudents'
 import './sunday-school.css'
 
 const EMPTY = buildHubSummary({ term: null, classes: [], enrollments: [], students: [], sessionsPerClass: 0 })
@@ -16,7 +15,6 @@ const STEPS = [
   { key: 'Term', icon: CalendarRange },
   { key: 'Classes', icon: GraduationCap },
   { key: 'Teachers', icon: UserCheck },
-  { key: 'Students', icon: Users },
 ] as const
 
 async function loadSummary(programId: string | null): Promise<HubSummary> {
@@ -39,7 +37,6 @@ function doneFlags(s: HubSummary): boolean[] {
     !!s.term,
     s.classCount > 0,
     s.classCount > 0 && s.teacherlessCount < s.classCount,
-    s.classCount > 0 && s.unplacedCount === 0 && s.placedCount > 0,
   ]
 }
 
@@ -64,7 +61,7 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
       setSummary(s)
       const qs = params.get('step')
       const resume = qs ? Number(qs) : (createMode && !progId ? 1 : firstIncompleteStep(s))
-      setStep((cur) => (cur === 5 ? 5 : Math.min(Math.max(resume, 1), 4)))
+      setStep((cur) => (cur === 5 ? 5 : Math.min(Math.max(resume, 1), 3)))
       setReady(true)
     })
     return () => { active = false }
@@ -106,8 +103,7 @@ const SetupWizard: React.FC<{ programId: string | null; createMode: boolean }> =
         <div>
           {step === 1 && <StepTerm programId={progId} createMode={createMode && !progId} onNext={() => goto(2)} onChanged={refresh} onProgram={(id) => setProgId(String(id))} />}
           {step === 2 && <StepClasses programId={progId} onBack={() => goto(1)} onNext={() => goto(3)} onChanged={refresh} />}
-          {step === 3 && <StepTeachers programId={progId} onBack={() => goto(2)} onNext={() => goto(4)} />}
-          {step === 4 && <StepStudents programId={progId} onBack={() => goto(3)} onFinish={() => goto(5)} onChanged={refresh} />}
+          {step === 3 && <StepTeachers programId={progId} onBack={() => goto(2)} onNext={() => goto(5)} />}
           {step === 5 && (
             <div className="ss-card">
               <div className="ss-finish">

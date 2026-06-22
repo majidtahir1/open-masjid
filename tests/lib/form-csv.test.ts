@@ -173,4 +173,70 @@ describe('submissionsToCsv', () => {
     expect(cols[3]).toBe('')
     expect(cols[4]).toBe('')
   })
+
+  describe('repeatable-group expansion', () => {
+    const groupSchema: FormSchema = {
+      steps: [
+        {
+          id: 'step1',
+          fields: [
+            { id: 'g_name', type: 'short-text', name: 'guardian_name', label: 'Guardian', required: false },
+            {
+              id: 'g_children',
+              type: 'repeatable-group',
+              name: 'children',
+              label: 'Children',
+              itemLabel: 'Child',
+              fields: [
+                { id: 'c_first', type: 'short-text', name: 'child_first', label: 'First name', required: false },
+                { id: 'c_grade', type: 'short-text', name: 'child_grade', label: 'Grade', required: false },
+              ],
+            } as FormSchema['steps'][0]['fields'][number],
+          ],
+        },
+      ],
+    }
+
+    it('expands group items into per-item child columns across the max item count', () => {
+      const subs = [
+        {
+          ...baseSubmission,
+          data: {
+            guardian_name: 'Aisha',
+            children: [
+              { child_first: 'Yusuf', child_grade: '3' },
+              { child_first: 'Maryam', child_grade: '5' },
+            ],
+          },
+        },
+        {
+          ...baseSubmission,
+          data: { guardian_name: 'Omar', children: [{ child_first: 'Bilal', child_grade: '1' }] },
+        },
+      ]
+      const csv = submissionsToCsv(groupSchema, subs)
+      const header = csv.split('\n')[0]
+      // Two items max across rows → two sets of child columns.
+      expect(header).toContain('Child 1 — First name')
+      expect(header).toContain('Child 1 — Grade')
+      expect(header).toContain('Child 2 — First name')
+      expect(header).toContain('Child 2 — Grade')
+
+      // Values appear, never [object Object] or blank for present items.
+      expect(csv).not.toContain('[object Object]')
+      expect(csv).toContain('Yusuf')
+      expect(csv).toContain('Maryam')
+      expect(csv).toContain('Bilal')
+
+      const row1 = csv.split('\n')[1].split(',')
+      const firstIdx = header.split(',').indexOf('Child 1 — First name')
+      expect(row1[firstIdx]).toBe('Yusuf')
+    })
+
+    it('emits a single column set even when no submissions have group data', () => {
+      const csv = submissionsToCsv(groupSchema, [])
+      const header = csv.split('\n')[0]
+      expect(header).toContain('Child 1 — First name')
+    })
+  })
 })

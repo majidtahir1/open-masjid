@@ -25,10 +25,30 @@ interface PublicFormRecord {
   title?: string | null
   description?: unknown
   status?: 'published' | 'closed' | string | null
+  schoolRegistration?: boolean | null
+  registrationProgram?: string | number | { id: string | number } | null
   settings?: {
     capacity?: number | null
   } | null
   appearance?: Appearance | null
+}
+
+export interface ProgramClass {
+  id: string | number
+  name: string
+  tuitionCents: number | null
+}
+
+/** Program-level pricing the public form needs to show the tuition summary. */
+export interface ProgramPricing {
+  pricingModel: 'per-program' | 'per-class'
+  /** Per-program monthly tuition (cents). Ignored when pricingModel is per-class. */
+  tuitionCents: number | null
+  /** Billing cadence — drives whether/how the tuition summary renders. */
+  paymentModel: 'free' | 'one-time' | 'monthly'
+  /** Sibling-discount tiers (rank → percent off). */
+  tiers: { rank: number; percentOff: number }[]
+  currency: string
 }
 
 export default async function FormPage({
@@ -79,6 +99,68 @@ export default async function FormPage({
 
   const closed = form.status === 'closed' || isFull
 
+  // For per-class registration programs, load the program's ACTIVE classes so
+  // the public form can render the per-participant class selector. Non-
+  // registration forms (no schoolRegistration / no program) get an empty list.
+  let programClasses: ProgramClass[] = []
+  let programPricing: ProgramPricing | null = null
+  const programRaw = form.registrationProgram
+  const programId =
+    programRaw && typeof programRaw === 'object' && 'id' in programRaw
+      ? programRaw.id
+      : (programRaw as string | number | null)
+  if (form.schoolRegistration === true && programId) {
+    // Load the program's pricing model + per-program tuition so the public
+    // form can show the tuition summary (the actual charge is recomputed
+    // server-side at submit; this is the display-only mirror).
+    const program = (await payload.findByID({
+      collection: 'terms',
+      id: programId,
+      overrideAccess: true,
+    }).catch(() => null)) as {
+      pricingModel?: string | null
+      tuitionCents?: number | null
+      paymentModel?: string | null
+      multiChildDiscount?: { rank?: number | null; percentOff?: number | null }[] | null
+      currency?: string | null
+    } | null
+    if (program) {
+      programPricing = {
+        pricingModel: program.pricingModel === 'per-class' ? 'per-class' : 'per-program',
+        tuitionCents: program.tuitionCents ?? null,
+        paymentModel:
+          program.paymentModel === 'monthly' || program.paymentModel === 'one-time'
+            ? program.paymentModel
+            : 'free',
+        tiers: Array.isArray(program.multiChildDiscount)
+          ? program.multiChildDiscount.map((t) => ({ rank: Number(t.rank), percentOff: Number(t.percentOff) }))
+          : [],
+        currency: program.currency ?? 'usd',
+      }
+    }
+    const classesResult = await payload.find({
+      collection: 'school-classes',
+      where: {
+        and: [
+          { term: { equals: programId } },
+          { status: { equals: 'active' } },
+        ],
+      },
+      limit: 1000,
+      depth: 0,
+      select: { name: true, tuitionCents: true },
+      overrideAccess: true,
+    })
+    programClasses = classesResult.docs.map((c) => {
+      const doc = c as { id: string | number; name?: string | null; tuitionCents?: number | null }
+      return {
+        id: doc.id,
+        name: doc.name ?? '',
+        tuitionCents: doc.tuitionCents ?? null,
+      }
+    })
+  }
+
   // Background CSS from form.appearance (gradient overrides solid color)
   const backgroundCss = computeBackgroundCss(form.appearance ?? undefined)
 
@@ -98,7 +180,12 @@ export default async function FormPage({
             <RichText data={form.description as never} className="om-pf-description" />
           ) : null}
         </header>
-        <PublicFormClient form={form as any} closed={closed} />
+        <PublicFormClient
+          form={form as any}
+          closed={closed}
+          programClasses={programClasses}
+          programPricing={programPricing}
+        />
       </div>
     </section>
   )

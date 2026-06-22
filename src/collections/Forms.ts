@@ -10,7 +10,8 @@ import { denyKioskManager, hideForKioskManager } from '../access/kioskRoles'
 import { setTenantFromUser } from '../hooks/setTenantFromUser'
 import { validateSchema } from '../lib/form-schema'
 import { applyRenames, detectFieldRenames } from '../lib/form-schema-migrate'
-import { hasRequiredRegistrationFields } from '../lib/registration-fields'
+import { hasParticipantGroup, hasRequiredRegistrationFields } from '../lib/registration-fields'
+import { cascadeDeleteFormSubmissions } from '../hooks/cascadeDeleteFormSubmissions'
 
 const slugify = (v: string): string =>
   v.toLowerCase().trim()
@@ -35,6 +36,14 @@ export const Forms: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'submissionsCount', 'lastSubmission', 'updatedAt'],
     components: {
+      // Hides the list-view row-selection column so there's no bulk delete;
+      // form deletion is funneled through the form page's count-aware dialog.
+      beforeListTable: ['/src/admin/forms/HideFormsBulkSelect#default'],
+      edit: {
+        // Replaces the native delete with a count-aware confirmation (warns how
+        // many submissions cascade-delete with the form). Hides #action-delete.
+        editMenuItems: ['/src/admin/forms/DeleteFormMenuItem#default'],
+      },
       views: {
         edit: {
           // Spreadsheet of this form's submissions.
@@ -58,15 +67,30 @@ export const Forms: CollectionConfig = {
     delete: denyKioskManager(withBillingLock(tenantScopedDelete)),
   },
   hooks: {
-    beforeChange: [setTenantFromUser, async ({ data }) => {
+    beforeDelete: [cascadeDeleteFormSubmissions],
+    beforeChange: [setTenantFromUser, async ({ data, originalDoc }) => {
       if (data?.schema) {
         const r = validateSchema(data.schema)
         if (!r.success) throw new Error(`Invalid form schema: ${r.error}`)
-        if (data.schoolRegistration === true && !hasRequiredRegistrationFields(r.schema)) {
-          throw new Error('A registration form must keep the Student first name and Student last name fields.')
+      }
+      // Registration invariants are only enforced at PUBLISH — drafts can be
+      // saved while still being built (e.g. before the participant group exists).
+      const orig = originalDoc as Record<string, any> | undefined
+      const status = (data?.status ?? orig?.status) as string | undefined
+      const schoolReg = data?.schoolRegistration ?? orig?.schoolRegistration
+      if (status === 'published' && schoolReg === true) {
+        const rawSchema = data?.schema ?? orig?.schema
+        const sr = rawSchema ? validateSchema(rawSchema) : null
+        const parsed = sr && sr.success ? sr.schema : null
+        if (!parsed || !hasRequiredRegistrationFields(parsed)) {
+          throw new Error('Before publishing: a registration form must include the Student first name and Student last name fields.')
         }
-        if (data.schoolRegistration === true && !data.registrationProgram) {
-          throw new Error('A registration form must have a program selected (For program).')
+        if (!(data?.registrationProgram ?? orig?.registrationProgram)) {
+          throw new Error('Before publishing: select a program for this registration form (For program).')
+        }
+        const participantModel = data?.registration?.participantModel ?? orig?.registration?.participantModel
+        if (participantModel === 'children' && !hasParticipantGroup(parsed)) {
+          throw new Error('Before publishing: a children registration form must contain a repeatable participant group.')
         }
       }
       return data
@@ -137,7 +161,7 @@ export const Forms: CollectionConfig = {
       name: 'schoolRegistration',
       type: 'checkbox',
       defaultValue: false,
-      label: 'Sunday school registration form',
+      label: 'Program registration form',
       admin: {
         position: 'sidebar',
         description: 'Submissions create an unplaced student you can place into a class.',
@@ -152,6 +176,22 @@ export const Forms: CollectionConfig = {
         description: 'Which program registrants are signed up for.',
         condition: (data) => data?.schoolRegistration === true,
       },
+    },
+    {
+      name: 'registration',
+      type: 'group',
+      admin: { condition: (_, sib) => sib?.schoolRegistration === true },
+      fields: [
+        {
+          name: 'participantModel',
+          type: 'select',
+          defaultValue: 'children',
+          options: [
+            { label: 'Children (guardian registers ≥1 child)', value: 'children' },
+            { label: 'Self (an adult registers themselves)', value: 'self' },
+          ],
+        },
+      ],
     },
     {
       name: 'submissionsCount',
@@ -307,7 +347,16 @@ export const Forms: CollectionConfig = {
       name: 'payment',
       type: 'group',
       fields: [
-        { name: 'enabled', type: 'checkbox', defaultValue: false },
+        // Registration-form pricing (cadence, discounts, currency) lives on the
+        // bound program (Terms), not here — see src/collections/Terms.ts. These
+        // legacy fields drive only standalone donation/payment forms and are
+        // hidden when schoolRegistration is on.
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: { condition: (data) => data?.schoolRegistration !== true },
+        },
         {
           name: 'mode',
           type: 'select',
@@ -316,25 +365,43 @@ export const Forms: CollectionConfig = {
             { label: 'Fixed price', value: 'fixed' },
             { label: 'Suggested amounts', value: 'suggested' },
           ],
+          // Legacy one-time pricing — hidden on registration forms, whose
+          // pricing comes from the program/class tuition + paymentModel.
+          admin: { condition: (data) => data?.schoolRegistration !== true },
         },
+        // Stored in cents; the DollarCents component shows an editable $ input.
         {
           name: 'priceCents',
           type: 'number',
-          admin: { condition: (_, sib) => sib?.mode === 'fixed' && sib?.enabled },
+          min: 0,
+          label: 'Price',
+          admin: {
+            condition: (data, sib) => data?.schoolRegistration !== true && sib?.mode === 'fixed' && sib?.enabled,
+            description: 'Dollars, e.g. enter 25 for $25.',
+            components: { Field: '/src/admin/forms/fields/DollarCents#default' },
+          },
         },
         {
           name: 'suggestedAmountsCents',
           type: 'array',
+          labels: { singular: 'Suggested amount', plural: 'Suggested amounts' },
           fields: [
-            { name: 'amount', type: 'number', required: true, min: 0 },
+            {
+              name: 'amount',
+              type: 'number',
+              required: true,
+              min: 0,
+              label: 'Amount',
+              admin: { description: 'Dollars', components: { Field: '/src/admin/forms/fields/DollarCents#default' } },
+            },
           ],
-          admin: { condition: (_, sib) => sib?.mode === 'suggested' && sib?.enabled },
+          admin: { condition: (data, sib) => data?.schoolRegistration !== true && sib?.mode === 'suggested' && sib?.enabled },
         },
         {
           name: 'allowCustomAmount',
           type: 'checkbox',
           defaultValue: true,
-          admin: { condition: (_, sib) => sib?.mode === 'suggested' && sib?.enabled },
+          admin: { condition: (data, sib) => data?.schoolRegistration !== true && sib?.mode === 'suggested' && sib?.enabled },
         },
         {
           name: 'currency',
@@ -345,6 +412,7 @@ export const Forms: CollectionConfig = {
             { label: 'CAD', value: 'cad' },
             { label: 'GBP', value: 'gbp' },
           ],
+          admin: { condition: (data) => data?.schoolRegistration !== true },
         },
         {
           name: 'description',

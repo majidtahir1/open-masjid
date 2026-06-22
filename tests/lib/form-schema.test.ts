@@ -2,17 +2,104 @@
 import { describe, it, expect } from 'vitest'
 import {
   FormSchema,
+  Field,
   validateSchema,
   validateSubmission,
+  validateFields,
   FIELD_TYPES,
 } from '@/lib/form-schema'
 
 describe('FIELD_TYPES', () => {
-  it('exposes the 12 v1 field types in a stable order', () => {
+  it('exposes the field types in a stable order', () => {
     expect(FIELD_TYPES.map((t) => t.id)).toEqual([
       'short-text','email','phone','long-text','number','date',
-      'dropdown','radio','multiselect','checkbox-group','consent','page-break',
+      'dropdown','radio','multiselect','checkbox-group','consent','class-select','page-break',
+      'section','repeatable-group',
     ])
+  })
+})
+
+describe('repeatable-group schema', () => {
+  const groupSchema = {
+    steps: [{ id: 's1', fields: [
+      { type: 'short-text', id: 'g1', name: 'guardian_name', label: 'Guardian', required: true },
+      { type: 'repeatable-group', id: 'p', name: 'participants', label: 'Children', itemLabel: 'Child', min: 1, max: 10, fields: [
+        { type: 'short-text', id: 'f1', name: 'student_first_name', label: 'First', required: true },
+        { type: 'short-text', id: 'f2', name: 'student_last_name', label: 'Last', required: true },
+      ] },
+    ] }],
+  }
+
+  it('accepts a valid group schema', () => {
+    expect(validateSchema(groupSchema).success).toBe(true)
+  })
+
+  it('rejects duplicate names across group + top level', () => {
+    const bad = JSON.parse(JSON.stringify(groupSchema))
+    bad.steps[0].fields[1].fields[0].name = 'guardian_name'
+    expect(validateSchema(bad).success).toBe(false)
+  })
+
+  it('validates submission into a nested participants array', () => {
+    const r = validateSubmission(groupSchema as any, {
+      guardian_name: 'Rahman',
+      participants: [
+        { student_first_name: 'Aisha', student_last_name: 'Abbasi' },
+        { student_first_name: 'Yusuf', student_last_name: 'Abbasi' },
+      ],
+    })
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect(r.data.guardian_name).toBe('Rahman')
+      expect((r.data.participants as any[]).length).toBe(2)
+      expect((r.data.participants as any[])[0].student_first_name).toBe('Aisha')
+    }
+  })
+
+  it('fails when a required field inside an item is empty', () => {
+    const r = validateSubmission(groupSchema as any, {
+      guardian_name: 'Rahman',
+      participants: [{ student_first_name: '', student_last_name: 'Abbasi' }],
+    })
+    expect(r.ok).toBe(false)
+  })
+
+  it('fails when fewer than min items', () => {
+    const r = validateSubmission(groupSchema as any, { guardian_name: 'R', participants: [] })
+    expect(r.ok).toBe(false)
+  })
+})
+
+describe('class-select field', () => {
+  const groupWithClass = {
+    steps: [{ id: 's1', fields: [
+      { type: 'repeatable-group', id: 'p', name: 'participants', label: 'Children', itemLabel: 'Child', min: 1, fields: [
+        { type: 'short-text', id: 'f1', name: 'student_first_name', label: 'First', required: true },
+        { type: 'class-select', id: 'f2', name: 'class', label: 'Class', required: true },
+      ] },
+    ] }],
+  }
+
+  it('validateSchema accepts a class-select inside a repeatable-group', () => {
+    expect(validateSchema(groupWithClass).success).toBe(true)
+  })
+
+  it('validateSubmission stores the selected class id under its name', () => {
+    const r = validateSubmission(groupWithClass as any, {
+      participants: [{ student_first_name: 'Aisha', class: '42' }],
+    })
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect((r.data.participants as any[])[0].class).toBe('42')
+    }
+  })
+
+  it('validateSubmission errors when required class-select is empty', () => {
+    const r = validateSubmission(groupWithClass as any, {
+      participants: [{ student_first_name: 'Aisha', class: '' }],
+    })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.errors['participants.0.class']).toBeDefined()
   })
 })
 
@@ -64,5 +151,51 @@ describe('validateSubmission', () => {
   it('rejects multiselect values not in option list', () => {
     const r = validateSubmission(schema, { email: 'x@y.com', name: 'A', roles: ['c'] })
     expect(r.ok).toBe(false)
+  })
+})
+
+describe('validateFields (per-step validation)', () => {
+  const fields: Field[] = [
+    { type: 'email', id: 'f1', name: 'email', label: 'Email', required: true },
+    { type: 'number', id: 'f2', name: 'attendees', label: 'Attendees', required: true, min: 1 },
+    { type: 'short-text', id: 'f3', name: 'note', label: 'Note', required: false },
+  ]
+
+  it('returns no errors when the step fields are all valid', () => {
+    const { errors } = validateFields(fields, { email: 'a@b.com', attendees: 3 })
+    expect(errors).toEqual({})
+  })
+
+  it('flags an invalid email format (not just emptiness)', () => {
+    const { errors } = validateFields(fields, { email: 'not-an-email', attendees: 3 })
+    expect(errors.email).toBe('Invalid email')
+  })
+
+  it('flags a number below its min', () => {
+    const { errors } = validateFields(fields, { email: 'a@b.com', attendees: 0 })
+    expect(errors.attendees).toBe('Min 1')
+  })
+
+  it('flags missing required fields', () => {
+    const { errors } = validateFields(fields, {})
+    expect(errors.email).toBe('Required')
+    expect(errors.attendees).toBe('Required')
+  })
+
+  it('validates required children inside a repeatable-group with indexed keys', () => {
+    const groupFields: Field[] = [
+      {
+        type: 'repeatable-group', id: 'g1', name: 'children', label: 'Children', min: 1,
+        fields: [
+          { type: 'short-text', id: 'c1', name: 'student_first_name', label: 'First', required: true },
+          { type: 'number', id: 'c2', name: 'age', label: 'Age', required: false, min: 1 },
+        ],
+      },
+    ]
+    const { errors } = validateFields(groupFields, {
+      children: [{ student_first_name: '', age: 0 }],
+    })
+    expect(errors['children.0.student_first_name']).toBe('Required')
+    expect(errors['children.0.age']).toBe('Min 1')
   })
 })

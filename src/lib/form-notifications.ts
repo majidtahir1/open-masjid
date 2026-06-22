@@ -16,6 +16,33 @@ function interpolate(t: string, vars: Record<string, string>): string {
     .replace(/^[ \t]+|[ \t]+$/gm, '')
 }
 
+/**
+ * Render one submission's `data` as a plain-text summary for the admin email.
+ * Most fields are flat `key: value`. A repeatable-group stores its answers as
+ * an array of item maps under one key; those render as a labelled header plus
+ * indented, numbered sub-lines so they never collapse to `[object Object]`.
+ */
+export function buildSubmissionSummary(data: Record<string, unknown>): string {
+  const renderScalar = (v: unknown): string => (Array.isArray(v) ? v.join(', ') : String(v))
+  const isItemArray = (v: unknown): v is Record<string, unknown>[] =>
+    Array.isArray(v) && v.length > 0 && v.every((x) => x !== null && typeof x === 'object' && !Array.isArray(x))
+
+  return Object.entries(data)
+    .map(([k, v]) => {
+      if (isItemArray(v)) {
+        const lines = v.map((item, i) => {
+          const inner = Object.entries(item)
+            .map(([ck, cv]) => `${ck}: ${renderScalar(cv)}`)
+            .join(', ')
+          return `  ${i + 1}. ${inner}`
+        })
+        return `${k}:\n${lines.join('\n')}`
+      }
+      return `${k}: ${renderScalar(v)}`
+    })
+    .join('\n')
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -176,9 +203,7 @@ export async function sendFormNotifications({
   const recipients = (settings.notificationEmails ?? [])
     .map((e) => e.email)
     .filter(Boolean) as string[]
-  const summary = Object.entries(submission.data as Record<string, unknown>)
-    .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`)
-    .join('\n')
+  const summary = buildSubmissionSummary(submission.data as Record<string, unknown>)
 
   const tenant = await loadTenant(form)
   if (!shouldSendForTenant(tenant)) {

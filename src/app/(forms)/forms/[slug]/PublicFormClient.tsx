@@ -13,11 +13,15 @@ import { PublicFormFields } from '@/components/PublicFormFields'
 import { PublicFormProgress } from '@/components/PublicFormProgress'
 import { PublicFormSuccess } from '@/components/PublicFormSuccess'
 import { PublicFormPaymentBlock } from '@/components/PublicFormPaymentBlock'
+import { PublicFormTuitionSummary, type SummaryParticipant } from '@/components/PublicFormTuitionSummary'
 import RichText from '@/components/RichText'
 import { flattenStepsForOnePerPage } from '@/lib/form-appearance'
+import type { DiscountTier } from '@/lib/tuition-pricing'
 import type { Form } from '@/payload-types'
-import type { FormSchema } from '@/lib/form-schema'
+import { validateFields } from '@/lib/form-schema'
+import type { FormSchema, Field } from '@/lib/form-schema'
 import type { Appearance } from '@/lib/form-appearance'
+import type { ProgramClass, ProgramPricing } from './page'
 
 /** Augmented Form type that includes the appearance group added in V2. */
 type FormWithAppearance = Form & { appearance?: Appearance | null }
@@ -25,9 +29,31 @@ type FormWithAppearance = Form & { appearance?: Appearance | null }
 interface Props {
   form: Form
   closed: boolean
+  /** Active classes of the bound program — options for class-select fields. */
+  programClasses?: ProgramClass[]
+  /** Program pricing model + per-program tuition; null for non-registration forms. */
+  programPricing?: ProgramPricing | null
 }
 
-export function PublicFormClient({ form, closed }: Props) {
+/** First repeatable-group field in the schema (the participant group), if any. */
+function findParticipantGroup(schema: FormSchema): Extract<Field, { type: 'repeatable-group' }> | null {
+  for (const step of schema.steps) {
+    for (const f of step.fields) {
+      if (f.type === 'repeatable-group') return f
+    }
+  }
+  return null
+}
+
+/** Name of the first class-select field within a list of fields, if any. */
+function classSelectName(fields: readonly Field[]): string | null {
+  for (const f of fields) {
+    if (f.type === 'class-select' && 'name' in f) return f.name
+  }
+  return null
+}
+
+export function PublicFormClient({ form, closed, programClasses = [], programPricing = null }: Props) {
   const schema = form.schema as FormSchema
   const formExt = form as FormWithAppearance
 
@@ -36,7 +62,21 @@ export function PublicFormClient({ form, closed }: Props) {
     ? flattenStepsForOnePerPage(schema)
     : schema
 
-  const [values, setValues] = useState<Record<string, unknown>>({})
+  // Seed an empty item ([{}]) for every repeatable-group so the group renders
+  // one item card on load. Flat forms have no groups → empty initial values,
+  // exactly as before.
+  const [values, setValues] = useState<Record<string, unknown>>(() => {
+    const init: Record<string, unknown> = {}
+    for (const step of effectiveSchema.steps) {
+      for (const f of step.fields) {
+        if (f.type === 'repeatable-group') {
+          const count = Math.max(1, f.min ?? 1)
+          init[f.name] = Array.from({ length: count }, () => ({}))
+        }
+      }
+    }
+    return init
+  })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
@@ -82,19 +122,51 @@ export function PublicFormClient({ form, closed }: Props) {
     }
   }
 
-  function validateStep(): boolean {
-    const stepErrors: Record<string, string> = {}
-    for (const f of currentFields) {
-      const val = values[f.name]
-      const isEmpty =
-        val === undefined ||
-        val === null ||
-        val === '' ||
-        (Array.isArray(val) && (val as unknown[]).length === 0)
-      if (f.required && isEmpty) {
-        stepErrors[f.name] = 'Required'
-      }
+  /** Edit one child field of one item; immutable — replaces the item and the array. */
+  function onGroupChange(groupName: string, index: number, childName: string, val: unknown) {
+    setValues((prev) => {
+      const arr = Array.isArray(prev[groupName]) ? (prev[groupName] as Record<string, unknown>[]) : [{}]
+      const nextArr = arr.map((item, i) => (i === index ? { ...item, [childName]: val } : item))
+      return { ...prev, [groupName]: nextArr }
+    })
+    const errKey = `${groupName}.${index}.${childName}`
+    if (errors[errKey]) {
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next[errKey]
+        return next
+      })
     }
+  }
+
+  function addItem(groupName: string) {
+    setValues((prev) => {
+      const arr = Array.isArray(prev[groupName]) ? (prev[groupName] as Record<string, unknown>[]) : [{}]
+      return { ...prev, [groupName]: [...arr, {}] }
+    })
+  }
+
+  function removeItem(groupName: string, index: number) {
+    setValues((prev) => {
+      const arr = Array.isArray(prev[groupName]) ? (prev[groupName] as Record<string, unknown>[]) : [{}]
+      return { ...prev, [groupName]: arr.filter((_, i) => i !== index) }
+    })
+    // Drop any errors keyed to the removed item.
+    setErrors((prev) => {
+      const next: Record<string, string> = {}
+      const removedPrefix = `${groupName}.${index}.`
+      for (const [k, v] of Object.entries(prev)) {
+        if (!k.startsWith(removedPrefix)) next[k] = v
+      }
+      return next
+    })
+  }
+
+  function validateStep(): boolean {
+    // Reuse the same field validation the server runs at submit, so "Continue"
+    // catches format/min/option errors (e.g. a malformed email) on the current
+    // step instead of letting them slip through to the final POST.
+    const { errors: stepErrors } = validateFields(currentFields, values)
     setErrors((prev) => ({ ...prev, ...stepErrors }))
 
     // Move focus to the first errored field so keyboard/SR users land there
@@ -229,8 +301,45 @@ export function PublicFormClient({ form, closed }: Props) {
         : 'Continue →'
 
   // Suggested amounts: extract the `amount` value from each row
-  const suggestedAmountsCents =
-    form.payment?.suggestedAmountsCents?.map((row) => row.amount) ?? []
+  const suggestedAmountsCents: number[] =
+    form.payment?.suggestedAmountsCents?.map((row) => row.amount).filter((a): a is number => typeof a === 'number') ?? []
+
+  // ─── Registration tuition summary ────────────────────────────────────────────
+  // A paid registration form shows a live tuition breakdown (program price ×
+  // participants − sibling discounts) instead of the legacy donation block.
+  const isRegistration = form.schoolRegistration === true
+  const paymentModel = programPricing?.paymentModel ?? 'free'
+  const showTuition =
+    isRegistration && (paymentModel === 'monthly' || paymentModel === 'one-time') && programPricing !== null
+
+  let tuitionParticipants: SummaryParticipant[] = []
+  if (showTuition) {
+    const participantModel = form.registration?.participantModel ?? 'self'
+    if (participantModel === 'children') {
+      const group = findParticipantGroup(effectiveSchema)
+      const groupName = group?.name
+      const classKey = group ? classSelectName(group.fields) : null
+      const items = groupName && Array.isArray(values[groupName]) ? (values[groupName] as Record<string, unknown>[]) : []
+      tuitionParticipants = items.map((it, i) => {
+        const first = String(it.student_first_name ?? '').trim()
+        const last = String(it.student_last_name ?? '').trim()
+        const name = `${first} ${last}`.trim()
+        const classVal = classKey ? it[classKey] : null
+        return { label: name || `Child ${i + 1}`, classId: classVal != null ? String(classVal) : null }
+      })
+    } else {
+      const classKey = classSelectName(effectiveSchema.steps.flatMap((s) => s.fields))
+      const first = String(values.student_first_name ?? '').trim()
+      const last = String(values.student_last_name ?? '').trim()
+      const classVal = classKey ? values[classKey] : null
+      tuitionParticipants = [{ label: `${first} ${last}`.trim() || 'Registration', classId: classVal != null ? String(classVal) : null }]
+    }
+  }
+
+  const classPrices: Record<string, number> = Object.fromEntries(
+    programClasses.map((c) => [String(c.id), c.tuitionCents ?? 0]),
+  )
+  const discountTiers = (programPricing?.tiers ?? []) as DiscountTier[]
 
   // Determine if current step is a single-field text-like step (for Enter hint)
   const showEnterHint =
@@ -261,14 +370,32 @@ export function PublicFormClient({ form, closed }: Props) {
         values={values}
         errors={errors}
         onChange={setValue}
+        onGroupChange={onGroupChange}
+        onGroupAdd={addItem}
+        onGroupRemove={removeItem}
+        programClasses={programClasses}
       />
 
       {showEnterHint && (
         <div className="om-pf-enter-hint" aria-hidden="true">Press Enter ↵ to continue</div>
       )}
 
-      {/* Payment block — rendered on the last step only when payment is enabled */}
-      {isLast && form.payment?.enabled && (
+      {/* Paid registration form: live tuition summary (program price, sibling
+          discounts) — the actual charge is recomputed server-side at submit. */}
+      {isLast && showTuition && programPricing && (
+        <PublicFormTuitionSummary
+          paymentModel={paymentModel as 'monthly' | 'one-time'}
+          pricingModel={programPricing.pricingModel}
+          programTuitionCents={programPricing.tuitionCents ?? 0}
+          classPrices={classPrices}
+          tiers={discountTiers}
+          participants={tuitionParticipants}
+          currency={programPricing.currency}
+        />
+      )}
+
+      {/* Legacy donation/payment block — non-registration forms only. */}
+      {isLast && !isRegistration && form.payment?.enabled && (
         <PublicFormPaymentBlock
           mode={form.payment.mode ?? 'fixed'}
           priceCents={form.payment.priceCents ?? undefined}

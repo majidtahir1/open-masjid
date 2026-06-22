@@ -9,6 +9,7 @@
  */
 
 import RichText from '@/components/RichText'
+import { formatCents } from '@/lib/money'
 
 export interface MembershipTier {
   id: string | number
@@ -16,16 +17,6 @@ export interface MembershipTier {
   description?: unknown
   amountCents: number
   cadence: 'monthly' | 'yearly'
-}
-
-function formatAmount(cents: number): string {
-  const dollars = Math.round(cents / 100)
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(dollars)
 }
 
 interface Props {
@@ -52,7 +43,7 @@ export default function MembershipTierCard({ tier }: Props) {
         ) : (
           <>
             <span className="font-display text-[36px] font-medium leading-none text-brand">
-              {formatAmount(tier.amountCents)}
+              {formatCents(tier.amountCents, 'USD', { whole: true })}
             </span>
             <span className="font-body text-fs-sm text-fg3">{cadenceLabel}</span>
           </>
@@ -110,7 +101,7 @@ export default function MembershipTierCard({ tier }: Props) {
             type="submit"
             className="w-full rounded-[var(--r-md)] bg-brand px-8 py-[14px] font-body text-[17px] font-semibold text-white shadow-sh-sm transition-all duration-base ease-out hover:-translate-y-px hover:bg-brand-hover hover:shadow-sh-md"
           >
-            Join — {formatAmount(tier.amountCents)}
+            Join — {formatCents(tier.amountCents, 'USD', { whole: true })}
             {cadenceLabel}
           </button>
         </form>

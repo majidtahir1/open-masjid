@@ -37,7 +37,18 @@ export function authorizeInvite(
   if (!body.role) return { ok: false, error: 'email and role are required', status: 400 }
 
   if (ctx.actingRole === 'platformOwner') {
-    return { ok: true, targetTenant: body.role === 'platformOwner' ? null : (body.tenant ?? null) }
+    if (body.role === 'platformOwner') return { ok: true, targetTenant: null }
+    // Every non-platformOwner role is tenant-scoped; a tenant-less account
+    // breaks all tenantScoped access rules, so require one explicitly.
+    const tenant = body.tenant ?? null
+    if (!tenant) {
+      return {
+        ok: false,
+        error: 'tenant is required for admin, school_admin, staff, teacher, and kiosk manager roles.',
+        status: 400,
+      }
+    }
+    return { ok: true, targetTenant: tenant }
   }
 
   // admin or school_admin

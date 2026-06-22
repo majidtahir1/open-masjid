@@ -1,13 +1,5 @@
 import type { PayloadRequest } from 'payload'
-
-/** Resolve a relationship value (scalar id or populated `{ id }`) to its id. */
-function relId(rel: unknown): string | number | null {
-  if (rel == null) return null
-  if (typeof rel === 'object' && 'id' in (rel as object)) {
-    return (rel as { id: string | number }).id
-  }
-  return rel as string | number
-}
+import { relId } from '@/lib/relationship-id'
 
 /**
  * True when the acting user is a NON-platformOwner whose tenant is a demo

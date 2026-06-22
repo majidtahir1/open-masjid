@@ -13,6 +13,9 @@ import {
   LayoutList,
   Shield,
   SeparatorHorizontal,
+  Heading,
+  Copy,
+  GraduationCap,
 } from 'lucide-react'
 import type { FieldTypeId } from '@/lib/form-schema'
 
@@ -47,8 +50,14 @@ export default function FieldTypeIcon({ type, size = 16, className }: FieldTypeI
       return <LayoutList {...props} />
     case 'consent':
       return <Shield {...props} />
+    case 'class-select':
+      return <GraduationCap {...props} />
     case 'page-break':
       return <SeparatorHorizontal {...props} />
+    case 'section':
+      return <Heading {...props} />
+    case 'repeatable-group':
+      return <Copy {...props} />
     default:
       return <Type {...props} />
   }

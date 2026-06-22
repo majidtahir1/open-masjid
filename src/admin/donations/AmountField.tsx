@@ -1,6 +1,7 @@
 'use client'
 
 import { useField, FieldLabel } from '@payloadcms/ui'
+import { formatCents } from '@/lib/money'
 
 /**
  * Detail-view field for `donations.amount`. The column stores cents — render
@@ -12,9 +13,7 @@ export default function AmountField({ path = 'amount' }: { path?: string }) {
   const { value: currencyValue } = useField<string>({ path: 'currency' })
   const cents = typeof value === 'number' ? value : Number(value ?? 0)
   const currency = (typeof currencyValue === 'string' ? currencyValue : 'usd').toUpperCase()
-  const formatted = Number.isFinite(cents)
-    ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100)
-    : '—'
+  const formatted = Number.isFinite(cents) ? formatCents(cents, currency) : '—'
   return (
     <div className="field-type number read-only">
       <FieldLabel label="Amount" path={path} />

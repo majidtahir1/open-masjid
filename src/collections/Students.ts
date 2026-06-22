@@ -44,7 +44,7 @@ export const Students: CollectionConfig = {
     { name: 'firstName', type: 'text', required: true },
     { name: 'lastName', type: 'text', required: true },
     { name: 'age', type: 'number', min: 0, max: 25, admin: { description: 'Captured at registration.' } },
-    { name: 'gradeLevel', type: 'text', admin: { description: 'Assigned by admin during placement.' } },
+    { name: 'gradeLevel', type: 'text', admin: { description: 'From registration (or set by admin); used for placement.' } },
     {
       name: 'guardians',
       type: 'array',
@@ -66,10 +66,27 @@ export const Students: CollectionConfig = {
       admin: { description: 'Optional link to a paying Member (reserved for future tuition).' },
     },
     {
+      name: 'programSubscription',
+      type: 'relationship',
+      relationTo: 'program-subscriptions',
+      admin: {
+        readOnly: true,
+        description: 'Family tuition subscription this student was registered under.',
+      },
+    },
+    {
       name: 'registeredProgram',
       type: 'relationship',
       relationTo: 'terms',
       admin: { description: 'The program this student registered for (set at registration). A placement hint — students are not owned by a program.' },
+    },
+    {
+      name: 'registrationDetails',
+      type: 'json',
+      admin: {
+        readOnly: true,
+        description: 'Snapshot of the original registration form answers (all fields), captured at submission time.',
+      },
     },
     {
       name: 'status',

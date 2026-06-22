@@ -55,6 +55,25 @@ export const PAYMENT_OPTIONS: ColumnOption[] = [
 
 const OPTION_TYPES: ReadonlySet<string> = new Set(['dropdown', 'radio', 'multiselect', 'checkbox-group'])
 
+// How many item slots to expand a repeatable-group into when it has no `max`.
+const DEFAULT_GROUP_ITEMS = 3
+
+type LeafLikeField = { type: FieldTypeId; name: string; label?: string; options?: ColumnOption[] }
+
+/** Build the type-aware ColumnSpec for one leaf input field at the given id/label. */
+function leafSpec(f: LeafLikeField, id: string, label: string, fieldName: string): ColumnSpec {
+  const base = { id, label, fieldName, fieldType: f.type }
+  if (OPTION_TYPES.has(f.type)) {
+    return { ...base, kind: 'options', options: f.options ?? [] }
+  }
+  if (f.type === 'consent') {
+    return { ...base, kind: 'options', options: [{ value: 'true', label: 'Yes' }, { value: 'false', label: 'No' }] }
+  }
+  if (f.type === 'number') return { ...base, kind: 'numberRange' }
+  if (f.type === 'date') return { ...base, kind: 'dateRange' }
+  return { ...base, kind: 'text' }
+}
+
 export function buildColumnSpecs(
   schema: FormSchema | null | undefined,
   opts: { paymentEnabled: boolean },
@@ -63,23 +82,22 @@ export function buildColumnSpecs(
 
   const fields = (schema?.steps ?? []).flatMap((s) => s.fields)
   for (const f of fields) {
-    if (f.type === 'page-break') continue
-    const base = { id: `field:${f.name}`, label: f.label, fieldName: f.name, fieldType: f.type }
-    if (OPTION_TYPES.has(f.type)) {
-      specs.push({ ...base, kind: 'options', options: 'options' in f ? f.options : [] })
-    } else if (f.type === 'consent') {
-      specs.push({
-        ...base,
-        kind: 'options',
-        options: [{ value: 'true', label: 'Yes' }, { value: 'false', label: 'No' }],
-      })
-    } else if (f.type === 'number') {
-      specs.push({ ...base, kind: 'numberRange' })
-    } else if (f.type === 'date') {
-      specs.push({ ...base, kind: 'dateRange' })
-    } else {
-      specs.push({ ...base, kind: 'text' })
+    // Structural / non-input field types produce no column here.
+    if (f.type === 'page-break' || f.type === 'section') continue
+    if (f.type === 'repeatable-group') {
+      // Expand into one set of child columns per item slot. fieldName is a
+      // dotted path (`<group>.<index>.<child>`) resolved by getCellValue.
+      const itemLabel = f.itemLabel || f.label || f.name
+      const count = f.max ?? DEFAULT_GROUP_ITEMS
+      for (let i = 0; i < count; i++) {
+        for (const child of f.fields) {
+          const fieldName = `${f.name}.${i}.${child.name}`
+          specs.push(leafSpec(child, `field:${fieldName}`, `${itemLabel} ${i + 1} — ${child.label ?? child.name}`, fieldName))
+        }
+      }
+      continue
     }
+    specs.push(leafSpec(f as LeafLikeField, `field:${f.name}`, f.label ?? f.name, f.name))
   }
 
   if (opts.paymentEnabled) {
@@ -89,7 +107,17 @@ export function buildColumnSpecs(
 }
 
 export function getCellValue(row: SubmissionRowData, spec: ColumnSpec): unknown {
-  if (spec.fieldName) return row.data?.[spec.fieldName]
+  if (spec.fieldName) {
+    // A dotted fieldName (`<group>.<index>.<child>`) addresses a value inside a
+    // repeatable-group's nested item array; a plain name is a flat lookup.
+    if (spec.fieldName.includes('.')) {
+      const [group, idxStr, child] = spec.fieldName.split('.')
+      const items = row.data?.[group]
+      const item = Array.isArray(items) ? items[Number(idxStr)] : undefined
+      return item && typeof item === 'object' ? (item as Record<string, unknown>)[child] : undefined
+    }
+    return row.data?.[spec.fieldName]
+  }
   if (spec.id === 'payment') return row.paymentStatus
   return row.submittedAt
 }

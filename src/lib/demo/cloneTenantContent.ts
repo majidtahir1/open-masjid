@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import path from 'path'
+import { relId } from '@/lib/relationship-id'
 
 const MEDIA_STATIC_DIR = 'public/media'
 
@@ -36,13 +37,6 @@ function setPath(obj: any, dotted: string, value: unknown): void {
   }
   o[keys[keys.length - 1]] = value
 }
-/** Extract a relationship/upload id whether scalar or populated `{id}`. */
-function relId(v: unknown): string | number | null {
-  if (v == null) return null
-  if (typeof v === 'object' && 'id' in (v as object)) return (v as { id: string | number }).id
-  return v as string | number
-}
-
 /**
  * Clone visible site content (+ referenced media files) from one tenant to
  * another. PII collections are never touched. Idempotency (wiping the dest

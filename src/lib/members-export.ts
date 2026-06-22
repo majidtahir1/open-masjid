@@ -8,6 +8,8 @@
  * The output starts with a UTF-8 BOM (﻿) so Excel opens it correctly.
  */
 
+import { csvCell } from '@/lib/csv'
+
 export interface MemberExportRow {
   name: string | null | undefined
   email: string | null | undefined
@@ -37,15 +39,6 @@ const COLUMNS = [
   'stripeSubscriptionId',
 ] as const
 
-/** RFC 4180-compliant CSV escaping. */
-function csvEscape(value: string): string {
-  if (value === '') return ''
-  if (/[",\n\r]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`
-  }
-  return value
-}
-
 /**
  * Format an array of member rows as a UTF-8 BOM-prefixed CSV string.
  * Empty / null / undefined values are rendered as empty strings.
@@ -69,7 +62,7 @@ export function formatMembersCsv(rows: MemberExportRow[]): string {
       row.canceledAt ?? '',
       row.stripeCustomerId ?? '',
       row.stripeSubscriptionId ?? '',
-    ].map(csvEscape)
+    ].map(csvCell)
     lines.push(cells.join(','))
   }
 

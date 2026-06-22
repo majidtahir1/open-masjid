@@ -1,0 +1,77 @@
+<h2>The "Your Children" screen — two layouts</h2>
+<p class="subtitle">After a parent enters their phone, the kiosk shows their kids with one big tap to check in or out. Which feels better on an iPad at a busy door?</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">A · Big cards, one action each</div>
+    <div class="mockup-body" style="background:#0f172a;padding:18px;border-radius:10px;color:#e2e8f0;font-family:system-ui">
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:14px">Salam, Tahir family 👋 &nbsp;·&nbsp; Sunday School</div>
+
+      <div style="background:#1e293b;border-radius:14px;padding:18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:22px;font-weight:700">Yusuf Tahir</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:4px">Grade 3 · Qur'an, Islamic Studies</div>
+          <div style="display:inline-block;margin-top:8px;font-size:12px;background:#064e3b;color:#6ee7b7;padding:3px 10px;border-radius:999px">● Checked in 9:42 AM</div>
+        </div>
+        <button style="background:#b91c1c;color:#fff;border:none;border-radius:12px;padding:18px 22px;font-size:17px;font-weight:700">Check out</button>
+      </div>
+
+      <div style="background:#1e293b;border-radius:14px;padding:18px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:22px;font-weight:700">Maryam Tahir</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:4px">Grade 1 · Qur'an</div>
+          <div style="display:inline-block;margin-top:8px;font-size:12px;background:#334155;color:#cbd5e1;padding:3px 10px;border-radius:999px">○ Not yet arrived</div>
+        </div>
+        <button style="background:#15803d;color:#fff;border:none;border-radius:12px;padding:18px 22px;font-size:17px;font-weight:700">Check in</button>
+      </div>
+
+      <button style="width:100%;margin-top:18px;background:transparent;color:#64748b;border:1px solid #334155;border-radius:10px;padding:12px;font-size:14px">Done</button>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">B · Compact list + "check in all"</div>
+    <div class="mockup-body" style="background:#0f172a;padding:18px;border-radius:10px;color:#e2e8f0;font-family:system-ui">
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:14px">Salam, Tahir family 👋 &nbsp;·&nbsp; Sunday School</div>
+
+      <button style="width:100%;background:#15803d;color:#fff;border:none;border-radius:12px;padding:16px;font-size:18px;font-weight:700;margin-bottom:14px">Check in all (2)</button>
+
+      <div style="background:#1e293b;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="checkbox" checked style="width:22px;height:22px">
+          <div>
+            <div style="font-size:18px;font-weight:600">Yusuf Tahir</div>
+            <div style="font-size:12px;color:#6ee7b7">● In 9:42 AM</div>
+          </div>
+        </div>
+        <button style="background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600">Out</button>
+      </div>
+
+      <div style="background:#1e293b;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="checkbox" style="width:22px;height:22px">
+          <div>
+            <div style="font-size:18px;font-weight:600">Maryam Tahir</div>
+            <div style="font-size:12px;color:#94a3b8">○ Not arrived</div>
+          </div>
+        </div>
+        <button style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600">In</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options" style="margin-top:24px">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>Big cards</h3><p>One large card + one big button per child. Fewer kids per family means whitespace is fine; huge touch targets, no mis-taps. Best for clarity.</p></div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>Compact list + check-in-all</h3><p>Denser, with a one-tap "check in all siblings." Faster for big families, but smaller targets and a checkbox concept parents must grok.</p></div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content"><h3>Hybrid</h3><p>Big cards (A) PLUS a "Check in all" button at the top (from B). Best of both — recommended if families often have 3+ kids.</p></div>
+  </div>
+</div>

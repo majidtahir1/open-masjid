@@ -6,6 +6,7 @@ import { mapStripeEventToDonationAction } from '@/lib/donations-webhook'
 import { applyDonationAction } from '@/lib/donations-apply'
 import { handleMembershipEvent } from '@/lib/membership-webhook'
 import { handleFormSubmissionEvent } from '@/lib/form-submissions-webhook'
+import { handleTuitionEvent } from '@/lib/tuition-webhook'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -41,6 +42,9 @@ export async function POST(req: Request) {
         stripe.subscriptions.retrieve(id, { stripeAccount: account }),
     }),
     handleFormSubmissionEvent({ event, payload }),
+    handleTuitionEvent(event, payload, (id, account) =>
+      stripe.subscriptions.retrieve(id, { stripeAccount: account }),
+    ),
   ])
 
   if (!action) return NextResponse.json({ received: true, ignored: event.type })

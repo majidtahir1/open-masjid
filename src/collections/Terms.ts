@@ -65,6 +65,62 @@ export const Terms: CollectionConfig = {
       admin: { description: 'Days the program meets each week. Sessions are created on every selected day.' },
     },
     {
+      name: 'pricingModel',
+      type: 'select',
+      defaultValue: 'per-program',
+      options: [
+        { label: 'Per program (one price)', value: 'per-program' },
+        { label: 'Per class', value: 'per-class' },
+      ],
+    },
+    {
+      name: 'tuitionCents',
+      type: 'number',
+      min: 0,
+      label: 'Monthly tuition',
+      admin: {
+        description: 'Dollars per month for the whole program (per-program pricing). E.g. enter 50 for $50/mo.',
+        condition: (_, sib) => sib?.pricingModel === 'per-program',
+        components: { Field: '/src/admin/forms/fields/DollarCents#default' },
+      },
+    },
+    {
+      name: 'paymentModel',
+      type: 'select',
+      defaultValue: 'free',
+      label: 'How registrants pay',
+      options: [
+        { label: 'Free', value: 'free' },
+        { label: 'One-time', value: 'one-time' },
+        { label: 'Monthly recurring', value: 'monthly' },
+      ],
+      admin: { description: 'Billing cadence for registration forms bound to this program.' },
+    },
+    {
+      name: 'multiChildDiscount',
+      type: 'array',
+      labels: { singular: 'Discount tier', plural: 'Discount tiers' },
+      admin: {
+        description: 'Percentage off by child rank, e.g. rank 2 = 25 (2nd child 25% off). Most expensive child pays full.',
+        condition: (_, sib) => sib?.paymentModel === 'monthly' || sib?.paymentModel === 'one-time',
+      },
+      fields: [
+        { name: 'rank', type: 'number', required: true, min: 2 },
+        { name: 'percentOff', type: 'number', required: true, min: 0, max: 100 },
+      ],
+    },
+    {
+      name: 'currency',
+      type: 'select',
+      defaultValue: 'usd',
+      options: [
+        { label: 'USD', value: 'usd' },
+        { label: 'CAD', value: 'cad' },
+        { label: 'GBP', value: 'gbp' },
+      ],
+      admin: { condition: (_, sib) => sib?.paymentModel === 'monthly' || sib?.paymentModel === 'one-time' },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,
