@@ -21,7 +21,8 @@ describe('mapParticipantToStudent', () => {
       1, 7,
     )
     expect(r).toMatchObject({ tenant: 1, firstName: 'Aisha', lastName: 'Abbasi', gradeLevel: '3', status: 'active', registeredProgram: 7 })
-    expect((r!.guardians as any[])[0]).toMatchObject({ name: 'Mr Abbasi', phone: '847-555-0190', email: 'a@b.com', isPrimary: true })
+    // Phone is normalized (digits, last 10) so it matches the kiosk lookup.
+    expect((r!.guardians as any[])[0]).toMatchObject({ name: 'Mr Abbasi', phone: '8475550190', email: 'a@b.com', isPrimary: true })
   })
   it('returns null without first+last name', () => {
     expect(mapParticipantToStudent({ student_first_name: 'A' }, {}, 1, null)).toBeNull()
@@ -48,5 +49,43 @@ describe('resolveAutoEnrollClassId', () => {
   })
   it('returns null with two or more classes', () => {
     expect(resolveAutoEnrollClassId([1, 2])).toBeNull()
+  })
+})
+
+import { guardiansFromSubmission } from '@/lib/school-enroll'
+import type { FormSchema } from '@/lib/form-schema'
+
+const schemaWithGuardians: FormSchema = { steps: [{ id: 's1', fields: [
+  { type: 'repeatable-group', id: 'g', name: 'guardians', label: 'Guardians', role: 'guardians', min: 1, fields: [
+    { type: 'short-text', id: 'n', name: 'g_name', label: 'Name', required: true, role: 'guardian_name' },
+    { type: 'phone', id: 'p', name: 'g_phone', label: 'Phone', required: false, role: 'guardian_phone' },
+    { type: 'email', id: 'e', name: 'g_email', label: 'Email', required: false, role: 'guardian_email' },
+    { type: 'short-text', id: 'r', name: 'g_rel', label: 'Rel', required: false, role: 'guardian_relationship' },
+  ]},
+]}] }
+
+describe('guardiansFromSubmission', () => {
+  it('reads guardians by role, normalizes phone, marks first primary', () => {
+    const data = { guardians: [
+      { g_name: 'Parent One', g_phone: '(999) 000-0000', g_email: 'a@b.com', g_rel: 'Mother' },
+      { g_name: 'Parent Two', g_phone: '111-222-3333' },
+    ]}
+    expect(guardiansFromSubmission(schemaWithGuardians, data)).toEqual([
+      { name: 'Parent One', phone: '9990000000', email: 'a@b.com', relationship: 'Mother', isPrimary: true },
+      { name: 'Parent Two', phone: '1112223333', isPrimary: false },
+    ])
+  })
+  it('returns [] when there is no guardians group', () => {
+    expect(guardiansFromSubmission({ steps: [{ id: 's1', fields: [] }] }, { guardian_name: 'X' })).toEqual([])
+  })
+})
+
+describe('mapParticipantToStudent with explicit guardians', () => {
+  it('assigns the provided guardians array to the student', () => {
+    const guardians = [{ name: 'Parent One', phone: '9990000000', isPrimary: true }]
+    const s = mapParticipantToStudent(
+      { student_first_name: 'Bob', student_last_name: 'Smith' }, {}, 1, 2, guardians,
+    )
+    expect(s?.guardians).toEqual(guardians)
   })
 })
