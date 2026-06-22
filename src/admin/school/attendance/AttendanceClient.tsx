@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Download, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import { Download, ChevronRight, ClipboardCheck, UserCheck } from 'lucide-react'
 import { api } from '../api'
 import SchoolTabs from '../SchoolTabs'
 import '../sunday-school.css'
@@ -149,6 +150,7 @@ export default function AttendanceClient({ programId }: { programId: string | nu
   }
 
   const STATUS_LABELS = ['present', 'absent', 'late', 'excused'] as const
+  const progQ = programId ? `?program=${programId}` : ''
 
   return (
     <div className="ss-root">
@@ -156,7 +158,20 @@ export default function AttendanceClient({ programId }: { programId: string | nu
 
       <div style={{ padding: '28px 32px 0' }}>
         <p className="ss-eyebrow">Programs</p>
-        <h1 className="ss-display">Attendance</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <h1 className="ss-display">Attendance reports</h1>
+          {/* This page is read-only reporting. Marking happens in the Take
+              attendance tool; Who's here is the live check-in view. Both linked
+              here so all attendance lives in one spot. */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Link className="ss-btn" href={`/admin/take-attendance${progQ}`}>
+              <ClipboardCheck size={16} /> Take attendance
+            </Link>
+            <Link className="ss-btn ss-btn--ghost" href={`/admin/programs/whos-here${progQ}`}>
+              <UserCheck size={16} /> Who&apos;s here
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div style={{ padding: '20px 32px 40px' }}>
