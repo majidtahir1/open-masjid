@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto'
 import type { Payload } from 'payload'
 import { validateSubmission, type FormSchema } from './form-schema'
+import { validateGuardians } from './registration-fields'
 import { checkRateLimit } from './form-rate-limit'
 import { extractSubmitterName } from './form-submitter-name'
 
@@ -35,9 +36,11 @@ export async function submitForm(args: SubmitArgs): Promise<SubmitResult> {
   const ipHash = createHash('sha256').update(ip).digest('hex').slice(0, 32)
   if (!checkRateLimit(`form:${form.id}:${ipHash}`)) return { ok: false, error: 'rate_limited' }
 
-  // 3. Schema validation
+  // 3. Schema validation (+ registration guardian rule: primary phone required)
   const v = validateSubmission(form.schema, data)
   if (!v.ok) return { ok: false, error: 'validation', errors: v.errors }
+  const guardianErrors = validateGuardians(form.schema, data)
+  if (Object.keys(guardianErrors).length) return { ok: false, error: 'validation', errors: guardianErrors }
 
   // 4. Capacity
   const cap = form.settings?.capacity
