@@ -114,3 +114,62 @@ describe('REGISTRATION_FIELD_DEFS', () => {
     expect(REGISTRATION_FIELD_DEFS.map((d) => d.name)).toEqual(['student_first_name', 'student_last_name'])
   })
 })
+
+import {
+  GUARDIANS_GROUP_ROLE, GUARDIAN_ROLES,
+  participantGroupName, guardiansGroupName, ensureGuardiansGroup, validateGuardians,
+} from '@/lib/registration-fields'
+
+const newId = () => { let n = 0; return () => `id-${++n}` }
+
+describe('role-aware participant + guardians groups', () => {
+  const withBoth: FormSchema = { steps: [{ id: 's1', fields: [
+    { type: 'repeatable-group', id: 'p', name: 'participants', label: 'Children', min: 1,
+      fields: [{ type: 'short-text', id: 'a', name: 'student_first_name', label: 'First', required: true }] },
+    { type: 'repeatable-group', id: 'g', name: 'guardians', label: 'Guardians', role: 'guardians', min: 1,
+      fields: [{ type: 'short-text', id: 'b', name: 'g_name', label: 'Name', role: 'guardian_name', required: true }] },
+  ]}] }
+
+  it('participantGroupName ignores the guardians group', () => {
+    expect(participantGroupName(withBoth)).toBe('participants')
+  })
+  it('guardiansGroupName finds the guardians-role group', () => {
+    expect(guardiansGroupName(withBoth)).toBe('guardians')
+  })
+  it('hasParticipantGroup is true with exactly one non-guardians group', () => {
+    expect(hasParticipantGroup(withBoth)).toBe(true)
+  })
+  it('ensureGuardiansGroup appends a role-tagged guardians group when missing', () => {
+    const next = ensureGuardiansGroup({ steps: [{ id: 's1', fields: [] }] }, newId())
+    const g = next.steps.flatMap((s) => s.fields).find((f: any) => f.role === GUARDIANS_GROUP_ROLE) as any
+    expect(g).toBeTruthy()
+    expect(g.type).toBe('repeatable-group')
+    const roles = g.fields.map((c: any) => c.role)
+    expect(roles).toContain(GUARDIAN_ROLES.name)
+    expect(roles).toContain(GUARDIAN_ROLES.phone)
+  })
+  it('ensureGuardiansGroup is idempotent', () => {
+    const make = newId()
+    const g1 = ensureGuardiansGroup({ steps: [{ id: 's1', fields: [] }] }, make)
+    const g2 = ensureGuardiansGroup(g1, make)
+    expect(g2).toBe(g1)
+  })
+})
+
+describe('validateGuardians', () => {
+  const schema: FormSchema = { steps: [{ id: 's1', fields: [
+    { type: 'repeatable-group', id: 'g', name: 'guardians', label: 'Guardians', role: 'guardians', min: 1, fields: [
+      { type: 'short-text', id: 'n', name: 'g_name', label: 'Name', required: true, role: 'guardian_name' },
+      { type: 'phone', id: 'p', name: 'g_phone', label: 'Phone', required: false, role: 'guardian_phone' },
+    ]},
+  ]}] }
+  it('requires the primary guardian phone', () => {
+    expect(validateGuardians(schema, { guardians: [{ g_name: 'A' }] })['guardians.0.g_phone']).toBe('Required')
+  })
+  it('passes when the primary has a phone', () => {
+    expect(validateGuardians(schema, { guardians: [{ g_name: 'A', g_phone: '5551234' }] })).toEqual({})
+  })
+  it('no guardians group → no errors', () => {
+    expect(validateGuardians({ steps: [{ id: 's1', fields: [] }] }, {})).toEqual({})
+  })
+})
