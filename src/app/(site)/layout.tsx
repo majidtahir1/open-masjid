@@ -160,10 +160,14 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           <Header
             tenant={tenant as unknown as TenantLike}
             navPages={navPages.map(({ title, slug }) => ({ title, slug }))}
+            hasPrayerSchedule={Boolean(schedule)}
           />
-          <PrayerStrip schedule={stripSchedule} />
+          {/* No active schedule at all (e.g. a masjid fundraising before it
+              has a building) → no strip. A schedule with a gap today still
+              shows the "coming soon" state. */}
+          {schedule && <PrayerStrip schedule={stripSchedule} />}
           <main className="min-h-[60vh]">{children}</main>
-          <Footer tenant={footerTenant} />
+          <Footer tenant={footerTenant} hasPrayerSchedule={Boolean(schedule)} />
         </TenantProvider>
       </body>
     </html>

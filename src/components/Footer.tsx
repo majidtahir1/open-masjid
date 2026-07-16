@@ -15,6 +15,11 @@ export interface FooterTenant {
 
 export interface FooterProps {
   tenant: FooterTenant
+  /**
+   * Whether the tenant has an active prayer schedule. Mirrors the header:
+   * without one, the Prayer Times quick link would lead to an empty page.
+   */
+  hasPrayerSchedule?: boolean
 }
 
 /**
@@ -113,7 +118,10 @@ function ContactLines({ contact }: { contact: TenantContactInfo | null | undefin
   )
 }
 
-export default function Footer({ tenant }: FooterProps) {
+export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps) {
+  const quickLinks = QUICK_LINKS.filter(
+    (link) => hasPrayerSchedule || link.href !== '/prayer-times',
+  )
   const year = new Date().getFullYear()
   const tagline =
     tenant.footerTagline ?? 'A community built on knowledge, tarbiya, and prayer.'
@@ -161,7 +169,7 @@ export default function Footer({ tenant }: FooterProps) {
               Explore
             </div>
             <ul className="m-0 list-none space-y-2 p-0 text-fs-sm">
-              {QUICK_LINKS.map((link) => (
+              {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
