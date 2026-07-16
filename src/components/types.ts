@@ -118,6 +118,11 @@ export interface HeroSlideLike {
   accent: Accent
   /** Layout variant. Defaults to 'original' (single column, current behavior). */
   style?: HeroStyle | null
+  /**
+   * Background treatment. 'brand' renders the slide on a deep brand-color
+   * panel with light text. Ignored by the 'photo' style (always dark).
+   */
+  background?: 'default' | 'brand' | null
   splitFields?: HeroSplitFields | null
   photoFields?: HeroPhotoFields | null
   ctas?: HeroCta[] | null
@@ -142,6 +147,13 @@ export interface HeroLiveData {
     when: string
     href: string
   }> | null
+  /**
+   * Whether the tenant has an active prayer schedule at all. When false
+   * (e.g. a masjid fundraising before it has a building), hero variants skip
+   * the Next Iqamah card instead of showing its "Schedule coming" fallback.
+   * Undefined (older callers) is treated as true.
+   */
+  hasSchedule?: boolean
 }
 
 export interface ServiceLike {

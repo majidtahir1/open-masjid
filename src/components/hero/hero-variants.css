@@ -513,6 +513,17 @@
   transition: background-color 600ms var(--ease-out);
 }
 .om-hero-section.om-photo-active { background: var(--brand-ink); }
+/* Brand-panel background (per-slide opt-in for non-photo styles): a deep
+   wash of the tenant's brand color with a soft radial glow so it doesn't
+   read flat. Text goes light via .is-on-dark on the copy/controls. */
+.om-hero-section.om-brand-active {
+  background:
+    radial-gradient(120% 90% at 85% 10%,
+      color-mix(in oklab, var(--brand) 55%, transparent) 0%,
+      transparent 60%),
+    var(--brand-ink);
+}
+.om-hero-slide.is-brand { color: #fff; }
 @media (prefers-reduced-motion: reduce) {
   .om-hero-section { transition: none; }
 }

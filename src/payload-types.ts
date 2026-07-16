@@ -970,6 +970,10 @@ export interface HeroSlide {
    * Visual layout for this slide. Each style has a built-in color treatment that you can override via Slide Theme below.
    */
   style: 'original' | 'split' | 'live' | 'photo';
+  /**
+   * Background treatment for this slide. "Brand" renders the slide on a deep panel of your brand color with light text — good for campaign slides. Not used by the Photo layout (it is always dark).
+   */
+  background?: ('default' | 'brand') | null;
   accent: 'cream' | 'teal' | 'navy' | 'gold';
   /**
    * Content shown in the right-side card stack for the Split layout. Only used when Layout Style is "Split".
@@ -2513,6 +2517,7 @@ export interface HeroSlidesSelect<T extends boolean = true> {
   body?: T;
   meta?: T;
   style?: T;
+  background?: T;
   accent?: T;
   splitFields?:
     | T

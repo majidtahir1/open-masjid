@@ -71,12 +71,24 @@ export default function Hero({ slides, intervalMs = 7000, liveData }: HeroProps)
     return slides[idx]?.style ?? 'original'
   }, [slides, idx, hasSlides])
 
+  // 'photo' is always dark; other styles go dark when the slide opts into
+  // the brand-panel background.
+  const isBrandSlide = (s: HeroSlideLike | undefined): boolean =>
+    (s?.style ?? 'original') !== 'photo' && s?.background === 'brand'
+  const activeDark = activeStyle === 'photo' || isBrandSlide(slides[idx])
+
   if (!hasSlides) return null
 
   return (
     <section
       ref={rootRef}
-      className={`om-hero-section ${activeStyle === 'photo' ? 'om-photo-active' : ''}`}
+      className={[
+        'om-hero-section',
+        activeStyle === 'photo' ? 'om-photo-active' : '',
+        activeStyle !== 'photo' && isBrandSlide(slides[idx]) ? 'om-brand-active' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       aria-roledescription="carousel"
       aria-label="Featured highlights"
       onFocus={onFocus}
@@ -99,6 +111,7 @@ export default function Hero({ slides, intervalMs = 7000, liveData }: HeroProps)
                 'om-hero-slide',
                 active ? 'is-active' : '',
                 style === 'photo' ? 'is-photo' : '',
+                style !== 'photo' && slide.background === 'brand' ? 'is-brand' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -126,7 +139,7 @@ export default function Hero({ slides, intervalMs = 7000, liveData }: HeroProps)
           slides={slides}
           idx={idx}
           go={go}
-          onDark={activeStyle === 'photo'}
+          onDark={activeDark}
         />
       </div>
     </section>

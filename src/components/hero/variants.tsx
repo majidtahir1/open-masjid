@@ -28,25 +28,29 @@ interface VariantProps {
 }
 
 export function HeroOriginal({ slide, active }: VariantProps) {
+  const onDark = slide.background === 'brand'
   return (
     <>
-      <BgOrnament big />
+      {!onDark && <BgOrnament big />}
       <div className="om-hero-original-inner">
-        <HeroCopy slide={slide} active={active} />
+        <HeroCopy slide={slide} active={active} onDark={onDark} />
       </div>
     </>
   )
 }
 
 export function HeroSplit({ slide, active, liveData, uid }: VariantProps) {
+  const onDark = slide.background === 'brand'
   return (
     <>
-      <BgOrnament />
+      {!onDark && <BgOrnament />}
       <div className="mx-auto w-full max-w-page">
         <div className="om-hero-grid">
-          <HeroCopy slide={slide} active={active} />
+          <HeroCopy slide={slide} active={active} onDark={onDark} />
           <div className="om-hero-stack">
-            <NextIqamahCard data={liveData?.nextIqamah ?? null} />
+            {liveData?.hasSchedule !== false && (
+              <NextIqamahCard data={liveData?.nextIqamah ?? null} />
+            )}
             <FeaturePhotoCard slide={slide} uid={uid} />
           </div>
         </div>
@@ -56,12 +60,13 @@ export function HeroSplit({ slide, active, liveData, uid }: VariantProps) {
 }
 
 export function HeroLive({ slide, active, liveData }: VariantProps) {
+  const onDark = slide.background === 'brand'
   return (
     <>
-      <BgOrnament />
+      {!onDark && <BgOrnament />}
       <div className="mx-auto w-full max-w-page">
         <div className="om-hero-grid">
-          <HeroCopy slide={slide} active={active} />
+          <HeroCopy slide={slide} active={active} onDark={onDark} />
           <LiveWidget liveData={liveData} />
         </div>
       </div>
@@ -98,7 +103,9 @@ export function HeroPhoto({ slide, active, liveData, uid }: VariantProps) {
         <div className="om-hero-photo-bg-inner">
           <HeroCopy slide={slide} active={active} onDark />
           <div className="om-hero-photo-bg-side">
-            <NextIqamahCard data={liveData?.nextIqamah ?? null} />
+            {liveData?.hasSchedule !== false && (
+              <NextIqamahCard data={liveData?.nextIqamah ?? null} />
+            )}
             <AyahCard slide={slide} />
           </div>
         </div>
