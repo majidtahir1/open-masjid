@@ -5,6 +5,7 @@ import { withBillingLock } from '../access/billingLocked'
 import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
 import { seedDefaultDonationFunds } from '../hooks/seedDefaultDonationFunds'
 import { seedPrayerDisplayContent } from '../hooks/seedPrayerDisplayContent'
+import { validateUniqueCustomDomains } from '../hooks/validateUniqueCustomDomains'
 
 /**
  * Field-update guard for tenant lifecycle / billing / Stripe-derived state.
@@ -55,6 +56,7 @@ export const Tenants: CollectionConfig = {
     },
   },
   hooks: {
+    beforeValidate: [validateUniqueCustomDomains],
     beforeChange: [geocodeTenantAddress],
     afterChange: [seedDefaultDonationFunds, seedPrayerDisplayContent],
   },
@@ -169,7 +171,6 @@ export const Tenants: CollectionConfig = {
               // owners so the shared public admin can't repoint demo domains.
               access: { update: demoLockedFieldUpdate },
               admin: {
-                hidden: true,
                 description:
                   'Add each custom domain the masjid owns (both with and without www if applicable). Visitors reaching these domains will see this tenant\'s public site.',
               },
