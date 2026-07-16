@@ -28,6 +28,11 @@ export interface HeaderProps {
    * nav link — the page would be empty.
    */
   hasPrayerSchedule?: boolean
+  /**
+   * Whether the tenant has any active membership tiers. Without one the
+   * Membership nav link is dropped — the page would be an empty state.
+   */
+  hasMembership?: boolean
 }
 
 const NAV_LINKS: Array<{ href: string; label: string }> = [
@@ -49,14 +54,17 @@ export default function Header({
   currentPath,
   navPages = [],
   hasPrayerSchedule = true,
+  hasMembership = true,
 }: HeaderProps) {
   const dynamicLinks = navPages.map((p) => ({
     href: `/${p.slug}`,
     label: p.title,
   }))
-  const staticLinks = NAV_LINKS.filter(
-    (link) => hasPrayerSchedule || link.href !== '/prayer-times',
-  )
+  const staticLinks = NAV_LINKS.filter((link) => {
+    if (link.href === '/prayer-times') return hasPrayerSchedule
+    if (link.href === '/membership') return hasMembership
+    return true
+  })
   const allLinks = [...staticLinks, ...dynamicLinks]
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)

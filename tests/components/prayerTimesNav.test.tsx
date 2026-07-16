@@ -29,6 +29,24 @@ describe('Header prayer times nav', () => {
   })
 })
 
+describe('Header membership nav', () => {
+  it('includes the Membership link when the tenant has active tiers', () => {
+    const html = renderToStaticMarkup(<Header hasMembership />)
+    expect(html).toContain('href="/membership"')
+  })
+
+  it('omits the Membership link when the tenant has no active tiers', () => {
+    const html = renderToStaticMarkup(<Header hasMembership={false} />)
+    expect(html).not.toContain('href="/membership"')
+    expect(html).toContain('href="/events"')
+  })
+
+  it('defaults to showing the Membership link', () => {
+    const html = renderToStaticMarkup(<Header />)
+    expect(html).toContain('href="/membership"')
+  })
+})
+
 describe('Footer prayer times quick link', () => {
   it('includes the Prayer Times link when the tenant has an active schedule', () => {
     const html = renderToStaticMarkup(<Footer tenant={footerTenant} hasPrayerSchedule />)
