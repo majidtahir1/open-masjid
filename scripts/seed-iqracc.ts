@@ -73,9 +73,12 @@ async function seed() {
     siteType: 'masjid' as const,
     status: 'active' as const,
     branding: {
-      primaryColor: '#2E4632', // flyer dark green
-      secondaryColor: '#1F2B4D', // flyer navy
-      accentColor: '#C9A24B', // flyer gold
+      // Palette chosen in the admin on 2026-07-18 (replaces the flyer's
+      // green/navy/gold). Source of truth is this seed — re-running it
+      // overwrites admin edits to these tenant fields.
+      primaryColor: '#006786', // ocean teal
+      secondaryColor: '#4F46B8', // indigo
+      accentColor: '#DFAF2B', // gold
       displayFont: 'Fraunces' as const,
     },
     contactInfo: {
