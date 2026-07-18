@@ -34,6 +34,9 @@ const h2 = (text: string) => ({
   type: 'heading', tag: 'h2', children: [t(text)], direction: null, format: '' as const, indent: 0, version: 1,
 })
 const lead = (bold: string, rest: string) => p(t(bold, 1), t(rest))
+const img = (mediaId: string | number) => ({
+  type: 'upload', relationTo: 'media', value: mediaId, fields: null, format: '', version: 1,
+})
 const doc = (...children: unknown[]) => ({
   root: {
     type: 'root', direction: null, format: '' as const, indent: 0, version: 1,
@@ -275,6 +278,7 @@ async function seed() {
 
   // 7. Project page — the subpage they keep updating with progress
   const pageContent = doc(
+    img(heroMedia.id),
     p(
       t(
         'Iqra Community Center is working to purchase a property in McKinney to establish a lasting home for our community — a welcoming space dedicated to community programs, education, wellness, family support, and meaningful gatherings.',
