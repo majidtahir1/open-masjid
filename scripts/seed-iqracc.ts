@@ -6,7 +6,7 @@ import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
 /**
- * Seed the MFLLCA (McKinney) tenant — a fundraising-first onboard: the masjid
+ * Seed the Iqra Community Center (McKinney) tenant — a fundraising-first onboard: the masjid
  * is raising money to purchase its future community-center property, so the
  * site leads with the campaign (hero photo + donate) and has NO prayer
  * schedule yet (which also hides the Prayer Times nav + strip).
@@ -17,11 +17,11 @@ import config from '../src/payload.config'
  * Spec: docs/superpowers/specs/2026-07-15-mfllca-onboarding-design.md
  */
 
-const SLUG = 'mfllca'
+const SLUG = 'iqracc'
 // Bump the filename when the asset changes — media is reused by filename.
-const HERO_FILENAME = 'mfllca-building.png'
+const HERO_FILENAME = 'iqracc-building.png'
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const HERO_PATH = resolve(__dirname, 'seed-assets', 'mfllca', 'property.png')
+const HERO_PATH = resolve(__dirname, 'seed-assets', 'iqracc', 'property.png')
 
 // ---- Lexical content builders (match scripts/seedBlogIntro.ts) ----
 const t = (text: string, format = 0) => ({
@@ -65,7 +65,7 @@ async function seed() {
 
   // 1. Tenant
   const tenantData = {
-    name: 'MFLLCA',
+    name: 'Iqra Community Center',
     slug: SLUG,
     siteType: 'masjid' as const,
     status: 'active' as const,
@@ -76,18 +76,18 @@ async function seed() {
       displayFont: 'Fraunces' as const,
     },
     contactInfo: {
-      email: 'info@mfllca.com',
+      email: 'info@iqracc.com',
       address: 'McKinney, TX',
     },
     footerTagline: 'Building our future. Together.',
     location: { lat: 33.1972, lng: -96.6398, timezone: 'America/Chicago' },
     prayerCalc: { method: 'ISNA' as const, asrMadhab: 'Standard' as const },
     donationConfig: {
-      // Local/dev placeholder. Production: the MFLLCA admin completes the
+      // Local/dev placeholder. Production: the Iqra CC admin completes the
       // Stripe Connect OAuth flow from their admin panel, then mode flips to
       // 'connect' automatically.
       mode: 'external' as const,
-      externalUrl: 'https://donate.stripe.com/REPLACE_WITH_MFLLCA_PAYMENT_LINK',
+      externalUrl: 'https://donate.stripe.com/REPLACE_WITH_IQRACC_PAYMENT_LINK',
     },
   }
   let tenant = await findOne<{ id: string | number }>(payload, 'tenants', {
@@ -101,7 +101,7 @@ async function seed() {
       overrideAccess: true,
       req: seedReq,
     })) as { id: string | number }
-    console.log('✓ Created MFLLCA tenant')
+    console.log('✓ Created Iqra CC tenant')
   } else {
     tenant = (await payload.update({
       collection: 'tenants',
@@ -111,12 +111,12 @@ async function seed() {
       overrideAccess: true,
       req: seedReq,
     })) as { id: string | number }
-    console.log('✓ Updated MFLLCA tenant')
+    console.log('✓ Updated Iqra CC tenant')
   }
   const tenantId = tenant.id
 
   // 2. Admin user (local dev credentials)
-  const adminEmail = 'admin@mfllca.com'
+  const adminEmail = 'admin@iqracc.com'
   const existingAdmin = await findOne<{ id: string | number }>(payload, 'users', {
     email: { equals: adminEmail },
   })
@@ -128,7 +128,7 @@ async function seed() {
         password: 'admin-dev-password',
         role: 'admin',
         tenant: tenantId,
-        firstName: 'MFLLCA',
+        firstName: 'Iqra CC',
         lastName: 'Admin',
       },
       overrideAccess: true,
@@ -147,7 +147,7 @@ async function seed() {
       collection: 'media' as never,
       file: { data, mimetype: 'image/png', name: HERO_FILENAME, size: data.length },
       data: {
-        alt: 'Rendering of the future MFLLCA community center property in McKinney',
+        alt: 'Rendering of the future Iqra Community Center property in McKinney',
         tenant: tenantId,
       },
       overrideAccess: true,
@@ -168,10 +168,10 @@ async function seed() {
   await payload.create({
     collection: 'hero-slides',
     data: {
-      eyebrow: 'MFLLCA Community Center Project · McKinney, TX',
+      eyebrow: 'Iqra Community Center Project · McKinney, TX',
       title: 'Building our future. Together.',
       body:
-        'MFLLCA is working to purchase this property to establish a welcoming space dedicated to community programs, education, wellness, family support, and meaningful gatherings.',
+        'Iqra Community Center is working to purchase this property to establish a welcoming space dedicated to community programs, education, wellness, family support, and meaningful gatherings.',
       style: 'split' as const,
       background: 'brand' as const,
       accent: 'cream' as const,
@@ -277,7 +277,7 @@ async function seed() {
   const pageContent = doc(
     p(
       t(
-        'MFLLCA is working to purchase a property in McKinney to establish a lasting home for our community — a welcoming space dedicated to community programs, education, wellness, family support, and meaningful gatherings.',
+        'Iqra Community Center is working to purchase a property in McKinney to establish a lasting home for our community — a welcoming space dedicated to community programs, education, wellness, family support, and meaningful gatherings.',
       ),
     ),
     h2('The property'),
@@ -286,7 +286,7 @@ async function seed() {
     lead('Zoning: ', 'Commercially zoned for office, childcare, learning center, and church use.'),
     lead('Purchase price: ', '$1.2 million.'),
     h2('What your support makes possible'),
-    p(t('Secure the property purchase. Preserve and improve the facility. Create spaces for youth, families, and seniors. Expand educational and community programs. Build a long-term home for MFLLCA community initiatives.')),
+    p(t('Secure the property purchase. Preserve and improve the facility. Create spaces for youth, families, and seniors. Expand educational and community programs. Build a long-term home for Iqra Community Center initiatives.')),
     h2('Timeline & progress'),
     lead('Summer 2026 — ', 'Fundraising campaign underway. Every contribution brings us closer to securing the property.'),
     p(t('Updates will be posted here as we reach each milestone, insha’Allah.')),
@@ -403,8 +403,8 @@ async function seed() {
   }
   console.log('✓ Created Stay Connected form')
 
-  console.log('\nDone. Visit http://mfllca.localhost:3000')
-  console.log('Admin: http://mfllca.localhost:3000/admin —', adminEmail, '/ admin-dev-password')
+  console.log('\nDone. Visit http://iqracc.localhost:3000')
+  console.log('Admin: http://iqracc.localhost:3000/admin —', adminEmail, '/ admin-dev-password')
   process.exit(0)
 }
 

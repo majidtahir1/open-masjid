@@ -3,6 +3,11 @@
 **Date:** 2026-07-15
 **Status:** Approved by Majid (conversation, 2026-07-15)
 
+> **Naming update (2026-07-18):** the organization chose its permanent name —
+> **Iqra Community Center** (slug `iqracc`, domain `iqracc.com`). "MFLLCA" below
+> is the working name used at design time; the seed script is now
+> `scripts/seed-iqracc.ts` (`npm run seed:iqracc`).
+
 ## Goal
 
 Onboard MFLLCA (McKinney) as a new open-masjid tenant. Primary goal: drive donations
