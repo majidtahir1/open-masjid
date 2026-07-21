@@ -20,7 +20,7 @@ import { TenantProvider } from '@/lib/context'
 import { getCurrentTenant, getTenantContext } from '@/lib/tenant-server'
 import { tenantThemeCss } from '@/lib/tenantTheme'
 import { findDayRow, getActiveSchedule } from '@/lib/prayer-schedule'
-import { fetchNavPages } from '@/lib/data'
+import { fetchActiveTiers, fetchNavPages } from '@/lib/data'
 import { resolveTenantFavicon } from '@/lib/tenantFavicon'
 import { getRequestOrigin } from '@/lib/seo'
 import { getTenantBillingState, isPublicSiteOffline, type BillingTenantFields } from '@/lib/billing'
@@ -114,10 +114,11 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     }
   }
 
-  const [themeCss, schedule, navPages] = await Promise.all([
+  const [themeCss, schedule, navPages, activeTiers] = await Promise.all([
     Promise.resolve(tenantThemeCss(tenant)),
     getActiveSchedule(tenant.id),
     fetchNavPages(tenant),
+    fetchActiveTiers(tenant),
   ])
 
   // Synthesize a flat PrayerScheduleLike for PrayerStrip from today's day row.
@@ -160,10 +161,15 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           <Header
             tenant={tenant as unknown as TenantLike}
             navPages={navPages.map(({ title, slug }) => ({ title, slug }))}
+            hasPrayerSchedule={Boolean(schedule)}
+            hasMembership={activeTiers.length > 0}
           />
-          <PrayerStrip schedule={stripSchedule} />
+          {/* No active schedule at all (e.g. a masjid fundraising before it
+              has a building) → no strip. A schedule with a gap today still
+              shows the "coming soon" state. */}
+          {schedule && <PrayerStrip schedule={stripSchedule} />}
           <main className="min-h-[60vh]">{children}</main>
-          <Footer tenant={footerTenant} />
+          <Footer tenant={footerTenant} hasPrayerSchedule={Boolean(schedule)} />
         </TenantProvider>
       </body>
     </html>

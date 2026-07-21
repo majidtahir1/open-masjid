@@ -18,6 +18,7 @@
     "generate:types": "payload generate:types",
     "seed": "node --env-file=.env --import tsx scripts/seed.ts",
     "seed:demo": "node --env-file=.env --import tsx scripts/seed-demo.ts",
+    "seed:iqracc": "node --env-file=.env --import tsx scripts/seed-iqracc.ts",
     "import:demo": "node --env-file=.env --import tsx scripts/import-icp-to-demo.ts",
     "seed:blog": "node --env-file=.env --import tsx scripts/seedBlogIntro.ts",
     "cleanup:pending-tenants": "node --env-file=.env --import tsx scripts/cleanupPendingTenants.ts",

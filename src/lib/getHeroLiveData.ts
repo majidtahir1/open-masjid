@@ -260,9 +260,10 @@ export async function getHeroLiveData(
   tenantId: string | number,
   tz?: string | null,
 ): Promise<HeroLiveData> {
-  const [nextIqamah, upcomingEvents] = await Promise.all([
+  const [nextIqamah, upcomingEvents, schedule] = await Promise.all([
     getNextIqamah(tenantId, new Date(), tz),
     getUpcomingEvents(tenantId, 2),
+    getActiveSchedule(tenantId).catch(() => null),
   ])
-  return { nextIqamah, upcomingEvents }
+  return { nextIqamah, upcomingEvents, hasSchedule: Boolean(schedule) }
 }

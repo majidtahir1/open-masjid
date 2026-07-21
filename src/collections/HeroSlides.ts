@@ -118,6 +118,24 @@ export const HeroSlides: CollectionConfig = {
       },
     },
     {
+      name: 'background',
+      type: 'select',
+      defaultValue: 'default',
+      label: 'Background',
+      options: [
+        { label: 'Default — light page background', value: 'default' },
+        { label: 'Brand — deep brand-color panel, light text', value: 'brand' },
+      ],
+      admin: {
+        description:
+          'Background treatment for this slide. "Brand" renders the slide on a deep panel of your brand color with light text — good for campaign slides. Not used by the Photo layout (it is always dark).',
+        condition: (_, siblingData) => siblingData?.style !== 'photo',
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
+      },
+    },
+    {
       // Legacy field — kept in the schema so existing rows still validate,
       // but hidden from admin and unused at render. The hero variants
       // determine their colors from `style` + the per-tenant theme; the

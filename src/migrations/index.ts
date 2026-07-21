@@ -47,6 +47,7 @@ import * as migration_20260619_201100_program_tuition_pricing from './20260619_2
 import * as migration_20260619_201516_program_subscriptions from './20260619_201516_program_subscriptions';
 import * as migration_20260619_202232_program_subscription_canceled_at from './20260619_202232_program_subscription_canceled_at';
 import * as migration_20260620_150540_move_pricing_to_program from './20260620_150540_move_pricing_to_program';
+import * as migration_20260716_044647_hero_slide_background from './20260716_044647_hero_slide_background';
 
 export const migrations = [
   {
@@ -292,6 +293,11 @@ export const migrations = [
   {
     up: migration_20260620_150540_move_pricing_to_program.up,
     down: migration_20260620_150540_move_pricing_to_program.down,
-    name: '20260620_150540_move_pricing_to_program'
+    name: '20260620_150540_move_pricing_to_program',
+  },
+  {
+    up: migration_20260716_044647_hero_slide_background.up,
+    down: migration_20260716_044647_hero_slide_background.down,
+    name: '20260716_044647_hero_slide_background'
   },
 ];
