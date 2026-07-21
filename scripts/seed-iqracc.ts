@@ -121,8 +121,20 @@ async function seed() {
   }
   const tenantId = tenant.id
 
-  // 2. Admin user (local dev credentials)
-  const adminEmail = 'admin@iqracc.com'
+  // 2. Admin user. Credentials come from IQRACC_ADMIN_EMAIL /
+  //    IQRACC_ADMIN_PASSWORD. Dev-only fallbacks apply when DATABASE_URI is
+  //    local; against any other database the envs are required so a prod run
+  //    can never create the well-known dev credentials.
+  const isLocalDb = /@(127\.0\.0\.1|localhost)[:/]/.test(process.env.DATABASE_URI ?? '')
+  const adminEmail =
+    process.env.IQRACC_ADMIN_EMAIL ?? (isLocalDb ? 'admin@iqracc.com' : undefined)
+  const adminPassword =
+    process.env.IQRACC_ADMIN_PASSWORD ?? (isLocalDb ? 'admin-dev-password' : undefined)
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      'IQRACC_ADMIN_EMAIL and IQRACC_ADMIN_PASSWORD must be set when seeding a non-local database.',
+    )
+  }
   const existingAdmin = await findOne<{ id: string | number }>(payload, 'users', {
     email: { equals: adminEmail },
   })
@@ -131,7 +143,7 @@ async function seed() {
       collection: 'users',
       data: {
         email: adminEmail,
-        password: 'admin-dev-password',
+        password: adminPassword,
         role: 'admin',
         tenant: tenantId,
         firstName: 'Iqra CC',
@@ -411,7 +423,7 @@ async function seed() {
   console.log('✓ Created Stay Connected form')
 
   console.log('\nDone. Visit http://iqracc.localhost:3000')
-  console.log('Admin: http://iqracc.localhost:3000/admin —', adminEmail, '/ admin-dev-password')
+  console.log('Admin: http://iqracc.localhost:3000/admin —', adminEmail)
   process.exit(0)
 }
 

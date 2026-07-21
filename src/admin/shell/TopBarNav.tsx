@@ -115,17 +115,6 @@ export default function TopBarNav() {
     zIndex: 60,
   }
 
-  const Logo = (
-    <a href="/admin" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/brand/logo-icp-horizontal-navy.svg"
-        alt="OpenMasjid"
-        style={{ height: 30, filter: 'brightness(0) invert(1)' }}
-      />
-    </a>
-  )
-
   const Avatar = (
     <AccountMenu
       open={accountOpen}
@@ -165,8 +154,6 @@ export default function TopBarNav() {
           aria-hidden
         />
       )}
-      {Logo}
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 6 }}>
         {items.map((item) =>
           item.kind === 'leaf' ? (
