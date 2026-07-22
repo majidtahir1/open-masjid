@@ -41,26 +41,7 @@ export default async function AboutPage() {
 
         {page?.content ? (
           <RichText data={page.content} className="max-w-[68ch]" />
-        ) : (
-          <div className="max-w-[68ch] space-y-5 text-fs-base leading-relaxed text-fg2">
-            <p className="m-0">
-              {tenant.name ?? 'Our masjid'} was established in September 2021 to
-              serve Muslim families in Prosper and Celina, Texas. What began as
-              a handful of neighbors gathering for prayer has grown into a
-              community centered on knowledge, tarbiya, and worship.
-            </p>
-            <p className="m-0">
-              We hold the five daily prayers, weekly halaqas, children&rsquo;s
-              classes, and Ramadan programs for families and youth. Our aim is
-              simple: to be a place where faith is learned, lived, and passed
-              on.
-            </p>
-            <p className="m-0">
-              Everyone is welcome &mdash; whether you are new to the area, new
-              to Islam, or simply passing through for a prayer.
-            </p>
-          </div>
-        )}
+        ) : null}
 
         <aside className="mt-16 rounded-[var(--r-md)] border border-border bg-white p-8 shadow-sh-xs">
           <div className="mb-5 font-body text-fs-xs font-semibold uppercase tracking-caps text-brand">
