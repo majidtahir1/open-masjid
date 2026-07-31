@@ -28,6 +28,14 @@
   margin-inline: auto;
 }
 
+/* Dark theme: deep teal/gold text accents fall below readable contrast on
+   dark surfaces — lift them to lighter siblings. The navy masthead and
+   primary buttons are intentionally theme-agnostic brand surfaces. */
+[data-theme='dark'] .ss-root {
+  --ss-teal-600: #5cb8c3;
+  --ss-gold-700: #e3bd7a;
+}
+
 /* --- shared eyebrow / type --------------------------------------------- */
 .ss-eyebrow {
   font-size: 11px;

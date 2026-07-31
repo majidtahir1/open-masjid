@@ -162,6 +162,80 @@
   --tracking-caps:   0.12em;
 }
 
+/* -------------------------------------------------------------------------
+ * Admin shell surface tokens (--om-*). The shell components (TopBarNav,
+ * MegaMenu, MobileShell, CommandPalette, AccountMenu, Dashboard chrome)
+ * style themselves inline via these variables so popovers, sheets, and
+ * cards re-skin automatically when the admin theme flips to dark.
+ * ----------------------------------------------------------------------- */
+:root {
+  --om-pop-bg:        #ffffff;
+  --om-pop-border:    #dde1e1;
+  --om-hover-bg:      #f7f8f8;
+  --om-divider:       #eef0f0;
+  --om-row-divider:   #f0f1f1;
+  --om-card-border:   #e4e7e7;
+  --om-sheet-bg:      #f4f5f6;
+  --om-text-strong:   #141616;
+  --om-text-body:     #3a3f3f;
+  --om-text-muted:    #747c7c;
+  --om-active-row:    #eef0fa;
+  --om-kbd-bg:        #f7f8f8;
+  --om-teal-ink:      #1e7e8e;
+  --om-teal-badge-bg: #e6f5f7;
+  --om-teal-badge-fg: #175f6b;
+  --om-swatch-bg:     #eaf1f3;
+  --om-tabbar-bg:     rgba(255, 255, 255, 0.92);
+  --om-tab-active:    #0f1e4a;
+  --om-danger:        #b2493c;
+  --om-drag-handle:   #c3c9c9;
+  --om-on-brand:      #ffffff;
+
+  /* Status tints (chips / banners) */
+  --om-ok-bg:         #dcfce7;
+  --om-ok-fg:         #14532d;
+  --om-warn-bg:       #fef3c7;
+  --om-warn-fg:       #78350f;
+  --om-err-bg:        #fee2e2;
+  --om-err-fg:        #991b1b;
+  --om-neutral-bg:    #f1f5f9;
+  --om-neutral-fg:    #334155;
+}
+
+[data-theme='dark'] {
+  --om-pop-bg:        var(--theme-elevation-100, #1b2138);
+  --om-pop-border:    rgba(255, 255, 255, 0.12);
+  --om-hover-bg:      rgba(255, 255, 255, 0.06);
+  --om-divider:       rgba(255, 255, 255, 0.08);
+  --om-row-divider:   rgba(255, 255, 255, 0.08);
+  --om-card-border:   rgba(255, 255, 255, 0.1);
+  --om-sheet-bg:      var(--theme-elevation-50, #13182b);
+  --om-text-strong:   #f7f8f8;
+  --om-text-body:     #dde1e1;
+  --om-text-muted:    #9ca4a4;
+  --om-active-row:    rgba(60, 164, 178, 0.16);
+  --om-kbd-bg:        rgba(255, 255, 255, 0.08);
+  --om-teal-ink:      #5cb8c3;
+  --om-teal-badge-bg: rgba(60, 164, 178, 0.18);
+  --om-teal-badge-fg: #8dced6;
+  --om-swatch-bg:     rgba(255, 255, 255, 0.08);
+  --om-tabbar-bg:     rgba(13, 18, 34, 0.92);
+  --om-tab-active:    #5cb8c3;
+  --om-danger:        #e08a7e;
+  --om-drag-handle:   #545b5b;
+  --om-on-brand:      #0a1638;
+
+  /* Status tints (chips / banners) */
+  --om-ok-bg:         rgba(76, 139, 91, 0.22);
+  --om-ok-fg:         #a7d4b2;
+  --om-warn-bg:       rgba(184, 149, 79, 0.22);
+  --om-warn-fg:       #ecd3a3;
+  --om-err-bg:        rgba(178, 73, 60, 0.22);
+  --om-err-fg:        #f2a49c;
+  --om-neutral-bg:    rgba(255, 255, 255, 0.08);
+  --om-neutral-fg:    #c3c9c9;
+}
+
 /* Dark mode — keyed on Payload's admin theme attribute. Do not add `.dark`
  * here; the public site handles its own `.dark` scope in globals.css. */
 [data-theme='dark'] {
@@ -173,17 +247,40 @@
   --popover-foreground:     #F7F8F8;
   --primary:                var(--icp-teal-500);
   --primary-foreground:     var(--icp-navy-900);
-  --secondary:              var(--icp-navy-500);
-  --secondary-foreground:   #F7F8F8;
+  /* navy-500 is invisible against the navy-900 background (text-secondary
+     icons, secondary badges) — use light teal with dark ink instead. */
+  --secondary:              var(--icp-teal-300);
+  --secondary-foreground:   var(--icp-navy-900);
   --muted:                  var(--icp-navy-800);
   --muted-foreground:       var(--icp-gray-300);
   --accent:                 var(--icp-gold-300);
   --accent-foreground:      var(--icp-navy-900);
   --destructive:            var(--icp-danger);
   --destructive-foreground: #FFFFFF;
-  --border:                 rgba(255, 255, 255, 0.10);
-  --input:                  rgba(255, 255, 255, 0.12);
+  --border:                 rgba(255, 255, 255, 0.14);
+  --input:                  rgba(255, 255, 255, 0.16);
   --ring:                   var(--icp-teal-400);
+
+  /* Mirrored public-site tokens (--bg / --fg* / --brand layer) are consumed
+   * by admin-side custom components (onboarding wizard, milestone panel,
+   * hint rail). Their :root values are light-only, so invert them here or
+   * those surfaces render as white cards with dark text in dark mode. */
+  --bg:            var(--theme-elevation-50, #10182e);
+  --bg-alt:        var(--theme-elevation-100, #1b2138);
+  --fg1:           #F7F8F8;
+  --fg2:           #DDE1E1;
+  --fg3:           #9CA4A4;
+  --fg4:           #747C7C;
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-teal:   rgba(60, 164, 178, 0.35);
+  --border-navy:   rgba(155, 164, 209, 0.35);
+  /* Brand navy is unreadable as text on dark surfaces — flip the brand layer
+   * to light navy. Buttons that use --brand as a background pair it with
+   * --om-on-brand (white in light, navy ink in dark) to keep contrast. */
+  --brand:         var(--icp-navy-200);
+  --brand-hover:   var(--icp-navy-100);
+  --brand-press:   var(--icp-navy-50);
+  --brand-soft:    rgba(155, 164, 209, 0.16);
 }
 
 /* -------------------------------------------------------------------------
@@ -202,6 +299,21 @@
     background-color: var(--icp-navy-hover);
     border-color: var(--icp-navy-hover);
     color: #ffffff;
+  }
+
+  /* Navy melts into the dark admin background — flip to the dark theme's
+     primary (teal on near-black ink), matching the shadcn token mapping. */
+  [data-theme='dark'] & {
+    background-color: var(--icp-teal-500);
+    border-color: var(--icp-teal-500);
+    color: var(--icp-navy-900);
+
+    &:hover,
+    &:focus {
+      background-color: var(--icp-teal-400);
+      border-color: var(--icp-teal-400);
+      color: var(--icp-navy-900);
+    }
   }
 }
 

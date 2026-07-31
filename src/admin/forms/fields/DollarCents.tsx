@@ -41,7 +41,7 @@ export default function DollarCents({
         {label}
       </label>
       <div style={{ position: 'relative', maxWidth: 320 }}>
-        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6b7280', fontSize: 13, pointerEvents: 'none' }}>$</span>
+        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--om-text-muted)', fontSize: 13, pointerEvents: 'none' }}>$</span>
         <input
           id={resolvedPath}
           type="number"
@@ -56,11 +56,11 @@ export default function DollarCents({
             const n = Number(v)
             if (Number.isFinite(n)) setValue(Math.round(n * 100))
           }}
-          style={{ width: '100%', padding: '8px 10px 8px 22px', border: '1px solid rgba(15,23,42,0.12)', borderRadius: 6, fontSize: 13 }}
+          style={{ width: '100%', padding: '8px 10px 8px 22px', border: '1px solid var(--om-pop-border)', borderRadius: 6, fontSize: 13 }}
         />
       </div>
       {field.admin?.description && (
-        <p style={{ margin: '6px 0 0', fontSize: 12, color: '#6b7280' }}>{field.admin.description}</p>
+        <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--om-text-muted)' }}>{field.admin.description}</p>
       )}
     </div>
   )

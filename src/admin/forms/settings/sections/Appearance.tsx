@@ -56,7 +56,7 @@ function ColorPickerInline({
           style={{
             width: 44,
             height: 36,
-            border: '1px solid rgba(15,23,42,0.12)',
+            border: '1px solid var(--om-pop-border)',
             borderRadius: 6,
             padding: 0,
             cursor: 'pointer',
@@ -72,7 +72,7 @@ function ColorPickerInline({
           style={{
             flex: 1,
             padding: '8px 10px',
-            border: '1px solid rgba(15,23,42,0.12)',
+            border: '1px solid var(--om-pop-border)',
             borderRadius: 6,
             fontFamily: 'monospace',
             fontSize: 13,
@@ -85,12 +85,12 @@ function ColorPickerInline({
             title="Clear"
             style={{
               padding: '6px 10px',
-              border: '1px solid rgba(15,23,42,0.12)',
+              border: '1px solid var(--om-pop-border)',
               borderRadius: 6,
-              background: 'white',
+              background: 'var(--om-pop-bg)',
               fontSize: 12,
               cursor: 'pointer',
-              color: '#6b7280',
+              color: 'var(--om-text-muted)',
             }}
           >
             Clear
@@ -100,7 +100,7 @@ function ColorPickerInline({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {brandPresets.length > 0 && (
           <>
-            <div style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+            <div style={{ fontSize: 11, color: 'var(--om-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4 }}>
               Brand
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -115,7 +115,7 @@ function ColorPickerInline({
             </div>
           </>
         )}
-        <div style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: brandPresets.length > 0 ? 4 : 0 }}>
+        <div style={{ fontSize: 11, color: 'var(--om-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: brandPresets.length > 0 ? 4 : 0 }}>
           Presets
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -151,7 +151,7 @@ function SwatchButton({
         width: 26,
         height: 26,
         borderRadius: 6,
-        border: selected ? '2px solid #0E1B2C' : '1px solid rgba(15,23,42,0.12)',
+        border: selected ? '2px solid var(--om-text-strong)' : '1px solid var(--om-pop-border)',
         background: color,
         padding: 0,
         cursor: 'pointer',
@@ -245,7 +245,7 @@ export default function Appearance() {
             width: '100%',
             padding: '8px 10px',
             borderRadius: 6,
-            border: '1px solid rgba(15,23,42,0.12)',
+            border: '1px solid var(--om-pop-border)',
             fontSize: 14,
           }}
         >
@@ -259,7 +259,7 @@ export default function Appearance() {
         <h3 className="settings-card__title">Intro message</h3>
         <p className="settings-field__helper">
           Optional message shown above the first field.{' '}
-          <a href="../" style={{ color: '#1e3a5f', textDecoration: 'underline' }}>
+          <a href="../" style={{ color: 'var(--om-teal-ink)', textDecoration: 'underline' }}>
             Edit intro message in the main form view
           </a>{' '}
           to use the full rich-text editor.
@@ -270,7 +270,7 @@ export default function Appearance() {
         <h3 className="settings-card__title">Submission message</h3>
         <p className="settings-field__helper">
           Shown after a successful submission.{' '}
-          <a href="../" style={{ color: '#1e3a5f', textDecoration: 'underline' }}>
+          <a href="../" style={{ color: 'var(--om-teal-ink)', textDecoration: 'underline' }}>
             Edit submission message in the main form view
           </a>{' '}
           to use the full rich-text editor. Falls back to the Settings &rarr; Confirmation message
@@ -333,7 +333,7 @@ export default function Appearance() {
               width: '100%',
               padding: '8px 10px',
               borderRadius: 6,
-              border: '1px solid rgba(15,23,42,0.12)',
+              border: '1px solid var(--om-pop-border)',
               fontSize: 14,
             }}
           >
@@ -350,7 +350,7 @@ export default function Appearance() {
               height: 80,
               borderRadius: 8,
               background: previewCss,
-              border: '1px solid rgba(15,23,42,0.08)',
+              border: '1px solid var(--om-divider)',
             }}
           />
         )}

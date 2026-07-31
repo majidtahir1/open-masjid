@@ -576,7 +576,7 @@ export function BrandingStep({
                 style={{
                   flex: 1,
                   height: 4,
-                  background: i === 0 ? 'var(--brand)' : 'var(--icp-gray-100)',
+                  background: i === 0 ? 'var(--brand)' : 'var(--om-neutral-bg)',
                   borderRadius: 2,
                 }}
               />
@@ -797,7 +797,7 @@ export function BrandingStep({
                     height: 120,
                     borderRadius: 'var(--r-sm)',
                     background:
-                      'linear-gradient(180deg, var(--icp-gray-100), var(--icp-gray-200))',
+                      'linear-gradient(180deg, var(--om-neutral-bg), var(--om-card-border))',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -866,7 +866,7 @@ export function BrandingStep({
                         height: 32,
                         borderRadius: 'var(--r-sm)',
                         background:
-                          'linear-gradient(180deg, var(--icp-gray-100), var(--icp-gray-200))',
+                          'linear-gradient(180deg, var(--om-neutral-bg), var(--om-card-border))',
                       }}
                     />
                   )}
@@ -1139,9 +1139,9 @@ export function BrandingStep({
             style={{
               padding: 'var(--sp-3) var(--sp-4)',
               borderRadius: 'var(--r-md)',
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              color: '#991b1b',
+              background: 'var(--om-err-bg)',
+              border: '1px solid var(--om-err-fg)',
+              color: 'var(--om-err-fg)',
               fontSize: 13,
             }}
           >
@@ -1308,7 +1308,7 @@ function PrimaryFooterButton({
       style={{
         ...baseFooterBtn,
         background: 'var(--brand)',
-        color: '#fff',
+        color: 'var(--om-on-brand)',
         opacity: disabled ? 0.6 : 1,
       }}
     >

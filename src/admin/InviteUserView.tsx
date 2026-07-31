@@ -111,7 +111,7 @@ export default function InviteUserForm({
     >
       <div style={row}>
         <label style={label} htmlFor="invite-email">
-          Email <span style={{ color: '#dc2626' }}>*</span>
+          Email <span style={{ color: 'var(--om-danger)' }}>*</span>
         </label>
         <input
           id="invite-email"
@@ -152,7 +152,7 @@ export default function InviteUserForm({
       </div>
       <div style={row}>
         <label style={label} htmlFor="invite-role">
-          Role <span style={{ color: '#dc2626' }}>*</span>
+          Role <span style={{ color: 'var(--om-danger)' }}>*</span>
         </label>
         <select
           id="invite-role"
@@ -171,7 +171,7 @@ export default function InviteUserForm({
       {role !== 'platformOwner' ? (
         <div style={row}>
           <label style={label} htmlFor="invite-tenant">
-            Tenant <span style={{ color: '#dc2626' }}>*</span>
+            Tenant <span style={{ color: 'var(--om-danger)' }}>*</span>
           </label>
           {isPlatformOwner ? (
             <select
@@ -207,7 +207,7 @@ export default function InviteUserForm({
             padding: '10px 18px',
             borderRadius: 4,
             background: 'var(--theme-elevation-800, #0F1E4A)',
-            color: '#fff',
+            color: 'var(--theme-elevation-0, #fff)',
             border: 'none',
             fontSize: 14,
             fontWeight: 600,
@@ -221,7 +221,7 @@ export default function InviteUserForm({
           <span
             style={{
               fontSize: 13,
-              color: message.kind === 'ok' ? '#14532d' : '#991b1b',
+              color: message.kind === 'ok' ? 'var(--om-ok-fg)' : 'var(--om-err-fg)',
             }}
           >
             {message.text}

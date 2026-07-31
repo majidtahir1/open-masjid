@@ -70,6 +70,25 @@
   flex-shrink: 0;
 }
 
+/* Dark theme: the navy active/focus accents disappear against dark
+   surfaces — switch interaction accents to teal. Buttons keep white-on-navy
+   (still high contrast). */
+[data-theme='dark'] .settings-nav__item--active {
+  background: rgba(60, 164, 178, 0.2);
+  color: #f7f8f8;
+}
+
+[data-theme='dark'] .settings-field__input:focus,
+[data-theme='dark'] .settings-field__textarea:focus,
+[data-theme='dark'] .settings-field__select:focus {
+  border-color: #3ca4b2;
+  box-shadow: 0 0 0 3px rgba(60, 164, 178, 0.2);
+}
+
+[data-theme='dark'] .settings-toggle input:checked + .settings-toggle__track {
+  background: #28a0b4;
+}
+
 /* ---- Content area ---- */
 .settings-content {
   flex: 1;

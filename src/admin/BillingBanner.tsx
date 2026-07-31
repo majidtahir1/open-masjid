@@ -19,10 +19,10 @@ export default async function BillingBanner() {
   }
 
   const colors: Record<string, { bg: string; fg: string }> = {
-    trial: { bg: '#fef3c7', fg: '#92400e' },
-    past_due_trial: { bg: '#fee2e2', fg: '#991b1b' },
-    past_due: { bg: '#fee2e2', fg: '#991b1b' },
-    grace_period: { bg: '#fee2e2', fg: '#991b1b' },
+    trial: { bg: 'var(--om-warn-bg)', fg: 'var(--om-warn-fg)' },
+    past_due_trial: { bg: 'var(--om-err-bg)', fg: 'var(--om-err-fg)' },
+    past_due: { bg: 'var(--om-err-bg)', fg: 'var(--om-err-fg)' },
+    grace_period: { bg: 'var(--om-err-bg)', fg: 'var(--om-err-fg)' },
     offline: { bg: '#1f2937', fg: '#fff' },
   }
   const c = colors[state.kind]

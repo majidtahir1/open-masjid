@@ -344,6 +344,8 @@
   font-size: 14px;
   max-height: 90px;
   outline: none;
+  background: #fff;
+  color: var(--gray-900);
 }
 
 .textarea:focus {
@@ -378,6 +380,70 @@
   color: #c0392b;
   background: #fdf0ef;
   border-top: 1px solid #f5c6c3;
+}
+
+/* ---- dark theme (Payload admin toggle) ----
+   The mockup palette is light-only; when the admin theme is dark, re-skin
+   the panel surfaces on Payload's elevation scale so text stays readable. */
+[data-theme='dark'] .panel {
+  background: var(--theme-elevation-50, #13182b);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .msgs {
+  background: var(--theme-elevation-0, #0b0f1f);
+}
+
+[data-theme='dark'] .bot .bubble {
+  background: var(--theme-elevation-100, #1b2138);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--theme-elevation-800, #e8eaf2);
+}
+
+[data-theme='dark'] .composer {
+  background: var(--theme-elevation-50, #13182b);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .textarea {
+  background: var(--theme-elevation-100, #1b2138);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--theme-elevation-800, #e8eaf2);
+}
+
+[data-theme='dark'] .textarea:focus {
+  border-color: var(--icp-teal-400, #3ca4b2);
+  box-shadow: 0 0 0 3px rgba(60, 164, 178, 0.22);
+}
+
+[data-theme='dark'] .attach {
+  color: var(--theme-elevation-500, #9aa1b5);
+}
+
+[data-theme='dark'] .attach:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--theme-elevation-800, #e8eaf2);
+}
+
+[data-theme='dark'] .send {
+  background: var(--icp-teal-500, #28a0b4);
+  color: var(--navy-800);
+}
+
+[data-theme='dark'] .tool {
+  background: rgba(217, 168, 78, 0.14);
+  border-color: rgba(240, 200, 140, 0.4);
+  color: var(--gold);
+}
+
+[data-theme='dark'] .typing span {
+  background: var(--theme-elevation-400, #6b7286);
+}
+
+[data-theme='dark'] .error {
+  color: #f2a49c;
+  background: rgba(178, 73, 60, 0.18);
+  border-top-color: rgba(178, 73, 60, 0.4);
 }
 
 /* Mobile: lift the launcher above the bottom tab bar (84px) so it doesn't sit

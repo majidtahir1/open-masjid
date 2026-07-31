@@ -46,8 +46,8 @@ const META: Record<
     blurb:
       'Branded sponsor / advertiser slides with four layout templates and brand-color theming. Saving auto-broadcasts.',
     Icon: ShoppingBag,
-    accent: 'text-amber-600',
-    iconBg: 'bg-amber-100',
+    accent: 'text-[var(--om-warn-fg)]',
+    iconBg: 'bg-[var(--om-warn-bg)]',
     activeField: 'active',
   },
   'weekly-events-slides': {
@@ -55,8 +55,8 @@ const META: Record<
     blurb:
       'A recurring weekly schedule grid — Mondays, Tuesdays, Jumuah, etc. One entry per day per class.',
     Icon: CalendarClock,
-    accent: 'text-indigo-600',
-    iconBg: 'bg-indigo-100',
+    accent: 'text-indigo-600 dark:text-indigo-400',
+    iconBg: 'bg-indigo-100 dark:bg-indigo-500/15',
     activeField: 'active',
   },
   'qr-codes': {
@@ -64,8 +64,8 @@ const META: Record<
     blurb:
       'Reusable QR-code library. Generate once with a URL + colors, then attach to any carousel or sponsor slide for congregants to scan.',
     Icon: QrCode,
-    accent: 'text-emerald-600',
-    iconBg: 'bg-emerald-100',
+    accent: 'text-[var(--om-ok-fg)]',
+    iconBg: 'bg-[var(--om-ok-bg)]',
     activeField: null,
   },
 }
@@ -117,7 +117,7 @@ async function Banner({ slug }: { slug: CollectionSlug }) {
                 {meta.activeField && (
                   <Badge
                     variant="secondary"
-                    className="bg-emerald-100 text-emerald-700 text-xs font-semibold"
+                    className="bg-[var(--om-ok-bg)] text-[var(--om-ok-fg)] text-xs font-semibold"
                   >
                     {active} active
                   </Badge>

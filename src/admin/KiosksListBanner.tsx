@@ -29,14 +29,14 @@ const META: Record<
   ONLINE: {
     label: 'Online',
     Icon: Wifi,
-    tone: 'text-emerald-600',
-    iconBg: 'bg-emerald-100',
+    tone: 'text-[var(--om-ok-fg)]',
+    iconBg: 'bg-[var(--om-ok-bg)]',
   },
   OFFLINE: {
     label: 'Offline',
     Icon: WifiOff,
-    tone: 'text-rose-600',
-    iconBg: 'bg-rose-100',
+    tone: 'text-[var(--om-err-fg)]',
+    iconBg: 'bg-[var(--om-err-bg)]',
   },
   UNPAIRED: {
     label: 'Unpaired',
@@ -47,8 +47,8 @@ const META: Record<
   MAINTENANCE: {
     label: 'Maintenance',
     Icon: Wrench,
-    tone: 'text-amber-600',
-    iconBg: 'bg-amber-100',
+    tone: 'text-[var(--om-warn-fg)]',
+    iconBg: 'bg-[var(--om-warn-bg)]',
   },
 }
 

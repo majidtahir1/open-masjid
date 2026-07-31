@@ -76,7 +76,7 @@ export function MilestoneTile({
           height: 32,
           borderRadius: '50%',
           background: 'var(--brand)',
-          color: '#fff',
+          color: 'var(--om-on-brand)',
         }}
       >
         <Check size={16} strokeWidth={2} />

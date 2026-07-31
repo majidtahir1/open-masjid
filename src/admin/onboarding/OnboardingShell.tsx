@@ -112,7 +112,7 @@ export function OnboardingShell({
           alignItems: 'center',
           gap: 6,
           background: 'var(--brand)',
-          color: 'white',
+          color: 'var(--om-on-brand)',
           padding: '8px 16px',
           borderRadius: 'var(--r-md)',
           fontFamily: 'var(--font-body)',
@@ -215,7 +215,7 @@ export function OnboardingShell({
 
       <div
         style={{
-          background: 'white',
+          background: 'var(--om-pop-bg)',
           padding: 'var(--sp-8) var(--sp-12)',
         }}
       >
@@ -249,7 +249,7 @@ export function OnboardingShell({
                 alignItems: 'center',
                 gap: 8,
                 background: 'var(--brand)',
-                color: 'white',
+                color: 'var(--om-on-brand)',
                 padding: '12px 22px',
                 borderRadius: 'var(--r-md)',
                 fontFamily: 'var(--font-body)',
@@ -355,7 +355,7 @@ export function OnboardingShell({
                 height: 4,
                 width: '100%',
                 borderRadius: 'var(--r-pill)',
-                background: 'var(--icp-gray-100)',
+                background: 'var(--om-neutral-bg)',
                 overflow: 'hidden',
               }}
             >
@@ -416,7 +416,7 @@ export function OnboardingShell({
             margin: 0,
             padding: 0,
             background: 'var(--bg)',
-            border: '1px solid rgba(15, 30, 74, 0.06)',
+            border: '1px solid var(--om-card-border)',
             borderRadius: 'var(--r-lg)',
             overflow: 'hidden',
             boxShadow: 'var(--sh-xs)',
@@ -427,8 +427,8 @@ export function OnboardingShell({
               key={s.slug}
               className="flex"
               style={{
-                borderTop: i >= 3 ? '1px solid rgba(15, 30, 74, 0.06)' : 'none',
-                borderLeft: i % 3 === 0 ? 'none' : '1px solid rgba(15, 30, 74, 0.06)',
+                borderTop: i >= 3 ? '1px solid var(--om-row-divider)' : 'none',
+                borderLeft: i % 3 === 0 ? 'none' : '1px solid var(--om-row-divider)',
               }}
             >
               <MilestoneTile
@@ -490,7 +490,7 @@ export function OnboardingShell({
                 'background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--icp-gray-100)'
+              e.currentTarget.style.background = 'var(--om-neutral-bg)'
               e.currentTarget.style.color = 'var(--fg1)'
             }}
             onMouseLeave={(e) => {

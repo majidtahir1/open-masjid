@@ -54,7 +54,7 @@ const PlusGlyph = ({ size = 26 }: { size?: number }) => (
   </svg>
 )
 
-const ChevronGlyph = ({ size = 18, color = '#C3C9C9' }: { size?: number; color?: string }) => (
+const ChevronGlyph = ({ size = 18, color = 'var(--om-drag-handle)' }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ color }}>
     <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -72,15 +72,15 @@ const overlayStyle: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 45,
-  background: '#F4F5F6',
+  background: 'var(--om-sheet-bg)',
   overflowY: 'auto',
   paddingTop: HEADER_HEIGHT,
   paddingBottom: TAB_HEIGHT + 12,
 }
 
 const cardStyle: React.CSSProperties = {
-  background: '#fff',
-  border: '1px solid #E4E7E7',
+  background: 'var(--om-pop-bg)',
+  border: '1px solid var(--om-card-border)',
   borderRadius: 15,
   overflow: 'hidden',
 }
@@ -107,7 +107,7 @@ function LeafLink({
         alignItems: 'center',
         gap: 13,
         padding: '14px 16px',
-        borderBottom: last ? 'none' : '1px solid #F0F1F1',
+        borderBottom: last ? 'none' : '1px solid var(--om-row-divider)',
         textDecoration: 'none',
       }}
     >
@@ -127,7 +127,7 @@ function LeafLink({
         <NavIcon name={leaf.icon} size={17} />
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: '#141616' }}>
+        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: 'var(--om-text-strong)' }}>
           {leaf.label}
         </span>
         {leaf.description && (
@@ -195,7 +195,7 @@ export default function MobileShell({
 
   const homeActive = pathname === '/admin' && panel === null
 
-  const tabColor = (active: boolean) => (active ? '#0F1E4A' : '#9CA4A4')
+  const tabColor = (active: boolean) => (active ? 'var(--om-tab-active)' : '#9CA4A4')
 
   // ---- Header -------------------------------------------------------------
   const header = (
@@ -315,8 +315,8 @@ export default function MobileShell({
                   <LeafLink
                     key={c.href}
                     leaf={c}
-                    swatchBg="#E6F5F7"
-                    swatchColor="#175F6B"
+                    swatchBg="var(--om-teal-badge-bg)"
+                    swatchColor="var(--om-teal-badge-fg)"
                     last={i === websiteGroup.children.length - 1}
                     onNavigate={closePanels}
                   />
@@ -342,8 +342,8 @@ export default function MobileShell({
                   <div key={item.href} style={{ ...cardStyle, marginTop: 12 }}>
                     <LeafLink
                       leaf={item}
-                      swatchBg="#EAF1F3"
-                      swatchColor="#1E7E8E"
+                      swatchBg="var(--om-swatch-bg)"
+                      swatchColor="var(--om-teal-ink)"
                       last
                       onNavigate={closePanels}
                     />
@@ -356,8 +356,8 @@ export default function MobileShell({
                         <LeafLink
                           key={c.href}
                           leaf={c}
-                          swatchBg="#EAF1F3"
-                          swatchColor="#1E7E8E"
+                          swatchBg="var(--om-swatch-bg)"
+                          swatchColor="var(--om-teal-ink)"
                           last={i === item.children.length - 1}
                           onNavigate={closePanels}
                         />
@@ -390,10 +390,10 @@ export default function MobileShell({
           right: 0,
           zIndex: 50,
           height: TAB_HEIGHT,
-          background: 'rgba(255,255,255,.92)',
+          background: 'var(--om-tabbar-bg)',
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
-          borderTop: '1px solid #E4E7E7',
+          borderTop: '1px solid var(--om-card-border)',
           display: 'flex',
           alignItems: 'flex-start',
           padding: '10px 6px 0',
@@ -461,7 +461,7 @@ export default function MobileShell({
               left: 0,
               right: 0,
               bottom: 0,
-              background: '#F4F5F6',
+              background: 'var(--om-sheet-bg)',
               borderRadius: '22px 22px 0 0',
               padding: '10px 14px 34px',
               animation: 'om-sheet-up 220ms cubic-bezier(0.22,0.61,0.36,1)',
@@ -472,11 +472,11 @@ export default function MobileShell({
                 width: 38,
                 height: 4,
                 borderRadius: 2,
-                background: '#C3C9C9',
+                background: 'var(--om-drag-handle)',
                 margin: '0 auto 14px',
               }}
             />
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#747C7C', padding: '0 4px 10px' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--om-text-muted)', padding: '0 4px 10px' }}>
               Create new
             </div>
             <div style={cardStyle}>
@@ -490,7 +490,7 @@ export default function MobileShell({
                     alignItems: 'center',
                     gap: 13,
                     padding: '14px 16px',
-                    borderBottom: i === createActions.length - 1 ? 'none' : '1px solid #F0F1F1',
+                    borderBottom: i === createActions.length - 1 ? 'none' : '1px solid var(--om-row-divider)',
                     textDecoration: 'none',
                   }}
                 >
@@ -500,8 +500,8 @@ export default function MobileShell({
                       height: 32,
                       flex: '0 0 auto',
                       borderRadius: 9,
-                      background: '#E6F5F7',
-                      color: '#175F6B',
+                      background: 'var(--om-teal-badge-bg)',
+                      color: 'var(--om-teal-badge-fg)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -510,7 +510,7 @@ export default function MobileShell({
                     <PlusGlyph size={18} />
                   </span>
                   <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: '#141616' }}>
+                    <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: 'var(--om-text-strong)' }}>
                       {a.label}
                     </span>
                     <span style={{ display: 'block', fontSize: 12, color: '#9CA4A4', marginTop: 1 }}>
@@ -527,10 +527,10 @@ export default function MobileShell({
                 width: '100%',
                 marginTop: 12,
                 padding: '14px 16px',
-                background: '#fff',
-                border: '1px solid #E4E7E7',
+                background: 'var(--om-pop-bg)',
+                border: '1px solid var(--om-card-border)',
                 borderRadius: 15,
-                color: '#B2493C',
+                color: 'var(--om-danger)',
                 fontSize: 14.5,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -570,11 +570,11 @@ function AccountRow({
         alignItems: 'center',
         gap: 13,
         padding: '14px 16px',
-        borderBottom: last ? 'none' : '1px solid #F0F1F1',
+        borderBottom: last ? 'none' : '1px solid var(--om-row-divider)',
         textDecoration: 'none',
       }}
     >
-      <span style={{ flex: 1, fontSize: 14.5, fontWeight: 600, color: '#141616' }}>{label}</span>
+      <span style={{ flex: 1, fontSize: 14.5, fontWeight: 600, color: 'var(--om-text-strong)' }}>{label}</span>
       <ChevronGlyph />
     </a>
   )

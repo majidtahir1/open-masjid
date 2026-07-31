@@ -152,7 +152,7 @@ export default function CreateTenantPanelClient() {
         >
           <div style={row}>
             <label style={label} htmlFor="ct-name">
-              Tenant name <span style={{ color: '#dc2626' }}>*</span>
+              Tenant name <span style={{ color: 'var(--om-danger)' }}>*</span>
             </label>
             <input
               id="ct-name"
@@ -167,7 +167,7 @@ export default function CreateTenantPanelClient() {
           <div style={{ ...row, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={label} htmlFor="ct-slug">
-                URL slug <span style={{ color: '#dc2626' }}>*</span>
+                URL slug <span style={{ color: 'var(--om-danger)' }}>*</span>
               </label>
               <input
                 id="ct-slug"
@@ -191,7 +191,7 @@ export default function CreateTenantPanelClient() {
             </div>
             <div>
               <label style={label} htmlFor="ct-type">
-                Site type <span style={{ color: '#dc2626' }}>*</span>
+                Site type <span style={{ color: 'var(--om-danger)' }}>*</span>
               </label>
               <select
                 id="ct-type"
@@ -223,7 +223,7 @@ export default function CreateTenantPanelClient() {
           </p>
           <div style={row}>
             <label style={label} htmlFor="ct-email">
-              Email <span style={{ color: '#dc2626' }}>*</span>
+              Email <span style={{ color: 'var(--om-danger)' }}>*</span>
             </label>
             <input
               id="ct-email"
@@ -270,7 +270,7 @@ export default function CreateTenantPanelClient() {
                 padding: '10px 18px',
                 borderRadius: 4,
                 background: 'var(--theme-elevation-800, #0F1E4A)',
-                color: '#fff',
+                color: 'var(--theme-elevation-0, #fff)',
                 border: 'none',
                 fontSize: 14,
                 fontWeight: 600,
@@ -284,7 +284,7 @@ export default function CreateTenantPanelClient() {
               <span
                 style={{
                   fontSize: 13,
-                  color: message.kind === 'ok' ? '#14532d' : '#991b1b',
+                  color: message.kind === 'ok' ? 'var(--om-ok-fg)' : 'var(--om-err-fg)',
                 }}
               >
                 {message.text}
