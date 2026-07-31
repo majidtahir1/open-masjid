@@ -17,7 +17,7 @@ export default function Confirmation() {
 
       <p className="settings-field__helper" style={{ marginBottom: 12 }}>
         The success message is a rich-text field.{' '}
-        <a href="../" style={{ color: '#1e3a5f', textDecoration: 'underline' }}>
+        <a href="../" style={{ color: 'var(--om-teal-ink)', textDecoration: 'underline' }}>
           Edit success message in the main form view
         </a>{' '}
         to use the full editor.

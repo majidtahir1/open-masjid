@@ -114,11 +114,11 @@ export default function ScheduleNameCell({
         display: 'inline-flex',
         alignItems: 'center',
         gap: 10,
-        background: '#dcfce7',
+        background: 'var(--om-ok-bg)',
         padding: '8px 12px',
         borderRadius: 6,
-        borderLeft: '4px solid #16a34a',
-        color: '#14532d',
+        borderLeft: '4px solid var(--om-ok-fg)',
+        color: 'var(--om-ok-fg)',
         fontWeight: 700,
       }}
     >

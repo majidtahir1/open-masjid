@@ -61,7 +61,7 @@ export default function Basics() {
           <label className="settings-field__label">Description</label>
           <p className="settings-field__helper">
             The description is a rich-text field.{' '}
-            <a href="../" style={{ color: '#1e3a5f', textDecoration: 'underline' }}>
+            <a href="../" style={{ color: 'var(--om-teal-ink)', textDecoration: 'underline' }}>
               Edit in main form view
             </a>
             {' '}to use the full editor.

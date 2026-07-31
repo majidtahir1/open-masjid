@@ -218,7 +218,7 @@ export default async function ScheduleTimeline() {
                 top: -4,
                 bottom: -4,
                 width: 2,
-                background: '#dc2626',
+                background: 'var(--om-danger, #dc2626)',
                 boxShadow: '0 0 0 1px rgba(220,38,38,0.2)',
                 zIndex: 2,
               }}

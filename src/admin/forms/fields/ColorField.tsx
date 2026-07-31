@@ -117,7 +117,7 @@ export default function ColorField({
             style={{
               width: 44,
               height: 36,
-              border: '1px solid rgba(15,23,42,0.12)',
+              border: '1px solid var(--om-pop-border)',
               borderRadius: 6,
               padding: 0,
               cursor: 'pointer',
@@ -134,7 +134,7 @@ export default function ColorField({
             style={{
               flex: 1,
               padding: '8px 10px',
-              border: '1px solid rgba(15,23,42,0.12)',
+              border: '1px solid var(--om-pop-border)',
               borderRadius: 6,
               fontFamily: 'monospace',
               fontSize: 13,
@@ -147,12 +147,12 @@ export default function ColorField({
               title="Clear"
               style={{
                 padding: '6px 10px',
-                border: '1px solid rgba(15,23,42,0.12)',
+                border: '1px solid var(--om-pop-border)',
                 borderRadius: 6,
-                background: 'white',
+                background: 'var(--om-pop-bg)',
                 fontSize: 12,
                 cursor: 'pointer',
-                color: '#6b7280',
+                color: 'var(--om-text-muted)',
               }}
             >
               Clear
@@ -167,7 +167,7 @@ export default function ColorField({
               <div
                 style={{
                   fontSize: 11,
-                  color: '#6b7280',
+                  color: 'var(--om-text-muted)',
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: 0.4,
@@ -190,7 +190,7 @@ export default function ColorField({
           <div
             style={{
               fontSize: 11,
-              color: '#6b7280',
+              color: 'var(--om-text-muted)',
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: 0.4,
@@ -212,7 +212,7 @@ export default function ColorField({
         </div>
 
         {field.admin?.description && (
-          <p style={{ margin: 0, fontSize: 12, color: '#6b7280' }}>{field.admin.description}</p>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--om-text-muted)' }}>{field.admin.description}</p>
         )}
       </div>
     </div>
@@ -237,7 +237,7 @@ function Swatch({
         width: 26,
         height: 26,
         borderRadius: 6,
-        border: selected ? '2px solid #0E1B2C' : '1px solid rgba(15,23,42,0.12)',
+        border: selected ? '2px solid var(--om-text-strong)' : '1px solid var(--om-pop-border)',
         background: color,
         padding: 0,
         cursor: 'pointer',

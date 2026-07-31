@@ -314,7 +314,7 @@ export function IdentityStep({
                 style={{
                   flex: 1,
                   height: 4,
-                  background: i === 1 ? 'var(--brand)' : 'var(--icp-gray-100)',
+                  background: i === 1 ? 'var(--brand)' : 'var(--om-neutral-bg)',
                   borderRadius: 2,
                 }}
               />
@@ -539,9 +539,9 @@ export function IdentityStep({
             style={{
               padding: 'var(--sp-3) var(--sp-4)',
               borderRadius: 'var(--r-md)',
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              color: '#991b1b',
+              background: 'var(--om-err-bg)',
+              border: '1px solid var(--om-err-fg)',
+              color: 'var(--om-err-fg)',
               fontSize: 13,
             }}
           >
@@ -708,7 +708,7 @@ function PrimaryFooterButton({
       style={{
         ...baseFooterBtn,
         background: 'var(--brand)',
-        color: '#fff',
+        color: 'var(--om-on-brand)',
         opacity: disabled ? 0.6 : 1,
       }}
     >

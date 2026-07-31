@@ -246,16 +246,18 @@
   --popover-foreground:      #F7F8F8;
   --primary:                 var(--icp-teal-500);
   --primary-foreground:      var(--icp-navy-900);
-  --secondary:               var(--icp-navy-500);
-  --secondary-foreground:    #F7F8F8;
+  /* navy-500 is invisible against the navy-900 background (text-secondary
+     icons, secondary badges) — use light teal with dark ink instead. */
+  --secondary:               var(--icp-teal-300);
+  --secondary-foreground:    var(--icp-navy-900);
   --muted:                   var(--icp-navy-800);
   --muted-foreground:        var(--icp-gray-300);
   --accent:                  var(--icp-gold-300);
   --accent-foreground:       var(--icp-navy-900);
   --destructive:             var(--icp-danger);
   --destructive-foreground:  #FFFFFF;
-  --border:                  rgba(255, 255, 255, 0.10);
-  --input:                   rgba(255, 255, 255, 0.12);
+  --border:                  rgba(255, 255, 255, 0.14);
+  --input:                   rgba(255, 255, 255, 0.16);
   --ring:                    var(--icp-teal-400);
 }
 

@@ -407,7 +407,7 @@ async function TenantDashboard({
   const isKiosk = user.role === 'kioskManager'
 
   return (
-    <div className="om-dashboard-hub min-h-screen bg-[#F7F8F8] px-6 py-10 md:px-14 md:py-11">
+    <div className="om-dashboard-hub min-h-screen bg-[#F7F8F8] dark:bg-[var(--theme-bg)] px-6 py-10 md:px-14 md:py-11">
       <div className="mx-auto max-w-[1180px] space-y-9">
       <OnboardingShell
         initialStates={onboardingStates}
@@ -420,14 +420,14 @@ async function TenantDashboard({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1
-            className="text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-[#0F1E4A]"
+            className="text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-[#0F1E4A] dark:text-[#EEF0FA]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Salam, {displayName}
           </h1>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-[15px] text-[#747C7C]">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[15px] text-[#747C7C] dark:text-[#9CA4A4]">
             <span>Managing</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6F5F7] px-3 py-1.5 font-semibold text-[#175F6B]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6F5F7] px-3 py-1.5 font-semibold text-[#175F6B] dark:bg-[rgba(60,164,178,0.18)] dark:text-[#8DCED6]">
               <Building className="size-3.5" aria-hidden />
               {tenantName}
             </span>
@@ -435,7 +435,7 @@ async function TenantDashboard({
         </div>
         <div className="flex items-center gap-3">
           {isAdmin && setupDone >= onboardingStates.length && (
-            <span className="inline-flex items-center gap-2 rounded-[10px] border border-[#DDE1E1] bg-white px-3.5 py-2.5 text-[14.5px] text-[#3A3F3F]">
+            <span className="inline-flex items-center gap-2 rounded-[10px] border border-[#DDE1E1] bg-white px-3.5 py-2.5 text-[14.5px] text-[#3A3F3F] dark:border-[rgba(255,255,255,0.12)] dark:bg-[var(--theme-elevation-50)] dark:text-[#DDE1E1]">
               <span className="size-2 rounded-full bg-[#4C8B5B]" aria-hidden />
               Setup checklist · {setupDone} of {onboardingStates.length} done
             </span>
@@ -507,14 +507,14 @@ async function TenantDashboard({
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {/* Active prayer schedule */}
-        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6">
-          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E]">
+        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6 dark:border-[rgba(255,255,255,0.1)] dark:bg-[var(--theme-elevation-50)]">
+          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E] dark:text-[#5CB8C3]">
             <Clock className="size-[18px]" aria-hidden />
-            <span className="text-[15.5px] font-semibold text-[#141616]">Active Prayer Schedule</span>
+            <span className="text-[15.5px] font-semibold text-[#141616] dark:text-[#F7F8F8]">Active Prayer Schedule</span>
           </div>
           {schedule ? (
             <div>
-              <div className="grid grid-cols-[70px_1fr_1fr] gap-2 border-b border-[#EEF0F0] pb-2 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#9CA4A4]">
+              <div className="grid grid-cols-[70px_1fr_1fr] gap-2 border-b border-[#EEF0F0] pb-2 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#9CA4A4] dark:border-[rgba(255,255,255,0.08)]">
                 <div>Prayer</div>
                 <div>Adhan</div>
                 <div>Iqamah</div>
@@ -523,23 +523,23 @@ async function TenantDashboard({
                 <div
                   key={r.prayer}
                   className={`grid grid-cols-[70px_1fr_1fr] gap-2 py-2 text-[14.5px] ${
-                    i < schedule.rows.length - 1 ? 'border-b border-[#F2F3F3]' : ''
+                    i < schedule.rows.length - 1 ? 'border-b border-[#F2F3F3] dark:border-[rgba(255,255,255,0.06)]' : ''
                   }`}
                 >
-                  <div className="font-medium text-[#3A3F3F]">{r.prayer}</div>
-                  <div className="text-[#747C7C]">{r.adhan}</div>
-                  <div className="text-[#141616]">{r.iqamah}</div>
+                  <div className="font-medium text-[#3A3F3F] dark:text-[#DDE1E1]">{r.prayer}</div>
+                  <div className="text-[#747C7C] dark:text-[#9CA4A4]">{r.adhan}</div>
+                  <div className="text-[#141616] dark:text-[#F7F8F8]">{r.iqamah}</div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[14.5px] leading-[1.6] text-[#747C7C]">
+            <p className="text-[14.5px] leading-[1.6] text-[#747C7C] dark:text-[#9CA4A4]">
               No schedule set yet. Create one to populate the public prayer times page.
             </p>
           )}
           <Link
             href={scheduleEditHref}
-            className="mt-4 inline-flex items-center gap-1 text-[14.5px] font-semibold text-[#1E7E8E]"
+            className="mt-4 inline-flex items-center gap-1 text-[14.5px] font-semibold text-[#1E7E8E] dark:text-[#5CB8C3]"
           >
             Update schedule
             <ChevronRight className="size-3.5" aria-hidden />
@@ -547,10 +547,10 @@ async function TenantDashboard({
         </div>
 
         {/* Upcoming events */}
-        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6">
-          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E]">
+        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6 dark:border-[rgba(255,255,255,0.1)] dark:bg-[var(--theme-elevation-50)]">
+          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E] dark:text-[#5CB8C3]">
             <CalendarPlus className="size-[18px]" aria-hidden />
-            <span className="text-[15.5px] font-semibold text-[#141616]">Upcoming Events</span>
+            <span className="text-[15.5px] font-semibold text-[#141616] dark:text-[#F7F8F8]">Upcoming Events</span>
             <span className="ml-auto text-[13.5px] text-[#9CA4A4]">
               {eventsRes.docs.length > 0 ? `${eventsRes.docs.length} upcoming` : 'None'}
             </span>
@@ -570,7 +570,7 @@ async function TenantDashboard({
                   className={i < eventsRes.docs.length - 1 ? 'mb-3' : undefined}
                 >
                   <Link href={`/admin/collections/events/${e.id}`} className="block">
-                    <p className="text-[14.5px] font-medium text-[#3A3F3F]">
+                    <p className="text-[14.5px] font-medium text-[#3A3F3F] dark:text-[#DDE1E1] dark:text-[#DDE1E1]">
                       {e.title || '(untitled)'}
                     </p>
                     <p className="mt-0.5 text-[13.5px] text-[#9CA4A4]">
@@ -581,23 +581,23 @@ async function TenantDashboard({
               ))}
             </ul>
           ) : (
-            <p className="text-[14.5px] leading-[1.6] text-[#747C7C]">No upcoming published events.</p>
+            <p className="text-[14.5px] leading-[1.6] text-[#747C7C] dark:text-[#9CA4A4]">No upcoming published events.</p>
           )}
         </div>
 
         {/* Active announcements */}
-        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6">
-          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E]">
+        <div className="rounded-[13px] border border-[#DDE1E1] bg-white p-6 dark:border-[rgba(255,255,255,0.1)] dark:bg-[var(--theme-elevation-50)]">
+          <div className="mb-3.5 flex items-center gap-2.5 text-[#1E7E8E] dark:text-[#5CB8C3]">
             <Megaphone className="size-[18px]" aria-hidden />
-            <span className="text-[15.5px] font-semibold text-[#141616]">Active Announcements</span>
+            <span className="text-[15.5px] font-semibold text-[#141616] dark:text-[#F7F8F8]">Active Announcements</span>
           </div>
           <p
-            className="text-[54px] font-medium leading-none text-[#0F1E4A]"
+            className="text-[54px] font-medium leading-none text-[#0F1E4A] dark:text-[#EEF0FA]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             {announcementsRes.totalDocs}
           </p>
-          <p className="mt-1.5 text-[14.5px] text-[#747C7C]">
+          <p className="mt-1.5 text-[14.5px] text-[#747C7C] dark:text-[#9CA4A4]">
             {announcementsRes.totalDocs === 1 ? 'announcement is live' : 'announcements are live'}
           </p>
         </div>
@@ -605,7 +605,7 @@ async function TenantDashboard({
 
       <p className="flex items-center gap-1.5 pt-1 text-[14px] text-[#9CA4A4]">
         Tip — press
-        <kbd className="rounded-[6px] bg-[#EEF0F0] px-1.5 py-0.5 text-[12.5px] font-semibold text-[#545B5B]">
+        <kbd className="rounded-[6px] bg-[#EEF0F0] px-1.5 py-0.5 text-[12.5px] font-semibold text-[#545B5B] dark:bg-[rgba(255,255,255,0.1)] dark:text-[#C3C9C9]">
           ⌘K
         </kbd>
         to jump anywhere or run an action.
@@ -633,7 +633,7 @@ function QuickActionCard({
     return (
       <Link
         href={href}
-        className="block rounded-[13px] bg-[#0F1E4A] p-[21px] text-white transition-transform duration-200 hover:-translate-y-0.5"
+        className="block rounded-[13px] bg-[#0F1E4A] p-[21px] text-white dark:border dark:border-[rgba(255,255,255,0.14)] transition-transform duration-200 hover:-translate-y-0.5"
       >
         <span className="text-[#F0C88C] [&_svg]:size-[22px]">{icon}</span>
         <div className="mt-[18px] text-[16.5px] font-semibold">{title}</div>
@@ -644,11 +644,11 @@ function QuickActionCard({
   return (
     <Link
       href={href}
-      className="block rounded-[13px] border border-[#DDE1E1] bg-white p-[21px] transition duration-200 hover:border-[#BEE4E9] hover:shadow-[0_6px_18px_rgba(19,46,48,0.08)]"
+      className="block rounded-[13px] border border-[#DDE1E1] bg-white p-[21px] transition duration-200 hover:border-[#BEE4E9] hover:shadow-[0_6px_18px_rgba(19,46,48,0.08)] dark:border-[rgba(255,255,255,0.1)] dark:bg-[var(--theme-elevation-50)] dark:hover:border-[#175F6B]"
     >
-      <span className="text-[#1E7E8E] [&_svg]:size-[22px]">{icon}</span>
-      <div className="mt-[18px] text-[16.5px] font-semibold text-[#141616]">{title}</div>
-      <div className="mt-0.5 text-[14px] text-[#747C7C]">{description}</div>
+      <span className="text-[#1E7E8E] dark:text-[#5CB8C3] [&_svg]:size-[22px]">{icon}</span>
+      <div className="mt-[18px] text-[16.5px] font-semibold text-[#141616] dark:text-[#F7F8F8]">{title}</div>
+      <div className="mt-0.5 text-[14px] text-[#747C7C] dark:text-[#9CA4A4]">{description}</div>
     </Link>
   )
 }

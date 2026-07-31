@@ -28,7 +28,7 @@ function Row({
     padding: '9px 12px',
     borderRadius: 8,
     fontSize: 13.5,
-    color: '#3A3F3F',
+    color: 'var(--om-text-body)',
     textDecoration: 'none',
     cursor: 'pointer',
     background: 'transparent',
@@ -38,7 +38,7 @@ function Row({
     fontFamily: 'inherit',
   }
   const onEnter = (e: React.MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.background = '#F7F8F8'
+    e.currentTarget.style.background = 'var(--om-hover-bg)'
   }
   const onLeave = (e: React.MouseEvent<HTMLElement>) => {
     e.currentTarget.style.background = 'transparent'
@@ -125,23 +125,23 @@ export function AccountMenu({
             right: 0,
             zIndex: 70,
             width: 260,
-            background: '#fff',
-            border: '1px solid #DDE1E1',
+            background: 'var(--om-pop-bg)',
+            border: '1px solid var(--om-pop-border)',
             borderRadius: 14,
             boxShadow: '0 18px 44px rgba(15,30,74,.20)',
             padding: 8,
           }}
         >
           <div style={{ padding: '8px 12px 10px' }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: '#141616' }}>{user.name}</div>
-            <div style={{ fontSize: 12, color: '#747C7C', marginTop: 2 }}>{user.email}</div>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--om-text-strong)' }}>{user.name}</div>
+            <div style={{ fontSize: 12, color: 'var(--om-text-muted)', marginTop: 2 }}>{user.email}</div>
           </div>
           <Row label="My Profile" href="/admin/account" onClick={onToggle} />
           {showSettings && tenantEditHref && (
             <Row label="Site Settings" href={tenantEditHref} onClick={onToggle} />
           )}
           {viewSiteHref && <Row label="View site" href={viewSiteHref} newTab onClick={onToggle} />}
-          <div style={{ height: 1, background: '#EEF0F0', margin: '6px 4px' }} />
+          <div style={{ height: 1, background: 'var(--om-divider)', margin: '6px 4px' }} />
           <Row label="Sign out" onClick={signOut} />
         </div>
       )}

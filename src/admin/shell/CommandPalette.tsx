@@ -52,8 +52,8 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   if (isMobile) {
     return (
-      <div className="omk" role="dialog" aria-modal aria-label="Command palette" style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#F4F5F6', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 16px 12px', background: '#fff', borderBottom: '1px solid #EEF0F0' }}>
+      <div className="omk" role="dialog" aria-modal aria-label="Command palette" style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'var(--om-sheet-bg)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 16px 12px', background: 'var(--om-pop-bg)', borderBottom: '1px solid var(--om-divider)' }}>
           <span style={{ color: '#9CA4A4', display: 'inline-flex' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
               <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
@@ -63,7 +63,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
           <input
             ref={inputRef} value={query} onChange={(e) => { setQuery(e.target.value); setActive(0) }}
             onKeyDown={onKeyDown} placeholder="Search pages and actions…"
-            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, background: 'transparent' }}
+            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, background: 'transparent', color: 'var(--om-text-strong)' }}
           />
           <button type="button" onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#28A0B4', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
             Cancel
@@ -79,16 +79,16 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(10,22,56,.32)' }} />
       <div role="dialog" aria-modal aria-label="Command palette" style={{
         position: 'absolute', top: 88, left: '50%', transform: 'translateX(-50%)',
-        width: 600, maxWidth: '92vw', background: '#fff', borderRadius: 16,
+        width: 600, maxWidth: '92vw', background: 'var(--om-pop-bg)', borderRadius: 16,
         boxShadow: '0 30px 80px rgba(10,22,56,.4)', overflow: 'hidden',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '18px 20px', borderBottom: '1px solid #EEF0F0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '18px 20px', borderBottom: '1px solid var(--om-divider)' }}>
           <input
             ref={inputRef} value={query} onChange={(e) => { setQuery(e.target.value); setActive(0) }}
             onKeyDown={onKeyDown} placeholder="Search pages and actions…"
-            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, background: 'transparent' }}
+            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, background: 'transparent', color: 'var(--om-text-strong)' }}
           />
-          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: '#F7F8F8', color: '#747C7C' }}>esc</span>
+          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: 'var(--om-kbd-bg)', color: 'var(--om-text-muted)' }}>esc</span>
         </div>
         <div style={{ maxHeight: 420, overflowY: 'auto', padding: 10 }}>{results}</div>
       </div>
@@ -101,9 +101,9 @@ function Section({ title, items }: { title: string; items: { key: string; label:
     <div>
       <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9CA4A4', padding: '8px 12px 6px' }}>{title}</div>
       {items.map((it) => (
-        <div key={it.key} onClick={it.onClick} style={{ display: 'flex', gap: 13, padding: '11px 12px', borderRadius: 10, cursor: 'pointer', background: it.activeRow ? '#EEF0FA' : 'transparent' }}>
+        <div key={it.key} onClick={it.onClick} style={{ display: 'flex', gap: 13, padding: '11px 12px', borderRadius: 10, cursor: 'pointer', background: it.activeRow ? 'var(--om-active-row)' : 'transparent' }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: '#141616' }}>{it.label}</div>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--om-text-strong)' }}>{it.label}</div>
             <div style={{ fontSize: 12, color: '#9CA4A4' }}>{it.group}</div>
           </div>
         </div>

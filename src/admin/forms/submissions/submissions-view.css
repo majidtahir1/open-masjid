@@ -22,6 +22,16 @@
   --sv-teal-wash: rgba(40, 160, 180, 0.09);
 }
 
+/* Dark theme: the deep teal/gold text accents sit below readable contrast on
+   dark surfaces — lift them to their lighter siblings. Navy brand bands
+   (table header, drawer masthead) are intentionally theme-agnostic. */
+[data-theme='dark'] .sv-root,
+[data-theme='dark'] .svd-overlay,
+[data-theme='dark'] .sv-menu__pop {
+  --sv-teal-600: #5cb8c3;
+  --sv-gold-700: #e3bd7a;
+}
+
 .sv-root {
   padding: 18px 24px 48px;
 }
@@ -247,6 +257,10 @@
 
 .sv-table tbody tr:nth-child(even) {
   background: rgba(15, 30, 74, 0.025);
+}
+
+[data-theme='dark'] .sv-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .sv-table tbody tr:hover {
@@ -754,6 +768,20 @@
 .svd-btn--danger-ghost:hover {
   border-color: #b2493c;
   background: rgba(178, 73, 60, 0.08);
+}
+
+[data-theme='dark'] .svd-btn--danger-ghost,
+[data-theme='dark'] .svd-btn--danger-ghost svg {
+  color: #e08a7e;
+}
+
+[data-theme='dark'] .svd-btn--danger-ghost {
+  border-color: rgba(224, 138, 126, 0.5);
+}
+
+[data-theme='dark'] .svd-btn--danger-ghost:hover {
+  border-color: #e08a7e;
+  background: rgba(178, 73, 60, 0.2);
 }
 
 .svd-btn--danger {

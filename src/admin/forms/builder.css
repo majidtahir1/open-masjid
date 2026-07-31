@@ -3,6 +3,33 @@
    Artboard refs: 2.1 builder-default, 2.2 builder-popover, 2.3 builder-clean
    ============================================================ */
 
+/* ---------- theme tokens ----------
+   Surfaces ride on Payload's elevation scale (auto-inverts in dark mode).
+   The navy accent is unreadable on dark surfaces, so it flips to a light
+   navy tint when the admin theme is dark. */
+:root {
+  --fb-surface: var(--theme-input-bg, var(--theme-elevation-0, #fff));
+  --fb-accent: #1b3358;
+  --fb-accent-wash: rgba(27, 51, 88, 0.07);
+  --fb-accent-wash-strong: rgba(27, 51, 88, 0.14);
+  --fb-danger: #e53e3e;
+  --fb-danger-wash: #fff1f1;
+  --fb-warning-fg: #b45309;
+  --fb-warning-bg: #fffbeb;
+  --fb-warning-border: #fcd34d;
+}
+
+[data-theme='dark'] {
+  --fb-accent: #9ba4d1;
+  --fb-accent-wash: rgba(155, 164, 209, 0.14);
+  --fb-accent-wash-strong: rgba(155, 164, 209, 0.24);
+  --fb-danger: #f28b82;
+  --fb-danger-wash: rgba(229, 62, 62, 0.16);
+  --fb-warning-fg: #fcd34d;
+  --fb-warning-bg: rgba(180, 83, 9, 0.16);
+  --fb-warning-border: rgba(252, 211, 77, 0.4);
+}
+
 /* ---------- canvas ---------- */
 .fb-canvas {
   max-width: 760px;
@@ -49,7 +76,7 @@
 
 /* ---------- field card ---------- */
 .fb-card {
-  background: #fff;
+  background: var(--fb-surface);
   border: 1.5px solid var(--theme-elevation-200);
   border-radius: 12px;
   display: grid;
@@ -67,8 +94,8 @@
 }
 
 .fb-card--selected {
-  border-color: #1B3358;
-  box-shadow: 0 0 0 3px rgba(27, 51, 88, 0.12);
+  border-color: var(--fb-accent);
+  box-shadow: 0 0 0 3px var(--fb-accent-wash-strong);
 }
 
 .fb-card-grip {
@@ -117,7 +144,7 @@
 }
 
 .fb-card-required {
-  color: #e53e3e;
+  color: var(--fb-danger);
   font-weight: 600;
   font-size: 13px;
   flex-shrink: 0;
@@ -130,8 +157,8 @@
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.03em;
-  color: #1B3358;
-  background: rgba(27, 51, 88, 0.07);
+  color: var(--fb-accent);
+  background: var(--fb-accent-wash);
   border-radius: 5px;
   padding: 2px 7px;
   flex-shrink: 0;
@@ -253,8 +280,8 @@
 }
 
 .fb-card-action-btn--danger:hover {
-  background: #fff1f1;
-  color: #e53e3e;
+  background: var(--fb-danger-wash);
+  color: var(--fb-danger);
 }
 
 /* ---------- add-field pill button ---------- */
@@ -284,7 +311,7 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--theme-elevation-450);
-  background: #fff;
+  background: var(--fb-surface);
   border: 1.5px solid var(--theme-elevation-200);
   border-radius: 20px;
   padding: 4px 12px;
@@ -295,9 +322,9 @@
 }
 
 .fb-add-pill:hover {
-  border-color: #1B3358;
-  color: #1B3358;
-  box-shadow: 0 2px 8px -2px rgba(27, 51, 88, 0.15);
+  border-color: var(--fb-accent);
+  color: var(--fb-accent);
+  box-shadow: 0 2px 8px -2px var(--fb-accent-wash-strong);
 }
 
 /* ---------- add-field popover ---------- */
@@ -312,7 +339,7 @@
   transform: translateX(-50%);
   width: 460px;
   max-width: calc(100vw - 32px);
-  background: #fff;
+  background: var(--fb-surface);
   border-radius: 12px;
   border: 1px solid var(--theme-elevation-200);
   box-shadow: 0 14px 40px -10px rgba(7, 23, 25, 0.20), 0 4px 12px -4px rgba(7, 23, 25, 0.08);
@@ -338,8 +365,8 @@
 }
 
 .fb-popover-search-input:focus {
-  border-color: #1B3358;
-  background: #fff;
+  border-color: var(--fb-accent);
+  background: var(--fb-surface);
 }
 
 .fb-popover-grid {
@@ -376,8 +403,8 @@
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: rgba(27, 51, 88, 0.08);
-  color: #1B3358;
+  background: var(--fb-accent-wash);
+  color: var(--fb-accent);
   flex-shrink: 0;
 }
 
@@ -416,7 +443,7 @@
 .fb-drawer {
   width: 360px;
   flex-shrink: 0;
-  background: #fff;
+  background: var(--fb-surface);
   border-left: 1px solid var(--theme-elevation-200);
   display: flex;
   flex-direction: column;
@@ -446,8 +473,8 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: rgba(27, 51, 88, 0.09);
-  color: #1B3358;
+  background: var(--fb-accent-wash);
+  color: var(--fb-accent);
   flex-shrink: 0;
 }
 
@@ -517,12 +544,12 @@
 }
 
 .fb-drawer-tab:hover:not(.fb-drawer-tab--disabled) {
-  color: #1B3358;
+  color: var(--fb-accent);
 }
 
 .fb-drawer-tab--active {
-  color: #1B3358;
-  border-bottom-color: #1B3358;
+  color: var(--fb-accent);
+  border-bottom-color: var(--fb-accent);
 }
 
 .fb-drawer-tab--disabled {
@@ -580,7 +607,7 @@
   padding: 0 10px;
   font-size: 13px;
   color: var(--theme-elevation-800);
-  background: #fff;
+  background: var(--fb-surface);
   outline: none;
   font-family: inherit;
   width: 100%;
@@ -589,7 +616,7 @@
 }
 
 .fb-drawer-input:focus {
-  border-color: #1B3358;
+  border-color: var(--fb-accent);
 }
 
 .fb-drawer-input--mono {
@@ -599,9 +626,9 @@
 
 .fb-drawer-warning {
   font-size: 11px;
-  color: #b45309;
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
+  color: var(--fb-warning-fg);
+  background: var(--fb-warning-bg);
+  border: 1px solid var(--fb-warning-border);
   border-radius: 5px;
   padding: 6px 9px;
   line-height: 1.5;
@@ -650,8 +677,8 @@
 }
 
 .fb-drawer-icon-btn--danger:hover {
-  background: #fff1f1;
-  color: #e53e3e;
+  background: var(--fb-danger-wash);
+  color: var(--fb-danger);
 }
 
 .fb-drawer-add-option-btn {
@@ -660,8 +687,8 @@
   gap: 5px;
   font-size: 12px;
   font-weight: 500;
-  color: #1B3358;
-  background: rgba(27, 51, 88, 0.07);
+  color: var(--fb-accent);
+  background: var(--fb-accent-wash);
   border: none;
   border-radius: 6px;
   padding: 6px 10px;
@@ -672,7 +699,7 @@
 }
 
 .fb-drawer-add-option-btn:hover {
-  background: rgba(27, 51, 88, 0.14);
+  background: var(--fb-accent-wash-strong);
 }
 
 /* section divider */
@@ -738,14 +765,14 @@
   height: 14px;
   left: 3px;
   top: 3px;
-  background: #fff;
+  background: var(--fb-surface);
   border-radius: 50%;
   transition: transform 0.15s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .fb-drawer-toggle input:checked + .fb-drawer-toggle-slider {
-  background: #1B3358;
+  background: var(--fb-accent);
 }
 
 .fb-drawer-toggle input:checked + .fb-drawer-toggle-slider::before {
@@ -837,15 +864,15 @@
 }
 .fb-canvas-toolbar__link {
   font-size: 13px;
-  color: #1B3358;
+  color: var(--fb-accent);
   text-decoration: none;
   padding: 6px 10px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--theme-elevation-150);
   border-radius: 6px;
-  background: white;
+  background: var(--fb-surface);
   transition: background-color 0.15s, border-color 0.15s;
 }
 .fb-canvas-toolbar__link:hover {
-  background: #f4f5f7;
-  border-color: rgba(15, 23, 42, 0.20);
+  background: var(--theme-elevation-50);
+  border-color: var(--theme-elevation-250);
 }

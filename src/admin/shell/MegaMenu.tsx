@@ -9,8 +9,8 @@ const CARD: React.CSSProperties = {
   top: 'calc(100% + 10px)',
   left: 0,
   zIndex: 70,
-  background: '#fff',
-  border: '1px solid #DDE1E1',
+  background: 'var(--om-pop-bg)',
+  border: '1px solid var(--om-pop-border)',
   borderRadius: 14,
   boxShadow: '0 18px 44px rgba(15,30,74,.20)',
 }
@@ -25,7 +25,7 @@ export function MegaMenu({
   onToggle: () => void
 }) {
   const hover = (e: React.MouseEvent<HTMLAnchorElement>, on: boolean) => {
-    e.currentTarget.style.background = on ? '#F7F8F8' : 'transparent'
+    e.currentTarget.style.background = on ? 'var(--om-hover-bg)' : 'transparent'
   }
 
   return (
@@ -80,13 +80,13 @@ export function MegaMenu({
                 background: 'transparent',
               }}
             >
-              <span style={{ color: '#1E7E8E', flexShrink: 0, marginTop: 1 }}>
+              <span style={{ color: 'var(--om-teal-ink)', flexShrink: 0, marginTop: 1 }}>
                 <NavIcon name={c.icon} size={18} />
               </span>
               <span>
-                <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: '#141616' }}>{c.label}</span>
+                <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: 'var(--om-text-strong)' }}>{c.label}</span>
                 {c.description && (
-                  <span style={{ display: 'block', fontSize: 12, color: '#747C7C', marginTop: 2 }}>{c.description}</span>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--om-text-muted)', marginTop: 2 }}>{c.description}</span>
                 )}
               </span>
             </a>
@@ -108,13 +108,13 @@ export function MegaMenu({
                 gap: 11,
                 padding: '10px 11px',
                 borderRadius: 9,
-                color: '#3A3F3F',
+                color: 'var(--om-text-body)',
                 fontSize: 13.5,
                 textDecoration: 'none',
                 background: 'transparent',
               }}
             >
-              <span style={{ color: '#1E7E8E', flexShrink: 0, display: 'inline-flex' }}>
+              <span style={{ color: 'var(--om-teal-ink)', flexShrink: 0, display: 'inline-flex' }}>
                 <NavIcon name={c.icon} size={18} />
               </span>
               {c.label}

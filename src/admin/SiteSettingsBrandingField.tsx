@@ -105,23 +105,23 @@ export default function SiteSettingsBrandingField() {
       <div
         style={{
           padding: 'var(--sp-6, 24px)',
-          border: '1px solid var(--border, #e5e7eb)',
+          border: '1px solid var(--om-card-border)',
           borderRadius: 'var(--r-md, 8px)',
-          background: 'var(--bg-alt, #f9fafb)',
+          background: 'var(--om-sheet-bg)',
           fontFamily: 'var(--font-body, sans-serif)',
           fontSize: 14,
-          color: 'var(--fg2, #6b7280)',
+          color: 'var(--om-text-body)',
           lineHeight: 1.55,
         }}
       >
-        <strong style={{ color: 'var(--fg1, #111827)', display: 'block', marginBottom: 8 }}>
+        <strong style={{ color: 'var(--om-text-strong)', display: 'block', marginBottom: 8 }}>
           Branding is managed by the tenant admin.
         </strong>
         Branding is edited by tenant admins via the onboarding wizard or{' '}
         <code
           style={{
-            background: 'var(--bg, #fff)',
-            border: '1px solid var(--border, #e5e7eb)',
+            background: 'var(--om-pop-bg)',
+            border: '1px solid var(--om-card-border)',
             borderRadius: 4,
             padding: '1px 5px',
             fontSize: 13,
@@ -140,7 +140,7 @@ export default function SiteSettingsBrandingField() {
       <div
         style={{
           padding: 'var(--sp-6, 24px)',
-          color: 'var(--fg3, #9ca3af)',
+          color: 'var(--om-text-muted)',
           fontFamily: 'var(--font-body, sans-serif)',
           fontSize: 14,
         }}
@@ -157,10 +157,10 @@ export default function SiteSettingsBrandingField() {
         role="alert"
         style={{
           padding: 'var(--sp-4, 16px)',
-          border: '1px solid #fecaca',
+          border: '1px solid var(--om-err-fg)',
           borderRadius: 'var(--r-md, 8px)',
-          background: '#fef2f2',
-          color: '#991b1b',
+          background: 'var(--om-err-bg)',
+          color: 'var(--om-err-fg)',
           fontFamily: 'var(--font-body, sans-serif)',
           fontSize: 13,
         }}

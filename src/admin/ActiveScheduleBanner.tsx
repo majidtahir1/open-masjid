@@ -154,9 +154,9 @@ export default function ActiveScheduleBanner() {
   }
 
   const palette = {
-    green: { bg: '#dcfce7', border: '#16a34a', text: '#14532d' },
-    amber: { bg: '#fef3c7', border: '#d97706', text: '#78350f' },
-    gray: { bg: '#f1f5f9', border: '#64748b', text: '#334155' },
+    green: { bg: 'var(--om-ok-bg)', border: 'var(--om-ok-fg)', text: 'var(--om-ok-fg)' },
+    amber: { bg: 'var(--om-warn-bg)', border: 'var(--om-warn-fg)', text: 'var(--om-warn-fg)' },
+    gray: { bg: 'var(--om-neutral-bg)', border: 'var(--om-neutral-fg)', text: 'var(--om-neutral-fg)' },
   }[tone]
 
   return (
