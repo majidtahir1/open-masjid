@@ -145,18 +145,18 @@ export async function getNextIqamah(
   tz?: string | null,
 ): Promise<NextIqamahResult | null> {
   try {
-    const schedule = await getActiveSchedule(tenantId, now)
+    const schedule = await getActiveSchedule(tenantId, now, tz ?? undefined)
     if (!schedule) return null
 
-    const today = findDayRow(schedule, now)
+    const today = findDayRow(schedule, now, tz ?? undefined)
     const todayHit = pickNextIqamahFromDay(today, now, tz)
     if (todayHit) return todayHit
 
     // Nothing left today — roll forward to tomorrow's Fajr.
     const tomorrow = new Date(now)
     tomorrow.setDate(tomorrow.getDate() + 1)
-    const tomorrowSchedule = await getActiveSchedule(tenantId, tomorrow)
-    const tomorrowDay = findDayRow(tomorrowSchedule, tomorrow)
+    const tomorrowSchedule = await getActiveSchedule(tenantId, tomorrow, tz ?? undefined)
+    const tomorrowDay = findDayRow(tomorrowSchedule, tomorrow, tz ?? undefined)
     const fajrRaw = tomorrowDay?.fajr?.iqamah?.trim()
     if (!fajrRaw) return null
     const fajrMins = parseTimeToMinutes(fajrRaw, 'fajr')
@@ -263,7 +263,7 @@ export async function getHeroLiveData(
   const [nextIqamah, upcomingEvents, schedule] = await Promise.all([
     getNextIqamah(tenantId, new Date(), tz),
     getUpcomingEvents(tenantId, 2),
-    getActiveSchedule(tenantId).catch(() => null),
+    getActiveSchedule(tenantId, new Date(), tz ?? undefined).catch(() => null),
   ])
   return { nextIqamah, upcomingEvents, hasSchedule: Boolean(schedule) }
 }

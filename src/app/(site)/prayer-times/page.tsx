@@ -34,8 +34,9 @@ export default async function PrayerTimesPage() {
   const tenant = await getCurrentTenant()
   if (!tenant) return null
 
-  const active = await getActiveSchedule(tenant.id)
-  const today = findDayRow(active)
+  const tz = tenant.location?.timezone ?? undefined
+  const active = await getActiveSchedule(tenant.id, new Date(), tz)
+  const today = findDayRow(active, new Date(), tz)
 
   // Flatten today's day row into the same shape the render helpers expect.
   const flat: PrayerScheduleLike | null =

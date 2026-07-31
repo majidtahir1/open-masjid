@@ -38,6 +38,11 @@ export interface TenantRecord {
   slug?: string
   customDomains?: Array<string | { domain: string }>
   siteType?: 'masjid' | 'umbrella'
+  location?: {
+    lat?: number | null
+    lng?: number | null
+    timezone?: string | null
+  }
   branding?: {
     logo?: unknown
     primaryColor?: string

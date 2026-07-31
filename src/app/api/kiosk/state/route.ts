@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payloadClient'
 import { verifySecret } from '@/lib/kiosk/auth'
 import { composeKioskState } from '@/lib/kiosk/composeState'
+import { getActiveSchedule } from '@/lib/prayer-schedule'
+import { localDateKey } from '@/lib/local-date'
 import { versionHash } from '@/lib/kiosk/versionHash'
 
 export const runtime = 'nodejs'
@@ -70,29 +72,10 @@ export async function GET(req: Request) {
 
   const pd = (tenantDoc as any).prayerDisplay ?? {}
 
-  // Pick the schedule whose date range covers today, not just the latest one.
-  const todayIso = now.toISOString()
-  const schedules = await payload.find({
-    collection: 'prayer-schedules',
-    where: {
-      and: [
-        { tenant: { equals: tenantId } },
-        { startDate: { less_than_equal: todayIso } },
-        {
-          or: [
-            { endDate: { greater_than_equal: todayIso } },
-            { endDate: { exists: false } },
-          ],
-        },
-      ],
-    },
-    sort: '-startDate',
-    limit: 1,
-    overrideAccess: true,
-  })
-  const prayerTimes = schedules.docs[0] ?? null
+  // Pick the schedule whose date range covers today in the tenant's timezone.
+  const prayerTimes = await getActiveSchedule(tenantId, now, tenant.timezone)
 
-  const dayKey = now.toISOString().slice(0, 10)
+  const dayKey = localDateKey(now, tenant.timezone)
   const scheduleUpdatedAt = (prayerTimes as any)?.updatedAt ?? ''
   const version = versionHash({
     slideIds: [...slides.map((s) => `${s.type}:${s.id}`), 'prayer-schedule', ...contentPool.map((c) => c.id)],

@@ -124,7 +124,7 @@ export async function composeKioskState(args: {
     id: String(t.id),
     name: t.name ?? '',
     logo: t.logo ?? null,
-    timezone: t.timezone ?? 'UTC',
+    timezone: t.location?.timezone ?? t.timezone ?? 'UTC',
   }
 
   const contentPool = resolveContentPool(content.docs)

@@ -44,7 +44,12 @@ export default async function HomePage() {
         (tenant as { location?: { timezone?: string | null } }).location?.timezone ?? null,
       ),
       fetchAnnouncements(tenant),
-      getActiveSchedule(tenant.id),
+      getActiveSchedule(
+        tenant.id,
+        new Date(),
+        (tenant as { location?: { timezone?: string | null } }).location?.timezone ??
+          undefined,
+      ),
       getRequestOrigin(tenant),
     ])
 

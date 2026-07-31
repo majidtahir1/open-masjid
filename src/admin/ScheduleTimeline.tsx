@@ -17,6 +17,7 @@
  */
 
 import React from 'react'
+import { localDayFloorISO } from '@/lib/local-date'
 
 import { getAdminUser } from '@/lib/admin-context'
 
@@ -92,7 +93,10 @@ function assignLanes(schedules: Schedule[]): Array<Schedule & { lane: number }> 
  * startDate among those that cover today.
  */
 function findActiveId(schedules: Schedule[], now = new Date()): string | number | null {
-  const nowMs = now.getTime()
+  // Dates are date-only (midnight UTC) and inclusive — compare calendar dates,
+  // not instants, or the schedule reads as inactive on its whole last day.
+  const nowFloor = localDayFloorISO(now)
+  const nowMs = new Date(nowFloor).getTime()
   const covering = schedules.filter((s) => {
     if (!s.startDate || !s.endDate) return false
     return new Date(s.startDate).getTime() <= nowMs && new Date(s.endDate).getTime() >= nowMs

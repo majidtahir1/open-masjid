@@ -29,6 +29,7 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 
 import { getAdminUser } from '@/lib/admin-context'
+import { localDateKey, localDayFloorISO } from '@/lib/local-date'
 import {
   Building,
   CalendarPlus,
@@ -115,8 +116,12 @@ type ActiveScheduleView = {
 async function fetchActiveSchedule(
   payload: Awaited<ReturnType<typeof getPayload>>,
   tenantId: string | number,
+  timeZone?: string,
 ): Promise<ActiveScheduleView | null> {
-  const todayIso = new Date().toISOString()
+  // startDate/endDate are date-only (midnight UTC); compare against the
+  // tenant-local calendar date, not the current instant, or the schedule
+  // stops matching partway through its last day.
+  const dayFloorISO = localDayFloorISO(new Date(), timeZone)
 
   // 1. New collection: schedule covering today (startDate <= today <= endDate),
   //    then look up today's entry in days[].
@@ -125,8 +130,8 @@ async function fetchActiveSchedule(
       collection: 'prayer-schedules' as never,
       where: {
         tenant: { equals: tenantId },
-        startDate: { less_than_equal: todayIso },
-        endDate: { greater_than_equal: todayIso },
+        startDate: { less_than_equal: dayFloorISO },
+        endDate: { greater_than_equal: dayFloorISO },
       },
       sort: '-startDate',
       limit: 1,
@@ -146,7 +151,7 @@ async function fetchActiveSchedule(
         isha?: DayPair | null
       }
       const days = (doc.days as DayRow[] | null | undefined) ?? []
-      const target = todayIso.slice(0, 10)
+      const target = localDateKey(new Date(), timeZone)
       const today = days.find((d) => (d.date ? d.date.slice(0, 10) === target : false))
 
       const pick = (g: DayPair | null | undefined) => ({
@@ -219,6 +224,7 @@ async function TenantDashboard({
   // branding.logo upload is populated with a `url` field.
   let tenantName = 'your masjid'
   let tenantLogo: { url: string; alt: string } | null = null
+  let tenantTimezone: string | undefined
   try {
     const t = (await payload.findByID({
       collection: 'tenants',
@@ -227,6 +233,7 @@ async function TenantDashboard({
       overrideAccess: true,
     })) as unknown as Record<string, unknown>
     if (t?.name) tenantName = t.name as string
+    if (typeof t?.timezone === 'string') tenantTimezone = t.timezone
     const branding = t.branding as { logo?: unknown } | undefined
     const logo = branding?.logo as { url?: string | null; alt?: string | null } | undefined
     if (logo?.url) {
@@ -239,7 +246,7 @@ async function TenantDashboard({
   // Fetch all three cards in parallel — keeps first paint snappy even with
   // a slow Postgres link.
   const [schedule, eventsRes, announcementsRes] = await Promise.all([
-    fetchActiveSchedule(payload, tenantId),
+    fetchActiveSchedule(payload, tenantId, tenantTimezone),
     payload.find({
       collection: 'events',
       where: {
