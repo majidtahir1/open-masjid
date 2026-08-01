@@ -116,13 +116,13 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
 
   const [themeCss, schedule, navPages, activeTiers] = await Promise.all([
     Promise.resolve(tenantThemeCss(tenant)),
-    getActiveSchedule(tenant.id),
+    getActiveSchedule(tenant.id, new Date(), tenant.location?.timezone ?? undefined),
     fetchNavPages(tenant),
     fetchActiveTiers(tenant),
   ])
 
   // Synthesize a flat PrayerScheduleLike for PrayerStrip from today's day row.
-  const today = findDayRow(schedule)
+  const today = findDayRow(schedule, new Date(), tenant.location?.timezone ?? undefined)
   const stripSchedule: PrayerScheduleLike | null =
     schedule && today
       ? {

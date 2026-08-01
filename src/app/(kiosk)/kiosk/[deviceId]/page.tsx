@@ -11,6 +11,7 @@ import { pickVariant, pickContent, type PrayerVariant } from '@/lib/kiosk/prayer
 import { computeSalahState, type IqamahPoint } from '@/lib/kiosk/salahWindow'
 import { parseTimeToMinutes, type DayData } from '@/lib/kiosk/prayerTimetable'
 import type { ContentEntry } from '@/lib/kiosk/prayerContentSeeds'
+import { localDateKey } from '@/lib/local-date'
 import CarouselErrorBoundary from '../../_components/CarouselErrorBoundary'
 
 type Slide = {
@@ -165,17 +166,14 @@ export default function KioskDisplayPage({
   const [content, setContent] = useState<ContentEntry | null>(null)
   const seenRef = useRef<string[]>([])
 
-  // Today's prayer day data
+  // Today's prayer day data. days[].date is date-only (midnight UTC), so
+  // compare calendar dates — parsing it into local components shifts every
+  // row back a day in timezones behind UTC.
   const todayDay: DayData | null = useMemo(() => {
     const days = state?.prayerTimes?.days ?? []
-    const n = new Date()
-    return (
-      days.find((d: any) => {
-        const dd = new Date(d.date)
-        return dd.getFullYear() === n.getFullYear() && dd.getMonth() === n.getMonth() && dd.getDate() === n.getDate()
-      }) ?? null
-    )
-  }, [state?.prayerTimes])
+    const target = localDateKey(new Date(), state?.tenant?.timezone)
+    return days.find((d: any) => d.date?.slice(0, 10) === target) ?? null
+  }, [state?.prayerTimes, state?.tenant?.timezone])
 
   // Salah takeover state — evaluated every 5s
   const [salah, setSalah] = useState({ active: false, prayerName: null as string | null, iqamahLabel: null as string | null })

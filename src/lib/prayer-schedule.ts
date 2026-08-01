@@ -14,6 +14,7 @@ import { unstable_noStore as noStore } from 'next/cache'
 
 import type { TenantRecord } from './tenant-parse'
 import { getPayloadClient } from './payloadClient'
+import { localDateKey, localDayFloorISO } from './local-date'
 
 export interface PrayerDayRow {
   date?: string | null
@@ -37,24 +38,23 @@ export interface PrayerScheduleRecord {
 export async function getActiveSchedule(
   tenantId: string | number,
   date: Date = new Date(),
+  timeZone?: string,
 ): Promise<PrayerScheduleRecord | null> {
   noStore()
   const payload = await getPayloadClient()
   if (!payload) return null
-  const iso = date.toISOString()
-  // endDate is inclusive: a schedule with endDate = Apr 30 00:00 UTC should
-  // still be active at any moment on Apr 30 UTC. Compare against the UTC
-  // midnight of the query date so the match is inclusive through that day.
-  const dayFloorISO = new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  ).toISOString()
+  // startDate/endDate are date-only (midnight UTC) and both inclusive. Resolve
+  // "today" as a calendar date in the tenant's timezone and compare its
+  // midnight-UTC floor against both bounds — comparing against the current
+  // instant drops a schedule for its entire last day once UTC midnight passes.
+  const dayFloorISO = localDayFloorISO(date, timeZone)
 
   try {
     const res = await payload.find({
       collection: 'prayer-schedules',
       where: {
         tenant: { equals: tenantId },
-        startDate: { less_than_equal: iso },
+        startDate: { less_than_equal: dayFloorISO },
         endDate: { greater_than_equal: dayFloorISO },
       },
       sort: '-startDate',
@@ -75,9 +75,10 @@ export async function getActiveSchedule(
 export function findDayRow(
   schedule: PrayerScheduleRecord | null,
   date: Date = new Date(),
+  timeZone?: string,
 ): PrayerDayRow | null {
   if (!schedule?.days?.length) return null
-  const target = date.toISOString().slice(0, 10)
+  const target = localDateKey(date, timeZone)
   return (
     schedule.days.find((d) => (d.date ? d.date.slice(0, 10) === target : false)) ?? null
   )
