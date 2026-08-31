@@ -662,6 +662,16 @@ export const Tenants: CollectionConfig = {
                   },
                 },
                 {
+                  name: 'zelleQrCode',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Zelle QR Code',
+                  admin: {
+                    description:
+                      'Optional Zelle QR code image. Shown in the Ways to give card on the Donate page when set.',
+                  },
+                },
+                {
                   name: 'address',
                   type: 'textarea',
                   label: 'Address',

@@ -52,6 +52,7 @@ import * as migration_20260827_224142_pages_hero_featured from './20260827_22414
 import * as migration_20260830_234533_tenant_homepage_copy_and_service_links from './20260830_234533_tenant_homepage_copy_and_service_links';
 import * as migration_20260830_235542_hero_showcase_style from './20260830_235542_hero_showcase_style';
 import * as migration_20260831_002516_services_link_label from './20260831_002516_services_link_label';
+import * as migration_20260831_201957_tenant_zelle_qr_code from './20260831_201957_tenant_zelle_qr_code';
 
 export const migrations = [
   {
@@ -322,6 +323,11 @@ export const migrations = [
   {
     up: migration_20260831_002516_services_link_label.up,
     down: migration_20260831_002516_services_link_label.down,
-    name: '20260831_002516_services_link_label'
+    name: '20260831_002516_services_link_label',
+  },
+  {
+    up: migration_20260831_201957_tenant_zelle_qr_code.up,
+    down: migration_20260831_201957_tenant_zelle_qr_code.down,
+    name: '20260831_201957_tenant_zelle_qr_code'
   },
 ];

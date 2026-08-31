@@ -475,6 +475,10 @@ export interface Tenant {
      */
     zelle?: string | null;
     /**
+     * Optional Zelle QR code image. Shown in the Ways to give card on the Donate page when set.
+     */
+    zelleQrCode?: (number | null) | Media;
+    /**
      * Street address, one line per part (street, city/state/zip).
      */
     address?: string | null;
@@ -3334,6 +3338,7 @@ export interface TenantsSelect<T extends boolean = true> {
         phone?: T;
         email?: T;
         zelle?: T;
+        zelleQrCode?: T;
         address?: T;
       };
   socialLinks?:
