@@ -15,7 +15,9 @@ export function eventToHeroSlide(event: FeaturedEvent): HeroSlideLike {
     ? event.tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : 'Event'
   return {
-    id: event.id,
+    // Namespaced so ids never collide with hero-slides or pages in the
+    // merged carousel (ids are used as React keys / uids).
+    id: `event-${event.id}`,
     kind: 'flyer',
     eyebrow: tag,
     title: event.title,

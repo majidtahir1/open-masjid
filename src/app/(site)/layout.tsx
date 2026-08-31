@@ -7,6 +7,7 @@ import '../globals.css'
 import { fraunces, inter, amiri } from '@/lib/fonts'
 import { cn } from '@/lib/utils'
 import Header from '@/components/Header'
+import HeaderArabicBand from '@/components/HeaderArabicBand'
 import PrayerStrip from '@/components/PrayerStrip'
 import Footer from '@/components/Footer'
 import type {
@@ -145,8 +146,23 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     socialLinks: tenant.socialLinks as TenantSocialLink[] | null | undefined,
     footerTagline:
       typeof tenant.footerTagline === 'string' ? tenant.footerTagline : null,
+    footerLegalNote:
+      typeof tenant.footerLegalNote === 'string' ? tenant.footerLegalNote : null,
     logoUrl: mediaUrl(tenant.branding?.logo),
+    // A wide lockup already contains the org name — the footer skips the
+    // redundant name text next to it.
+    logoIsWordmark: (() => {
+      const logo = tenant.branding?.logo
+      if (!logo || typeof logo !== 'object') return false
+      const { width, height } = logo as { width?: number | null; height?: number | null }
+      return Boolean(width && height && width / height > 2.5)
+    })(),
   }
+
+  const headerArabicLine =
+    typeof tenant.branding?.headerArabicLine === 'string'
+      ? tenant.branding.headerArabicLine
+      : null
 
   return (
     <html
@@ -164,6 +180,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             hasPrayerSchedule={Boolean(schedule)}
             hasMembership={activeTiers.length > 0}
           />
+          <HeaderArabicBand text={headerArabicLine} />
           {/* No active schedule at all (e.g. a masjid fundraising before it
               has a building) → no strip. A schedule with a gap today still
               shows the "coming soon" state. */}

@@ -95,7 +95,7 @@ export function HeroCopy({
   )
 }
 
-function CtaButton({ cta, tabIndex }: { cta: HeroCta; tabIndex: number }) {
+export function CtaButton({ cta, tabIndex }: { cta: HeroCta; tabIndex: number }) {
   const href = resolveCtaHref(cta)
   const isPrimary = cta.primary ?? false
   const className = `om-hero-btn ${isPrimary ? 'om-hero-btn-primary' : 'om-hero-btn-secondary'}`

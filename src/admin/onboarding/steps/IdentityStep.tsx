@@ -10,10 +10,12 @@ import { ExternalLink, X } from 'lucide-react'
 export type IdentityInitial = {
   name?: string
   footerTagline?: string
+  footerLegalNote?: string
   contactInfo?: {
     address?: string
     phone?: string
     email?: string
+    zelle?: string
   }
   socialLinks?: Array<{ platform: string; url: string }>
 }
@@ -136,6 +138,7 @@ export function IdentityStep({
 }: Props) {
   const [name, setName] = useState(initial.name ?? '')
   const [footerTagline, setFooterTagline] = useState(initial.footerTagline ?? '')
+  const [footerLegalNote, setFooterLegalNote] = useState(initial.footerLegalNote ?? '')
 
   const [aStreet, aCity, aStateZip] = splitAddress(initial.contactInfo?.address)
   const [street, setStreet] = useState(aStreet)
@@ -144,6 +147,7 @@ export function IdentityStep({
 
   const [phone, setPhone] = useState(initial.contactInfo?.phone ?? '')
   const [email, setEmail] = useState(initial.contactInfo?.email ?? '')
+  const [zelle, setZelle] = useState(initial.contactInfo?.zelle ?? '')
 
   const initialSocial = (initial.socialLinks ?? []).reduce<Record<string, string>>(
     (acc, s) => {
@@ -179,10 +183,12 @@ export function IdentityStep({
         body: JSON.stringify({
           name: name.trim(),
           footerTagline: footerTagline.trim(),
+          footerLegalNote: footerLegalNote.trim(),
           contactInfo: {
             address: joinAddress(street.trim(), city.trim(), stateZip.trim()),
             phone: phone.trim(),
             email: email.trim(),
+            zelle: zelle.trim(),
           },
           socialLinks,
           markComplete,
@@ -396,6 +402,19 @@ export function IdentityStep({
           />
         </Field>
 
+        {/* Legal note */}
+        <Field
+          label="Footer legal note"
+          helper='Optional legal/tax line shown at the bottom of the footer, e.g. "ACME is a 501(c)(3) tax-exempt nonprofit. Donations are tax-deductible."'
+        >
+          <textarea
+            value={footerLegalNote}
+            onChange={(e) => setFooterLegalNote(e.target.value)}
+            rows={2}
+            style={{ ...inputStyle, resize: 'vertical' }}
+          />
+        </Field>
+
         {/* Address */}
         <section style={{ display: 'grid', gap: 'var(--sp-3)' }}>
           <span style={labelStyle}>Address</span>
@@ -497,6 +516,24 @@ export function IdentityStep({
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              <span
+                style={{
+                  ...labelStyle,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: 'var(--fg2)',
+                }}
+              >
+                Zelle (email or phone)
+              </span>
+              <input
+                type="text"
+                value={zelle}
+                onChange={(e) => setZelle(e.target.value)}
                 style={inputStyle}
               />
             </div>

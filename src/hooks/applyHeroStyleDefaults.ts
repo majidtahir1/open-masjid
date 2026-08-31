@@ -11,6 +11,7 @@ const STYLE_TO_DEFAULT_ACCENT: Record<string, string> = {
   split: 'cream',
   live: 'cream',
   photo: 'navy',
+  showcase: 'cream',
 }
 
 export const applyHeroStyleDefaults: CollectionBeforeChangeHook = ({

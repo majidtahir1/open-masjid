@@ -107,6 +107,51 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      name: 'featured',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Featured on Homepage',
+      admin: {
+        description:
+          'Tick to include this page in the homepage hero slider. Featured pages rotate alongside hero slides and featured events.',
+        components: {
+          Field: '/src/fields/CheckboxField#default',
+        },
+      },
+    },
+    {
+      name: 'heroExcerpt',
+      type: 'textarea',
+      label: 'Hero Excerpt',
+      admin: {
+        description:
+          'Short blurb shown on this page\'s hero slide. Falls back to the SEO meta description when blank. 1–2 sentences.',
+        condition: (data) => data?.featured === true,
+        components: {
+          Field: '/src/fields/TextareaField#default',
+        },
+      },
+    },
+    {
+      name: 'heroAccent',
+      type: 'select',
+      label: 'Hero Accent Color',
+      options: [
+        { label: 'Cream (warm, neutral)', value: 'cream' },
+        { label: 'Teal (fresh, calm)', value: 'teal' },
+        { label: 'Navy (serious, premium)', value: 'navy' },
+        { label: 'Gold (celebratory)', value: 'gold' },
+      ],
+      admin: {
+        description:
+          'Shown only when "Featured on Homepage" is on. Picks the theme for this page\'s slide in the hero.',
+        condition: (data) => data?.featured === true,
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
+      },
+    },
+    {
       name: 'showInNav',
       type: 'checkbox',
       defaultValue: false,

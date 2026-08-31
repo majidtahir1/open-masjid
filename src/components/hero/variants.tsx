@@ -3,11 +3,13 @@
 import {
   AyahCard,
   BgOrnament,
+  CtaButton,
   FeaturePhotoCard,
   HeroCopy,
   LiveWidget,
   NextIqamahCard,
   PlaceholderImg,
+  renderTitle,
 } from './parts'
 import {
   mediaUrl,
@@ -71,6 +73,64 @@ export function HeroLive({ slide, active, liveData }: VariantProps) {
         </div>
       </div>
     </>
+  )
+}
+
+/**
+ * Showcase — copy on the left, a flush full-height photo bleeding to the
+ * right viewport edge with a soft --bg fade melting it into the copy area.
+ * No cards or widgets; just the two-tone headline, ornamental divider,
+ * body paragraphs, and CTAs. Always a light (page-background) variant.
+ */
+export function HeroShowcase({ slide, active, uid }: VariantProps) {
+  const f = slide.splitFields
+  const url = mediaUrl(f?.image)
+  const alt = mediaAlt(f?.image, f?.photoLabel ?? slide.title ?? '')
+  const tone = (f?.photoTone ?? 'brand') as PhotoTone
+  const customColor = f?.customColor ?? null
+  const paragraphs = (slide.body ?? '')
+    .split('\n\n')
+    .map((p) => p.trim())
+    .filter(Boolean)
+  return (
+    <div className="om-hero-showcase">
+      <div className="om-hero-showcase-copy">
+        {slide.eyebrow && <div className="om-hero-eyebrow">{slide.eyebrow}</div>}
+        <h1 className="om-hero-title om-hero-showcase-title">
+          {renderTitle(slide.title)}
+        </h1>
+        <div className="om-hero-showcase-divider" aria-hidden="true">
+          <span />
+        </div>
+        {paragraphs.map((p, i) => (
+          <p key={i} className="om-hero-showcase-p">
+            {p}
+          </p>
+        ))}
+        {slide.ctas && slide.ctas.length > 0 && (
+          <div className="om-hero-ctas">
+            {slide.ctas.map((cta, j) => (
+              <CtaButton key={j} cta={cta} tabIndex={active ? 0 : -1} />
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="om-hero-showcase-media">
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={url} alt={alt} />
+        ) : (
+          <PlaceholderImg
+            label={f?.photoLabel ?? null}
+            tone={tone}
+            customColor={customColor}
+            full
+            uid={`showcase-${uid}`}
+          />
+        )}
+        <div className="om-hero-showcase-fade" aria-hidden="true" />
+      </div>
+    </div>
   )
 }
 

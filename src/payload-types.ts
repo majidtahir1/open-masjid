@@ -352,6 +352,59 @@ export interface Tenant {
      * Headline font. Body text and Arabic fonts are fixed platform-wide for consistency.
      */
     displayFont?: ('Fraunces' | 'Playfair Display' | 'DM Serif Display' | 'IBM Plex Sans') | null;
+    /**
+     * Optional Arabic line (e.g. a bismillah or duʿa) shown centered beneath the site header on every page. Rendered right-to-left in an Arabic font. Leave blank to hide.
+     */
+    headerArabicLine?: string | null;
+  };
+  /**
+   * Overrides for the hardcoded homepage section copy. Every field is optional — leave a field blank to use the platform default.
+   */
+  homepageCopy?: {
+    /**
+     * Small caps label above the homepage "Upcoming events" block. Leave blank for the platform default: "What's happening".
+     */
+    eventsEyebrow?: string | null;
+    /**
+     * Heading of the homepage events block. Leave blank for the platform default: "Upcoming events".
+     */
+    eventsHeading?: string | null;
+    /**
+     * Short sentence under the events heading. Leave blank for the platform default: "Classes, programs, and gatherings for the whole community."
+     */
+    eventsSubcopy?: string | null;
+    /**
+     * Small caps label above the homepage services grid. Leave blank for the platform default: "What we do".
+     */
+    servicesEyebrow?: string | null;
+    /**
+     * Heading of the homepage services grid. Leave blank for the platform default: "Services for our community".
+     */
+    servicesHeading?: string | null;
+    /**
+     * Short sentence under the services heading. Leave blank for the platform default: "From your first week to your last rites — we're here for every part of the journey, Insha'Allah."
+     */
+    servicesSubcopy?: string | null;
+    /**
+     * How service cards are laid out on the homepage. "Compact strip" renders smaller cards in a tighter multi-column strip.
+     */
+    servicesLayout?: ('cards' | 'compact') | null;
+    /**
+     * Small caps label above the homepage donate band. Leave blank for the platform default: "Build with us".
+     */
+    donateEyebrow?: string | null;
+    /**
+     * Pull quote in the homepage donate band. Leave blank for the platform default hadith: "The most beloved deeds to Allah are those done consistently, even if small."
+     */
+    donateQuote?: string | null;
+    /**
+     * Citation line under the donate quote. Leave blank for the platform default: "— Prophet Muhammad (peace be upon him)".
+     */
+    donateCitation?: string | null;
+    /**
+     * Label of the donate band button. Leave blank for the platform default: "Donate now".
+     */
+    donateButtonLabel?: string | null;
   };
   /**
    * Masjid coordinates and timezone. Lat/lng are auto-filled from the address on save. Override manually if the geocoder picks the wrong point.
@@ -418,6 +471,10 @@ export interface Tenant {
     phone?: string | null;
     email?: string | null;
     /**
+     * Zelle address (email or phone) for donations. Shown in the site footer when set.
+     */
+    zelle?: string | null;
+    /**
      * Street address, one line per part (street, city/state/zip).
      */
     address?: string | null;
@@ -439,6 +496,10 @@ export interface Tenant {
    * Optional short phrase shown beneath the logo in the footer, e.g. "Serving Prosper since 2010".
    */
   footerTagline?: string | null;
+  /**
+   * Legal/tax line shown at the bottom of the footer, e.g. "ACME is a 501(c)(3) tax-exempt nonprofit. Donations are tax-deductible."
+   */
+  footerLegalNote?: string | null;
   /**
    * A tenant is "pending" until its admin user signs in for the first time. Pending tenants are subject to auto-cleanup after 7 days.
    */
@@ -943,7 +1004,7 @@ export interface Term {
   createdAt: string;
 }
 /**
- * Slides for the homepage hero slider. Use these for mission statements, donation pushes, or general announcements. Featured events from the Events collection are auto-added at render time.
+ * Slides for the homepage hero slider. Use these for mission statements, donation pushes, or general announcements. Featured events and featured pages are auto-added at render time.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hero-slides".
@@ -969,14 +1030,14 @@ export interface HeroSlide {
   /**
    * Visual layout for this slide. Each style has a built-in color treatment that you can override via Slide Theme below.
    */
-  style: 'original' | 'split' | 'live' | 'photo';
+  style: 'original' | 'split' | 'live' | 'photo' | 'showcase';
   /**
    * Background treatment for this slide. "Brand" renders the slide on a deep panel of your brand color with light text — good for campaign slides. Not used by the Photo layout (it is always dark).
    */
   background?: ('default' | 'brand') | null;
   accent: 'cream' | 'teal' | 'navy' | 'gold';
   /**
-   * Content shown in the right-side card stack for the Split layout. Only used when Layout Style is "Split".
+   * Content shown in the right-side card stack for the Split layout, and the flush right-edge photo for the Showcase layout (only Photo + Photo Label/Tone apply there). Only used when Layout Style is "Split" or "Showcase".
    */
   splitFields?: {
     /**
@@ -1415,6 +1476,22 @@ export interface Service {
    */
   icon: string;
   /**
+   * Optionally render a "Learn more" link on this service's card. Link to a page on this site or to an external URL.
+   */
+  linkType?: ('none' | 'page' | 'url') | null;
+  /**
+   * The site page the "Learn more" link on this service's card points to.
+   */
+  linkPage?: (number | null) | Page;
+  /**
+   * The URL the "Learn more" link on this service's card points to. Use a full https:// URL for external sites, or a relative path (e.g. /programs) for a page on this site.
+   */
+  linkUrl?: string | null;
+  /**
+   * Text for the link on this service's card, e.g. "Explore programs". Leave blank for "Learn more".
+   */
+  linkLabel?: string | null;
+  /**
    * Lower numbers appear first in the grid.
    */
   sortOrder?: number | null;
@@ -1460,6 +1537,18 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Tick to include this page in the homepage hero slider. Featured pages rotate alongside hero slides and featured events.
+   */
+  featured?: boolean | null;
+  /**
+   * Short blurb shown on this page's hero slide. Falls back to the SEO meta description when blank. 1–2 sentences.
+   */
+  heroExcerpt?: string | null;
+  /**
+   * Shown only when "Featured on Homepage" is on. Picks the theme for this page's slide in the hero.
+   */
+  heroAccent?: ('cream' | 'teal' | 'navy' | 'gold') | null;
   /**
    * When enabled, this page appears as a link in the public site header navigation. Only published pages are shown.
    */
@@ -2701,6 +2790,10 @@ export interface ServicesSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   icon?: T;
+  linkType?: T;
+  linkPage?: T;
+  linkUrl?: T;
+  linkLabel?: T;
   sortOrder?: T;
   tenant?: T;
   updatedAt?: T;
@@ -2715,6 +2808,9 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   content?: T;
+  featured?: T;
+  heroExcerpt?: T;
+  heroAccent?: T;
   showInNav?: T;
   navOrder?: T;
   tenant?: T;
@@ -3188,6 +3284,22 @@ export interface TenantsSelect<T extends boolean = true> {
         secondaryColor?: T;
         accentColor?: T;
         displayFont?: T;
+        headerArabicLine?: T;
+      };
+  homepageCopy?:
+    | T
+    | {
+        eventsEyebrow?: T;
+        eventsHeading?: T;
+        eventsSubcopy?: T;
+        servicesEyebrow?: T;
+        servicesHeading?: T;
+        servicesSubcopy?: T;
+        servicesLayout?: T;
+        donateEyebrow?: T;
+        donateQuote?: T;
+        donateCitation?: T;
+        donateButtonLabel?: T;
       };
   location?:
     | T
@@ -3221,6 +3333,7 @@ export interface TenantsSelect<T extends boolean = true> {
     | {
         phone?: T;
         email?: T;
+        zelle?: T;
         address?: T;
       };
   socialLinks?:
@@ -3231,6 +3344,7 @@ export interface TenantsSelect<T extends boolean = true> {
         id?: T;
       };
   footerTagline?: T;
+  footerLegalNote?: T;
   status?: T;
   demoMode?: T;
   trialEndsAt?: T;
