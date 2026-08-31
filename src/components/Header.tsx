@@ -107,7 +107,7 @@ export default function Header({
       <div className="mx-auto flex h-36 max-w-page items-center justify-between gap-6 px-6">
         <Link
           href="/"
-          className="inline-flex h-28 items-center"
+          className="inline-flex h-32 items-center"
           aria-label={`${tenantName} — Home`}
         >
           {logoSrc ? (
@@ -117,7 +117,7 @@ export default function Header({
               width={416}
               height={112}
               priority
-              className="h-28 w-[416px] object-contain"
+              className="h-32 w-auto max-w-[416px] object-contain object-left"
               unoptimized={logoSrc.startsWith('/')}
             />
           ) : (
@@ -140,7 +140,7 @@ export default function Header({
                 href={link.href}
                 aria-current={active ? 'page' : undefined}
                 className={[
-                  'px-[14px] py-2 text-fs-sm font-medium transition-colors duration-base ease-out',
+                  'whitespace-nowrap px-[14px] py-2 text-fs-sm font-medium transition-colors duration-base ease-out',
                   'rounded-[var(--r-sm)] outline-none',
                   'focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
                   active

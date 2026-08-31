@@ -74,8 +74,8 @@ export const HINTS: Record<MilestoneSlug, Hint[]> = {
   ],
   hero: [
     {
-      headline: 'Featured events become hero slides.',
-      body: 'Mark an event as featured and it auto-appears in the homepage rotation.',
+      headline: 'Featured events and pages become hero slides.',
+      body: 'Mark an event or page as featured and it auto-appears in the homepage rotation.',
     },
     {
       headline: 'PhotoTone keeps text readable.',

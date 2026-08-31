@@ -26,7 +26,7 @@ export const HeroSlides: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'accent', 'active', 'sortOrder'],
     description:
-      'Slides for the homepage hero slider. Use these for mission statements, donation pushes, or general announcements. Featured events from the Events collection are auto-added at render time.',
+      'Slides for the homepage hero slider. Use these for mission statements, donation pushes, or general announcements. Featured events and featured pages are auto-added at render time.',
   },
   access: {
     read: denyKioskManager(tenantScopedRead),
@@ -108,6 +108,7 @@ export const HeroSlides: CollectionConfig = {
         { label: 'Split — copy + card stack (next iqamah, photo, up next)', value: 'split' },
         { label: 'Live — copy + "Right now at ICP" widget', value: 'live' },
         { label: 'Photo — full-bleed dark + ayah card', value: 'photo' },
+        { label: 'Showcase — flush photo, bold headline', value: 'showcase' },
       ],
       admin: {
         description:
@@ -164,8 +165,9 @@ export const HeroSlides: CollectionConfig = {
       label: 'Split Layout — Card Content',
       admin: {
         description:
-          'Content shown in the right-side card stack for the Split layout. Only used when Layout Style is "Split".',
-        condition: (_, siblingData) => siblingData?.style === 'split',
+          'Content shown in the right-side card stack for the Split layout, and the flush right-edge photo for the Showcase layout (only Photo + Photo Label/Tone apply there). Only used when Layout Style is "Split" or "Showcase".',
+        condition: (_, siblingData) =>
+          siblingData?.style === 'split' || siblingData?.style === 'showcase',
       },
       fields: [
         {

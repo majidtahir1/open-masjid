@@ -6,10 +6,12 @@ import config from '@payload-config'
 type Body = {
   name?: string
   footerTagline?: string
+  footerLegalNote?: string
   contactInfo?: {
     address?: string
     phone?: string
     email?: string
+    zelle?: string
   }
   socialLinks?: Array<{ platform: string; url: string }>
 }
@@ -56,6 +58,9 @@ export async function POST(req: Request) {
   if (typeof body.footerTagline === 'string') {
     data.footerTagline = body.footerTagline
   }
+  if (typeof body.footerLegalNote === 'string') {
+    data.footerLegalNote = body.footerLegalNote
+  }
 
   if (body.contactInfo && typeof body.contactInfo === 'object') {
     const existing = tenant.contactInfo ?? {}
@@ -63,6 +68,7 @@ export async function POST(req: Request) {
     if (typeof body.contactInfo.address === 'string') next.address = body.contactInfo.address
     if (typeof body.contactInfo.phone === 'string') next.phone = body.contactInfo.phone
     if (typeof body.contactInfo.email === 'string') next.email = body.contactInfo.email
+    if (typeof body.contactInfo.zelle === 'string') next.zelle = body.contactInfo.zelle
     data.contactInfo = next
   }
 

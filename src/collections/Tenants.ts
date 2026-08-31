@@ -288,6 +288,166 @@ export const Tenants: CollectionConfig = {
                     },
                   },
                 },
+                {
+                  name: 'headerArabicLine',
+                  type: 'text',
+                  label: 'Header Arabic Line',
+                  admin: {
+                    description:
+                      'Optional Arabic line (e.g. a bismillah or duʿa) shown centered beneath the site header on every page. Rendered right-to-left in an Arabic font. Leave blank to hide.',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              name: 'homepageCopy',
+              type: 'group',
+              label: 'Homepage Copy',
+              admin: {
+                description:
+                  'Overrides for the hardcoded homepage section copy. Every field is optional — leave a field blank to use the platform default.',
+              },
+              fields: [
+                {
+                  name: 'eventsEyebrow',
+                  type: 'text',
+                  label: 'Events Eyebrow',
+                  admin: {
+                    description:
+                      'Small caps label above the homepage "Upcoming events" block. Leave blank for the platform default: "What\'s happening".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'eventsHeading',
+                  type: 'text',
+                  label: 'Events Heading',
+                  admin: {
+                    description:
+                      'Heading of the homepage events block. Leave blank for the platform default: "Upcoming events".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'eventsSubcopy',
+                  type: 'textarea',
+                  label: 'Events Subcopy',
+                  admin: {
+                    description:
+                      'Short sentence under the events heading. Leave blank for the platform default: "Classes, programs, and gatherings for the whole community."',
+                    components: {
+                      Field: '/src/fields/TextareaField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'servicesEyebrow',
+                  type: 'text',
+                  label: 'Services Eyebrow',
+                  admin: {
+                    description:
+                      'Small caps label above the homepage services grid. Leave blank for the platform default: "What we do".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'servicesHeading',
+                  type: 'text',
+                  label: 'Services Heading',
+                  admin: {
+                    description:
+                      'Heading of the homepage services grid. Leave blank for the platform default: "Services for our community".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'servicesSubcopy',
+                  type: 'textarea',
+                  label: 'Services Subcopy',
+                  admin: {
+                    description:
+                      'Short sentence under the services heading. Leave blank for the platform default: "From your first week to your last rites — we\'re here for every part of the journey, Insha\'Allah."',
+                    components: {
+                      Field: '/src/fields/TextareaField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'servicesLayout',
+                  type: 'select',
+                  defaultValue: 'cards',
+                  label: 'Services Layout',
+                  options: [
+                    { label: 'Cards (default)', value: 'cards' },
+                    { label: 'Compact strip', value: 'compact' },
+                  ],
+                  admin: {
+                    description:
+                      'How service cards are laid out on the homepage. "Compact strip" renders smaller cards in a tighter multi-column strip.',
+                    components: {
+                      Field: '/src/fields/SelectField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'donateEyebrow',
+                  type: 'text',
+                  label: 'Donate Eyebrow',
+                  admin: {
+                    description:
+                      'Small caps label above the homepage donate band. Leave blank for the platform default: "Build with us".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'donateQuote',
+                  type: 'textarea',
+                  label: 'Donate Quote',
+                  admin: {
+                    description:
+                      'Pull quote in the homepage donate band. Leave blank for the platform default hadith: "The most beloved deeds to Allah are those done consistently, even if small."',
+                    components: {
+                      Field: '/src/fields/TextareaField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'donateCitation',
+                  type: 'text',
+                  label: 'Donate Citation',
+                  admin: {
+                    description:
+                      'Citation line under the donate quote. Leave blank for the platform default: "— Prophet Muhammad (peace be upon him)".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
+                  name: 'donateButtonLabel',
+                  type: 'text',
+                  label: 'Donate Button Label',
+                  admin: {
+                    description:
+                      'Label of the donate band button. Leave blank for the platform default: "Donate now".',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
               ],
             },
           ],
@@ -489,6 +649,19 @@ export const Tenants: CollectionConfig = {
                   },
                 },
                 {
+                  name: 'zelle',
+                  type: 'text',
+                  label: 'Zelle',
+                  admin: {
+                    description:
+                      'Zelle address (email or phone) for donations. Shown in the site footer when set.',
+                    placeholder: 'donate@icprosper.org',
+                    components: {
+                      Field: '/src/fields/TextField#default',
+                    },
+                  },
+                },
+                {
                   name: 'address',
                   type: 'textarea',
                   label: 'Address',
@@ -559,6 +732,19 @@ export const Tenants: CollectionConfig = {
                 hidden: true,
                 components: {
                   Field: '/src/fields/TextField#default',
+                },
+              },
+            },
+            {
+              name: 'footerLegalNote',
+              type: 'textarea',
+              label: 'Footer Legal Note',
+              admin: {
+                description:
+                  'Legal/tax line shown at the bottom of the footer, e.g. "ACME is a 501(c)(3) tax-exempt nonprofit. Donations are tax-deductible."',
+                hidden: true,
+                components: {
+                  Field: '/src/fields/TextareaField#default',
                 },
               },
             },

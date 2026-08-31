@@ -31,10 +31,12 @@ type TenantDoc = {
   name?: string | null
   slug?: string | null
   footerTagline?: string | null
+  footerLegalNote?: string | null
   contactInfo?: {
     address?: string | null
     phone?: string | null
     email?: string | null
+    zelle?: string | null
   } | null
   socialLinks?: Array<{ platform?: string; url?: string }> | null
 }
@@ -159,10 +161,12 @@ export default function SiteSettingsIdentityField() {
   const initial: IdentityInitial = {
     name: tenant.name ?? '',
     footerTagline: tenant.footerTagline ?? '',
+    footerLegalNote: tenant.footerLegalNote ?? '',
     contactInfo: {
       address: tenant.contactInfo?.address ?? '',
       phone: tenant.contactInfo?.phone ?? '',
       email: tenant.contactInfo?.email ?? '',
+      zelle: tenant.contactInfo?.zelle ?? '',
     },
     socialLinks: (tenant.socialLinks ?? [])
       .filter((s): s is { platform: string; url: string } =>

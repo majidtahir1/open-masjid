@@ -375,6 +375,117 @@
   text-transform: uppercase; color: var(--accent);
 }
 
+/* ---------- SHOWCASE — flush right-edge photo, bold two-tone headline ----------
+   Full-viewport band on the page background. Copy (~40%) sits left, aligned
+   to the page container via a computed left pad; the photo (~60%) bleeds to
+   the right viewport edge with no frame. A --bg gradient overlay on the
+   photo's left edge (plus a subtle top wash) melts it into the page. */
+.om-hero-showcase {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: center;
+  min-height: 460px;
+}
+.om-hero-showcase-copy {
+  /* Above the media column so the nowrap headline can extend over the fade. */
+  position: relative;
+  z-index: 2;
+  padding: 48px 32px 64px 24px;
+  /* Align with the max-w-page (1200px) container's inner gutter. */
+  padding-left: max(24px, calc((100vw - 1200px) / 2 + 24px));
+}
+.om-hero-showcase-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(32px, 3.2vw, 50px);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin-bottom: 22px;
+}
+/* Wide screens: keep each authored title line on one line and let the
+   headline extend over the photo's faded zone, like a magazine spread.
+   The left fade below guarantees a readable backdrop. */
+@media (min-width: 901px) {
+  .om-hero-showcase-title span {
+    white-space: nowrap;
+  }
+}
+/* Two-tone: the last title line takes the accent (gold) tone. Generic — any
+   tenant's multi-line '\n' title gets its final line accented; single-line
+   titles stay on the heading color. */
+.om-hero-showcase-title span:last-child:not(:first-child) {
+  color: var(--accent-strong);
+}
+/* Ornamental divider: thin gold rule + tiny rotated-square diamond. */
+.om-hero-showcase-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 26px;
+}
+.om-hero-showcase-divider::before {
+  content: "";
+  width: 64px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+.om-hero-showcase-divider span {
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+.om-hero-showcase-p {
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: var(--fg2);
+  margin: 0 0 16px;
+  max-width: 500px;
+}
+.om-hero-showcase .om-hero-ctas { margin-top: 28px; margin-bottom: 0; }
+.om-hero-showcase-media {
+  position: relative;
+  align-self: stretch;
+  min-height: 460px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+.om-hero-showcase-media img {
+  /* Natural aspect, bottom-aligned — a wide panorama shows its whole
+     subject instead of being crop-zoomed; the mask melts its top edge
+     into the page background so there is no hard seam. */
+  width: 100%; height: auto;
+  display: block;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 24%);
+}
+.om-hero-showcase-fade {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, var(--bg) 0%, transparent 45%);
+}
+@media (max-width: 900px) {
+  .om-hero-showcase {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .om-hero-showcase-copy {
+    padding: 56px 24px 40px;
+  }
+  .om-hero-showcase-media {
+    align-self: auto;
+    min-height: 0;
+    height: 320px;
+  }
+  .om-hero-showcase-fade {
+    background: linear-gradient(to bottom, var(--bg) 0%, transparent 40%);
+  }
+}
+
 /* ---------- ORIGINAL — kept slim ---------- */
 .om-hero-original-inner {
   padding: 48px 24px 96px;

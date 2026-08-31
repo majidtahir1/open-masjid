@@ -11,6 +11,8 @@ export interface DonateCTAProps {
   citation?: string
   /** Section eyebrow. */
   eyebrow?: string
+  /** Label on the donate button. Default "Donate now". */
+  buttonLabel?: string
 }
 
 const DEFAULT_HADITH =
@@ -26,6 +28,7 @@ export default function DonateCTA({
   hadith = DEFAULT_HADITH,
   citation = DEFAULT_CITATION,
   eyebrow = 'Build with us',
+  buttonLabel = 'Donate now',
 }: DonateCTAProps) {
   const mode = donationConfig?.mode ?? 'external'
   const externalUrl = donationConfig?.externalUrl ?? null
@@ -44,7 +47,7 @@ export default function DonateCTA({
   const button = (
     <>
       <Heart size={18} strokeWidth={1.75} aria-hidden="true" />
-      <span>Donate now</span>
+      <span>{buttonLabel}</span>
     </>
   )
 

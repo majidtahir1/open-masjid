@@ -76,6 +76,64 @@ export const Services: CollectionConfig = {
       validate: (value: unknown) => validateLucideIcon(value),
     },
     {
+      name: 'linkType',
+      type: 'select',
+      defaultValue: 'none',
+      label: 'Link Type',
+      options: [
+        { label: 'No link', value: 'none' },
+        { label: 'Site page', value: 'page' },
+        { label: 'External URL', value: 'url' },
+      ],
+      admin: {
+        description:
+          'Optionally render a "Learn more" link on this service\'s card. Link to a page on this site or to an external URL.',
+        components: {
+          Field: '/src/fields/SelectField#default',
+        },
+      },
+    },
+    {
+      name: 'linkPage',
+      type: 'relationship',
+      relationTo: 'pages',
+      label: 'Link Page',
+      admin: {
+        description:
+          'The site page the "Learn more" link on this service\'s card points to.',
+        condition: (_, siblingData) => siblingData?.linkType === 'page',
+      },
+    },
+    {
+      name: 'linkUrl',
+      type: 'text',
+      label: 'Link URL',
+      admin: {
+        description:
+          'The URL the "Learn more" link on this service\'s card points to. Use a full https:// URL for external sites, or a relative path (e.g. /programs) for a page on this site.',
+        placeholder: 'https://example.org/program',
+        condition: (_, siblingData) => siblingData?.linkType === 'url',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
+      },
+    },
+    {
+      name: 'linkLabel',
+      type: 'text',
+      label: 'Link Label',
+      admin: {
+        description:
+          'Text for the link on this service\'s card, e.g. "Explore programs". Leave blank for "Learn more".',
+        placeholder: 'Learn more',
+        condition: (_, siblingData) =>
+          siblingData?.linkType === 'page' || siblingData?.linkType === 'url',
+        components: {
+          Field: '/src/fields/TextField#default',
+        },
+      },
+    },
+    {
       name: 'sortOrder',
       type: 'number',
       defaultValue: 0,

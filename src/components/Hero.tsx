@@ -8,6 +8,7 @@ import {
   HeroLive,
   HeroOriginal,
   HeroPhoto,
+  HeroShowcase,
   HeroSplit,
 } from './hero/variants'
 import type { HeroLiveData, HeroSlideLike, HeroStyle } from './types'
@@ -71,10 +72,13 @@ export default function Hero({ slides, intervalMs = 7000, liveData }: HeroProps)
     return slides[idx]?.style ?? 'original'
   }, [slides, idx, hasSlides])
 
-  // 'photo' is always dark; other styles go dark when the slide opts into
-  // the brand-panel background.
-  const isBrandSlide = (s: HeroSlideLike | undefined): boolean =>
-    (s?.style ?? 'original') !== 'photo' && s?.background === 'brand'
+  // 'photo' is always dark; 'showcase' is always light (its --bg fade melts
+  // the photo into the page background, so a brand panel would clash);
+  // other styles go dark when the slide opts into the brand-panel background.
+  const isBrandSlide = (s: HeroSlideLike | undefined): boolean => {
+    const st = s?.style ?? 'original'
+    return st !== 'photo' && st !== 'showcase' && s?.background === 'brand'
+  }
   const activeDark = activeStyle === 'photo' || isBrandSlide(slides[idx])
 
   if (!hasSlides) return null
@@ -111,7 +115,9 @@ export default function Hero({ slides, intervalMs = 7000, liveData }: HeroProps)
                 'om-hero-slide',
                 active ? 'is-active' : '',
                 style === 'photo' ? 'is-photo' : '',
-                style !== 'photo' && slide.background === 'brand' ? 'is-brand' : '',
+                style !== 'photo' && style !== 'showcase' && slide.background === 'brand'
+                  ? 'is-brand'
+                  : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -165,6 +171,7 @@ function VariantRenderer({
 }) {
   const props = { slide, nextSlide, active, liveData, uid, onJumpToNext }
   if (style === 'photo') return <HeroPhoto {...props} />
+  if (style === 'showcase') return <HeroShowcase {...props} />
   if (style === 'live') return <HeroLive {...props} />
   if (style === 'split') return <HeroSplit {...props} />
   return <HeroOriginal {...props} />

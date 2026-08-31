@@ -76,7 +76,7 @@ export interface HeroCta {
   primary?: boolean | null
 }
 
-export type HeroStyle = 'original' | 'split' | 'live' | 'photo'
+export type HeroStyle = 'original' | 'split' | 'live' | 'photo' | 'showcase'
 /** Brand-neutral tone slot. `brand`/`secondary`/`accent` map to the tenant's
  *  --brand / --secondary / --accent CSS variable at render time so per-tenant
  *  skinning flows through automatically. `custom` lets an editor pick a
@@ -126,8 +126,8 @@ export interface HeroSlideLike {
   splitFields?: HeroSplitFields | null
   photoFields?: HeroPhotoFields | null
   ctas?: HeroCta[] | null
-  /** Used only for hero-wrapped events. Optional. */
-  kind?: 'mission' | 'program' | 'flyer' | 'announcement' | null
+  /** Used only for hero-wrapped events/pages. Optional. */
+  kind?: 'mission' | 'program' | 'flyer' | 'announcement' | 'page' | null
 }
 
 /** Live data passed in from the server for variants that show real-time info. */
@@ -163,6 +163,13 @@ export interface ServiceLike {
   /** Lucide icon name in kebab-case, e.g. "hand-heart". */
   icon: string
   sortOrder?: number | null
+  /** Optional "Learn more" link on the card. */
+  linkType?: 'none' | 'page' | 'url' | null
+  /** Populated page doc (at depth ≥ 1) or a bare relationship id. */
+  linkPage?: { slug?: string | null } | string | number | null
+  linkUrl?: string | null
+  /** Custom text for the card link. Blank → "Learn more". */
+  linkLabel?: string | null
 }
 
 export interface EventLike {

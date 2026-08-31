@@ -45,7 +45,7 @@ const PANELS: Record<MilestoneSlug, PanelMeta> = {
   hero: {
     title: 'Set your homepage hero',
     intro:
-      'Featured events become hero slides automatically — or you can upload a photo.',
+      'Featured events and pages become hero slides automatically — or you can upload a photo.',
     primaryHref: '/admin/collections/hero-slides/create',
     primaryLabel: 'Open the hero editor',
   },

@@ -122,6 +122,37 @@ export async function fetchFeaturedEvents(
   }
 }
 
+/** Pages marked as featured — rendered alongside hero-slides on the homepage carousel. */
+export async function fetchFeaturedPages(
+  tenant: TenantRecord,
+  opts: ReadOpts = {},
+) {
+  noStore()
+  const payload = await getPayloadClient()
+  if (!payload) return []
+  const draft = opts.draft ?? false
+  try {
+    const res = await payload.find({
+      collection: 'pages',
+      where: gate(
+        {
+          tenant: { equals: tenant.id },
+          featured: { equals: true },
+        },
+        draft,
+      ),
+      sort: 'title',
+      limit: 6,
+      depth: 1,
+      overrideAccess: true,
+      draft,
+    })
+    return res.docs as unknown[]
+  } catch {
+    return []
+  }
+}
+
 export async function fetchEventBySlug(
   tenant: TenantRecord,
   slug: string,

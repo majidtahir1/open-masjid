@@ -4,13 +4,20 @@ import type { ReactElement, SVGProps } from 'react'
 
 import type { TenantContactInfo, TenantSocialLink } from './types'
 
+/** Contact info plus the optional Zelle handle (email/phone used for Zelle). */
+type FooterContactInfo = TenantContactInfo & { zelle?: string | null }
+
 export interface FooterTenant {
   name: string
-  contactInfo?: TenantContactInfo | null
+  contactInfo?: FooterContactInfo | null
   socialLinks?: TenantSocialLink[] | null
   footerTagline?: string | null
+  /** Optional legal / disclaimer note rendered in the bottom bar. */
+  footerLegalNote?: string | null
   /** Optional tenant logo URL. When omitted, the footer renders no logo. */
   logoUrl?: string | null
+  /** True when the logo is a wide lockup that already contains the org name. */
+  logoIsWordmark?: boolean | null
 }
 
 export interface FooterProps {
@@ -61,6 +68,14 @@ const LinkedinIcon: BrandIconComponent = (props) => (
   </svg>
 )
 
+/** Simple send glyph for the Zelle row — matches the stroke style above. */
+const ZelleSendIcon: BrandIconComponent = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+    <path d="M21 3 10.5 13.5" />
+    <path d="M21 3l-6.8 18a.4.4 0 0 1-.75.02L10.5 13.5 2.98 10.55a.4.4 0 0 1 .02-.75L21 3z" />
+  </svg>
+)
+
 const SOCIAL_ICONS: Record<TenantSocialLink['platform'], BrandIconComponent> = {
   facebook: FacebookIcon,
   instagram: InstagramIcon,
@@ -85,10 +100,10 @@ const QUICK_LINKS: Array<{ href: string; label: string }> = [
   { href: '/donate', label: 'Donate' },
 ]
 
-function ContactLines({ contact }: { contact: TenantContactInfo | null | undefined }) {
+function ContactLines({ contact }: { contact: FooterContactInfo | null | undefined }) {
   if (!contact) return null
-  const { phone, email, address } = contact
-  if (!phone && !email && !address) return null
+  const { phone, email, address, zelle } = contact
+  if (!phone && !email && !address && !zelle) return null
   return (
     <div className="space-y-2 text-fs-sm leading-relaxed text-white/75">
       {address && (
@@ -98,7 +113,7 @@ function ContactLines({ contact }: { contact: TenantContactInfo | null | undefin
         <p className="m-0">
           <a
             href={`tel:${phone.replace(/\s+/g, '')}`}
-            className="text-white/85 transition-colors duration-fast hover:text-teal-200"
+            className="text-white/85 transition-colors duration-fast hover:text-[var(--secondary-on-dark)]"
           >
             {phone}
           </a>
@@ -108,10 +123,16 @@ function ContactLines({ contact }: { contact: TenantContactInfo | null | undefin
         <p className="m-0">
           <a
             href={`mailto:${email}`}
-            className="text-white/85 transition-colors duration-fast hover:text-teal-200"
+            className="text-white/85 transition-colors duration-fast hover:text-[var(--secondary-on-dark)]"
           >
             {email}
           </a>
+        </p>
+      )}
+      {zelle && (
+        <p className="m-0 inline-flex items-center gap-2 text-white/85">
+          <ZelleSendIcon width={14} height={14} className="shrink-0 text-[var(--secondary-on-dark)]" />
+          <span>Zelle: {zelle}</span>
         </p>
       )}
     </div>
@@ -128,6 +149,8 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
   const socials = (tenant.socialLinks ?? []).filter(
     (s): s is TenantSocialLink => !!s && !!s.platform && !!s.url,
   )
+  const legalNote =
+    typeof tenant.footerLegalNote === 'string' ? tenant.footerLegalNote.trim() : ''
 
   return (
     <footer className="border-t border-brand/30 bg-brand-ink text-fg-inverse">
@@ -137,18 +160,24 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
           <div>
             <div className="mb-4 flex items-center gap-3">
               {tenant.logoUrl && (
-                <Image
-                  src={tenant.logoUrl}
-                  alt=""
-                  width={72}
-                  height={72}
-                  className="h-[72px] w-[72px] shrink-0 object-contain"
-                  unoptimized={tenant.logoUrl.startsWith('/')}
-                />
+                // Light tile keeps dark-toned (or transparent) logos legible
+                // on the dark footer background.
+                <span className="inline-flex shrink-0 items-center justify-center rounded-lg bg-white/90 p-1.5">
+                  <Image
+                    src={tenant.logoUrl}
+                    alt=""
+                    width={220}
+                    height={60}
+                    className="h-auto max-h-[60px] w-auto max-w-[220px] object-contain"
+                    unoptimized={tenant.logoUrl.startsWith('/')}
+                  />
+                </span>
               )}
-              <div className="font-display text-[22px] font-semibold leading-snug text-white">
-                {tenant.name}
-              </div>
+              {!(tenant.logoUrl && tenant.logoIsWordmark) && (
+                <div className="font-display text-[22px] font-semibold leading-snug text-white">
+                  {tenant.name}
+                </div>
+              )}
             </div>
             <p className="m-0 max-w-[32ch] text-fs-sm leading-relaxed text-white/75">
               {tagline}
@@ -157,7 +186,7 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
 
           {/* Contact */}
           <div>
-            <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-teal-200">
+            <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-[var(--secondary-on-dark)]">
               Contact
             </div>
             <ContactLines contact={tenant.contactInfo} />
@@ -165,7 +194,7 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
 
           {/* Quick links */}
           <div>
-            <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-teal-200">
+            <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-[var(--secondary-on-dark)]">
               Explore
             </div>
             <ul className="m-0 list-none space-y-2 p-0 text-fs-sm">
@@ -173,7 +202,7 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-white/85 transition-colors duration-fast hover:text-teal-200"
+                    className="text-white/85 transition-colors duration-fast hover:text-[var(--secondary-on-dark)]"
                   >
                     {link.label}
                   </Link>
@@ -184,7 +213,7 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
 
           {/* Social */}
           <div>
-            <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-teal-200">
+            <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-[var(--secondary-on-dark)]">
               Follow
             </div>
             {socials.length > 0 ? (
@@ -204,8 +233,8 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
                           'inline-flex h-10 w-10 items-center justify-center rounded-[var(--r-md)]',
                           'border border-white/15 bg-white/5 text-white/80',
                           'transition-colors duration-base ease-out',
-                          'hover:border-teal-200 hover:bg-white/10 hover:text-teal-200',
-                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-200 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink',
+                          'hover:border-[var(--secondary-on-dark)] hover:bg-white/10 hover:text-[var(--secondary-on-dark)]',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary-on-dark)] focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink',
                         ].join(' ')}
                       >
                         <Icon width={18} height={18} />
@@ -221,16 +250,23 @@ export default function Footer({ tenant, hasPrayerSchedule = true }: FooterProps
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-fs-sm text-white/60 md:flex-row md:items-center">
-          <p className="m-0">
-            &copy; {year} {tenant.name}. All rights reserved.
-          </p>
+          <div className="space-y-1">
+            <p className="m-0">
+              &copy; {year} {tenant.name}. All rights reserved.
+            </p>
+            {legalNote && (
+              <p className="m-0 max-w-[64ch] whitespace-pre-line text-[12px] leading-relaxed text-white/45">
+                {legalNote}
+              </p>
+            )}
+          </div>
           <p className="m-0 text-[12px] text-white/45">
             Powered by{' '}
             <a
               href="https://openmasjid.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/60 underline underline-offset-2 transition-colors duration-fast hover:text-teal-200"
+              className="text-white/60 underline underline-offset-2 transition-colors duration-fast hover:text-[var(--secondary-on-dark)]"
             >
               OpenMasjid
             </a>
