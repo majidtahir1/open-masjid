@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
 
-import type { TenantDonationConfig } from '@/components/types'
+import type { TenantContactInfo, TenantDonationConfig } from '@/components/types'
 import { getCurrentTenant } from '@/lib/tenant-server'
 import { getPayloadClient } from '@/lib/payloadClient'
 import DonateForm, { type DonateFund } from '@/components/DonateForm'
@@ -26,6 +26,8 @@ export default async function DonatePage() {
   if (!tenant) return null
 
   const donationConfig: TenantDonationConfig = tenant.donationConfig ?? {}
+  const zelle =
+    (tenant.contactInfo as TenantContactInfo | null | undefined)?.zelle ?? null
   const mode: 'external' | 'connect' = donationConfig.mode ?? 'external'
   const externalUrl = donationConfig.externalUrl ?? null
   const useExternal = mode === 'external' && !!externalUrl && isExternal(externalUrl)
@@ -105,6 +107,23 @@ export default async function DonatePage() {
             >
               Donation setup pending
             </Link>
+          )}
+
+          {zelle && (
+            <div className="mx-auto mt-12 max-w-[480px] rounded-[var(--r-md)] border border-border bg-white p-7 text-left shadow-sh-sm">
+              <div className="mb-4 font-body text-fs-xs font-semibold uppercase tracking-caps text-brand">
+                Ways to give
+              </div>
+              {(useConnect || useExternal) && (
+                <p className="m-0 mb-3 font-body text-fs-base text-fg2">
+                  <span className="font-semibold text-fg1">Online:</span> Use
+                  the donate options above to give securely by card.
+                </p>
+              )}
+              <p className="m-0 font-body text-fs-base text-fg2">
+                <span className="font-semibold text-fg1">Zelle:</span> {zelle}
+              </p>
+            </div>
           )}
         </div>
       </section>

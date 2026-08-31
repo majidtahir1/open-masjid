@@ -4,12 +4,9 @@ import type { ReactElement, SVGProps } from 'react'
 
 import type { TenantContactInfo, TenantSocialLink } from './types'
 
-/** Contact info plus the optional Zelle handle (email/phone used for Zelle). */
-type FooterContactInfo = TenantContactInfo & { zelle?: string | null }
-
 export interface FooterTenant {
   name: string
-  contactInfo?: FooterContactInfo | null
+  contactInfo?: TenantContactInfo | null
   socialLinks?: TenantSocialLink[] | null
   footerTagline?: string | null
   /** Optional legal / disclaimer note rendered in the bottom bar. */
@@ -100,7 +97,7 @@ const QUICK_LINKS: Array<{ href: string; label: string }> = [
   { href: '/donate', label: 'Donate' },
 ]
 
-function ContactLines({ contact }: { contact: FooterContactInfo | null | undefined }) {
+function ContactLines({ contact }: { contact: TenantContactInfo | null | undefined }) {
   if (!contact) return null
   const { phone, email, address, zelle } = contact
   if (!phone && !email && !address && !zelle) return null

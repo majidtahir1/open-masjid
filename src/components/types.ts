@@ -30,6 +30,8 @@ export interface TenantBranding {
 export interface TenantContactInfo {
   phone?: string | null
   email?: string | null
+  /** Zelle handle (email or phone) for donations. */
+  zelle?: string | null
   address?: string | null
 }
 

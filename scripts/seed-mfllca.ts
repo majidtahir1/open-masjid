@@ -107,6 +107,7 @@ async function seed() {
     contactInfo: {
       address: 'Serving McKinney, Frisco,\nand surrounding communities',
       phone: '469-739-2300',
+      email: 'info@mfllca.com',
       zelle: '469-739-2300',
     },
     footerTagline: 'Learn. Grow. Connect.',
