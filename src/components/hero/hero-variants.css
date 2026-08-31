@@ -385,17 +385,28 @@
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-  align-items: center;
+  /* Spacer rows (1fr) vertically center the head+rest pair; the media area
+     spans all rows so the photo stretches the full hero height. */
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-areas:
+    '. media'
+    'head media'
+    'rest media'
+    '. media';
   min-height: 460px;
 }
+.om-hero-showcase-head { grid-area: head; }
+.om-hero-showcase-rest { grid-area: rest; }
 .om-hero-showcase-copy {
   /* Above the media column so the nowrap headline can extend over the fade. */
   position: relative;
   z-index: 2;
-  padding: 48px 32px 64px 24px;
+  padding: 0 32px 0 24px;
   /* Align with the max-w-page (1200px) container's inner gutter. */
   padding-left: max(24px, calc((100vw - 1200px) / 2 + 24px));
 }
+.om-hero-showcase-head { padding-top: 48px; }
+.om-hero-showcase-rest { padding-bottom: 64px; }
 .om-hero-showcase-title {
   font-weight: 800;
   text-transform: uppercase;
@@ -447,6 +458,7 @@
 }
 .om-hero-showcase .om-hero-ctas { margin-top: 28px; margin-bottom: 0; }
 .om-hero-showcase-media {
+  grid-area: media;
   position: relative;
   align-self: stretch;
   min-height: 460px;
@@ -469,13 +481,21 @@
   background: linear-gradient(to right, var(--bg) 0%, transparent 45%);
 }
 @media (max-width: 900px) {
+  /* Mobile order: headline → photo → body/CTAs. */
   .om-hero-showcase {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      'head'
+      'media'
+      'rest';
     min-height: 0;
   }
   .om-hero-showcase-copy {
-    padding: 56px 24px 40px;
+    padding: 0 24px;
   }
+  .om-hero-showcase-head { padding-top: 48px; }
+  .om-hero-showcase-rest { padding-top: 24px; padding-bottom: 40px; }
   .om-hero-showcase-media {
     align-self: auto;
     min-height: 0;

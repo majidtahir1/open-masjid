@@ -5,8 +5,11 @@
  * - linkType 'page'  → `/${slug}` from the populated linkPage doc. A bare
  *   relationship id (number/string, i.e. not populated at fetch depth) cannot
  *   be resolved, so no link is rendered.
- * - linkType 'url'   → linkUrl verbatim. Full http(s) URLs are flagged
- *   external (new tab); anything else is treated as a relative in-site path.
+ * - linkType 'url'   → http(s) URLs are flagged external (new tab);
+ *   root-relative paths (single leading `/`) are in-site links. Anything
+ *   else — javascript:, data:, protocol-relative `//`, bare words — is
+ *   rejected: tenant editors must not be able to store a link that executes
+ *   script in the site's origin (stored XSS).
  * - linkType 'none' / missing → no link.
  */
 
@@ -26,6 +29,16 @@ export function isExternalHref(href: string): boolean {
   return /^https?:\/\//i.test(href)
 }
 
+/** Root-relative in-site path: single leading slash (not protocol-relative `//`). */
+export function isRootRelativeHref(href: string): boolean {
+  return href.startsWith('/') && !href.startsWith('//')
+}
+
+/** True when a stored URL is safe to render as a link. */
+export function isSafeServiceHref(href: string): boolean {
+  return isExternalHref(href) || isRootRelativeHref(href)
+}
+
 export function resolveServiceLink(
   service: ServiceLinkInput,
 ): ResolvedServiceLink | null {
@@ -39,7 +52,7 @@ export function resolveServiceLink(
 
   if (service.linkType === 'url') {
     const url = service.linkUrl?.trim()
-    if (!url) return null
+    if (!url || !isSafeServiceHref(url)) return null
     return { href: url, external: isExternalHref(url) }
   }
 

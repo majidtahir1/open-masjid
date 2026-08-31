@@ -110,12 +110,21 @@ export const Services: CollectionConfig = {
       label: 'Link URL',
       admin: {
         description:
-          'The URL the "Learn more" link on this service\'s card points to. Use a full https:// URL for external sites, or a relative path (e.g. /programs) for a page on this site.',
+          'The URL the "Learn more" link on this service\'s card points to. Use a full https:// URL for external sites, or a root-relative path (e.g. /programs) for a page on this site.',
         placeholder: 'https://example.org/program',
         condition: (_, siblingData) => siblingData?.linkType === 'url',
         components: {
           Field: '/src/fields/TextField#default',
         },
+      },
+      // Reject javascript:/data:/protocol-relative and other ambiguous
+      // schemes — a stored link must never execute script in the site origin.
+      validate: (value: unknown) => {
+        if (value == null || value === '') return true
+        const url = String(value).trim()
+        if (/^https?:\/\//i.test(url)) return true
+        if (url.startsWith('/') && !url.startsWith('//')) return true
+        return 'Must be a full http(s):// URL or a root-relative path starting with "/".'
       },
     },
     {

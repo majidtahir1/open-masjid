@@ -49,6 +49,23 @@ async function deleteAll(
 }
 
 async function seed() {
+  // Safety gate: this script wipes and recreates the mfllca tenant's hero
+  // slides, services, events, and prayer schedule — running it against prod
+  // silently destroys any editorial changes made since. Require an explicit
+  // opt-in outside local dev.
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.SEED_MFLLCA_CONFIRM !== 'yes'
+  ) {
+    console.error(
+      'Refusing to run in production: this seed DELETES and recreates the ' +
+        "mfllca tenant's hero slides, services, events, and prayer schedule, " +
+        'overwriting any editorial changes.\n' +
+        'To proceed anyway, set SEED_MFLLCA_CONFIRM=yes',
+    )
+    process.exit(1)
+  }
+
   const payload = await getPayload({ config })
 
   // Fake req.user so validate hooks that gate on platformOwner succeed during seed
