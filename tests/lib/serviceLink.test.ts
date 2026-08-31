@@ -31,10 +31,25 @@ describe('resolveServiceLink', () => {
     ).toEqual({ href: 'http://example.org', external: true })
   })
 
-  it('treats non-http URLs as relative in-site paths', () => {
+  it('accepts root-relative paths as in-site links', () => {
     expect(
       resolveServiceLink({ linkType: 'url', linkUrl: '/programs' }),
     ).toEqual({ href: '/programs', external: false })
+  })
+
+  it('rejects dangerous or ambiguous schemes (stored XSS guard)', () => {
+    for (const url of [
+      // eslint-disable-next-line no-script-url
+      'javascript:alert(1)',
+      'JAVASCRIPT:alert(1)',
+      'data:text/html,<script>alert(1)</script>',
+      'vbscript:msgbox(1)',
+      '//evil.example.org/phish',
+      'programs', // bare word — ambiguous, not root-relative
+      'mailto:x@y.z',
+    ]) {
+      expect(resolveServiceLink({ linkType: 'url', linkUrl: url })).toBeNull()
+    }
   })
 
   it('returns no link for a blank linkUrl', () => {

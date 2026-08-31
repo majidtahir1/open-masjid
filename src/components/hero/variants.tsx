@@ -94,7 +94,9 @@ export function HeroShowcase({ slide, active, uid }: VariantProps) {
     .filter(Boolean)
   return (
     <div className="om-hero-showcase">
-      <div className="om-hero-showcase-copy">
+      {/* Head and rest are separate grid areas so the mobile layout can
+          interleave the photo between the headline and the body copy. */}
+      <div className="om-hero-showcase-copy om-hero-showcase-head">
         {slide.eyebrow && <div className="om-hero-eyebrow">{slide.eyebrow}</div>}
         <h1 className="om-hero-title om-hero-showcase-title">
           {renderTitle(slide.title)}
@@ -102,6 +104,8 @@ export function HeroShowcase({ slide, active, uid }: VariantProps) {
         <div className="om-hero-showcase-divider" aria-hidden="true">
           <span />
         </div>
+      </div>
+      <div className="om-hero-showcase-copy om-hero-showcase-rest">
         {paragraphs.map((p, i) => (
           <p key={i} className="om-hero-showcase-p">
             {p}

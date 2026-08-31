@@ -1484,7 +1484,7 @@ export interface Service {
    */
   linkPage?: (number | null) | Page;
   /**
-   * The URL the "Learn more" link on this service's card points to. Use a full https:// URL for external sites, or a relative path (e.g. /programs) for a page on this site.
+   * The URL the "Learn more" link on this service's card points to. Use a full https:// URL for external sites, or a root-relative path (e.g. /programs) for a page on this site.
    */
   linkUrl?: string | null;
   /**
