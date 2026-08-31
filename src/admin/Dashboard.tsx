@@ -381,20 +381,38 @@ async function TenantDashboard({
   const identityDoc = tenantDoc as {
     name?: string | null
     footerTagline?: string | null
+    footerLegalNote?: string | null
     contactInfo?: {
       address?: string | null
       phone?: string | null
       email?: string | null
+      zelle?: string | null
+      zelleQrCode?:
+        | { id: string | number; url?: string | null; filename?: string | null }
+        | string
+        | number
+        | null
     } | null
     socialLinks?: Array<{ platform?: string; url?: string }> | null
   }
   const identityInitial = {
     name: identityDoc.name ?? '',
     footerTagline: identityDoc.footerTagline ?? '',
+    footerLegalNote: identityDoc.footerLegalNote ?? '',
     contactInfo: {
       address: identityDoc.contactInfo?.address ?? '',
       phone: identityDoc.contactInfo?.phone ?? '',
       email: identityDoc.contactInfo?.email ?? '',
+      zelle: identityDoc.contactInfo?.zelle ?? '',
+      zelleQrCode: (() => {
+        const qr = identityDoc.contactInfo?.zelleQrCode
+        if (!qr || typeof qr !== 'object') return null
+        return {
+          id: qr.id,
+          url: qr.url ?? undefined,
+          filename: qr.filename ?? undefined,
+        }
+      })(),
     },
     socialLinks: (identityDoc.socialLinks ?? [])
       .filter((s): s is { platform: string; url: string } =>

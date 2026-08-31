@@ -12,6 +12,7 @@ type Body = {
     phone?: string
     email?: string
     zelle?: string
+    zelleQrCode?: number | string | null
   }
   socialLinks?: Array<{ platform: string; url: string }>
 }
@@ -69,6 +70,13 @@ export async function POST(req: Request) {
     if (typeof body.contactInfo.phone === 'string') next.phone = body.contactInfo.phone
     if (typeof body.contactInfo.email === 'string') next.email = body.contactInfo.email
     if (typeof body.contactInfo.zelle === 'string') next.zelle = body.contactInfo.zelle
+    if ('zelleQrCode' in body.contactInfo) {
+      const qr = body.contactInfo.zelleQrCode
+      // Media ids are integers; coerce numeric strings so the relationship
+      // validator doesn't reject them. Anything unparseable clears the field.
+      next.zelleQrCode =
+        qr == null || qr === '' || Number.isNaN(Number(qr)) ? null : Number(qr)
+    }
     data.contactInfo = next
   }
 
