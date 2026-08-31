@@ -170,11 +170,19 @@ async function seed() {
     'scripts/seed-assets/mfllca-building.jpeg',
   )
 
-  // Attach logo to tenant branding
+  const zelleQrId = await upsertMedia(
+    'MFLLCA Zelle QR code',
+    'scripts/seed-assets/mfllca-zelle-qr.png',
+  )
+
+  // Attach logo to tenant branding and the Zelle QR to contact info
   await payload.update({
     collection: 'tenants',
     id: tenantId,
-    data: { branding: { ...tenantData.branding, logo: logoId } },
+    data: {
+      branding: { ...tenantData.branding, logo: logoId },
+      contactInfo: { ...tenantData.contactInfo, zelleQrCode: zelleQrId },
+    },
     overrideAccess: true,
     req: seedReq,
   })
