@@ -86,6 +86,9 @@ function email() {
 export default buildConfig({
   admin: {
     user: 'users',
+    // Force light mode: without this Payload follows the OS preference, which
+    // surprises admins with a dark UI the public site never uses.
+    theme: 'light',
     meta: {
       title: 'OpenMasjid Admin',
       description: 'Content management for masajid',
