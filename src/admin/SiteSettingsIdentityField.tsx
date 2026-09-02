@@ -37,6 +37,11 @@ type TenantDoc = {
     phone?: string | null
     email?: string | null
     zelle?: string | null
+    zelleQrCode?:
+      | { id: string | number; url?: string | null; filename?: string | null }
+      | string
+      | number
+      | null
   } | null
   socialLinks?: Array<{ platform?: string; url?: string }> | null
 }
@@ -70,7 +75,7 @@ export default function SiteSettingsIdentityField() {
     setLoading(true)
     setFetchError(null)
 
-    fetch(`/api/tenants/${docId}?depth=0`, { credentials: 'include' })
+    fetch(`/api/tenants/${docId}?depth=1`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Fetch failed (${res.status})`)
         return res.json() as Promise<TenantDoc>
@@ -167,6 +172,15 @@ export default function SiteSettingsIdentityField() {
       phone: tenant.contactInfo?.phone ?? '',
       email: tenant.contactInfo?.email ?? '',
       zelle: tenant.contactInfo?.zelle ?? '',
+      zelleQrCode: (() => {
+        const qr = tenant.contactInfo?.zelleQrCode
+        if (!qr || typeof qr !== 'object') return null
+        return {
+          id: qr.id,
+          url: qr.url ?? undefined,
+          filename: qr.filename ?? undefined,
+        }
+      })(),
     },
     socialLinks: (tenant.socialLinks ?? [])
       .filter((s): s is { platform: string; url: string } =>

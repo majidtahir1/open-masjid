@@ -1,11 +1,17 @@
 'use client'
 
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { ExternalLink, X } from 'lucide-react'
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
+
+export type ZelleQrRef = {
+  id: string | number
+  url?: string
+  filename?: string
+} | null
 
 export type IdentityInitial = {
   name?: string
@@ -16,6 +22,7 @@ export type IdentityInitial = {
     phone?: string
     email?: string
     zelle?: string
+    zelleQrCode?: ZelleQrRef
   }
   socialLinks?: Array<{ platform: string; url: string }>
 }
@@ -148,6 +155,11 @@ export function IdentityStep({
   const [phone, setPhone] = useState(initial.contactInfo?.phone ?? '')
   const [email, setEmail] = useState(initial.contactInfo?.email ?? '')
   const [zelle, setZelle] = useState(initial.contactInfo?.zelle ?? '')
+  const [zelleQr, setZelleQr] = useState<ZelleQrRef>(
+    initial.contactInfo?.zelleQrCode ?? null,
+  )
+  const [uploadingQr, setUploadingQr] = useState(false)
+  const qrInputRef = useRef<HTMLInputElement | null>(null)
 
   const initialSocial = (initial.socialLinks ?? []).reduce<Record<string, string>>(
     (acc, s) => {
@@ -166,6 +178,38 @@ export function IdentityStep({
 
   const [saving, setSaving] = useState<'draft' | 'continue' | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const handleQrFile = async (file: File) => {
+    setError(null)
+    setUploadingQr(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('alt', `${_tenantName} Zelle QR code`)
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        throw new Error(text || `Upload failed (${res.status})`)
+      }
+      const json = (await res.json()) as {
+        doc?: { id: number | string; url?: string; filename?: string }
+        id?: number | string
+        url?: string
+        filename?: string
+      }
+      const doc = json.doc ?? {
+        id: json.id as number | string,
+        url: json.url,
+        filename: json.filename,
+      }
+      if (doc.id == null) throw new Error('Upload returned no id')
+      setZelleQr({ id: doc.id, url: doc.url, filename: doc.filename })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setUploadingQr(false)
+    }
+  }
 
   const submit = async (kind: 'draft' | 'continue') => {
     const markComplete = kind === 'continue'
@@ -189,6 +233,7 @@ export function IdentityStep({
             phone: phone.trim(),
             email: email.trim(),
             zelle: zelle.trim(),
+            zelleQrCode: zelleQr?.id ?? null,
           },
           socialLinks,
           markComplete,
@@ -536,6 +581,84 @@ export function IdentityStep({
                 onChange={(e) => setZelle(e.target.value)}
                 style={inputStyle}
               />
+            </div>
+          </div>
+
+          {/* Zelle QR code */}
+          <div style={{ display: 'grid', gap: 6 }}>
+            <span
+              style={{
+                ...labelStyle,
+                fontSize: 12,
+                fontWeight: 500,
+                color: 'var(--fg2)',
+              }}
+            >
+              Zelle QR code
+            </span>
+            <p style={helperStyle}>
+              Optional. Shown on the Donate page so visitors can scan to send
+              with Zelle.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {zelleQr?.url && (
+                // eslint-disable-next-line @next/next/no-img-element -- admin preview of freshly uploaded media
+                <img
+                  src={zelleQr.url}
+                  alt="Zelle QR code preview"
+                  style={{
+                    width: 72,
+                    height: 72,
+                    objectFit: 'contain',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--r-md)',
+                    background: '#fff',
+                  }}
+                />
+              )}
+              <input
+                ref={qrInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) void handleQrFile(f)
+                  e.target.value = ''
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => qrInputRef.current?.click()}
+                disabled={uploadingQr}
+                style={{
+                  ...inputStyle,
+                  width: 'auto',
+                  cursor: uploadingQr ? 'wait' : 'pointer',
+                  opacity: uploadingQr ? 0.6 : 1,
+                  fontWeight: 600,
+                }}
+              >
+                {uploadingQr
+                  ? 'Uploading...'
+                  : zelleQr
+                    ? 'Replace QR code'
+                    : 'Upload QR code'}
+              </button>
+              {zelleQr && !uploadingQr && (
+                <button
+                  type="button"
+                  onClick={() => setZelleQr(null)}
+                  style={{
+                    ...inputStyle,
+                    width: 'auto',
+                    cursor: 'pointer',
+                    color: 'var(--fg2)',
+                  }}
+                >
+                  Remove
+                </button>
+              )}
             </div>
           </div>
         </section>

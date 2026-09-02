@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-import { getAdminUser, getAdminTenant } from '@/lib/admin-context'
+import { getAdminUser, getAdminTenantWithRelations } from '@/lib/admin-context'
 import { loginUrl } from '@/lib/login-redirect'
 import IdentityStandalone from '@/admin/onboarding/steps/IdentityStandalone'
 
@@ -34,16 +34,24 @@ export default async function IdentityPage() {
     redirect('/admin')
   }
 
-  const tenantDoc = await getAdminTenant(tenantId)
+  // depth 1 so contactInfo.zelleQrCode arrives populated with its url.
+  const tenantDoc = await getAdminTenantWithRelations(tenantId)
 
   const t = tenantDoc as {
     name?: string | null
     slug?: string | null
     footerTagline?: string | null
+    footerLegalNote?: string | null
     contactInfo?: {
       address?: string | null
       phone?: string | null
       email?: string | null
+      zelle?: string | null
+      zelleQrCode?:
+        | { id: string | number; url?: string | null; filename?: string | null }
+        | string
+        | number
+        | null
     } | null
     socialLinks?: Array<{ platform?: string; url?: string }> | null
   }
@@ -55,10 +63,21 @@ export default async function IdentityPage() {
   const initial = {
     name: t.name ?? '',
     footerTagline: t.footerTagline ?? '',
+    footerLegalNote: t.footerLegalNote ?? '',
     contactInfo: {
       address: t.contactInfo?.address ?? '',
       phone: t.contactInfo?.phone ?? '',
       email: t.contactInfo?.email ?? '',
+      zelle: t.contactInfo?.zelle ?? '',
+      zelleQrCode: (() => {
+        const qr = t.contactInfo?.zelleQrCode
+        if (!qr || typeof qr !== 'object') return null
+        return {
+          id: qr.id,
+          url: qr.url ?? undefined,
+          filename: qr.filename ?? undefined,
+        }
+      })(),
     },
     socialLinks: (t.socialLinks ?? [])
       .filter((s): s is { platform: string; url: string } =>
