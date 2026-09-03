@@ -1,5 +1,6 @@
 import type { CollectionConfig, FieldAccess } from 'payload'
 
+import { denyScopedApiKeyRead } from '../access/apiScoped'
 import { platformOwnerOnly } from '../access/tenantScoped'
 import { withBillingLock } from '../access/billingLocked'
 import { geocodeTenantAddress } from '../hooks/geocodeTenantAddress'
@@ -568,6 +569,10 @@ export const Tenants: CollectionConfig = {
                   name: 'pin',
                   type: 'text',
                   label: 'Staff setup PIN',
+                  // A scoped API key can read its own tenant doc (bootstrap);
+                  // the PIN mints a 180-day kiosk token via the public bind
+                  // endpoint, so it must not ride along.
+                  access: { read: denyScopedApiKeyRead },
                   admin: {
                     description:
                       'A 4–6 digit PIN a staff member enters once to bind an iPad to a program. Share with staff only. Leave blank to disable kiosk setup.',
