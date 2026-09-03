@@ -230,3 +230,46 @@ describe('gateByApiKeyScope', () => {
     })
   })
 })
+
+describe('scoped keys can always read their own user record (/api/users/me)', () => {
+  const scopedKey = { id: 42, _strategy: 'api-key', apiScopes: ['forms:read'] }
+
+  it('returns a self-only where clause for users read, regardless of scopes', () => {
+    const access = gateByApiKeyScope('users', 'read')(allow)
+    expect(access(argsFor(reqWith(scopedKey)))).toEqual({ id: { equals: 42 } })
+  })
+
+  it('does not consult existing access for self-read (narrower than any role read)', () => {
+    const access = gateByApiKeyScope('users', 'read')(deny)
+    expect(access(argsFor(reqWith(scopedKey)))).toEqual({ id: { equals: 42 } })
+  })
+
+  it('still denies users create/update/delete for scoped keys', () => {
+    for (const op of ['create', 'update', 'delete'] as const) {
+      const access = gateByApiKeyScope('users', op)(allow)
+      expect(access(argsFor(reqWith(scopedKey)))).toBe(false)
+    }
+  })
+
+  it('leaves UI sessions and unscoped keys on the existing users read access', () => {
+    const access = gateByApiKeyScope('users', 'read')(allow)
+    expect(access(argsFor(reqWith({ id: 1, _strategy: 'local-jwt' })))).toBe(true)
+    expect(access(argsFor(reqWith({ id: 1, _strategy: 'api-key', apiScopes: [] })))).toBe(true)
+  })
+})
+
+describe('scoped keys can read tenants via existing access (slug lookup for public URLs)', () => {
+  const scopedKey = { id: 42, _strategy: 'api-key', apiScopes: ['forms:read'], tenant: 4 }
+
+  it('defers tenants read to existing access instead of default-deny', () => {
+    const access = gateByApiKeyScope('tenants', 'read')(allowOwnTenant)
+    expect(access(argsFor(reqWith(scopedKey)))).toEqual({ tenant: { equals: 4 } })
+  })
+
+  it('still denies tenants create/update/delete for scoped keys', () => {
+    for (const op of ['create', 'update', 'delete'] as const) {
+      const access = gateByApiKeyScope('tenants', op)(allow)
+      expect(access(argsFor(reqWith(scopedKey)))).toBe(false)
+    }
+  })
+})

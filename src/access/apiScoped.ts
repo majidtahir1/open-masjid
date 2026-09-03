@@ -102,10 +102,18 @@ export const gateByApiKeyScope =
   (existing: Access | undefined): Access =>
   (args) => {
     const { req } = args
-    const user = req.user as UserWithScopes | null | undefined
+    const user = req.user as (UserWithScopes & { id?: string | number }) | null | undefined
     if (user && isApiKeyAuth(req)) {
       const scopes = user.apiScopes ?? []
       if (scopes.length > 0) {
+        // Session bootstrap for scoped keys: `/api/users/me` runs `findByID`
+        // on users with access enforced, and agents then resolve the tenant
+        // slug via `/api/tenants/<id>`. Neither collection is scope-mapped, so
+        // without these carve-outs every scoped key 403s before its first real
+        // call. Self-read is strictly narrower than any role's users read;
+        // tenants read already limits non-owners to their own tenant.
+        if (op === 'read' && slug === 'users') return { id: { equals: user.id } }
+        if (op === 'read' && slug === 'tenants') return (existing ?? PAYLOAD_DEFAULT_ACCESS)(args)
         const required = SCOPE_MAP[slug]?.[op]
         if (!required || !scopes.includes(required)) return false
       }
