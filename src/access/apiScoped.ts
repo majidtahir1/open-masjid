@@ -1,7 +1,12 @@
-import type { Access, CollectionConfig, PayloadRequest } from 'payload'
+import type { Access, CollectionConfig, FieldAccess, PayloadRequest } from 'payload'
 
 type UserWithStrategy = { _strategy?: string } | null | undefined
-type UserWithScopes = { _strategy?: string; apiScopes?: string[] }
+type UserWithScopes = {
+  _strategy?: string
+  apiScopes?: string[]
+  id?: string | number
+  tenant?: unknown
+}
 type Op = 'read' | 'create' | 'update' | 'delete'
 
 /**
@@ -79,6 +84,27 @@ const SCOPE_MAP: Record<string, Partial<Record<Op, string>>> = {
   // Payload REST can't provide — deferred to v1.1.
 }
 
+/** Normalizes a populated-or-not `tenant` relationship to its id. */
+const ownTenantId = (user: UserWithScopes): string | number | undefined => {
+  const t = user.tenant
+  if (typeof t === 'object' && t !== null && 'id' in t) return (t as { id: string | number }).id
+  if (typeof t === 'string' || typeof t === 'number') return t
+  return undefined
+}
+
+/**
+ * True when the request is a scoped API key (non-empty `apiScopes`). Field-level
+ * `read` guard for values a scoped key must never see even though the
+ * document itself is readable (e.g. the kiosk setup PIN on the tenant doc,
+ * which is reachable via the tenants carve-out above).
+ */
+export const isScopedApiKey = (req: PayloadRequest): boolean => {
+  const user = req.user as UserWithScopes | null | undefined
+  return Boolean(user && isApiKeyAuth(req) && (user.apiScopes?.length ?? 0) > 0)
+}
+
+export const denyScopedApiKeyRead: FieldAccess = ({ req }) => !isScopedApiKey(req)
+
 /**
  * Payload's default access policy when a collection doesn't define one
  * for a given operation: allow if there's an authenticated user. Used as
@@ -100,9 +126,9 @@ const PAYLOAD_DEFAULT_ACCESS: Access = ({ req }) => Boolean(req.user)
 export const gateByApiKeyScope =
   (slug: string, op: Op) =>
   (existing: Access | undefined): Access =>
-  (args) => {
+  async (args) => {
     const { req } = args
-    const user = req.user as (UserWithScopes & { id?: string | number }) | null | undefined
+    const user = req.user as UserWithScopes | null | undefined
     if (user && isApiKeyAuth(req)) {
       const scopes = user.apiScopes ?? []
       if (scopes.length > 0) {
@@ -110,10 +136,20 @@ export const gateByApiKeyScope =
         // on users with access enforced, and agents then resolve the tenant
         // slug via `/api/tenants/<id>`. Neither collection is scope-mapped, so
         // without these carve-outs every scoped key 403s before its first real
-        // call. Self-read is strictly narrower than any role's users read;
-        // tenants read already limits non-owners to their own tenant.
-        if (op === 'read' && slug === 'users') return { id: { equals: user.id } }
-        if (op === 'read' && slug === 'tenants') return (existing ?? PAYLOAD_DEFAULT_ACCESS)(args)
+        // call. Both are document-narrow: self only, own tenant only. The
+        // users carve-out still honors the collection's own read policy (a
+        // role it denies stays denied); the tenants one never widens to
+        // "all tenants", so a tenant-less (platformOwner) scoped key is denied.
+        if (op === 'read' && slug === 'users') {
+          if (user.id === undefined || user.id === null) return false
+          const base = await (existing ?? PAYLOAD_DEFAULT_ACCESS)(args)
+          if (!base) return false
+          return { id: { equals: user.id } }
+        }
+        if (op === 'read' && slug === 'tenants') {
+          const tenantId = ownTenantId(user)
+          return tenantId === undefined ? false : { id: { equals: tenantId } }
+        }
         const required = SCOPE_MAP[slug]?.[op]
         if (!required || !scopes.includes(required)) return false
       }
